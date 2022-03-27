@@ -4,7 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <dirent.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -4182,7 +4181,6 @@ static USE_RESULT pl_status fn_asserta_2(query *q)
 	return do_asserta_2(q);
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -4193,7 +4191,6 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 	GET_NEXT_ARG(p2,atom);
 	return do_asserta_2(q);
 }
-#endif
 
 static pl_status do_assertz_2(query *q)
 {
@@ -4285,7 +4282,6 @@ static USE_RESULT pl_status fn_assertz_2(query *q)
 	return do_assertz_2(q);
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
@@ -4296,7 +4292,6 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 	GET_NEXT_ARG(p2,atom);
 	return do_assertz_2(q);
 }
-#endif
 
 static void save_db(FILE *fp, query *q, int logging)
 {
@@ -4807,266 +4802,6 @@ static USE_RESULT pl_status fn_split_4(query *q)
 	return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 }
 
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_savefile_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,atom);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	FILE *fp = fopen(filename, "wb");
-	may_ptr_error(fp);
-	fwrite(GET_STR(q, p2), 1, LEN_STR(q, p2), fp);
-	fclose(fp);
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_loadfile_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	FILE *fp = fopen(filename, "rb");
-	free(filename);
-
-	if (!fp)
-		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
-
-	// Check for a BOM
-
-	int ch = getc_utf8(fp), offset = 0;
-
-	if ((unsigned)ch != 0xFEFF)
-		fseek(fp, 0, SEEK_SET);
-	else
-		offset = 3;
-
-	struct stat st = {0};
-
-	if (fstat(fileno(fp), &st)) {
-		return pl_error;
-	}
-
-	size_t len = st.st_size - offset;
-	char *s = malloc(len+1);
-	may_ptr_error(s, fclose(fp));
-
-	if (fread(s, 1, len, fp) != (size_t)len) {
-		free(s);
-		fclose(fp);
-		return throw_error(q, p1, p1_ctx, "domain_error", "cannot_read");
-	}
-
-	s[st.st_size] = '\0';
-	fclose(fp);
-	cell tmp;
-	may_error(make_stringn(&tmp, s, len), free(s));
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	free(s);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_getfile_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	FILE *fp = fopen(filename, "r");
-	free(filename);
-
-	if (!fp) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
-	}
-
-	// Check for a BOM
-
-	int ch = getc_utf8(fp);
-
-	if ((unsigned)ch != 0xFEFF)
-		fseek(fp, 0, SEEK_SET);
-
-	char *line = NULL;
-	size_t len = 0;
-	int nbr = 1, in_list = 0;
-
-	while ((getline(&line, &len, fp) != -1) && !g_tpl_interrupt) {
-		int len = strlen(line);
-
-		if (len && (line[len-1] == '\n')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		if (len && (line[len-1] == '\r')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		cell tmp;
-		may_error(make_stringn(&tmp, line, len));
-
-		if (nbr++ == 1)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
-
-		in_list = 1;
-	}
-
-	free(line);
-	fclose(fp);
-	free(filename);
-
-	if (!in_list) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else {
-		cell *l = end_list(q);
-		may_ptr_error(l);
-		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
-	}
-
-	return pl_success;
-}
-#endif
-
-static USE_RESULT pl_status fn_getlines_1(query *q)
-{
-	GET_NEXT_ARG(p1,variable);
-	int n = q->pl->current_input;
-	stream *str = &q->pl->streams[n];
-	char *line = NULL;
-	size_t len = 0;
-	int nbr = 1, in_list = 0;
-
-	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
-		int len = strlen(line);
-
-		if (len && (line[len-1] == '\n')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		if (len && (line[len-1] == '\r')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		cell tmp;
-		may_error(make_stringn(&tmp, line, len));
-
-		if (nbr++ == 1)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
-
-		in_list = 1;
-	}
-
-	free(line);
-
-	if (!in_list) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	} else {
-		cell *l = end_list(q);
-		may_ptr_error(l);
-		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-	}
-
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_getlines_2(query *q)
-{
-	GET_FIRST_ARG(pstr,stream);
-	GET_NEXT_ARG(p1,variable);
-	int n = get_stream(q, pstr);
-	stream *str = &q->pl->streams[n];
-	char *line = NULL;
-	size_t len = 0;
-	int nbr = 1, in_list = 0;
-
-	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
-		int len = strlen(line);
-
-		if (len && (line[len-1] == '\n')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		if (len && (line[len-1] == '\r')) {
-			line[len-1] = '\0';
-			len--;
-		}
-
-		cell tmp;
-		may_error(make_stringn(&tmp, line, len));
-
-		if (nbr++ == 1)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
-
-		in_list = 1;
-	}
-
-	free(line);
-
-	if (!in_list) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	} else {
-		cell *l = end_list(q);
-		may_ptr_error(l);
-		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-	}
-
-	return pl_success;
-}
-
 static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
 {
 	if (!strncmp(src, "https://", 8)) {
@@ -5408,83 +5143,6 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	tmp2.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
 	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 	return pl_success;
-}
-
-static USE_RESULT pl_status fn_getline_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	int n = q->pl->current_input;
-	stream *str = &q->pl->streams[n];
-	char *line = NULL;
-	size_t len = 0;
-
-	if (isatty(fileno(str->fp))) {
-		fprintf(str->fp, "%s", PROMPT);
-		fflush(str->fp);
-	}
-
-	if (net_getline(&line, &len, str) == -1) {
-		free(line);
-		return pl_failure;
-	}
-
-	len = strlen(line);
-
-	if (len && (line[len-1] == '\n')) {
-		line[len-1] = '\0';
-		len--;
-	}
-
-	if (len && (line[len-1] == '\r')) {
-		line[len-1] = '\0';
-		len--;
-	}
-
-	cell tmp;
-	may_error(make_string(&tmp, line), free(line));
-	free(line);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-static USE_RESULT pl_status fn_getline_2(query *q)
-{
-	GET_FIRST_ARG(pstr,stream);
-	GET_NEXT_ARG(p1,any);
-	int n = get_stream(q, pstr);
-	stream *str = &q->pl->streams[n];
-	char *line = NULL;
-	size_t len = 0;
-
-	if (isatty(fileno(str->fp))) {
-		fprintf(str->fp, "%s", PROMPT);
-		fflush(str->fp);
-	}
-
-	if (net_getline(&line, &len, str) == -1) {
-		free(line);
-
-		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
-			clearerr(str->fp);
-			return do_yield_0(q, 1);
-		}
-
-		return pl_failure;
-	}
-
-	if (line[strlen(line)-1] == '\n')
-		line[strlen(line)-1] = '\0';
-
-	if (line[strlen(line)-1] == '\r')
-		line[strlen(line)-1] = '\0';
-
-	cell tmp;
-	may_error(make_string(&tmp, line), free(line));
-	free(line);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
 }
 
 static USE_RESULT pl_status fn_bread_3(query *q)
@@ -6046,293 +5704,6 @@ static USE_RESULT pl_status fn_shell_2(query *q)
 }
 #endif
 
-#ifndef SANDBOX
-static char *fixup(const char *srcptr)
-{
-	char *tmpbuf = strdup(srcptr);
-	const char *src = srcptr;
-	char *dst = tmpbuf;
-
-	while (*src) {
-		if ((src[0] == '.') && (src[1] == '.') && (src[2] == '/')) {
-			dst -= 2;
-
-			while ((dst != tmpbuf) && (*dst != '/'))
-				dst--;
-
-			src += 2;
-			dst++;
-		} else if ((src[0] == '.') && (src[1] == '/')) {
-			src += 1;
-		} else
-			*dst++ = *src;
-
-		src++;
-	}
-
-	*dst = '\0';
-	return tmpbuf;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,atom_or_var);
-	GET_NEXT_ARG(p_opts,list_or_nil);
-	bool expand = false;
-	char *filename = NULL;
-	char *here = strdup(q->st.m->filename);
-	may_ptr_error(here);
-	char *ptr = here + strlen(here) - 1;
-
-	while (*ptr && (*ptr != '/')) {
-		ptr--;
-		*ptr = '\0';
-	}
-
-	char *cwd = here;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	LIST_HANDLER(p_opts);
-
-	while (is_list(p_opts) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p_opts);
-		h = deref(q, h, p_opts_ctx);
-
-		if (is_structure(h) && (h->arity == 1)) {
-			if (!CMP_SLICE2(q, h, "expand")) {
-				if (is_literal(h+1)) {
-					if (!CMP_SLICE2(q, h+1, "true"))
-						expand = true;
-				}
-			} else if (!CMP_SLICE2(q, h, "relative_to")) {
-				if (is_atom(h+1))
-					cwd = DUP_SLICE(q, h+1);
-			}
-		}
-
-		p_opts = LIST_TAIL(p_opts);
-		p_opts = deref(q, p_opts, p_opts_ctx);
-		p_opts_ctx = q->latest_ctx;
-	}
-
-	char *tmpbuf = NULL;
-	const char *s = filename;
-
-	if (expand && (*s == '$')) {
-		char envbuf[PATH_MAX];
-		char *dst = envbuf;
-		s++;
-
-		while (*s && (*s != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
-			*dst++ = *s++;
-
-		if (*s == '/')
-			s++;
-
-		*dst = '\0';
-		char *ptr = getenv(envbuf);
-		if (!ptr)
-			return throw_error(q, p1, p1_ctx, "existence_error", "environment_variable");
-
-		size_t buflen = strlen(ptr)+1+strlen(s)+1;
-		tmpbuf = malloc(buflen);
-		may_ptr_error(tmpbuf);
-		snprintf(tmpbuf, buflen, "%s/%s", ptr, s);
-		char *tmpbuf2;
-
-		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
-		} else {
-			free(tmpbuf);
-			tmpbuf = tmpbuf2;
-		}
-	} else {
-		if ((tmpbuf = realpath(s, NULL)) == NULL) {
-			if ((tmpbuf = realpath(cwd, NULL)) == NULL)
-				tmpbuf = realpath(".", NULL);
-
-			may_ptr_error(tmpbuf);
-
-			if (*s != '/') {
-				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
-				char *tmp = malloc(buflen);
-				may_ptr_error(tmp, free(tmpbuf));
-				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
-				free(tmpbuf);
-				tmpbuf = fixup(tmp);
-				may_ptr_error(tmpbuf);
-				free(tmp);
-			} else {
-				tmpbuf = fixup(s);
-				may_ptr_error(tmpbuf);
-			}
-		}
-	}
-
-	free(filename);
-
-	if (cwd != here)
-		free(cwd);
-
-	free(here);
-	cell tmp;
-
-	if (is_string(p1))
-		may_error(make_string(&tmp, tmpbuf), free(tmpbuf));
-	else
-		may_error(make_cstring(&tmp, tmpbuf), free(tmpbuf));
-
-	free(tmpbuf);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-#endif
-
-#ifndef SANDBOX
-static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
-{
-	if (is_atom(p1)) {
-		char *src = DUP_SLICE(q, p1);
-		char *filename = relative_to(q->st.m->filename, src);
-		//unload_file(q->st.m, filename);
-		free(src);
-
-		if (!load_file(q->st.m, filename, false)) {
-			free(filename);
-			return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
-		}
-
-		free(filename);
-		return pl_success;
-	}
-
-	if (!is_structure(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-	if (CMP_SLICE2(q, p1, ":"))
-		return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-	cell *mod = deref(q, p1+1, p1_ctx);
-	cell *file = deref(q, p1+2, p1_ctx);
-
-	if (!is_atom(mod) || !is_atom(file))
-		return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
-	char *filename = GET_STR(q, file);
-	tmp_m->make_public = 1;
-	filename = relative_to(q->st.m->filename, filename);
-	unload_file(q->st.m, filename);
-
-	if (!load_file(tmp_m, filename, false)) {
-		destroy_module(tmp_m);
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "source_sink");
-	}
-
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
-{
-	if (is_atom(p1)) {
-		char *src = DUP_SLICE(q, p1);
-		char *filename = relative_to(q->st.m->filename, src);
-		unload_file(q->st.m, filename);
-		free(src);
-		free(filename);
-		return pl_success;
-	}
-
-	if (!is_structure(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
-
-	if (CMP_SLICE2(q, p1, ":"))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
-
-	cell *mod = deref(q, p1+1, p1_ctx);
-	cell *file = deref(q, p1+2, p1_ctx);
-
-	if (!is_atom(mod) || !is_atom(file))
-		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
-
-	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
-	char *filename = GET_STR(q, file);
-	tmp_m->make_public = 1;
-	filename = relative_to(q->st.m->filename, filename);
-	unload_file(q->st.m, filename);
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_load_files_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-
-	if (is_atom(p1)) {
-		may_error(do_consult(q, p1, p1_ctx));
-		return pl_success;
-	}
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p1);
-		cell *c = deref(q, h, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		may_error(do_consult(q, c, c_ctx));
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_unload_files_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_structure);
-
-	if (is_atom(p1)) {
-		may_error(do_deconsult(q, p1, p1_ctx));
-		return pl_success;
-	}
-
-	LIST_HANDLER(p1);
-
-	while (is_list(p1) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(p1);
-		cell *c = deref(q, h, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-		may_error(do_deconsult(q, c, c_ctx));
-		p1 = LIST_TAIL(p1);
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	return pl_success;
-}
-#endif
-
 static USE_RESULT pl_status fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -6697,525 +6068,6 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_access_file_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,atom);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	int amode = R_OK;
-
-	if (!CMP_SLICE2(q, p2, "read"))
-		amode = R_OK;
-	else if (!CMP_SLICE2(q, p2, "write"))
-		amode = W_OK;
-	else if (!CMP_SLICE2(q, p2, "append"))
-		amode = W_OK;
-	else if (!CMP_SLICE2(q, p2, "execute"))
-		amode = X_OK;
-	else if (!CMP_SLICE2(q, p2, "none")) {
-		free(filename);
-		return pl_success;
-	} else {
-		free(filename);
-		return throw_error(q, p2, p2_ctx, "domain_error", "mode");
-	}
-
-	struct stat st = {0};
-	int status = stat(filename, &st);
-
-	if (status && (!CMP_SLICE2(q, p2, "read") || !CMP_SLICE2(q, p2, "exist") || !CMP_SLICE2(q, p2, "execute") || !CMP_SLICE2(q, p2, "none"))) {
-		free(filename);
-		return pl_failure;
-	}
-
-	if (status && (!CMP_SLICE2(q, p2, "write") || !CMP_SLICE2(q, p2, "append"))) {
-		free(filename);
-		return pl_success;
-	}
-
-	int ok = !access(filename, amode);
-	free(filename);
-	return ok;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_exists_file_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return pl_failure;
-	}
-
-	free(filename);
-
-	if ((st.st_mode & S_IFMT) != S_IFREG)
-		return pl_failure;
-
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_directory_files_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "directory");
-	}
-
-	DIR *dirp = opendir(filename);
-
-	if (!dirp) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "directory");
-	}
-
-	struct dirent *dire = readdir(dirp);
-	cell tmp;
-
-	if (is_string(p1))
-		may_error(make_string(&tmp, dire->d_name));
-	else
-		may_error(make_cstring(&tmp, dire->d_name));
-
-	allocate_list(q, &tmp);
-
-	for (dire = readdir(dirp); dire; dire = readdir(dirp)) {
-		if (is_string(p1))
-			may_error(make_string(&tmp, dire->d_name));
-		else
-			may_error(make_cstring(&tmp, dire->d_name));
-
-		append_list(q, &tmp);
-	}
-
-	closedir(dirp);
-	free(filename);
-	cell *l = end_list(q);
-	pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
-	return ok;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_delete_file_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	remove(filename);
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_rename_file_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,atom_or_list);
-	char *filename1, *filename2;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename1 = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename1 = DUP_SLICE(q, p1);
-
-	if (is_iso_list(p2)) {
-		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
-
-		if (!len) {
-			free(filename1);
-			return throw_error(q, p2, p2_ctx, "type_error", "atom");
-		}
-
-		filename2 = chars_list_to_string(q, p2, p2_ctx, len);
-	} else
-		filename2 = DUP_SLICE(q, p2);
-
-	struct stat st = {0};
-
-	if (stat(filename1, &st)) {
-		free(filename1);
-		free(filename2);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	bool ok = !rename(filename1, filename2);
-	free(filename1);
-	free(filename2);
-	return ok ? pl_success : pl_failure;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_copy_file_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,atom_or_list);
-	char *filename1, *filename2;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename1 = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename1 = DUP_SLICE(q, p1);
-
-	if (is_iso_list(p2)) {
-		size_t len = scan_is_chars_list(q, p2, p2_ctx, true);
-
-		if (!len) {
-			free(filename1);
-			return throw_error(q, p2, p2_ctx, "type_error", "atom");
-		}
-
-		filename2 = chars_list_to_string(q, p2, p2_ctx, len);
-	} else
-		filename2 = DUP_SLICE(q, p2);
-
-	FILE *fp1 = fopen(filename1, "rb");
-
-	if (!fp1) {
-		free(filename1);
-		free(filename2);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	free(filename1);
-	FILE *fp2 = fopen(filename2, "wb");
-
-	if (!fp2) {
-		fclose(fp1);
-		free(filename2);
-		return throw_error(q, p2, p2_ctx, "permission_error", "file");
-	}
-
-	free(filename2);
-	char buffer[1024];
-	size_t n;
-
-	while ((n = fread(buffer, 1, sizeof(buffer), fp1)) > 0) {
-		if (fwrite(buffer, 1, n, fp2) != n) {
-			fclose(fp2);
-			fclose(fp1);
-			return throw_error(q, p2, p2_ctx, "system_error", "file");
-		}
-	}
-
-	fclose(fp2);
-
-	if (!feof(fp1)) {
-		fclose(fp1);
-		return throw_error(q, p1, p1_ctx, "system_error", "file");
-	}
-
-	fclose(fp1);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_time_file_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	free(filename);
-	cell tmp;
-	make_real(&tmp, st.st_mtime);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_size_file_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,integer_or_var);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	free(filename);
-	cell tmp;
-	make_int(&tmp, st.st_size);
-	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_exists_directory_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (stat(filename, &st)) {
-		free(filename);
-		return pl_failure;
-	}
-
-	free(filename);
-
-	if ((st.st_mode & S_IFMT) != S_IFDIR)
-		return pl_failure;
-
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_make_directory_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	if (!stat(filename, &st)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "existence_error", "file");
-	}
-
-	if (mkdir(filename, 0777))
-		return throw_error(q, p1, p1_ctx, "permission_error", "file");
-
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_make_directory_path_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	struct stat st = {0};
-
-	for (char *ptr = filename+1; *ptr; ptr++) {
-		if (*ptr == PATH_SEP_CHAR) {
-			*ptr = '\0';
-
-			if (stat(filename, &st)) {
-				if (mkdir(filename, 0777)) {
-					free(filename);
-					return throw_error(q, p1, p1_ctx, "permission_error", "directory");
-				}
-			}
-
-			*ptr = PATH_SEP_CHAR;
-		}
-	}
-
-	if (!stat(filename, &st)) {
-		free(filename);
-		return pl_success;
-	}
-
-	if (mkdir(filename, 0777)) {
-		free(filename);
-		return throw_error(q, p1, p1_ctx, "permission_error", "directory");
-	}
-
-	free(filename);
-	return pl_success;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_working_directory_2(query *q)
-{
-	GET_FIRST_ARG(p_old,variable);
-	GET_NEXT_ARG(p_new,atom_or_list_or_var);
-	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
-	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
-	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
-	oldpath = tmpbuf2;
-	cell tmp;
-	may_error(make_string(&tmp, oldpath));
-
-	if (is_atom_or_list(p_new)) {
-		char *filename;
-
-		if (is_iso_list(p_new)) {
-			size_t len = scan_is_chars_list(q, p_new, p_new_ctx, true);
-
-			if (!len) {
-				unshare_cell(&tmp);
-				return throw_error(q, p_new, p_new_ctx, "type_error", "atom");
-			}
-
-			filename = chars_list_to_string(q, p_new, p_new_ctx, len);
-		} else
-			filename = DUP_SLICE(q, p_new);
-
-		if (chdir(filename)) {
-			unshare_cell(&tmp);
-			return throw_error(q, p_new, p_new_ctx, "existence_error", "path");
-		}
-
-		free(filename);
-	}
-
-	pl_status ok = unify(q, p_old, p_old_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-#endif
-
-#ifndef SANDBOX
-static USE_RESULT pl_status fn_chdir_1(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	char *filename;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-		filename = chars_list_to_string(q, p1, p1_ctx, len);
-	} else
-		filename = DUP_SLICE(q, p1);
-
-	pl_status ok = !chdir(filename);
-	free(filename);
-	return ok;
-}
-#endif
 
 static pl_idx_t jenkins_one_at_a_time_hash(const char *key, size_t len)
 {
@@ -8883,25 +7735,8 @@ static const struct builtins g_other_bifs[] =
 #ifndef SANDBOX
 	{"use_module", 1, fn_use_module_1, NULL, false},
 	{"use_module", 2, fn_use_module_2, NULL, false},
-	{"load_files", 2, fn_load_files_2, NULL, false},
-	{"unload_files", 1, fn_unload_files_1, NULL, false},
-	{"getfile", 2, fn_getfile_2, "+string,-list", false},
-	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
-	{"savefile", 2, fn_savefile_2, "+string,+string", false},
-	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
-	{"copy_file", 2, fn_copy_file_2, "+string,+string", false},
-	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
-	{"delete_file", 1, fn_delete_file_1, "+string", false},
-	{"exists_file", 1, fn_exists_file_1, "+string", false},
-	{"access_file", 2, fn_access_file_2, "+string,+mode", false},
-	{"time_file", 2, fn_time_file_2, "+string,-real", false},
-	{"size_file", 2, fn_size_file_2, "+string,-integer", false},
-	{"exists_directory", 1, fn_exists_directory_1, "+string", false},
-	{"make_directory", 1, fn_make_directory_1, "+string", false},
-	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
-	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
-	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
-	{"chdir", 1, fn_chdir_1, "+string", false},
+
+
 	{"sleep", 1, fn_sleep_1, "+integer", false},
 	{"delay", 1, fn_delay_1, "+integer", false},
 	{"shell", 1, fn_shell_1, "+atom", false},
@@ -8928,10 +7763,6 @@ static const struct builtins g_other_bifs[] =
 	{"time", 1, fn_time_1, NULL, false},
 	{"trace", 0, fn_trace_0, NULL, false},
 
-	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
-	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
-	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
-
 	// Miscellaneous...
 
 	{"sort", 4, fn_sort_4, NULL, false},
@@ -8939,15 +7770,10 @@ static const struct builtins g_other_bifs[] =
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
-	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
-	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
-	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
 	{"format", 2, fn_format_2, "+string,+list", false},
 	{"format", 3, fn_format_3, "+stream,+string,+list", false},
 	{"abolish", 2, fn_abolish_2, NULL, false},
 	{"assert", 1, fn_iso_assertz_1, NULL, false},
-	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"copy_term_nat", 2, fn_copy_term_nat_2, NULL, false},
 	{"string", 1, fn_atom_1, "+term", false},
 	{"atomic_concat", 3, fn_atomic_concat_3, NULL, false},
@@ -8961,15 +7787,9 @@ static const struct builtins g_other_bifs[] =
 	{"wall_time", 1, fn_wall_time_1, "-integer", false},
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms", false},
-	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
-	{"getline", 1, fn_getline_1, "-string", false},
-	{"getline", 2, fn_getline_2, "+stream,-string", false},
-	{"getlines", 1, fn_getlines_1, "-list", false},
-	{"getlines", 2, fn_getlines_2, "+stream,-list", false},
 	{"split_atom", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split_string", 4, fn_split_atom_4, "+string,+sep,+pad,-list", false},
 	{"split", 4, fn_split_4, "+string,+string,?left,?right", false},
-	{"$is_partial_string", 1, fn_sys_is_partial_string_1, "+string", false},
 	{"is_list_or_partial_list", 1, fn_is_list_or_partial_list_1, "+term", false},
 	{"is_partial_list", 1, fn_is_partial_list_1, "+term", false},
 	{"is_list", 1, fn_is_list_1, "+term", false},
@@ -8987,10 +7807,6 @@ static const struct builtins g_other_bifs[] =
 	{"hex_bytes", 2, fn_hex_bytes_2, "?string,?list", false},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
-	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
-	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
-	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
-	{"$load_ops", 0, fn_sys_load_ops_0, NULL, false},
 	{"numbervars", 1, fn_numbervars_1, "+term", false},
 	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end", false},
 	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list", false},
@@ -9003,8 +7819,6 @@ static const struct builtins g_other_bifs[] =
 	{"instance", 2, fn_instance_2, "+ref,?clause", false},
 	{"erase", 1, fn_erase_1, "+ref", false},
 	{"clause", 3, fn_clause_3, "?head,?body,-ref", false},
-	{"$queue", 1, fn_sys_queue_1, "+term", false},
-	{"$list", 1, fn_sys_list_1, "-list", false},
 	{"getenv", 2, fn_getenv_2, NULL, false},
 	{"setenv", 2, fn_setenv_2, NULL, false},
 	{"unsetenv", 1, fn_unsetenv_1, NULL, false},
@@ -9015,19 +7829,37 @@ static const struct builtins g_other_bifs[] =
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
 	{"unifiable", 3, fn_sys_unifiable_3, NULL, false},
+
+	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
+	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
+	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
+	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
+	{"$is_partial_string", 1, fn_sys_is_partial_string_1, "+string", false},
+	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
+	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
+	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
+	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
+	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false},
+	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false},
+	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false},
+	{"$load_ops", 0, fn_sys_load_ops_0, NULL, false},
+	{"$list", 1, fn_sys_list_1, "-list", false},
+	{"$queue", 1, fn_sys_queue_1, "+term", false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
-
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
-
 	{"$alarm", 1, fn_sys_alarm_1, "+integer", false},
 	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
 	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
 	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
-
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
+	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
+	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
+	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
+
 
 #if USE_OPENSSL
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},
@@ -9048,11 +7880,6 @@ static const struct builtins g_other_bifs[] =
 	{"fork", 0, fn_fork_0, NULL, false},
 	{"send", 1, fn_send_1, "+term", false},
 	{"recv", 1, fn_recv_1, "?clause", false},
-
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
-	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
-
-	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
 
 	{0}
 };
