@@ -713,22 +713,22 @@ copy_term(Term, Copy, Gs) :-
 
 % Debugging...
 
-portray_atts(Term) :-
+portray_atts_(Term) :-
 	copy_term(Term, Copy, Gs),
 	Term = Copy,
 	Gs = [Gs0],
 	write('   '),
 	write_term(Gs0, [varnames(true)]).
 
+dump_attvars_([]) :- !.
+dump_attvars_([Var|Vars]) :-
+	portray_atts_(Var),
+	(Vars == [] -> write('') ; write(',\n')),
+	dump_attvars_(Vars).
+
 dump_attvars :-
 	'$list_attributed'(Vars),
-	dump_attvars(Vars).
-
-dump_attvars([]) :- !.
-dump_attvars([Var|Vars]) :-
-	portray_atts(Var),
-	(Vars == [] -> write('') ; write(',\n')),
-	dump_attvars(Vars).
+	dump_attvars_(Vars).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

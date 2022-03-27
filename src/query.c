@@ -1555,12 +1555,20 @@ static void dump_vars(query *q, bool partial)
 	if (any && any_attributed(q))
 		fprintf(stdout, ",\n");
 
-	cell p1;
-	make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
-	cell *tmp = clone_to_heap(q, true, &p1, 0);
-	pl_idx_t nbr_cells = 1 + p1.nbr_cells;
-	make_return2(q, tmp+nbr_cells, q->st.curr_cell);
-	execute(q, tmp, f->nbr_vars);
+	// Print residual goals of attributed variables...
+
+	if (any_attributed(q) && !q->in_attvar_print) {
+		cell p1;
+		make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
+		cell *tmp = clone_to_heap(q, false, &p1, 1);
+		pl_idx_t nbr_cells = 0 + p1.nbr_cells;
+		make_end(tmp+nbr_cells);
+		q->st.curr_cell = tmp;
+		q->in_attvar_print = true;
+		start(q);
+		q->in_attvar_print = false;
+		any = true;
+	}
 
 	if (any && !partial) {
 		if (space) fprintf(stdout, " ");
@@ -1745,8 +1753,8 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 			char *s = DUP_SLICE(q, h);
 
 			if (!load_file(q->p->m, s, false)) {
-				free(s);
 				pl_status ok = throw_error(q, h, q->st.curr_frame, "existence_error", "source_sink");
+				free(s);
 				return ok;
 			}
 
