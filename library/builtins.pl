@@ -727,7 +727,7 @@ dump_attvars :-
 dump_attvars([]) :- !.
 dump_attvars([Var|Vars]) :-
 	portray_atts(Var),
-	(Vars == [] -> write('') ; write(',')),
+	(Vars == [] -> write('') ; write(',\n')),
 	dump_attvars(Vars).
 
 %

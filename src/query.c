@@ -1409,17 +1409,17 @@ static int varunformat(const char *s)
 	return (int)j;
 }
 
-static bool any_attributed(query *q)
+static bool any_attributed(const query *q)
 {
-	parser *p = q->p;
-	frame *f = GET_FIRST_FRAME();
+	const parser *p = q->p;
+	const frame *f = GET_FIRST_FRAME();
 	bool any = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
 			continue;
 
-		slot *e = GET_SLOT(f, i);
+		const slot *e = GET_SLOT(f, i);
 
 		if (!is_empty(&e->c))
 			continue;
