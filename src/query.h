@@ -11,6 +11,10 @@ pl_status push_barrier(query *q);
 pl_status push_call_barrier(query *q);
 pl_status push_catcher(query *q, enum q_retry type);
 
+pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract);
+pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src);
+void make_smalln(cell *tmp, const char *s, size_t n);
+pl_status do_yield_0(query *q, int msecs);
 void cut_me(query *q, bool inner_cut, bool soft_cut);
 void set_var(query *q, const cell *c, pl_idx_t ctx, cell *v, pl_idx_t v_ctx);
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing);
@@ -60,6 +64,8 @@ bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
 bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
 void make_indirect(cell *tmp, cell *c);
 bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip);
+bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx_t *vnames_ctx);
+int new_stream(prolog *pl);
 
 int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
@@ -110,6 +116,21 @@ struct reflist_ {
 struct cycle_info_ {
 	reflist *r1, *r2;
 };
+
+#define FEOF(str) feof(str->fp) && !str->ungetch
+
+#ifdef _WIN32
+#include <io.h>
+#define PATH_SEP "\\"
+#define PATH_SEP_CHAR '\\'
+#define NEWLINE_MODE "dos"
+#else
+#define PATH_SEP "/"
+#define PATH_SEP_CHAR '/'
+#define NEWLINE_MODE "posix"
+#endif
+
+#define PROMPT ""
 
 #define DUMP_TERM(s,c,c_ctx) {						\
 	printf("*** %s ", s);							\

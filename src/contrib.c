@@ -9,7 +9,7 @@
 
 #include "trealla.h"
 #include "internal.h"
-#include "builtins.h"
+#include "query.h"
 
 const struct builtins g_contrib_bifs[] =
 {
