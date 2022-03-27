@@ -1409,6 +1409,30 @@ static int varunformat(const char *s)
 	return (int)j;
 }
 
+static bool any_attributed(query *q)
+{
+	parser *p = q->p;
+	frame *f = GET_FIRST_FRAME();
+	bool any = false;
+
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
+		slot *e = GET_SLOT(f, i);
+
+		if (!is_empty(&e->c))
+			continue;
+
+		if (!e->c.attrs)
+			continue;
+
+		any = true;
+	}
+
+	return any;
+}
+
 static void dump_vars(query *q, bool partial)
 {
 	parser *p = q->p;
@@ -1527,7 +1551,16 @@ static void dump_vars(query *q, bool partial)
 
 	g_tpl_interrupt = false;
 	q->is_dump_vars = false;
-	clear_write_options(q);
+
+	if (any && any_attributed(q))
+		fprintf(stdout, ",\n");
+
+	cell p1;
+	make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
+	cell *tmp = clone_to_heap(q, true, &p1, 0);
+	pl_idx_t nbr_cells = 1 + p1.nbr_cells;
+	make_return2(q, tmp+nbr_cells, q->st.curr_cell);
+	execute(q, tmp, f->nbr_vars);
 
 	if (any && !partial) {
 		if (space) fprintf(stdout, " ");
@@ -1536,6 +1569,7 @@ static void dump_vars(query *q, bool partial)
 	}
 
 	q->pl->did_dump_vars = any;
+	clear_write_options(q);
 	clear_results();
 }
 

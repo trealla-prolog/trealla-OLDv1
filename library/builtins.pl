@@ -717,7 +717,8 @@ portray_atts(Term) :-
 	copy_term(Term, Copy, Gs),
 	Term = Copy,
 	Gs = [Gs0],
-	write('% '), write_term(user_output, Gs0, [varnames(true)]).
+	write('   '),
+	write_term(Gs0, [varnames(true)]).
 
 dump_attvars :-
 	'$list_attributed'(Vars),
@@ -726,7 +727,7 @@ dump_attvars :-
 dump_attvars([]) :- !.
 dump_attvars([Var|Vars]) :-
 	portray_atts(Var),
-	(Vars == [] -> write('.\n') ; write(',\n')),
+	(Vars == [] -> write('') ; write(',')),
 	dump_attvars(Vars).
 
 %
