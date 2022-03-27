@@ -1,0 +1,55 @@
+{
+  "uid" : "ed6543f1352990a0",
+  "name" : "dictionary_delete_4_02",
+  "fullName" : "dictionary_delete_4_02::tests(rbtree)",
+  "historyId" : "dictionary_delete_4_02::tests(rbtree)",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "165-170"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/df2266e9bbc041d0d7e46463d0cfe273ca272410/library/dictionaries/tests.lgt#L165"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ed6543f1352990a0.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "165-170", "https://github.com/LogtalkDotOrg/logtalk3/tree/df2266e9bbc041d0d7e46463d0cfe273ca272410/library/dictionaries/tests.lgt#L165" ]
+}
