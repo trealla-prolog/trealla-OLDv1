@@ -2649,6 +2649,164 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	return ok;
 }
 
+static USE_RESULT pl_status fn_edin_redo_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	int n = q->pl->current_input;
+	stream *str = &q->pl->streams[n];
+
+	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
+		fprintf(str->fp, "%s", PROMPT);
+		fflush(str->fp);
+	}
+
+	for (;;) {
+		str->did_getc = true;
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+		str->ungetch = 0;
+
+		if (feof(str->fp)) {
+			str->did_getc = false;
+			break;
+		} else if (ch == '\n')
+			str->did_getc = false;
+
+		if (ch == get_int(p1))
+			break;
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_edin_redo_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+	GET_NEXT_ARG(p1,integer);
+
+	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
+		fprintf(str->fp, "%s", PROMPT);
+		fflush(str->fp);
+	}
+
+	for (;;) {
+		str->did_getc = true;
+		int ch = str->ungetch ? str->ungetch : xgetc_utf8(net_getc, str);
+		str->ungetch = 0;
+
+		if (feof(str->fp)) {
+			str->did_getc = false;
+			break;
+		} else if (ch == '\n')
+			str->did_getc = false;
+
+		if (ch == get_int(p1))
+			break;
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_edin_tab_1(query *q)
+{
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = eval(q, p1_tmp);
+
+	if (!is_integer(&p1))
+		return throw_error(q, &p1, p1_tmp_ctx, "type_error", "integer");
+
+	int n = q->pl->current_output;
+	stream *str = &q->pl->streams[n];
+
+	for (int i = 0; i < get_int(&p1); i++)
+		fputc(' ', str->fp);
+
+	return !ferror(str->fp);
+}
+
+static USE_RESULT pl_status fn_edin_tab_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	GET_FIRST_ARG(p1_tmp,any);
+	cell p1 = eval(q, p1_tmp);
+
+	if (!is_integer(&p1))
+		return throw_error(q, &p1, p1_tmp_ctx, "type_error", "integer");
+
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+
+	for (int i = 0; i < get_int(&p1); i++)
+		fputc(' ', str->fp);
+
+	return !ferror(str->fp);
+}
+
+static USE_RESULT pl_status fn_edin_seen_0(query *q)
+{
+	int n = q->pl->current_input;
+	stream *str = &q->pl->streams[n];
+
+	if (n <= 2)
+		return pl_success;
+
+	if ((str->fp != stdin)
+		&& (str->fp != stdout)
+		&& (str->fp != stderr))
+		fclose(str->fp);
+
+	free(str->filename);
+	free(str->mode);
+	free(str->name);
+	memset(str, 0, sizeof(stream));
+	q->pl->current_input = 0;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_edin_told_0(query *q)
+{
+	int n = q->pl->current_output;
+	stream *str = &q->pl->streams[n];
+
+	if (n <= 2)
+		return pl_success;
+
+	if ((str->fp != stdin)
+		&& (str->fp != stdout)
+		&& (str->fp != stderr))
+		fclose(str->fp);
+
+	free(str->filename);
+	free(str->mode);
+	free(str->name);
+	memset(str, 0, sizeof(stream));
+	q->pl->current_output = 0;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_edin_seeing_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	char *name = q->pl->current_input==0?"user":q->pl->streams[q->pl->current_input].name;
+	cell tmp;
+	may_error(make_cstring(&tmp, name));
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_edin_telling_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	char *name =q->pl->current_output==1?"user":q->pl->streams[q->pl->current_output].name;
+	cell tmp;
+	may_error(make_cstring(&tmp, name));
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	unshare_cell(&tmp);
+	return pl_success;
+}
+
 const struct builtins g_files_bifs[] =
 {
 #ifndef SANDBOX
@@ -2709,6 +2867,18 @@ const struct builtins g_files_bifs[] =
 	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "?atom,?term,+list", false},
 	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "?chars,?term,+list", false},
 	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,?term,+list", false},
+
+	// Edinburgh...
+
+	{"seeing", 1, fn_edin_seeing_1, "-name", false},
+	{"telling", 1, fn_edin_telling_1, "-name", false},
+	{"seen", 0, fn_edin_seen_0, NULL, false},
+	{"told", 0, fn_edin_told_0, NULL, false},
+	{"redo", 1, fn_edin_redo_1, "+integer", false},
+	{"redo", 2, fn_edin_redo_2, "+stream,+integer", false},
+	{"tab", 1, fn_edin_tab_1, "+integer", false},
+	{"tab", 2, fn_edin_tab_2, "+stream,+integer", false},
+
 
 	{0}
 };
