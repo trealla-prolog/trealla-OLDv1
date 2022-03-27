@@ -11032,6 +11032,45 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
+static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	parser *p = q->p;
+	frame *f = GET_FIRST_FRAME();
+	bool first = true;
+
+	for (unsigned i = 0; i < p->nbr_vars; i++) {
+		if (!strcmp(p->vartab.var_name[i], "_"))
+			continue;
+
+		slot *e = GET_SLOT(f, i);
+
+		if (!is_empty(&e->c))
+			continue;
+
+		if (!e->c.attrs)
+			continue;
+
+		cell v;
+		make_variable(&v, index_from_pool(q->pl, p->vartab.var_name[i]), i);
+
+		if (first) {
+			allocate_list(q, &v);
+			first = false;
+		} else
+			append_list(q, &v);
+	}
+
+	if (first) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	cell *l = end_list(q);
+	return unify(q, p1, p1_ctx, l, INITIAL_FRAME);
+}
+
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
@@ -12007,6 +12046,7 @@ static const struct builtins g_predicates_other[] =
 	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
 	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
+	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
 
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
 
