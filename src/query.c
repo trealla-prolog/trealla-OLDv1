@@ -1421,10 +1421,7 @@ static bool any_attributed(const query *q)
 
 		const slot *e = GET_SLOT(f, i);
 
-		if (!is_empty(&e->c))
-			continue;
-
-		if (!e->c.attrs)
+		if (!is_empty(&e->c) || !e->c.attrs)
 			continue;
 
 		any = true;
