@@ -4892,110 +4892,6 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 }
 #endif
 
-static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
-{
-	GET_FIRST_ARG(p1,atom_or_list);
-	GET_NEXT_ARG(p2,variable);
-	GET_NEXT_ARG(p3,list_or_nil);
-	char *filename;
-	char *src = NULL;
-
-	if (is_iso_list(p1)) {
-		size_t len = scan_is_chars_list(q, p1, p1_ctx, true);
-
-		if (!len)
-			return throw_error(q, p1, p1_ctx, "type_error", "atom");
-
-		src = chars_list_to_string(q, p1, p1_ctx, len);
-		filename = src;
-	} else
-		filename = src = DUP_SLICE(q, p1);
-
-	bool bom_specified = false, use_bom = false, is_binary = false;
-	LIST_HANDLER(p3);
-
-	while (is_list(p3)) {
-		cell *h = LIST_HEAD(p3);
-		cell *c = deref(q, h, p3_ctx);
-
-		if (is_variable(c))
-			return throw_error(q, c, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
-
-		if (is_structure(c) && (c->arity == 1)) {
-			cell *name = c + 1;
-			name = deref(q, name, q->latest_ctx);
-
-			if (!CMP_SLICE2(q, c, "type")) {
-				if (is_atom(name) && !CMP_SLICE2(q, name, "binary")) {
-					is_binary = true;
-				} else if (is_atom(name) && !CMP_SLICE2(q, name, "text"))
-					is_binary = false;
-				else
-					return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
-			} else if (!CMP_SLICE2(q, c, "bom")) {
-				bom_specified = true;
-
-				if (is_atom(name) && !CMP_SLICE2(q, name, "true"))
-					use_bom = true;
-				else if (is_atom(name) && !CMP_SLICE2(q, name, "false"))
-					use_bom = false;
-			}
-		} else
-			return throw_error(q, c, q->latest_ctx, "domain_error", "stream_option");
-
-		p3 = LIST_TAIL(p3);
-		p3 = deref(q, p3, p3_ctx);
-		p3_ctx = q->latest_ctx;
-
-		if (is_variable(p3))
-			return throw_error(q, p3, p3_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
-	}
-
-	FILE *fp = fopen(filename, is_binary?"rb":"r");
-	free(src);
-
-	if (!fp)
-		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
-
-	// Check for a BOM
-
-	size_t offset = 0;
-
-	if (!is_binary && (!bom_specified || use_bom)) {
-		int ch = getc_utf8(fp);
-
-		if ((unsigned)ch != 0xFEFF)
-			fseek(fp, 0, SEEK_SET);
-		else
-			offset = 3;
-	}
-
-	struct stat st = {0};
-
-	if (fstat(fileno(fp), &st)) {
-		return pl_error;
-	}
-
-	size_t len = st.st_size - offset;
-	char *s = malloc(len+1);
-	may_ptr_error(s, fclose(fp));
-
-	if (fread(s, 1, len, fp) != (size_t)len) {
-		free(s);
-		fclose(fp);
-		return throw_error(q, p1, p1_ctx, "domain_error", "cannot_read");
-	}
-
-	s[st.st_size] = '\0';
-	fclose(fp);
-	cell tmp;
-	may_error(make_stringn(&tmp, s, len), free(s));
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	free(s);
-	return pl_success;
-}
-
 #ifndef SANDBOX
 static USE_RESULT pl_status fn_getfile_2(query *q)
 {
@@ -5582,51 +5478,6 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 
 	if (line[strlen(line)-1] == '\r')
 		line[strlen(line)-1] = '\0';
-
-	cell tmp;
-	may_error(make_string(&tmp, line), free(line));
-	free(line);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
-{
-	GET_FIRST_ARG(pstr,stream);
-	GET_NEXT_ARG(p1,any);
-	int n = get_stream(q, pstr);
-	stream *str = &q->pl->streams[n];
-	char *line = NULL;
-	size_t len = 0;
-
-	if (isatty(fileno(str->fp))) {
-		fprintf(str->fp, "%s", PROMPT);
-		fflush(str->fp);
-	}
-
-	if (net_getline(&line, &len, str) == -1) {
-		free(line);
-
-		if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
-			clearerr(str->fp);
-			return do_yield_0(q, 1);
-		}
-
-		cell tmp;
-		make_literal(&tmp, g_eof_s);
-		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (len && (line[len-1] == '\n')) {
-		line[len-1] = '\0';
-		len--;
-	}
-
-	if (len && (line[len-1] == '\r')) {
-		line[len-1] = '\0';
-		len--;
-	}
 
 	cell tmp;
 	may_error(make_string(&tmp, line), free(line));
@@ -9111,8 +8962,6 @@ static const struct builtins g_other_bifs[] =
 	{"date_time", 6, fn_date_time_6, "-yyyy,-m,-d,-h,--m,-s", false},
 	{"date_time", 7, fn_date_time_7, "-yyyy,-m,-d,-h,--m,-s,-ms", false},
 	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
-	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
-	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
 	{"getline", 1, fn_getline_1, "-string", false},
 	{"getline", 2, fn_getline_2, "+stream,-string", false},
 	{"getlines", 1, fn_getlines_1, "-list", false},
