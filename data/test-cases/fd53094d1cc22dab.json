@@ -1,0 +1,55 @@
+{
+  "uid" : "fd53094d1cc22dab",
+  "name" : "symbiosis_4",
+  "fullName" : "symbiosis_4::tests",
+  "historyId" : "symbiosis_4::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/symbiosis/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/symbiosis/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/symbiosis/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/symbiosis/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "43-45"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/examples/symbiosis/tests.lgt#L43"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fd53094d1cc22dab.json",
+  "parameterValues" : [ "examples/symbiosis/tests.lgt", "43-45", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/examples/symbiosis/tests.lgt#L43" ]
+}

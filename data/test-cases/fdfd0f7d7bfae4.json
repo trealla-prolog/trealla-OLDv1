@@ -1,0 +1,55 @@
+{
+  "uid" : "fdfd0f7d7bfae4",
+  "name" : "commons_soft_cut_2_3_09",
+  "fullName" : "commons_soft_cut_2_3_09::tests",
+  "historyId" : "commons_soft_cut_2_3_09::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/control/soft_cut_2_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/control/soft_cut_2_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/control/soft_cut_2_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/control/soft_cut_2_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "84-85"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tests/prolog/control/soft_cut_2_3/tests.lgt#L84"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fdfd0f7d7bfae4.json",
+  "parameterValues" : [ "tests/prolog/control/soft_cut_2_3/tests.lgt", "84-85", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tests/prolog/control/soft_cut_2_3/tests.lgt#L84" ]
+}
