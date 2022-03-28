@@ -1539,7 +1539,7 @@ static void dump_vars(query *q, bool partial)
 		q->quoted = 1;
 		q->variable_names = vlist;
 		q->variable_names_ctx = INITIAL_FRAME;
-		q->max_depth = 5;
+		q->max_depth = 9;
 
 		print_term(q, stdout, c, c_ctx, 1);
 
