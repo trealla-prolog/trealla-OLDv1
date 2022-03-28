@@ -708,8 +708,7 @@ collect_goals_([V|T], GsIn, GsOut) :-
 copy_term(Term, Copy, Gs) :-
 	copy_term(Term, Copy),
 	term_attvars(Copy, CopyVs),
-	collect_goals_(CopyVs, [], Gs),
-	'$strip_attributes'(CopyVs).
+	collect_goals_(CopyVs, [], Gs).
 
 % Debugging...
 

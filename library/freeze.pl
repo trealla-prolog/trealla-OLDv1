@@ -1,4 +1,4 @@
-:- module(freeze, [freeze/2]).
+:- module(freeze, [freeze/2, frozen/2]).
 
 :- use_module(library(atts)).
 :- use_module(library(dcgs)).
@@ -9,6 +9,11 @@
 freeze(X, Goal) :-
     put_atts(Fresh, frozen(Goal)),
     X = Fresh.
+
+frozen(Term, Goal) :-
+	copy_term(Term, _, Gs),
+	flatten(Gs, Gs2),
+	toconjunction(Gs2, Goal).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -27,5 +32,5 @@ verify_attributes(_, _, []).
 attribute_goals(Var) -->
     { get_atts(Var, frozen(Goals)),
       put_atts(Var, -frozen(_)) },
-    [freeze:freeze(Var, Goals)].
+    [freeze(Var, Goals)].
 
