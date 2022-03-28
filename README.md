@@ -272,6 +272,7 @@ Non-standard predicates
 	del_attr/2                  # SWI-compatible
 
 	freeze/2                    # auto-loaded from library(freeze)
+	frozen/2                    # auto-loaded from library(freeze)
 	when/2						# auto-loaded from library(when)
 	dif/2						# auto-loaded from library(dif)
 
