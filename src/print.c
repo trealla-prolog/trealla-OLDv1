@@ -608,10 +608,10 @@ static const char *varformat2(cell *c, unsigned nv_start)
 	dst += sprintf(dst, "%c", 'A'+(unsigned)(nbr));
 	mp_int_div_value(&tmp, 26, &tmp, NULL);
 
-	if (mp_int_compare_zero(&tmp) > 0) {
+	if (mp_int_compare_zero(&tmp) > 0)
 		dst += mp_int_to_string(&tmp, 10, dst, sizeof(tmpbuf));
-	}
 
+	mp_int_clear(&tmp);
 	return tmpbuf;
 }
 
