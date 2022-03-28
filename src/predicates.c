@@ -7108,7 +7108,7 @@ static USE_RESULT pl_status fn_sys_make_list_2(query *q)
 	unsigned var_nbr = f->nbr_vars;
 	bool first = true;
 
-	while (n--) {
+	while (n-- > 0) {
 		cell tmp;
 		make_variable(&tmp, g_anon_s, var_nbr++);
 		tmp.flags |= FLAG_VAR_ANON;
