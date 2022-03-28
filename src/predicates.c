@@ -4622,7 +4622,8 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		if (get_int(p1) != get_int(p2))
 			may_error(push_choice(q));
 
-		return unify(q, p3, p3_ctx, p1, q->st.curr_frame);
+		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
+		return pl_success;
 	}
 
 	pl_int_t val = get_int(p4) + 1;
@@ -4634,7 +4635,8 @@ static USE_RESULT pl_status fn_between_3(query *q)
 	if (val != get_int(p2))
 		may_error(push_choice(q));
 
-	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
 }
 
 #if 0

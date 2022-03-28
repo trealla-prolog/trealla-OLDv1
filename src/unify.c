@@ -833,9 +833,6 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 
 bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
-	q->save_tp = q->st.tp;
-	q->run_hook = q->cycle_error = false;
-
 	if (is_iso_list(p1) && is_iso_list(p2)) {
 		bool is_partial;
 
