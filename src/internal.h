@@ -82,7 +82,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 // Primary type...
 
 #define is_empty(c) ((c)->tag == TAG_EMPTY)
-#define is_variable(c) ((c)->tag == TAG_VAR)
+#define is_var(c) ((c)->tag == TAG_VAR)
 #define is_literal(c) ((c)->tag == TAG_LITERAL)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
 #define is_integer(c) ((c)->tag == TAG_INT)
@@ -640,7 +640,7 @@ struct parser_ {
 	bool end_of_term:1;
 	bool comment:1;
 	bool is_quoted:1;
-	bool is_variable:1;
+	bool is_var:1;
 	bool is_op:1;
 	bool skip:1;
 	bool command:1;

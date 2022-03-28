@@ -417,7 +417,7 @@ static void directives(parser *p, cell *d)
 		const char *name = "";
 		char tmpbuf[1024];
 
-		if (is_variable(p1)) {
+		if (is_var(p1)) {
 			snprintf(tmpbuf, sizeof(tmpbuf), "%s", p->m->filename);
 			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
 
@@ -490,7 +490,7 @@ static void directives(parser *p, cell *d)
 		const char *name = "";
 		char tmpbuf[1024];
 
-		if (is_variable(p1)) {
+		if (is_var(p1)) {
 			snprintf(tmpbuf, sizeof(tmpbuf), "%s", p->m->filename);
 			char *ptr = tmpbuf + strlen(tmpbuf) - 1;
 
@@ -896,7 +896,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
 
-		if (!is_variable(c))
+		if (!is_var(c))
 			continue;
 
 		if (rebase) {
@@ -936,9 +936,9 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		cell *c = cl->cells + i;
 
 		//if (is_literal(c)) printf("*** %u : %u %s\n", i, c->tag, GET_STR(p, c));
-		//if (is_variable(c)) printf("*** %u : %u var_nbr=%d, off=%u\n", i, c->tag, c->var_nbr, c->val_off);
+		//if (is_var(c)) printf("*** %u : %u var_nbr=%d, off=%u\n", i, c->tag, c->var_nbr, c->val_off);
 
-		if (!is_variable(c))
+		if (!is_var(c))
 			continue;
 
 		if (c->val_off == g_anon_s)
@@ -998,7 +998,7 @@ cell *check_body_callable(parser *p, cell *c)
 		}
 	}
 
-	return !is_callable(c) && !is_variable(c) ? c : NULL;
+	return !is_callable(c) && !is_var(c) ? c : NULL;
 }
 
 static cell *term_to_body_conversion(parser *p, cell *c)
@@ -1017,7 +1017,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			//if (c->val_off == g_soft_cut_s)
 			//	norhs = true;
 
-			if (is_variable(lhs)) {
+			if (is_var(lhs)) {
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
 			} else
@@ -1026,7 +1026,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			cell *rhs = lhs + lhs->nbr_cells;
 			c = p->cl->cells + c_idx;
 
-			if (is_variable(rhs) && !norhs)
+			if (is_var(rhs) && !norhs)
 				c = insert_here(p, c, rhs);
 			else
 				rhs = term_to_body_conversion(p, rhs);
@@ -1039,7 +1039,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		if (c->val_off == g_negation_s) {
 			cell *rhs = c + 1;
 
-			if (is_variable(rhs)) {
+			if (is_var(rhs)) {
 				c = insert_here(p, c, rhs);
 				rhs = c + 1;
 			} else
@@ -1968,7 +1968,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	p->v.flags = 0;
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
-	p->string = p->is_quoted = p->is_variable = p->is_op = false;
+	p->string = p->is_quoted = p->is_var = p->is_op = false;
 
 	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
 		src++;
@@ -2253,7 +2253,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		int ch_start = peek_char_utf8(p->token);
 
 		if (iswupper(ch_start) || (ch_start == '_'))
-			p->is_variable = true;
+			p->is_var = true;
 		else if (search_op(p->m, p->token, NULL, false))
 			p->is_op = true;
 
@@ -2791,7 +2791,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		p->last_close = false;
 
-		if (p->is_variable && (*p->srcptr == '(')) {
+		if (p->is_var && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, variable as functor, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2932,14 +2932,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_REAL) {
 			set_real(c, get_real(&p->v));
-		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
+		} else if ((!p->is_quoted || func || p->is_op || p->is_var ||
 			(get_builtin(p->m->pl, p->token, 0, &found, NULL), found) ||
 			!strcmp(p->token, "[]")) && !p->string) {
 
 			if (func && !strcmp(p->token, "."))
 				c->priority = 0;
 
-			if (p->is_variable)
+			if (p->is_var)
 				c->tag = TAG_VAR;
 
 			if (p->is_quoted)

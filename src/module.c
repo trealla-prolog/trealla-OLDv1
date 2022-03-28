@@ -276,14 +276,14 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 				return 1;
 			else
 				return 0;
-		} else if (!is_variable(p2))
+		} else if (!is_var(p2))
 			return -1;
 	} else if (is_bigint(p1)) {
 		if (is_bigint(p2)) {
 			return mp_int_compare(&p1->val_bigint->ival, &p2->val_bigint->ival);
 		} else if (is_smallint(p2)) {
 			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
-		} else if (!is_variable(p2))
+		} else if (!is_var(p2))
 			return -1;
 	} else if (is_real(p1)) {
 		if (is_real(p2)) {
@@ -295,7 +295,7 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 				return 0;
 		} else if (is_integer(p2))
 			return 1;
-		else if (!is_variable(p2))
+		else if (!is_var(p2))
 			return -1;
 	} else if (is_literal(p1) && !p1->arity) {
 		if (is_literal(p2) && !p2->arity) {
@@ -307,14 +307,14 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 		else if (is_number(p2))
 			return 1;
-		else if (!is_variable(p2))
+		else if (!is_var(p2))
 			return -1;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
 			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
 		else if (is_number(p2))
 			return 1;
-		else if (!is_variable(p2))
+		else if (!is_var(p2))
 			return -1;
 	} else if (is_structure(p1)) {
 		if (is_structure(p2)) {
@@ -341,7 +341,7 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 			}
 
 			return 0;
-		} else if (!is_variable(p2))
+		} else if (!is_var(p2))
 			return 1;
 	}
 
@@ -1128,7 +1128,7 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	// Check if a variable occurs more than once in the head...
 
 	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
-		if (!is_variable(c))
+		if (!is_var(c))
 			continue;
 
 		uint64_t mask2 = 1ULL << c->var_nbr;

@@ -236,7 +236,7 @@ static bool is_all_vars(cell *c)
 	c++;
 
 	while (arity--) {
-		if (!is_variable(c))
+		if (!is_var(c))
 			return false;
 
 		c += c->nbr_cells;
@@ -250,7 +250,7 @@ static bool is_ground(cell *c)
 	pl_idx_t nbr_cells = c->nbr_cells;
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++, c++) {
-		if (is_variable(c))
+		if (is_var(c))
 			return false;
 	}
 
@@ -358,7 +358,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
 
-		if (is_variable(c)) {
+		if (is_var(c)) {
 			*has_var = true;
 			return 0;
 		}
@@ -397,7 +397,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		cnt++;
 	}
 
-	if (is_variable(l)) {
+	if (is_var(l)) {
 		is_chars_list = 0;
 		*has_var = *is_partial = true;
 	} else if (is_string(l))
@@ -915,7 +915,7 @@ static void proceed(query *q)
 	}
 }
 
-// Resume previous frame...
+// Or, resume previous frame...
 
 static bool resume_frame(query *q)
 {
@@ -1029,7 +1029,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_variable(&e->c)) {
+	while (is_var(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		f = GET_FRAME(c_ctx);
@@ -1063,7 +1063,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_variable(&e->c)) {
+	while (is_var(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		f = GET_FRAME(c_ctx);
@@ -1157,7 +1157,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		p1 = orig_p1;
 		cell *c_body = get_logical_body(c);
 
-		if (p1_body && is_variable(p1_body) && !c_body) {
+		if (p1_body && is_var(p1_body) && !c_body) {
 			p1 = deref(q, get_head(p1), p1_ctx);
 			c = get_head(c);
 			needs_true = true;
@@ -1811,7 +1811,7 @@ pl_status start(query *q)
 				break;
 		}
 
-		if (is_variable(q->st.curr_cell)) {
+		if (is_var(q->st.curr_cell)) {
 			if (!fn_call_0(q, q->st.curr_cell))
 				continue;
 		}

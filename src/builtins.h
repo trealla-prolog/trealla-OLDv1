@@ -12,53 +12,53 @@
 	pl_idx_t p##_ctx = q->latest_ctx
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
-#define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
+#define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_var(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
 #define is_compound(c) (is_structure(c) || is_string(c))
 #define is_number(c) (is_integer(c) || is_real(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
-#define is_list_or_atom_or_var(c) (is_list(c) || is_atom(c) || is_variable(c))
-#define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
-#define is_list_or_var(c) (is_list(c) || is_variable(c))
-#define is_structure_or_var(c) (is_structure(c) || is_variable(c))
-#define is_atomic_or_var(c) (is_atomic(c) || is_variable(c))
-#define is_atom_or_var(c) (is_atom(c) || is_variable(c))
+#define is_list_or_atom_or_var(c) (is_list(c) || is_atom(c) || is_var(c))
+#define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_var(c))
+#define is_list_or_var(c) (is_list(c) || is_var(c))
+#define is_structure_or_var(c) (is_structure(c) || is_var(c))
+#define is_atomic_or_var(c) (is_atomic(c) || is_var(c))
+#define is_atom_or_var(c) (is_atom(c) || is_var(c))
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
-#define is_number_or_var(c) (is_number(c) || is_variable(c))
-#define is_real_or_var(c) (is_real(c) || is_variable(c))
-#define is_integer_or_var(c) (is_integer(c) || is_variable(c))
+#define is_number_or_var(c) (is_number(c) || is_var(c))
+#define is_real_or_var(c) (is_real(c) || is_var(c))
+#define is_integer_or_var(c) (is_integer(c) || is_var(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
-#define is_smallint_or_var(c) (is_smallint(c) || is_variable(c))
+#define is_smallint_or_var(c) (is_smallint(c) || is_var(c))
 #define is_smallint_or_atom(c) (is_smallint(c) || is_atom(c))
-#define is_nonvar(c) !is_variable(c)
+#define is_nonvar(c) !is_var(c)
 #define is_stream(c) (get_stream(q,c) >= 0)
-#define is_stream_or_var(c) (is_stream(c) || is_variable(c))
+#define is_stream_or_var(c) (is_stream(c) || is_var(c))
 #define is_stream_or_structure(c) (is_stream(c) || is_structure(c))
 #define is_list_or_atom(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list(c) (is_atom(c) || is_iso_list(c))
-#define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
+#define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_var(c))
 #define is_character(c) (is_atom(c) && ((strlen_utf8(GET_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
-#define is_character_or_var(c) (is_in_character(c) || is_variable(c))
+#define is_character_or_var(c) (is_in_character(c) || is_var(c))
 #define is_in_character(c) (is_atom(c) && ((strlen_utf8(GET_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
-#define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
+#define is_in_character_or_var(c) (is_in_character(c) || is_var(c))
 #define is_in_byte(c) (is_integer(c) && (get_smallint(c) >= -1) && (get_smallint(c) < 256))
-#define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
+#define is_in_byte_or_var(c) (is_in_byte(c) || is_var(c))
 #define is_byte(c) (is_integer(c) && (get_smallint(c) >= 0) && (get_smallint(c) < 256))
 #define is_any(c) true
 
 #define is_iso_list_or_nil(c) (is_iso_list(c) || is_nil(c))
-#define is_iso_list_or_nil_or_var(c) (is_iso_list_or_nil(c) || is_variable(c))
-#define is_iso_list_or_var(c) (is_iso_list(c) || is_variable(c))
-#define is_iso_atom_or_var(c) (is_iso_atom(c) || is_variable(c))
+#define is_iso_list_or_nil_or_var(c) (is_iso_list_or_nil(c) || is_var(c))
+#define is_iso_list_or_var(c) (is_iso_list(c) || is_var(c))
+#define is_iso_atom_or_var(c) (is_iso_atom(c) || is_var(c))
 
 inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_variable(&e->c)) {
+	while (is_var(&e->c)) {
 		c_ctx = e->ctx;
 		c = &e->c;
 		f = GET_FRAME(c_ctx);
@@ -74,7 +74,7 @@ inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 	return q->latest_ctx = e->ctx, &e->c;
 }
 
-#define deref(q, c, c_ctx) is_variable(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = c_ctx, c)
+#define deref(q, c, c_ctx) is_var(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = c_ctx, c)
 
 #define GET_FIRST_ARG(p,vt) \
 	cell *p = get_first_arg(q); \
@@ -182,7 +182,7 @@ USE_RESULT pl_status fn_iso_integer_1(query *q);
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
 		return pl_success; 												\
-	if (is_variable(c))											\
+	if (is_var(c))											\
 		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number"); \
 	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1)) \
 		return throw_error(q, c, q->st.curr_frame, "type_error", "evaluable");
