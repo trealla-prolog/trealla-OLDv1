@@ -7301,6 +7301,8 @@ static const struct builtins g_other_bifs[] =
 	{"limit", 2, fn_limit_2, "+integer,+callable", false},
 	{"offset", 2, fn_offset_2, "+integer,+callable", false},
 	{"unifiable", 3, fn_sys_unifiable_3, NULL, false},
+	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
+	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
@@ -7318,8 +7320,6 @@ static const struct builtins g_other_bifs[] =
 	{"$queue", 1, fn_sys_queue_1, "+term", false},
 	{"$incr", 2, fn_sys_incr_2, "?var", false},
 	{"$choice", 0, fn_sys_choice_0, NULL, false},
-	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
-	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 	{"$alarm", 1, fn_sys_alarm_1, "+integer", false},
 	{"$put_attributes", 2, fn_sys_put_attributes_2, "+variable,+list", false},
 	{"$get_attributes", 2, fn_sys_get_attributes_2, "+variable,-list", false},
