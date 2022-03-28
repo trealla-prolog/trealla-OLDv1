@@ -4100,7 +4100,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 }
 #endif
 
-static void parse_host(const char *src, char *hostname, char *path, unsigned *port, int *ssl, int *domain)
+static void parse_host(const char *src, char hostname[1024], char path[4096], unsigned *port, int *ssl, int *domain)
 {
 	if (!strncmp(src, "https://", 8)) {
 		src += 8;
@@ -4129,7 +4129,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
 	GET_NEXT_ARG(p3,list_or_nil);
-	char hostname[1024], path[1024*4];
+	char hostname[1024], path[4096];
 	char *keyfile = "privkey.pem", *certfile = "fullchain.pem";
 	int udp = 0, nodelay = 1, nonblock = 0, ssl = 0, domain = 0, level = 0;
 	unsigned port = 80;
