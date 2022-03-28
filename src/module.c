@@ -1590,6 +1590,7 @@ module *create_module(prolog *pl, const char *name)
 	m->defops = m_create((void*)strcmp, NULL, NULL);
 	m_allow_dups(m->defops, false);
 	m->indexing_threshold = 4096;
+	pl->modmap[m->id] = m;
 
 	if (strcmp(name, "system")) {
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {

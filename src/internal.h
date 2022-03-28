@@ -59,6 +59,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
+#define MAX_MODULES 1024
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define STREAM_BUFLEN 1024
@@ -681,6 +682,7 @@ struct module_ {
 
 struct prolog_ {
 	stream streams[MAX_STREAMS];
+	module *modmap[MAX_MODULES];;
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;

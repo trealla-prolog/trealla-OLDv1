@@ -103,16 +103,6 @@ module *find_module(prolog *pl, const char *name)
 	return NULL;
 }
 
-module *find_module_id(prolog *pl, unsigned id)
-{
-	for (module *m = pl->modules; m; m = m->next) {
-		if (m->id == id)
-			return m;
-	}
-
-	return pl->user_m;
-}
-
 bool get_halt(prolog *pl) { return pl->halt; }
 bool get_status(prolog *pl) { return pl->status; }
 bool get_redo(prolog *pl) { return pl->is_redo; }
