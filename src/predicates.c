@@ -6508,7 +6508,7 @@ static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
+static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -6520,7 +6520,7 @@ static USE_RESULT pl_status fn_sys_write_attributes_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_read_attributes_2(query *q)
+static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -7321,8 +7321,8 @@ static const struct builtins g_other_bifs[] =
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 	{"$alarm", 1, fn_sys_alarm_1, "+integer", false},
-	{"$write_attributes", 2, fn_sys_write_attributes_2, "+variable,+list", false},
-	{"$read_attributes", 2, fn_sys_read_attributes_2, "+variable,-list", false},
+	{"$put_attributes", 2, fn_sys_put_attributes_2, "+variable,+list", false},
+	{"$get_attributes", 2, fn_sys_get_attributes_2, "+variable,-list", false},
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
 	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},

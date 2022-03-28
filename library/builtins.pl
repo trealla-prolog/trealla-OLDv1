@@ -624,7 +624,7 @@ put_atts(Var, [H|T]) :- !,
 
 put_atts(Var, -Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,Value],
 	(	var(Value) ->
 		Functor = Value
@@ -632,43 +632,43 @@ put_atts(Var, -Attr) :- !,
 	),
 	dict:del(D, Module, D2),
 	(	D2 = [] -> '$erase_attributes'(Var)
-	;	'$write_attributes'(Var, D2)
+	;	'$put_attributes'(Var, D2)
 	).
 
 put_atts(Var, +Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
-	'$write_attributes'(Var, D2).
+	'$put_attributes'(Var, D2).
 
 put_atts(Var, Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:set(D, Module, Attr, D2),
-	'$write_attributes'(Var, D2).
+	'$put_attributes'(Var, D2).
 
 get_atts(Var, L) :- var(L), !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	dict:match(D, _, L).
 
 get_atts(Var, -Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,_],
 	\+ dict:get(D, Module, _).
 
 get_atts(Var, +Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:get(D, Module, Attr).
 
 get_atts(Var, Attr) :- !,
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	Attr =.. [Module,_],
 	dict:get(D, Module, Attr).
 
@@ -678,7 +678,7 @@ del_atts(Var) :-
 
 attvar(Var) :-
 	var(Var),
-	'$read_attributes'(Var, D),
+	'$get_attributes'(Var, D),
 	D \= [].
 
 term_attvars_([], VsIn, VsIn) :- !.
