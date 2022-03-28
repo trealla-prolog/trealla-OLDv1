@@ -6385,7 +6385,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
 	may_error(push_choice(q));
-	pl_idx_t save_tp = q->st.tp;
+	pl_idx_t before_hook_tp = q->st.tp;
 	bool save_hook = q->in_hook;
 	q->in_hook = true;
 
@@ -6401,8 +6401,8 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 	// Go thru trail, getting the bindings...
 
-	while (save_tp < q->st.tp) {
-		const trail *tr = q->trails + save_tp;
+	while (before_hook_tp < q->st.tp) {
+		const trail *tr = q->trails + before_hook_tp;
 		const frame *f = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
 		cell *c = deref(q, &e->c, e->ctx);
@@ -6426,7 +6426,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 			append_list(q, tmp);
 
 		free(tmp);
-		save_tp++;
+		before_hook_tp++;
 	}
 
 	undo_me(q);

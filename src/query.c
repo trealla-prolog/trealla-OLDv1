@@ -1820,8 +1820,8 @@ pl_status start(query *q)
 		Trace(q, q->st.curr_cell, q->st.curr_frame, CALL);
 		cell *save_cell = q->st.curr_cell;
 		pl_idx_t save_ctx = q->st.curr_frame;
-		q->run_hook = q->cycle_error = false;			// For hook
-		q->save_tp = q->st.tp;							// For hook
+		q->run_hook = q->cycle_error = false;
+		q->before_hook_tp = q->st.tp;
 
 		if (q->st.curr_cell->flags & FLAG_BUILTIN	) {
 			if (!q->st.curr_cell->fn) {					// NO-OP

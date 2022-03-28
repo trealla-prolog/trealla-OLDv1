@@ -459,7 +459,7 @@ pl_status do_post_unification_hook(query *q, bool is_builtin)
 {
 	q->in_hook = true;
 	q->run_hook = false;
-	q->undo_lo_tp = q->save_tp;
+	q->undo_lo_tp = q->before_hook_tp;
 	q->undo_hi_tp = q->st.tp;
 
 	cell *tmp = alloc_on_heap(q, 3);

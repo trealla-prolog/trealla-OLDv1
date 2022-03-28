@@ -559,7 +559,7 @@ struct query_ {
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;
-	pl_idx_t max_choices, max_frames, max_slots, max_trails, save_tp;
+	pl_idx_t max_choices, max_frames, max_slots, max_trails, before_hook_tp;
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint32_t cgen;
