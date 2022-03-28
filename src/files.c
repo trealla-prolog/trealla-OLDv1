@@ -4574,6 +4574,53 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	int n = q->pl->current_output;
+	stream *str = &q->pl->streams[n];
+	size_t len;
+
+	if (is_cstring(p1)) {
+		const char *src = GET_STR(q, p1);
+		size_t len = LEN_STR(q, p1);
+		net_write(src, len, str);
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
+		char *src = chars_list_to_string(q, p1, p1_ctx, len);
+		net_write(src, len, str);
+		free(src);
+	} else if (is_nil(p1)) {
+		;
+	} else
+		return throw_error(q, p1, p1_ctx, "type_error", "chars");
+
+	return !ferror(str->fp);
+}
+
+static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
+{
+	GET_FIRST_ARG(pstr,stream);
+	int n = get_stream(q, pstr);
+	stream *str = &q->pl->streams[n];
+	GET_NEXT_ARG(p1,any);
+	size_t len;
+
+	if (is_cstring(p1)) {
+		const char *src = GET_STR(q, p1);
+		size_t len = LEN_STR(q, p1);
+		net_write(src, len, str);
+	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
+		char *src = chars_list_to_string(q, p1, p1_ctx, len);
+		net_write(src, len, str);
+		free(src);
+	} else if (is_nil(p1)) {
+		;
+	} else
+		return throw_error(q, p1, p1_ctx, "type_error", "chars");
+
+	return !ferror(str->fp);
+}
+
 const struct builtins g_files_bifs[] =
 {
 #ifndef SANDBOX
@@ -4660,8 +4707,8 @@ const struct builtins g_files_bifs[] =
 	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
 	{"chdir", 1, fn_chdir_1, "+string", false},
-
-
+	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,?term,+list", false},
 	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,?term,+list", false},
 	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "?atom,?term,+list", false},

@@ -9,7 +9,6 @@
 #include <sys/stat.h>
 
 #include "internal.h"
-#include "network.h"
 #include "base64.h"
 #include "library.h"
 #include "parser.h"
@@ -6662,53 +6661,6 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	int n = q->pl->current_output;
-	stream *str = &q->pl->streams[n];
-	size_t len;
-
-	if (is_cstring(p1)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
-		net_write(src, len, str);
-	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
-		char *src = chars_list_to_string(q, p1, p1_ctx, len);
-		net_write(src, len, str);
-		free(src);
-	} else if (is_nil(p1)) {
-		;
-	} else
-		return throw_error(q, p1, p1_ctx, "type_error", "chars");
-
-	return !ferror(str->fp);
-}
-
-static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
-{
-	GET_FIRST_ARG(pstr,stream);
-	int n = get_stream(q, pstr);
-	stream *str = &q->pl->streams[n];
-	GET_NEXT_ARG(p1,any);
-	size_t len;
-
-	if (is_cstring(p1)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
-		net_write(src, len, str);
-	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
-		char *src = chars_list_to_string(q, p1, p1_ctx, len);
-		net_write(src, len, str);
-		free(src);
-	} else if (is_nil(p1)) {
-		;
-	} else
-		return throw_error(q, p1, p1_ctx, "type_error", "chars");
-
-	return !ferror(str->fp);
-}
-
 static USE_RESULT pl_status fn_kv_set_3(query *q)
 {
 	GET_FIRST_ARG(p1,smallint_or_atom);
@@ -7355,8 +7307,6 @@ static const struct builtins g_other_bifs[] =
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
 	{"$strip_attributes", 1, fn_sys_strip_attributes_1, "+vars", false},
 	{"$is_partial_string", 1, fn_sys_is_partial_string_1, "+string", false},
-	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false},
 	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false},
