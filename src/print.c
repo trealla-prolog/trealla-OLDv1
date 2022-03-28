@@ -597,8 +597,7 @@ static const char *varformat(unsigned nbr)
 	static char tmpbuf[80];
 	char *dst = tmpbuf;
 	dst += sprintf(dst, "%c", 'A'+nbr%26);
-	if ((nbr/26) > 0) dst += sprintf(dst, "%u", (nbr/26)%26);
-	if ((nbr/26/26) > 0) sprintf(dst, "_%u", (nbr/26/26)%26);
+	if ((nbr/26) > 0) dst += sprintf(dst, "%u", (nbr/26));
 	return tmpbuf;
 }
 
