@@ -1,0 +1,55 @@
+{
+  "uid" : "54b5f1f9ef1cb1",
+  "name" : "directory_load_diagram_rdirectory_2_01",
+  "fullName" : "directory_load_diagram_rdirectory_2_01::tests",
+  "historyId" : "directory_load_diagram_rdirectory_2_01::tests",
+  "time" : {
+    "duration" : 44
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/diagrams/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "299-301"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tools/diagrams/tests.lgt#L299"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "54b5f1f9ef1cb1.json",
+  "parameterValues" : [ "tools/diagrams/tests.lgt", "299-301", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tools/diagrams/tests.lgt#L299" ]
+}

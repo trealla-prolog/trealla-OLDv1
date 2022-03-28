@@ -1,0 +1,55 @@
+{
+  "uid" : "e84e42a3970d3be8",
+  "name" : "forwarding_2",
+  "fullName" : "forwarding_2::tests",
+  "historyId" : "forwarding_2::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/entities/forwarding/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/entities/forwarding/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/entities/forwarding/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/entities/forwarding/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "35-36"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tests/logtalk/entities/forwarding/tests.lgt#L35"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e84e42a3970d3be8.json",
+  "parameterValues" : [ "tests/logtalk/entities/forwarding/tests.lgt", "35-36", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tests/logtalk/entities/forwarding/tests.lgt#L35" ]
+}

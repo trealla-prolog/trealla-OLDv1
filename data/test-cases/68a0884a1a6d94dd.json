@@ -1,0 +1,55 @@
+{
+  "uid" : "68a0884a1a6d94dd",
+  "name" : "test_1_03",
+  "fullName" : "test_1_03::tests_dialects",
+  "historyId" : "test_1_03::tests_dialects",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "package",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/lgtunit/tests_dialects.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-41"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tools/lgtunit/tests_dialects.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "68a0884a1a6d94dd.json",
+  "parameterValues" : [ "tools/lgtunit/tests_dialects.lgt", "40-41", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/tools/lgtunit/tests_dialects.lgt#L40" ]
+}

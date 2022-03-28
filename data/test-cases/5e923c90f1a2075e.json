@@ -1,0 +1,55 @@
+{
+  "uid" : "5e923c90f1a2075e",
+  "name" : "s22",
+  "fullName" : "s22::tests",
+  "historyId" : "s22::tests",
+  "time" : {
+    "duration" : 128
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/benchmarks/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/benchmarks/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/benchmarks/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/benchmarks/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "48-50"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/examples/benchmarks/tests.lgt#L48"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5e923c90f1a2075e.json",
+  "parameterValues" : [ "examples/benchmarks/tests.lgt", "48-50", "https://github.com/LogtalkDotOrg/logtalk3/tree/d0adc6207e4e0c16788e0c82b2a25582e2e2030d/examples/benchmarks/tests.lgt#L48" ]
+}
