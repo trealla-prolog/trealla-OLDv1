@@ -1,0 +1,55 @@
+{
+  "uid" : "fa568a4449a09c55",
+  "name" : "polygons_09",
+  "fullName" : "polygons_09::tests",
+  "historyId" : "polygons_09::tests",
+  "time" : {
+    "duration" : 3
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/polygons/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/polygons/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/polygons/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/polygons/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "65-69"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9547c3404b4ced010121d50602bd38e081edfd49/examples/polygons/tests.lgt#L65"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fa568a4449a09c55.json",
+  "parameterValues" : [ "examples/polygons/tests.lgt", "65-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/9547c3404b4ced010121d50602bd38e081edfd49/examples/polygons/tests.lgt#L65" ]
+}
