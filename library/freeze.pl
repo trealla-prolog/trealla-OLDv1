@@ -7,7 +7,7 @@
 :- attribute frozen/1.
 
 freeze(X, Goal) :-
-    put_atts(Fresh, frozen(Goal)),
+    put_atts(Fresh, freeze(Goal)),
     X = Fresh.
 
 frozen(Term, Goal) :-
@@ -18,11 +18,11 @@ frozen(Term, Goal) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 verify_attributes(Var, Other, Goals) :-
-        get_atts(Var, frozen(Fa)), !,       % are we involved?
+        get_atts(Var, freeze(Fa)), !,       % are we involved?
         (   var(Other) ->                   % must be attributed then
-            (   get_atts(Other,  frozen(Fb)) % has a pending goal?
-            ->  put_atts(Other,  frozen((Fb,Fa))) % rescue conjunction
-            ;   put_atts(Other,  frozen(Fa)) % rescue the pending goal
+            (   get_atts(Other,  freeze(Fb)) % has a pending goal?
+            ->  put_atts(Other,  freeze((Fb,Fa))) % rescue conjunction
+            ;   put_atts(Other,  freeze(Fa)) % rescue the pending goal
             ),
             Goals = []
         ;   Goals = [Fa]
@@ -30,7 +30,7 @@ verify_attributes(Var, Other, Goals) :-
 verify_attributes(_, _, []).
 
 attribute_goals(Var) -->
-    { get_atts(Var, frozen(Goals)),
-      put_atts(Var, -frozen(_)) },
-    [freeze(Var, Goals)].
+    { get_atts(Var, freeze(Goals)),
+      put_atts(Var, -freeze(_)) },
+    [freeze:freeze(Var, Goals)].
 
