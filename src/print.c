@@ -337,7 +337,7 @@ static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t var_ctx)
 	const slot *e = GET_FIRST_SLOT(f);
 
 	for (pl_idx_t i = 0; i < f->nbr_vars; i++, e++) {
-		if (!is_var(&e->c))
+		if (!is_variable(&e->c))
 			continue;
 
 		if (e->ctx != var_ctx)
@@ -456,7 +456,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	pl_idx_t var_nbr = 0;
 
-	if (running && is_var(c) && q->variable_names) {
+	if (running && is_variable(c) && q->variable_names) {
 		cell *l = q->variable_names;
 		pl_idx_t l_ctx = q->variable_names_ctx;
 		LIST_HANDLER(l);
@@ -474,7 +474,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 				var_ctx = q->latest_ctx;
 			}
 
-			if (is_var(var) && (var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
+			if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx = c_ctx)) {
 				dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 				return dst - save_dst;
 			}
@@ -485,7 +485,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		}
 	}
 
-	if (is_var(c) && running && (q->nv_start == -1)
+	if (is_variable(c) && running && (q->nv_start == -1)
 		&& ((var_nbr = find_binding(q, c->var_nbr, c_ctx)) != ERR_IDX)) {
 		if (!dstlen) {
 			if (!(s_mask1[var_nbr]))
@@ -510,12 +510,12 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		return dst - save_dst;
 	}
 
-	if (is_var(c) && !running && !q->cycle_error) {
+	if (is_variable(c) && !running && !q->cycle_error) {
 		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 		return dst - save_dst;
 	}
 
-	if (is_var(c)) {
+	if (is_variable(c)) {
 		frame *f = GET_FRAME(c_ctx);
 		slot *e = GET_SLOT(f, c->var_nbr);
 		pl_idx_t slot_nbr = e - q->slots;
@@ -549,7 +549,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	const char *src = GET_STR(q, c);
 	size_t srclen = LEN_STR(q, c);
-	int dq = 0, quote = !is_var(c) && needs_quoting(q->st.m, src, srclen);
+	int dq = 0, quote = !is_variable(c) && needs_quoting(q->st.m, src, srclen);
 	quote += has_spaces(src, srclen);
 	if (is_string(c)) dq = quote = 1;
 	dst += snprintf(dst, dstlen, "%s", quote?dq?"\"":"'":"");
@@ -893,7 +893,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	int optype = GET_OP(c);
 	unsigned specifier;
 
-	if (!optype && !is_var(c)
+	if (!optype && !is_variable(c)
 		&& search_op(q->st.m, GET_STR(q, c), &specifier, true) && (c->arity == 1)) {
 		if (IS_PREFIX(specifier)) {
 			SET_OP(c, specifier);
@@ -902,7 +902,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	}
 
 	if (q->ignore_ops || !optype || !c->arity) {
-		int quote = ((running <= 0) || q->quoted) && !is_var(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
+		int quote = ((running <= 0) || q->quoted) && !is_variable(c) && needs_quoting(q->st.m, src, LEN_STR(q, c));
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
@@ -915,7 +915,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			return dst - save_dst;
 		}
 
-		if (is_var(c) && !is_anon(c) && q->variable_names) {
+		if (is_variable(c) && !is_anon(c) && q->variable_names) {
 			cell *l = q->variable_names;
 			pl_idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);
@@ -933,7 +933,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 					var_ctx = q->latest_ctx;
 				}
 
-				if (is_var(var) && (var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
+				if (is_variable(var) && (var->var_nbr == c->var_nbr) && (var_ctx == c_ctx)) {
 					dst += snprintf(dst, dstlen, "%s", GET_STR(q, name));
 					return dst - save_dst;
 				}
@@ -946,7 +946,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		dst += snprintf(dst, dstlen, "%s", !braces&&quote?dq?"\"":"'":"");
 
-		if (is_var(c)) {
+		if (is_variable(c)) {
 			dst += print_variable(q, dst, dstlen, c, c_ctx, running);
 			return dst - save_dst;
 		}
@@ -1164,7 +1164,7 @@ char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;
@@ -1187,7 +1187,7 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;
@@ -1231,7 +1231,7 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;
@@ -1276,7 +1276,7 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;
@@ -1300,7 +1300,7 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;
@@ -1340,7 +1340,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
 
-		if (t && !is_var(t) && !skip)
+		if (t && !is_variable(t) && !skip)
 			running = 0;
 	} else if (running && is_cyclic_term(q, c, c_ctx)) {
 		running = 0;

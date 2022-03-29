@@ -571,7 +571,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 	if (!strcmp(expected, "smallint"))
 		expected = "integer";
 
-	if (!is_var(c)) {
+	if (!is_variable(c)) {
 		char *tmpbuf = DUP_SLICE(q, goal);
 		snprintf(functor, sizeof(functor), "%s", tmpbuf);
 		free(tmpbuf);
@@ -587,7 +587,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 
 	cell *tmp;
 
-	if (is_var(c)) {
+	if (is_variable(c)) {
 		err_type = "instantiation_error";
 		//printf("error(%s,%s).\n", err_type, expected);
 		tmp = alloc_on_heap(q, 3);
@@ -629,7 +629,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
-	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_SLICE2(q, c, "/") && is_var(c+1)) {
+	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_SLICE2(q, c, "/") && is_variable(c+1)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);

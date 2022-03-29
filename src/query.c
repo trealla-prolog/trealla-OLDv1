@@ -236,7 +236,7 @@ static bool is_all_vars(cell *c)
 	c++;
 
 	while (arity--) {
-		if (!is_var(c))
+		if (!is_variable(c))
 			return false;
 
 		c += c->nbr_cells;
@@ -250,7 +250,7 @@ static bool is_ground(cell *c)
 	pl_idx_t nbr_cells = c->nbr_cells;
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++, c++) {
-		if (is_var(c))
+		if (is_variable(c))
 			return false;
 	}
 
@@ -358,7 +358,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
 
-		if (is_var(c)) {
+		if (is_variable(c)) {
 			*has_var = true;
 			return 0;
 		}
@@ -397,7 +397,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		cnt++;
 	}
 
-	if (is_var(l)) {
+	if (is_variable(l)) {
 		is_chars_list = 0;
 		*has_var = *is_partial = true;
 	} else if (is_string(l))
@@ -539,6 +539,8 @@ static frame *push_frame(query *q, unsigned nbr_vars)
 	const frame *curr_f = GET_CURR_FRAME();
 	frame *f = GET_FRAME(new_frame);
 	const cell *next_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
+
+	// Avoid long chains of useless returns...
 
 	if (is_end(next_cell) && !next_cell->val_ret && curr_f->prev_cell) {
 		f->prev_frame = curr_f->prev_frame;
@@ -911,8 +913,6 @@ static void proceed(query *q)
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
 	frame *f = GET_CURR_FRAME();
 
-	//printf("*** proceed\n");
-
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
 			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
@@ -926,16 +926,14 @@ static void proceed(query *q)
 	}
 }
 
-// Or, resume previous frame...
+// Resume previous frame...
 
 static bool resume_frame(query *q)
 {
 	if (!q->st.curr_frame)
 		return false;
 
-	//printf("*** resume\n");
-
-	const frame *f = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 #if 0
 	if (q->cp) {
@@ -1042,7 +1040,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_var(&e->c)) {
+	while (is_variable(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		f = GET_FRAME(c_ctx);
@@ -1076,7 +1074,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
-	while (is_var(&e->c)) {
+	while (is_variable(&e->c)) {
 		c = &e->c;
 		c_ctx = e->ctx;
 		f = GET_FRAME(c_ctx);
@@ -1170,7 +1168,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		p1 = orig_p1;
 		cell *c_body = get_logical_body(c);
 
-		if (p1_body && is_var(p1_body) && !c_body) {
+		if (p1_body && is_variable(p1_body) && !c_body) {
 			p1 = deref(q, get_head(p1), p1_ctx);
 			c = get_head(c);
 			needs_true = true;
@@ -1824,7 +1822,7 @@ pl_status start(query *q)
 				break;
 		}
 
-		if (is_var(q->st.curr_cell)) {
+		if (is_variable(q->st.curr_cell)) {
 			if (!fn_call_0(q, q->st.curr_cell))
 				continue;
 		}
@@ -1898,10 +1896,10 @@ pl_status start(query *q)
 		q->resume = false;
 		q->retry = QUERY_OK;
 
-		while (!q->st.curr_cell) {
+		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
 			if (!resume_frame(q)) {
 				while (q->cp) {
-					const choice *ch = GET_CURR_CHOICE();
+					choice *ch = GET_CURR_CHOICE();
 
 					if (!ch->barrier)
 						break;

@@ -144,7 +144,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	const pl_idx_t save_idx = tmp_heap_used(q);
 	cell *save_p1 = p1;
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -154,7 +154,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	copy_cells(tmp, p1, 1);
 
 	if (!is_structure(p1)) {
-		if (!is_var(p1))
+		if (!is_variable(p1))
 			return tmp;
 
 		if (nonlocals_only && (p1_ctx != q->st.curr_frame))
@@ -203,7 +203,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			cell *c = h;
 			pl_idx_t c_ctx = p1_ctx;
 
-			if (is_var(c)) {
+			if (is_variable(c)) {
 				c = deref(q, c, c_ctx);
 				c_ctx = q->latest_ctx;
 			}
@@ -260,7 +260,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			cell *c = p1;
 			pl_idx_t c_ctx = p1_ctx;
 
-			if (is_var(c)) {
+			if (is_variable(c)) {
 				c = deref(q, c, c_ctx);
 				c_ctx = q->latest_ctx;
 			}
@@ -330,7 +330,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab_idx++;
 	}
 
-	if (is_var(save_p1)) {
+	if (is_variable(save_p1)) {
 		const frame *f = GET_FRAME(p1_ctx);
 		const slot *e = GET_SLOT(f, p1->var_nbr);
 		const pl_idx_t slot_nbr = e - q->slots;
@@ -339,7 +339,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab_idx++;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -360,7 +360,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		}
 	}
 
-	if (is_var(save_p1)) {
+	if (is_variable(save_p1)) {
 		cell tmp;
 		tmp = *save_p1;
 		tmp.var_nbr = q->st.m->pl->tab2[0];
@@ -373,7 +373,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 	c = rec;
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
-		if (is_var(c) && is_fresh(c) && c->tmp_attrs) {
+		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
 			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->tmp_attrs;
 			e->c.attrs_ctx = c->tmp_attrs_ctx;
@@ -420,7 +420,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->st.m->pl->tab_idx = 0;
 	q->cycle_error = false;
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		p1 = deref(q, p1, p1_ctx);
 		p1_ctx = q->latest_ctx;
 	}
@@ -542,7 +542,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 		*dst = *src;
 		share_cell(src);
 
-		if (!is_var(src))
+		if (!is_variable(src))
 			continue;
 
 		slot *e = GET_SLOT(f, src->var_nbr);

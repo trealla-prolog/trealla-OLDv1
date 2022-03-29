@@ -64,7 +64,7 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (!strcmp(GET_STR(q,c), "[]"))
 		return true;
 
-	if (is_var(c))
+	if (is_variable(c))
 		*is_partial = true;
 	else
 		*is_partial = false;
@@ -433,7 +433,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			}
 		}
 	} else if (!CMP_SLICE2(q, c, "variables")) {
-		if (is_var(c1)) {
+		if (is_variable(c1)) {
 			if (vars) *vars = c1;
 			if (vars_ctx) *vars_ctx = c1_ctx;
 		} else {
@@ -441,7 +441,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			return false;
 		}
 	} else if (!CMP_SLICE2(q, c, "variable_names")) {
-		if (is_var(c1)) {
+		if (is_variable(c1)) {
 			if (varnames) *varnames = c1;
 			if (varnames_ctx) *varnames_ctx = c1_ctx;
 		} else {
@@ -449,7 +449,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			return false;
 		}
 	} else if (!CMP_SLICE2(q, c, "singletons")) {
-		if (is_var(c1)) {
+		if (is_variable(c1)) {
 			if (sings) *sings = c1;
 			if (sings_ctx) *sings_ctx = c1_ctx;
 		} else {
@@ -491,7 +491,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		h = deref(q, h, p21_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (is_var(h))
+		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 		if (!parse_read_params(q, str, h, h_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
@@ -502,7 +502,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		p21_ctx = q->latest_ctx;
 	}
 
-	if (is_var(p21))
+	if (is_variable(p21))
 		return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 	if (!is_nil(p21))
@@ -577,7 +577,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 					h = deref(q, h, p22_ctx);
 					pl_idx_t h_ctx = q->latest_ctx;
 
-					if (is_var(h))
+					if (is_variable(h))
 						return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 					if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
@@ -664,7 +664,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		h = deref(q, h, p22_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
 
-		if (is_var(h))
+		if (is_variable(h))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
 
 		if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
@@ -927,13 +927,13 @@ static USE_RESULT pl_status fn_iso_atomic_1(query *q)
 static USE_RESULT pl_status fn_iso_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_var(p1);
+	return is_variable(p1);
 }
 
 static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !is_var(p1);
+	return !is_variable(p1);
 }
 
 bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth)
@@ -943,7 +943,7 @@ bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth)
 		return false;
 	}
 
-	if (is_var(c))
+	if (is_variable(c))
 		return true;
 
 	if (!is_structure(c))
@@ -984,10 +984,10 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	GET_FIRST_ARG(p1,character_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		const char *src = GET_STR(q, p1);
 		size_t len = len_char_utf8(src);
 
@@ -1003,7 +1003,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "representation_error", "character_code");
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char tmpbuf[256];
 		int n = put_char_utf8(tmpbuf, get_int(p2));
 		cell tmp;
@@ -1026,7 +1026,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -1036,25 +1036,25 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	if (!is_iso_atom(p1) && !is_var(p1))
+	if (!is_iso_atom(p1) && !is_variable(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	if (is_atom(p1) && !LEN_STR(q, p1) && is_nil(p2))
 		return pl_success;
 
-	if (is_var(p1) && is_nil(p2)) {
+	if (is_variable(p1) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_var(p2) && !LEN_STR(q, p1)) {
+	if (is_variable(p2) && !LEN_STR(q, p1)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_var(p2) && (is_literal(p1) || (LEN_STR(q, p1) < MAX_SMALL_STRING))) {
+	if (is_variable(p2) && (is_literal(p1) || (LEN_STR(q, p1) < MAX_SMALL_STRING))) {
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(q, p1), LEN_STR(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -1062,7 +1062,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return pl_success;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp;
 		may_error(make_stringn(&tmp, GET_STR(q, p1), LEN_STR(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -1082,7 +1082,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 
 	// Verify the list
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		pl_idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
@@ -1091,10 +1091,10 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (!is_atom(head) && is_var(p1))
+			if (!is_atom(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "type_error", "character");
 
-			if (!is_atom(head) && !is_var(head))
+			if (!is_atom(head) && !is_variable(head))
 				return throw_error(q, head, q->latest_ctx, "type_error", "character");
 
 			if (is_atom(head)) {
@@ -1110,14 +1110,14 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2) && !is_var(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (is_string(p2) && is_var(p1)) {
+	if (is_string(p2) && is_variable(p1)) {
 		cell tmp = *p2;
 		tmp.flags &= ~FLAG_CSTR_STRING;
 		tmp.arity = 0;
@@ -1125,7 +1125,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return pl_success;
 	}
 
-	if (!is_var(p2) && is_var(p1)) {
+	if (!is_variable(p2) && is_variable(p1)) {
 		ASTRING(pr);
 		LIST_HANDLER(p2);
 
@@ -1180,7 +1180,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
 	cell *orig_p2 = p2;
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -1198,7 +1198,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	pl_int_t cnt = 0;
 	bool any_vars = false;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		pl_idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
@@ -1207,13 +1207,13 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (is_var(head))
+			if (is_variable(head))
 				any_vars = true;
 
-			if (!is_atom(head) && is_var(p1))
+			if (!is_atom(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "type_error", "character");
 
-			if (!is_atom(head) && !is_var(head))
+			if (!is_atom(head) && !is_variable(head))
 				return throw_error(q, head, q->latest_ctx, "type_error", "character");
 
 			if (is_atom(head)) {
@@ -1230,20 +1230,20 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 			cnt++;
 		}
 
-		if (!is_nil(p2) && !is_var(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, orig_p2, p2_ctx, "type_error", "list");
 
-		if (is_var(p2))
+		if (is_variable(p2))
 			any_vars = true;
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (is_var(p1) && any_vars)
+	if (is_variable(p1) && any_vars)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (!is_var(p2) && !any_vars) {
+	if (!is_variable(p2) && !any_vars) {
 		char *tmpbuf = malloc(cnt+1+1);
 		may_ptr_error(tmpbuf);
 		char *dst = tmpbuf;
@@ -1327,7 +1327,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -1337,16 +1337,16 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	if (!is_iso_atom(p1) && !is_var(p1))
+	if (!is_iso_atom(p1) && !is_variable(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-	if (!is_var(p2) && is_nil(p2)) {
+	if (!is_variable(p2) && is_nil(p2)) {
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_var(p2) && !LEN_STR(q, p1)) {
+	if (is_variable(p2) && !LEN_STR(q, p1)) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -1354,7 +1354,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 
 	// Verify the list
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		pl_idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
@@ -1363,10 +1363,10 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (!is_integer(head) && is_var(p1))
+			if (!is_integer(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
-			if (!is_integer(head) && !is_var(head))
+			if (!is_integer(head) && !is_variable(head))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
 			cell *tail = LIST_TAIL(p2);
@@ -1374,14 +1374,14 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2) && !is_var(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (!is_var(p2) && is_var(p1)) {
+	if (!is_variable(p2) && is_variable(p1)) {
 		ASTRING(pr);
 		LIST_HANDLER(p2);
 
@@ -1445,7 +1445,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -1463,7 +1463,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 
 	// Verify the list
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		pl_idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
@@ -1472,10 +1472,10 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (!is_integer(head) && is_var(p1))
+			if (!is_integer(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
-			if (!is_integer(head) && !is_var(head))
+			if (!is_integer(head) && !is_variable(head))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
 			cell *tail = LIST_TAIL(p2);
@@ -1483,14 +1483,14 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 			p2_ctx = q->latest_ctx;
 		}
 
-		if (!is_nil(p2) && !is_var(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "list");
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (!is_var(p2) && is_var(p1)) {
+	if (!is_variable(p2) && is_variable(p1)) {
 		ASTRING(pr);
 		LIST_HANDLER(p2);
 
@@ -1607,7 +1607,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 	cell *orig_p2 = p2;
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -1625,7 +1625,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	int cnt = 0;
 	bool any_vars = false;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		cell *save_p2 = p2;
 		pl_idx_t save_p2_ctx = p2_ctx;
 		LIST_HANDLER(p2);
@@ -1634,16 +1634,16 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			if (is_var(head))
+			if (is_variable(head))
 				any_vars = true;
 
-			if (!cnt && !is_integer(head) && is_var(p1))
+			if (!cnt && !is_integer(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "syntax_error", "integer");
 
-			if (!is_integer(head) && is_var(p1))
+			if (!is_integer(head) && is_variable(p1))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
-			if (!is_integer(head) && !is_var(head))
+			if (!is_integer(head) && !is_variable(head))
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 
 			cell *tail = LIST_TAIL(p2);
@@ -1652,20 +1652,20 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 			cnt++;
 		}
 
-		if (!is_nil(p2) && !is_var(p2))
+		if (!is_nil(p2) && !is_variable(p2))
 			return throw_error(q, orig_p2, p2_ctx, "type_error", "list");
 
-		if (is_var(p2))
+		if (is_variable(p2))
 			any_vars = true;
 
 		p2 = save_p2;
 		p2_ctx = save_p2_ctx;
 	}
 
-	if (is_var(p1) && any_vars)
+	if (is_variable(p1) && any_vars)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (!is_var(p2) && !any_vars) {
+	if (!is_variable(p2) && !any_vars) {
 		char *tmpbuf = malloc((cnt*6)+1+1);
 		may_ptr_error(tmpbuf);
 		char *dst = tmpbuf;
@@ -1775,25 +1775,25 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 	bool fixed = ((is_integer(p2) ? 1: 0) + (is_integer(p3) ? 1 : 0) + (is_integer(p4) ? 1 : 0)) >= 2;
 
-	if ((!is_var(p2) || !is_var(p4)) && !is_var(p5))
+	if ((!is_variable(p2) || !is_variable(p4)) && !is_variable(p5))
 		fixed = true;
 
 	if (!q->retry) {
 		may_error(push_choice(q));
 
-		if (!is_var(p2))
+		if (!is_variable(p2))
 			before = get_int(p2);
 
-		if (!is_var(p3))
+		if (!is_variable(p3))
 			len = get_int(p3);
 
-		if (!is_var(p4))
+		if (!is_variable(p4))
 			after = get_int(p4);
 
-		if (is_var(p2) && is_integer(p3) && is_integer(p4))
+		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;
 
-		if (is_var(p3) && is_integer(p2) && is_integer(p4))
+		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
 			len = len_p1 - before - after;
 	} else {
 		pl_idx_t v1, v2;
@@ -1889,8 +1889,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 static pl_status do_atom_concat_3(query *q)
 {
 	if (!q->retry) {
-		GET_FIRST_ARG(p1,var);
-		GET_NEXT_ARG(p2,var);
+		GET_FIRST_ARG(p1,variable);
+		GET_NEXT_ARG(p2,variable);
 		GET_NEXT_ARG(p3,atom);
 		cell tmp;
 		make_literal(&tmp, g_empty_s);
@@ -1942,10 +1942,10 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 	GET_NEXT_ARG(p2,atom_or_var);
 	GET_NEXT_ARG(p3,atom_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return do_atom_concat_3(q);
 
-	if (is_var(p3)) {
+	if (is_variable(p3)) {
 		if (!is_iso_atom(p1))
 			return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
@@ -1963,7 +1963,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		size_t len2 = LEN_STR(q, p2), len3 = LEN_STR(q, p3);
 		const char *s2 = GET_STR(q, p2), *s3 = GET_STR(q, p3);
 
@@ -1980,7 +1980,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		return pl_success;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		size_t len1 = LEN_STR(q, p1), len3 = LEN_STR(q, p3);
 		const char *s1 = GET_STR(q, p1), *s3 = GET_STR(q, p3);
 
@@ -2125,7 +2125,7 @@ pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_re
 {
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
-	if (is_var(head))
+	if (is_variable(head))
 		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 	if (!is_callable(head))
@@ -2189,10 +2189,10 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (is_var(p1) && is_nil(p2))
+	if (is_variable(p1) && is_nil(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "non_empty_list");
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -2216,7 +2216,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		return unify(q, p2, p2_ctx, l, p1_ctx);
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell tmp2 = *p1;
 		tmp2.nbr_cells = 1;
 		tmp2.arity = 0;
@@ -2235,11 +2235,11 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		return unify(q, p2, p2_ctx, l, p1_ctx);
 	}
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		cell *p22 = p2 + 1;
 		p22 = deref(q, p22, p2_ctx);
 
-		if (is_var(p22))
+		if (is_variable(p22))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false, false);
@@ -2264,7 +2264,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			arity++;
 		}
 
-		if (is_var(p2))
+		if (is_variable(p2))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "list");
 
 		if (!is_nil(p2))
@@ -2407,7 +2407,7 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, p2, p2_ctx, "type_error", "list");
 
-	if (!is_var(p1) && (is_atom(p1) || is_number(p1))) {
+	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -2429,7 +2429,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		frame *f1 = GET_FRAME(p1_ctx);
 		slot *e1 = GET_SLOT(f1, p1->var_nbr);
 		frame *f2 = GET_FRAME(p2_ctx);
@@ -2444,10 +2444,10 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		return pl_success;
 	}
 
-	if (is_atomic(p1) && is_var(p2))
+	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!is_var(p2) && !has_vars(q, p1, p1_ctx, 0))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
@@ -2456,7 +2456,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-	if (is_var(p1_raw) && is_var(p2)) {
+	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
 		tmpv.var_nbr = q->st.m->pl->tab2[0];
@@ -2471,13 +2471,13 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return pl_success;
 
-	if (is_atomic(p1) && is_var(p2))
+	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!is_var(p2) && !has_vars(q, p1, p1_ctx, 0))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
@@ -2486,7 +2486,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-	if (is_var(p1_raw) && is_var(p2)) {
+	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
 		tmpv.var_nbr = q->st.m->pl->tab2[0];
@@ -2661,7 +2661,7 @@ static void do_term_assign_vars(parser *p)
 	for (pl_idx_t i = 0; i < nbr_cells; i++) {
 		cell *c = p->cl->cells+i;
 
-		if (!is_var(c))
+		if (!is_variable(c))
 			continue;
 
 		assert(c->var_nbr < MAX_ARITY);
@@ -2671,7 +2671,7 @@ static void do_term_assign_vars(parser *p)
 	for (pl_idx_t i = 0; i < nbr_cells; i++) {
 		cell *c = p->cl->cells+i;
 
-		if (!is_var(c))
+		if (!is_variable(c))
 			continue;
 
 		unsigned var_nbr = count_non_anons(vars, c->var_nbr);
@@ -2708,7 +2708,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 
 	cell *head = get_head(tmp);
 
-	if (is_var(head))
+	if (is_variable(head))
 		return throw_error(q, head, q->st.curr_frame, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	if (!is_literal(head) && !is_cstring(head))
@@ -2772,7 +2772,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 
 	cell *head = get_head(tmp);
 
-	if (is_var(head))
+	if (is_variable(head))
 		return throw_error(q, head, q->st.curr_frame, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	if (!is_literal(head) && !is_cstring(head))
@@ -2827,7 +2827,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,any);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		if (!is_atomic(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "atomic");
 
@@ -3008,17 +3008,17 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	p1 = deref(q, p1, p_pi_ctx);
 	p1_ctx = q->latest_ctx;
 
-	if (!is_atom(p1) && !is_var(p1))
+	if (!is_atom(p1) && !is_variable(p1))
 		return throw_error(q, p_pi, p_pi_ctx, "type_error", "predicate_indicator");
 
 	p2 = p1 + 1;
 	p2 = deref(q, p2, p_pi_ctx);
 	p2_ctx = q->latest_ctx;
 
-	if ((!is_integer(p2) || is_negative(p2)) && !is_var(p2))
+	if ((!is_integer(p2) || is_negative(p2)) && !is_variable(p2))
 		return throw_error(q, p_pi, p_pi_ctx, "type_error", "predicate_indicator");
 
-	if (is_var(p1) || is_var(p2))
+	if (is_variable(p1) || is_variable(p2))
 		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 
 	cell tmp = (cell){0};
@@ -3438,7 +3438,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 		pl_idx_t c_ctx = q->latest_ctx;
 		cell tmp;
 
-		if (is_var(c) || is_structure(c)) {
+		if (is_variable(c) || is_structure(c)) {
 			make_variable(&tmp, c->val_off, create_vars(q, 1));
 			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 			c = &tmp;
@@ -3540,7 +3540,7 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p2);
 
-		if (!is_var(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -3608,7 +3608,7 @@ static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool asc
 		pl_idx_t c_ctx = q->latest_ctx;
 		cell tmp;
 
-		if (is_var(c) || is_structure(c)) {
+		if (is_variable(c) || is_structure(c)) {
 			make_variable(&tmp, c->val_off, create_vars(q, 1));
 			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 			c = &tmp;
@@ -3671,7 +3671,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p4);
 
-		if (!is_var(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -3720,7 +3720,7 @@ static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
 
 static USE_RESULT pl_status fn_sys_list_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 
 #if 0
@@ -3729,7 +3729,7 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 	cell *c = l;
 
 	for (pl_idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_var(c) && is_anon(c)) {
+		if (is_variable(c) && is_anon(c)) {
 			c->var_nbr = new_varno++;
 			c->flags = FLAG_VAR_FRESH | FLAG_VAR_ANON;
 		}
@@ -3739,7 +3739,7 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 		if (!create_vars(q, new_varno-f->nbr_vars))
 			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
 
-		REGET_FIRST_ARG(p1,var);
+		REGET_FIRST_ARG(p1,variable);
 	}
 #endif
 
@@ -3960,7 +3960,7 @@ static USE_RESULT pl_status fn_iso_op_3(query *q)
 		p3 = deref(q, p3, p3_ctx);
 		p3_ctx = q->latest_ctx;
 
-		if (is_var(p3))
+		if (is_variable(p3))
 			return throw_error(q, p3, p3_ctx, "instantiation_error", "atom");
 
 		if (is_nil(p3))
@@ -4004,13 +4004,13 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 	GET_NEXT_ARG(p2,callable_or_var);
 	GET_NEXT_ARG(p3,atom_or_var);
 
-	if (is_var(p1) && is_var(p2) && is_var(p3))
+	if (is_variable(p1) && is_variable(p2) && is_variable(p3))
 		return throw_error(q, p3, p3_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	for (;;) {
 		clause *r;
 
-		if (!is_var(p3)) {
+		if (!is_variable(p3)) {
 			uuid u;
 			uuid_from_buf(GET_STR(q, p3), &u);
 			db_entry *dbe = find_in_db(q->st.m, &u);
@@ -4049,7 +4049,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			if (is_var(p3)) {
+			if (is_variable(p3)) {
 				bool last_match = !q->st.curr_clause2->next;
 				stash_me(q, r, last_match);
 			}
@@ -4057,7 +4057,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			return pl_success;
 		}
 
-		if (!is_var(p3))
+		if (!is_variable(p3))
 			break;
 
 		undo_me(q);
@@ -4073,7 +4073,7 @@ static pl_status do_asserta_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
-	if (is_var(head))
+	if (is_variable(head))
 		return throw_error(q, head, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	bool found = false;
@@ -4126,7 +4126,7 @@ static pl_status do_asserta_2(query *q)
 	may_ptr_error(dbe);
 	p->cl->cidx = 0;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(q, p2), &u);
 		dbe->u = u;
@@ -4153,7 +4153,7 @@ static USE_RESULT pl_status fn_asserta_2(query *q)
 	if (is_cyclic_term(q, p1, p1_ctx))
 		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	return do_asserta_2(q);
 }
 
@@ -4173,7 +4173,7 @@ static pl_status do_assertz_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
-	if (is_var(head))
+	if (is_variable(head))
 		return throw_error(q, head, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	bool found = false;
@@ -4227,7 +4227,7 @@ static pl_status do_assertz_2(query *q)
 	may_ptr_error(dbe);
 	p->cl->cidx = 0;
 
-	if (!is_var(p2)) {
+	if (!is_variable(p2)) {
 		uuid u;
 		uuid_from_buf(GET_STR(q, p2), &u);
 		dbe->u = u;
@@ -4254,7 +4254,7 @@ static USE_RESULT pl_status fn_assertz_2(query *q)
 	if (is_cyclic_term(q, p1, p1_ctx))
 		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	return do_assertz_2(q);
 }
 
@@ -4463,7 +4463,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!CMP_SLICE2(q, p1, "cputime") && is_var(p2)) {
+	if (!CMP_SLICE2(q, p1, "cputime") && is_variable(p2)) {
 		uint64_t now = cpu_time_in_usec();
 		double elapsed = now - q->time_cpu_started;
 		cell tmp;
@@ -4472,7 +4472,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 		return pl_success;
 	}
 
-	if (!CMP_SLICE2(q, p1, "gctime") && is_var(p2)) {
+	if (!CMP_SLICE2(q, p1, "gctime") && is_variable(p2)) {
 		cell tmp;
 		make_real(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -4562,7 +4562,7 @@ static USE_RESULT pl_status fn_now_0(query *q)
 
 static USE_RESULT pl_status fn_now_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	pl_int_t secs = get_time_in_usec() / 1000 / 1000;
 	cell tmp;
 	make_int(&tmp, secs);
@@ -4572,7 +4572,7 @@ static USE_RESULT pl_status fn_now_1(query *q)
 
 static USE_RESULT pl_status fn_get_time_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	double v = ((double)get_time_in_usec()-q->get_started) / 1000 / 1000;
 	cell tmp;
 	make_real(&tmp, (double)v);
@@ -4582,7 +4582,7 @@ static USE_RESULT pl_status fn_get_time_1(query *q)
 
 static USE_RESULT pl_status fn_cpu_time_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	double v = ((double)cpu_time_in_usec()-q->time_cpu_started) / 1000 / 1000;
 	cell tmp;
 	make_real(&tmp, (double)v);
@@ -4607,7 +4607,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		if (get_int(p1) > get_int(p2))
 			return pl_failure;
 
-		if (!is_var(p3)) {
+		if (!is_variable(p3)) {
 			if (get_int(p3) > get_int(p2))
 				return pl_failure;
 
@@ -4801,7 +4801,7 @@ static USE_RESULT pl_status fn_is_partial_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
-	if (is_var(p1))
+	if (is_variable(p1))
 		return true;
 
 	bool is_partial;
@@ -4816,7 +4816,7 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
-	if (is_var(p1))
+	if (is_variable(p1))
 		return true;
 
 	bool is_partial;
@@ -4832,7 +4832,7 @@ static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		char *buf = print_term_to_strbuf(q, p2, p2_ctx, 1);
 		pl_status ok = throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
 		free(buf);
@@ -4846,7 +4846,7 @@ static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
-	if (is_var(p1) || is_nil(p1))
+	if (is_variable(p1) || is_nil(p1))
 		return pl_success;
 
 	// This checks for a valid list (it allows for partial but acyclic lists)...
@@ -4892,7 +4892,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(GET_STR(q,c), "[]")) && !is_var(c)) {
+	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(GET_STR(q,c), "[]")) && !is_variable(c)) {
 		make_int(&tmp, -1);
 		unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
@@ -5101,14 +5101,14 @@ static USE_RESULT pl_status fn_send_1(query *q)
 
 static USE_RESULT pl_status fn_recv_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell *c = pop_queue(q);
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
 
 static USE_RESULT pl_status fn_pid_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, getpid());
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -5117,7 +5117,7 @@ static USE_RESULT pl_status fn_pid_1(query *q)
 
 static USE_RESULT pl_status fn_wall_time_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, time(NULL));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -5126,13 +5126,13 @@ static USE_RESULT pl_status fn_wall_time_1(query *q)
 
 static USE_RESULT pl_status fn_date_time_7(query *q)
 {
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,var);
-	GET_NEXT_ARG(p3,var);
-	GET_NEXT_ARG(p4,var);
-	GET_NEXT_ARG(p5,var);
-	GET_NEXT_ARG(p6,var);
-	GET_NEXT_ARG(p7,var);
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p5,variable);
+	GET_NEXT_ARG(p6,variable);
+	GET_NEXT_ARG(p7,variable);
 	struct tm tm;
 	time_t now = time(NULL);
 	localtime_r(&now, &tm);
@@ -5156,12 +5156,12 @@ static USE_RESULT pl_status fn_date_time_7(query *q)
 
 static USE_RESULT pl_status fn_date_time_6(query *q)
 {
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,var);
-	GET_NEXT_ARG(p3,var);
-	GET_NEXT_ARG(p4,var);
-	GET_NEXT_ARG(p5,var);
-	GET_NEXT_ARG(p6,var);
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
+	GET_NEXT_ARG(p3,variable);
+	GET_NEXT_ARG(p4,variable);
+	GET_NEXT_ARG(p5,variable);
+	GET_NEXT_ARG(p6,variable);
 	struct tm tm;
 	time_t now = time(NULL);
 	localtime_r(&now, &tm);
@@ -5197,7 +5197,7 @@ static USE_RESULT pl_status fn_shell_1(query *q)
 static USE_RESULT pl_status fn_shell_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	int status = system(GET_STR(q, p1));
 	cell tmp;
 	make_int(&tmp, status);
@@ -5258,7 +5258,7 @@ static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
 			pl_idx_t arg_ctx = q->latest_ctx;
 
 			if (!CMP_SLICE2(q, h, "algorithm")) {
-				if (is_var(arg)) {
+				if (is_variable(arg)) {
 					cell tmp;
 					make_literal(&tmp, index_from_pool(q->pl, "sha256"));
 					set_var(q, arg, arg_ctx, &tmp, q->st.curr_frame);
@@ -5330,7 +5330,7 @@ static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
 static int do_b64encode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(q, p1);
 	size_t len = LEN_STR(q, p1);
 	char *dstbuf = malloc((len*3)+1);	// BASE64 can increase length x3
@@ -5346,7 +5346,7 @@ static int do_b64encode_2(query *q)
 
 static int do_b64decode_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
 	const char *str = GET_STR(q, p2);
 	size_t len = LEN_STR(q, p2);
@@ -5366,9 +5366,9 @@ static USE_RESULT pl_status fn_base64_3(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
 
-	if ((is_atom(p1) || is_list(p1)) && is_var(p2))
+	if ((is_atom(p1) || is_list(p1)) && is_variable(p2))
 		return do_b64encode_2(q);
-	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
+	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_b64decode_2(q);
 
 	return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
@@ -5416,7 +5416,7 @@ char *url_decode(const char *src, char *dstbuf)
 static pl_status do_urlencode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,var);
+	GET_NEXT_ARG(p2,variable);
 	const char *str = GET_STR(q, p1);
 	size_t len = LEN_STR(q, p1);
 	char *dstbuf = malloc((len*3)+1);	// URL's can increase length x3
@@ -5437,7 +5437,7 @@ static pl_status do_urlencode_2(query *q)
 
 static pl_status do_urldecode_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
 	const char *str = GET_STR(q, p2);
 	size_t len = LEN_STR(q, p2);
@@ -5462,9 +5462,9 @@ static USE_RESULT pl_status fn_urlenc_3(query *q)
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
 
-	if ((is_atom(p1) || is_string(p1)) && is_var(p2))
+	if ((is_atom(p1) || is_string(p1)) && is_variable(p2))
 		return do_urlencode_2(q);
-	else if (is_var(p1) && (is_atom(p2) || is_string(p2)))
+	else if (is_variable(p1) && (is_atom(p2) || is_string(p2)))
 		return do_urldecode_2(q);
 
 	return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
@@ -5592,7 +5592,7 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_var(p1))
+	if (is_variable(p1))
 		return pl_success;
 
 	cell tmp;
@@ -5617,10 +5617,10 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
 
@@ -5674,10 +5674,10 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
 
-	if (is_var(p1) && is_var(p2))
+	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		char tmpbuf[256];
 		char *dst = tmpbuf;
 
@@ -5779,7 +5779,7 @@ static USE_RESULT pl_status fn_unsetenv_1(query *q)
 
 static USE_RESULT pl_status fn_uuid_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	uuid u;
 	uuid_gen(q->pl, &u);
 	char tmpbuf[128];
@@ -5830,7 +5830,7 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 		cell *h = LIST_HEAD(p1);
 		h = deref(q, h, p1_ctx);
 
-		if (is_var(h))
+		if (is_variable(h))
 			return throw_error(q, h, q->latest_ctx, "instantiation_error", "atomic");
 
 		if (!is_atomic(h))
@@ -5851,7 +5851,7 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 		}
 	}
 
-	if (is_var(p1))
+	if (is_variable(p1))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atomic_list_concat/3");
 
 	cell tmp;
@@ -5867,7 +5867,7 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,atom);
-	GET_NEXT_ARG(p4,var);
+	GET_NEXT_ARG(p4,variable);
 
 	size_t srclen = LEN_STR(q, p1);
 	size_t dstlen = srclen * LEN_STR(q, p3);
@@ -5945,7 +5945,7 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 	predicate *pr = find_predicate(q->st.m, p1);
 
-	if (pr && !pr->is_dynamic && !is_var(p2)) {
+	if (pr && !pr->is_dynamic && !is_variable(p2)) {
 		make_literal(&tmp, index_from_pool(q->pl, "built_in"));
 		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
 			return pl_success;
@@ -6012,7 +6012,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 {
 	unsigned cnt = 0;
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		cell *tmp = alloc_on_heap(q, 2);
 		make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 		make_int(tmp+1, *end); *end = *end + 1;
@@ -6033,7 +6033,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 
 	for (; arity--; p1 += p1->nbr_cells) {
 
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			bool found = false;
 
 			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
@@ -6054,7 +6054,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 
-		if (is_var(c)) {
+		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
@@ -6104,7 +6104,7 @@ unsigned count_bits(const uint8_t *mask, unsigned bit)
 
 static USE_RESULT pl_status fn_var_number_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var);
 	unsigned pos = count_bits(q->nv_mask, p1->var_nbr);
 	cell tmp;
@@ -6336,8 +6336,8 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 
 static USE_RESULT pl_status fn_sys_incr_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,integer);
+	GET_FIRST_ARG(p1, variable);
+	GET_NEXT_ARG(p2, integer);
 	int64_t n = get_smallint(p2);
 	set_smallint(p2, n+1);
 	set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
@@ -6355,7 +6355,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		cell *tmp = clone_to_heap(q, true, p1, 4);
 		pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_2, 2, 2);
@@ -6438,7 +6438,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	parser *p = q->p;
 	frame *f = GET_FIRST_FRAME();
 	bool first = true;
@@ -6477,7 +6477,7 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
@@ -6487,7 +6487,7 @@ static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 
 static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
 
 	frame *f = GET_FRAME(p1_ctx);
@@ -6499,8 +6499,8 @@ static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
 
 static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
 {
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,var);
+	GET_FIRST_ARG(p1,variable);
+	GET_NEXT_ARG(p2,variable);
 
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
@@ -6650,7 +6650,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
 
-		if (is_var(h))
+		if (is_variable(h))
 			return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
 		if (is_structure(h) && (h->arity == 1)) {
@@ -6659,7 +6659,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
-				if (is_var(v))
+				if (is_variable(v))
 					return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
 				if (is_atom(v) && !CMP_SLICE2(q, v, "true"))
@@ -6722,7 +6722,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
 
-		if (is_var(h))
+		if (is_variable(h))
 			return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
 		if (is_structure(h) && (h->arity == 1)) {
@@ -6731,7 +6731,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
-				if (is_var(v))
+				if (is_variable(v))
 					return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
 				if (is_atom(v) && !CMP_SLICE2(q, v, "true"))
@@ -6962,7 +6962,7 @@ static USE_RESULT pl_status fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 
-	if (is_var(p1)) {
+	if (is_variable(p1)) {
 		cell tmp;
 		make_literal(&tmp, index_from_pool(q->pl, (q->save_m?q->save_m:q->st.m)->name));
 		q->save_m = NULL;
@@ -7061,7 +7061,7 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 
 static USE_RESULT pl_status fn_sys_get_level_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->cp);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -7097,45 +7097,6 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 		     (status == ERR_CYCLE_CMP || status == 0)?
 		     g_eq_s:status<0?g_lt_s:g_gt_s);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-}
-
-static USE_RESULT pl_status fn_sys_make_list_2(query *q)
-{
-	GET_FIRST_ARG(p1,var);
-	GET_NEXT_ARG(p2,integer);
-	int n = get_smallint(p2);
-	frame *f = GET_CURR_FRAME();
-	unsigned var_nbr = f->nbr_vars;
-	bool first = true;
-
-	while (n-- > 0) {
-		cell tmp;
-		make_variable(&tmp, g_anon_s, var_nbr++);
-		tmp.flags |= FLAG_VAR_ANON;
-
-		if (first)
-			allocate_list(q, &tmp);
-		else
-			append_list(q, &tmp);
-
-		first = false;
-	}
-
-	if (first) {
-		cell tmp;
-		make_literal(&tmp, g_nil_s);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
-	}
-
-	cell *l = end_list(q);
-	unsigned cnt = var_nbr - f->nbr_vars;
-
-	if (!create_vars(q, cnt))
-		return throw_error(q, p1, p1_ctx, "resource_error", "stack");
-
-	set_var(q, p1, p1_ctx, l, q->st.curr_frame);
-	return pl_success;
 }
 
 static const struct builtins g_iso_bifs[] =
@@ -7343,8 +7304,8 @@ static const struct builtins g_other_bifs[] =
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
 	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
 	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
-	{"$make_list", 2, fn_sys_make_list_2, NULL, false},
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
+
 
 #if USE_OPENSSL
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},

@@ -20,8 +20,8 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		return ERR_CYCLE_CMP;
 	}
 
-	if (is_var(p1)) {
-		if (is_var(p2)) {
+	if (is_variable(p1)) {
+		if (is_variable(p2)) {
 			if (p1_ctx < p2_ctx)
 				return -1;
 
@@ -34,7 +34,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		return -1;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		return 1;
 	}
 
@@ -136,7 +136,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		bool cycle1 = false, cycle2 = false;
 
 		if (q->info1) {
-			if (is_var(p1)) {
+			if (is_variable(p1)) {
 				if (is_in_ref_list(p1, p1_ctx, q->info1->r1)) {
 					c1 = p1;
 					c1_ctx = p1_ctx;
@@ -151,7 +151,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		}
 
 		if (q->info2) {
-			if (is_var(p2)) {
+			if (is_variable(p2)) {
 				if (is_in_ref_list(p2, p2_ctx, q->info2->r2)) {
 					c2 = p2;
 					c2_ctx = p2_ctx;
@@ -172,12 +172,12 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		if (val) return val;
 
 		if (q->info1) {
-			if (is_var(p1))
+			if (is_variable(p1))
 				q->info1->r1 = r1.next;		// restore
 		}
 
 		if (q->info2) {
-			if (is_var(p2))
+			if (is_variable(p2))
 				q->info2->r2 = r2.next;		// restore
 		}
 
@@ -215,7 +215,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist
 	p1++;
 
 	while (nbr_cells) {
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			if (is_in_ref_list(p1, p1_ctx, list))
 				return q->cycle_error = true;
 
@@ -389,7 +389,7 @@ static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 
 pl_status fn_sys_undo_trail_1(query *q)
 {
-	GET_FIRST_ARG(p1,var);
+	GET_FIRST_ARG(p1,variable);
 
 	if (((q->undo_hi_tp - q->undo_lo_tp) == 0) ||
 		(q->undo_lo_tp > q->undo_hi_tp)) {
@@ -496,7 +496,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *
 	pl_idx_t nbr_cells = p1->nbr_cells;
 
 	while (nbr_cells) {
-		if (is_var(p1)) {
+		if (is_variable(p1)) {
 			if (is_in_ref_list(p1, p1_ctx, list))
 				return;
 
@@ -514,7 +514,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 
-		if (is_var(c)) {
+		if (is_variable(c)) {
 			bool found = false;
 
 			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
@@ -695,10 +695,10 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 	if (!p1 && !p2)
 		return true;
 
-	if (!p1 && is_var(p2))
+	if (!p1 && is_variable(p2))
 		return true;
 
-	if (!p2 && is_var(p1))
+	if (!p2 && is_variable(p1))
 		return true;
 
 	if (!p1 || !p2)
@@ -728,7 +728,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 		if (q->info1) {
 			int both = 0;
 
-			if (is_var(p1)) {
+			if (is_variable(p1)) {
 				if (is_in_ref_list(p1, p1_ctx, q->info1->r1)) {
 					//c1 = p1;
 					//c1_ctx = p1_ctx;
@@ -741,7 +741,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 				}
 			}
 
-			if (is_var(p2)) {
+			if (is_variable(p2)) {
 				if (is_in_ref_list(p2, p2_ctx, q->info2->r2)) {
 					//c2 = p2;
 					//c2_ctx = p2_ctx;
@@ -763,12 +763,12 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 			return false;
 
 		if (q->info1) {
-			if (is_var(p1))
+			if (is_variable(p1))
 				q->info1->r1 = r1.next;		// restore
 		}
 
 		if (q->info2) {
-			if (is_var(p2))
+			if (is_variable(p2))
 				q->info2->r2 = r2.next;		// restore
 		}
 
@@ -787,7 +787,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
 
-	if (is_var(p1) && is_var(p2)) {
+	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
 		else if (p2_ctx < p1_ctx)
@@ -798,15 +798,15 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return true;
 	}
 
-	if (is_var(p1)) {
-		if (!is_var(p2))
+	if (is_variable(p1)) {
+		if (!is_variable(p2))
 			q->has_vars = true;
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 		return true;
 	}
 
-	if (is_var(p2)) {
+	if (is_variable(p2)) {
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 		return true;
 	}
