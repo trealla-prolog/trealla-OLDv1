@@ -922,7 +922,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
-	frame *f = GET_CURR_FRAME();
+	const frame *f = GET_CURR_FRAME();
 
 #if 0
 	if (q->cp) {
@@ -1885,10 +1885,10 @@ pl_status start(query *q)
 		q->resume = false;
 		q->retry = QUERY_OK;
 
-		while (!q->st.curr_cell || is_end(q->st.curr_cell)) {
+		while (!q->st.curr_cell) {
 			if (!resume_frame(q)) {
 				while (q->cp) {
-					choice *ch = GET_CURR_CHOICE();
+					const choice *ch = GET_CURR_CHOICE();
 
 					if (!ch->barrier)
 						break;
