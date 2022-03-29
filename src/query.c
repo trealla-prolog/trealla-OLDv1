@@ -933,7 +933,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
-	frame *f = GET_CURR_FRAME();
+	const frame *f = GET_CURR_FRAME();
 
 #if 0
 	if (q->cp) {
