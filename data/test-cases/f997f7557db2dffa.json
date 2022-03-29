@@ -1,0 +1,55 @@
+{
+  "uid" : "f997f7557db2dffa",
+  "name" : "hailstone_4",
+  "fullName" : "hailstone_4::tests",
+  "historyId" : "hailstone_4::tests",
+  "time" : {
+    "duration" : 1130
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/hailstone/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/hailstone/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/hailstone/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/hailstone/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "64-65"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9547c3404b4ced010121d50602bd38e081edfd49/examples/hailstone/tests.lgt#L64"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f997f7557db2dffa.json",
+  "parameterValues" : [ "examples/hailstone/tests.lgt", "64-65", "https://github.com/LogtalkDotOrg/logtalk3/tree/9547c3404b4ced010121d50602bd38e081edfd49/examples/hailstone/tests.lgt#L64" ]
+}
