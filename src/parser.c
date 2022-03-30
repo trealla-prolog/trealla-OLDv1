@@ -2692,7 +2692,10 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			continue;
 		}
 
-		if (!p->quote_char && args && !strcmp(p->token, ",")) {
+		if (!p->quote_char &&
+			((args && !strcmp(p->token, ",")) ||
+			(consing && !p->was_consing && !p->start_term && (!strcmp(p->token, ",") || !strcmp(p->token, "|")))
+			)) {
 			analyze(p, arg_idx, last_op);
 			arg_idx = p->cl->cidx;
 
@@ -2705,15 +2708,22 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			arity++;
+			if (args) {
+				arity++;
 
-			if (arity > MAX_ARITY) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: max arity reached, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				if (arity > MAX_ARITY) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: max arity reached, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
-				p->error_desc = "max_arity";
-				p->error = true;
-				break;
+					p->error_desc = "max_arity";
+					p->error = true;
+					break;
+				}
+			}
+
+			if (consing && !strcmp(p->token, "|")) {
+				p->was_consing = last_bar = true;
+				//consing = false;
 			}
 
 			p->last_close = false;
@@ -2737,13 +2747,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->error_desc = "list";
 			p->error = true;
 			break;
-		}
-
-		if (!p->is_quoted && consing && !strcmp(p->token, "|")) {
-			last_op = last_bar = p->was_consing = true;
-			p->last_close = false;
-			//consing = false;
-			continue;
 		}
 
 		if (!p->is_quoted && p->was_consing && last_bar && !strcmp(p->token, "]")) {

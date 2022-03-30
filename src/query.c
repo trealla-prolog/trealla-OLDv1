@@ -1453,7 +1453,7 @@ static void dump_vars(query *q, bool partial)
 	q->pl->tab_idx = 0;
 	bool any = false;
 
-	// Build the ignore list for vaiable name clashes....
+	// Build the ignore list for variable name clashes....
 
 	for (unsigned i = 0; i < MAX_ARITY; i++)
 		q->ignore[i] = false;
