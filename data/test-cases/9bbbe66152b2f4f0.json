@@ -1,0 +1,55 @@
+{
+  "uid" : "9bbbe66152b2f4f0",
+  "name" : "lgt_compound_03",
+  "fullName" : "lgt_compound_03::tests",
+  "historyId" : "lgt_compound_03::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/syntax/compounds/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/syntax/compounds/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/syntax/compounds/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/syntax/compounds/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "42-44"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/63f7df98526b1eaae428969172d7737bf55958d2/tests/prolog/syntax/compounds/tests.lgt#L42"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "9bbbe66152b2f4f0.json",
+  "parameterValues" : [ "tests/prolog/syntax/compounds/tests.lgt", "42-44", "https://github.com/LogtalkDotOrg/logtalk3/tree/63f7df98526b1eaae428969172d7737bf55958d2/tests/prolog/syntax/compounds/tests.lgt#L42" ]
+}
