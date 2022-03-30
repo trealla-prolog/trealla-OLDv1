@@ -100,12 +100,15 @@ static void clr_accum(cell *p)
 		} \
 	} else if (is_smallint(&p1) && is_real(&p2)) { \
 		q->accum.val_real = (double)p1.val_int op p2.val_real; \
+		if (isinf(q->accum.val_real)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow"); \
 		q->accum.tag = TAG_REAL; \
 	} else if (is_real(&p1) && is_real(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_real; \
+		if (isinf(q->accum.val_real)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow"); \
 		q->accum.tag = TAG_REAL; \
 	} else if (is_real(&p1) && is_smallint(&p2)) { \
 		q->accum.val_real = p1.val_real op p2.val_int; \
+		if (isinf(q->accum.val_real)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow"); \
 		q->accum.tag = TAG_REAL; \
 	} else if (is_variable(&p1) || is_variable(&p2)) { \
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated"); \
