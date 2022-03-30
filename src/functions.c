@@ -1187,6 +1187,7 @@ static USE_RESULT pl_status fn_atanh_1(query *q)
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1)) {
 		q->accum.val_real = atanh(p1.val_real);
+		if (isinf(q->accum.val_real)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "undefined");
 		q->accum.tag = TAG_REAL;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
@@ -1274,6 +1275,10 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 			return throw_error(q, &p2, q->st.curr_frame, "evaluation_error", "undefined");
 
 		q->accum.val_real = pow(p1.val_real, p2.val_real);
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_smallint(&p2)) {
 		if ((p1.val_real == 0.0) && (p2.val_int < 0))
@@ -1365,6 +1370,10 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		q->accum.val_real = pow(p1.val_real, p2.val_real);
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_smallint(&p2)) {
 		q->accum.val_real = pow(p1.val_real, p2.val_int);
@@ -1421,6 +1430,10 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = BIGINT_TO_DOUBLE(&p1.val_bigint->ival) / p2.val_real;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p2) && is_smallint(&p1)) {
 		q->accum.val_real = p1.val_int;
@@ -1433,6 +1446,10 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real /= d;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_bigint(&p2) && is_real(&p1)) {
 		double d = BIGINT_TO_DOUBLE(&p2.val_bigint->ival);
@@ -1444,30 +1461,50 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = p1.val_real / d;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = (double)p1.val_int / p2.val_int;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_smallint(&p1) && is_real(&p2)) {
 		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = (double)p1.val_int / p2.val_real;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_real(&p2)) {
 		if (p2.val_real == 0.0)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = p1.val_real / p2.val_real;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_real(&p1) && is_smallint(&p2)) {
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
 		q->accum.val_real = p1.val_real / p2.val_int;
+
+		if (isinf(q->accum.val_real))
+			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
+
 		q->accum.tag = TAG_REAL;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
