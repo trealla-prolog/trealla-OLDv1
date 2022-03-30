@@ -37,7 +37,6 @@ static void clr_accum(cell *p)
 		mp_int_clear(&p->val_bigint->ival);
 		free(p->val_bigint);
 	}
-
 	p->tag = TAG_INT;
 	p->val_int = 0;
 	p->flags = 0;
@@ -50,7 +49,6 @@ static void clr_accum(cell *p)
 #define ON_OVERFLOW(op,v1,v2)									\
 	__int128_t tmp = (__int128_t)v1 op v2;						\
 	if ((tmp > INT64_MAX) || (tmp < INT64_MIN))
-
 #else
 
 #define ON_OVERFLOW(op,v1,v2)									\
@@ -58,7 +56,6 @@ static void clr_accum(cell *p)
 		(v1) <= INT32_MIN ||									\
 		(v2) >= INT32_MAX ||									\
 		(v2) <= INT32_MIN)
-
 #endif
 
 #define DO_OP2(op,op2,p1,p2) \
@@ -189,10 +186,7 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 	q->st.curr_cell = c;
 	q->st.curr_frame = c_ctx;
 	q->eval = true;
-
-	if (c->fn)
-		c->fn(q);
-
+	c->fn(q);
 	q->eval = save_calc;
 
 	if (!q->did_throw) {
@@ -214,6 +208,8 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 
 	if (!c->match)
 		return throw_error(q, c, c_ctx, "type_error", "evaluable");
+
+	// Currently user-defined functions are disabled...
 
 	return throw_error(q, c, c_ctx, "type_error", "evaluable");
 
