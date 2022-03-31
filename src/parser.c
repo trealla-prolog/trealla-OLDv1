@@ -737,11 +737,34 @@ static void directives(parser *p, cell *d)
 			if (!strcmp(GET_STR(p, h), "//"))
 				arity += 2;
 
+			cell tmp = *c_name;
+			tmp.arity = arity;
+
 			//printf("*** %s => %s / %u\n", dirname, GET_STR(p, c_name), arity);
 
 			if (!strcmp(dirname, "dynamic")) {
+				predicate * pr = find_predicate(p->m, &tmp);
+
+				if (pr && !pr->is_dynamic && pr->cnt) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", p->m->name, GET_STR(p->m, c_name), arity);
+
+					p->error = true;
+					return;
+				}
+
 				set_dynamic_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "persist")) {
+				predicate * pr = find_predicate(p->m, &tmp);
+
+				if (pr && !pr->is_dynamic && pr->cnt) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", p->m->name, GET_STR(p->m, c_name), arity);
+
+					p->error = true;
+					return;
+				}
+
 				set_persist_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, GET_STR(p, c_name), arity);
@@ -795,6 +818,8 @@ static void directives(parser *p, cell *d)
 			cell *c_arity = c_id + 2;
 			if (!is_integer(c_arity)) return;
 			unsigned arity = get_int(c_arity);
+			cell tmp = *c_name;
+			tmp.arity = arity;
 
 			//printf("*** *** *** %s : %s / %u\n", m->name, GET_STR(p, c_name), arity);
 
@@ -805,10 +830,29 @@ static void directives(parser *p, cell *d)
 				set_multifile_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(m, GET_STR(p, c_name), arity);
-			else if (!strcmp(dirname, "dynamic"))
+			else if (!strcmp(dirname, "dynamic")) {
+				predicate * pr = find_predicate(p->m, &tmp);
+
+				if (pr && !pr->is_dynamic && pr->cnt) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", m->name, GET_STR(p->m, c_name), arity);
+
+					p->error = true;
+					return;
+				}
+
 				set_dynamic_in_db(m, GET_STR(p, c_name), arity);
-			else if (!strcmp(dirname, "persist"))
+			} else if (!strcmp(dirname, "persist")) {
+				if (find_predicate(p->m, &tmp)) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", p->m->name, GET_STR(p->m, c_name), arity);
+
+					p->error = true;
+					return;
+				}
+
 				set_persist_in_db(m, GET_STR(p, c_name), arity);
+			}
 
 			p1 += p1->nbr_cells;
 		} else if (!strcmp(dirname, "meta_predicate")) {
