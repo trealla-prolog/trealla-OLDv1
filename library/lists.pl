@@ -51,17 +51,17 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth(1, [H|_], H) :- !.
+nth(1, [H|_], H).
 nth(N, [_|T], H) :-
 	can_be(integer, N),
 	nth(M, T, H), N is M + 1.
 
-nth1(1, [H|_], H) :- !.
+nth1(1, [H|_], H).
 nth1(N, [_|T], H) :-
 	can_be(integer, N),
 	nth1(M, T, H), N is M + 1.
 
-nth0(0, [H|_], H) :- !.
+nth0(0, [H|_], H).
 nth0(N, [_|T], H) :-
 	can_be(integer, N),
 	nth0(M, T, H), N is M + 1.
