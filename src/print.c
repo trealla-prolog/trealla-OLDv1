@@ -633,6 +633,7 @@ static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 			while (q->ignore[i+offset])
 				offset++;
 
+			q->ignore[i+offset] = true;
 			return varformat(i+offset);
 		}
 	}
