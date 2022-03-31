@@ -47,21 +47,6 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, pl_idx_t 
 	return pr->is_multifile ? true : false;
 }
 
-bool is_dynamic_in_db(prolog *pl, const char *mod, const char *name, pl_idx_t arity)
-{
-	module *m = find_module(pl, mod);
-	if (!m) return false;
-
-	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
-	tmp.val_off = index_from_pool(m->pl, name);
-	if (tmp.val_off == ERR_IDX) return false;
-	tmp.arity = arity;
-	predicate *pr = find_predicate(m, &tmp);
-	if (!pr) return false;
-	return pr->is_dynamic ? true : false;
-}
-
 static pl_idx_t add_to_pool(prolog *pl, const char *name)
 {
 	size_t offset = pl->pool_offset, len = strlen(name);

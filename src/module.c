@@ -899,7 +899,7 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 	predicate *pr = find_predicate(m, c);
 
 	if (pr && !consulting && !pr->is_dynamic) {
-		fprintf(stdout, "Error: not dynamic %s/%u\n", GET_STR(m, c), c->arity);
+		fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", m->name, GET_STR(m, c), c->arity);
 		return NULL;
 	}
 
