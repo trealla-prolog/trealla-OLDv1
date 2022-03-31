@@ -1,0 +1,55 @@
+{
+  "uid" : "ec16a30dd7ee670c",
+  "name" : "dictionary_delete_max_4_02",
+  "fullName" : "dictionary_delete_max_4_02::tests(avltree)",
+  "historyId" : "dictionary_delete_max_4_02::tests(avltree)",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "346-352"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3b0618b904b6e15487454dc203bc78749e9fb797/library/dictionaries/tests.lgt#L346"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ec16a30dd7ee670c.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "346-352", "https://github.com/LogtalkDotOrg/logtalk3/tree/3b0618b904b6e15487454dc203bc78749e9fb797/library/dictionaries/tests.lgt#L346" ]
+}

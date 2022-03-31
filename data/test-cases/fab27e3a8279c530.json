@@ -1,0 +1,55 @@
+{
+  "uid" : "fab27e3a8279c530",
+  "name" : "retract_1_14",
+  "fullName" : "retract_1_14::tests",
+  "historyId" : "retract_1_14::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/retract_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/retract_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "96-98"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3b0618b904b6e15487454dc203bc78749e9fb797/tests/logtalk/methods/retract_1/tests.lgt#L96"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fab27e3a8279c530.json",
+  "parameterValues" : [ "tests/logtalk/methods/retract_1/tests.lgt", "96-98", "https://github.com/LogtalkDotOrg/logtalk3/tree/3b0618b904b6e15487454dc203bc78749e9fb797/tests/logtalk/methods/retract_1/tests.lgt#L96" ]
+}
