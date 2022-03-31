@@ -891,25 +891,19 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 	if (!is_check_directive(c))
 		c = get_head(p1);
 
-	if (!c) {
-		fprintf(stdout, "Error: not a fact or db_entry\n");
+	if (!c)
 		return NULL;
-	}
 
 	predicate *pr = find_predicate(m, c);
 
-	if (pr && !consulting && !pr->is_dynamic) {
-		fprintf(stdout, "Error: no permission to modify static predicate %s:%s/%u\n", m->name, GET_STR(m, c), c->arity);
+	if (pr && !consulting && !pr->is_dynamic)
 		return NULL;
-	}
 
 	if (!pr) {
 		bool found = false, function = false;
 
-		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
-			fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
+		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function)
 			return NULL;
-		}
 
 		pr = create_predicate(m, c);
 		ensure(pr);

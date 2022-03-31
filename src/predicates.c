@@ -2747,7 +2747,10 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
 	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
-	may_ptr_error(dbe);
+
+	if (!dbe)
+		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
+
 	p->cl->cidx = 0;
 	uuid_gen(q->pl, &dbe->u);
 
@@ -2811,7 +2814,10 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
 	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
-	may_ptr_error(dbe);
+
+	if (!dbe)
+		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
+
 	p->cl->cidx = 0;
 	uuid_gen(q->pl, &dbe->u);
 
@@ -4123,7 +4129,10 @@ static pl_status do_asserta_2(query *q)
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
 	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
-	may_ptr_error(dbe);
+
+	if (!dbe)
+		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
+
 	p->cl->cidx = 0;
 
 	if (!is_variable(p2)) {
@@ -4224,7 +4233,10 @@ static pl_status do_assertz_2(query *q)
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
 	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->cells, 0);
-	may_ptr_error(dbe);
+
+	if (!dbe)
+		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
+
 	p->cl->cidx = 0;
 
 	if (!is_variable(p2)) {
