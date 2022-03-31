@@ -1675,8 +1675,10 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 		if (p2.val_int == 0)
 			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
 
-		if (fn_iso_mod_2(q) != pl_success)
-			return pl_failure;
+        q->accum.val_int = p1.val_int % p2.val_int;
+
+		if ((q->accum.val_int != 0) && ((q->accum.val_int ^ p2.val_int) < 0))
+			q->accum.val_int = q->accum.val_int + p2.val_int;
 
 		q->accum.val_int = (p1.val_int - q->accum.val_int) / p2.val_int;
 		q->accum.tag = TAG_INT;
