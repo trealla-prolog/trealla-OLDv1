@@ -62,7 +62,6 @@ nth(N, List, Head) :-
 nth_(1, [Head|_], Head).
 nth_(N, [_|Tail], Elem) :-
     nonvar(N),
-    must_be(integer, N),
     M is N-1,
     nth_(M, Tail, Elem),
     !.
@@ -82,7 +81,6 @@ nth1(N, List, Head) :-
 nth1_(1, [Head|_], Head).
 nth1_(N, [_|Tail], Elem) :-
     nonvar(N),
-    must_be(integer, N),
     M is N-1,
     nth1_(M, Tail, Elem),
     !.
@@ -102,7 +100,6 @@ nth0(N, List, Head) :-
 nth0_(0, [Head|_], Head).
 nth0_(N, [_|Tail], Elem) :-
     nonvar(N),
-    must_be(integer, N),
     M is N-1,
     nth0_(M, Tail, Elem),
     !.
