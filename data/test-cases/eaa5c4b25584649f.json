@@ -1,0 +1,55 @@
+{
+  "uid" : "eaa5c4b25584649f",
+  "name" : "setup_variable_sharing",
+  "fullName" : "setup_variable_sharing::tests_dialects",
+  "historyId" : "setup_variable_sharing::tests_dialects",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "package",
+    "value" : "tools/lgtunit/tests_dialects.lgt::tests_dialects"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/lgtunit/tests_dialects.lgt"
+  }, {
+    "name" : "position",
+    "value" : "159-160"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/373256a96754df23060874b5dbf8980d9a033c0c/tools/lgtunit/tests_dialects.lgt#L159"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "eaa5c4b25584649f.json",
+  "parameterValues" : [ "tools/lgtunit/tests_dialects.lgt", "159-160", "https://github.com/LogtalkDotOrg/logtalk3/tree/373256a96754df23060874b5dbf8980d9a033c0c/tools/lgtunit/tests_dialects.lgt#L159" ]
+}
