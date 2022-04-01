@@ -51,40 +51,64 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth(1, [Head|_], Head).
-nth(N, [_|Tail], Elem) :-
+nth(N, List, Head) :-
+    nonvar(N),
+    must_be(integer, N),
+    nth_(N, List, Head),
+    !.
+nth(N, List, Head) :-
+	nth_(N, List, Head).
+
+nth_(1, [Head|_], Head).
+nth_(N, [_|Tail], Elem) :-
     nonvar(N),
     must_be(integer, N),
     M is N-1,
-    nth(M, Tail, Elem),
+    nth_(M, Tail, Elem),
     !.
-nth(N,[_|T],Item) :-
+nth_(N,[_|T],Item) :-
     var(N),
-    nth(M,T,Item),
+    nth_(M,T,Item),
     N is M + 1.
 
-nth1(1, [Head|_], Head).
-nth1(N, [_|Tail], Elem) :-
+nth1(N, List, Head) :-
+    nonvar(N),
+    must_be(integer, N),
+    nth1_(N, List, Head),
+    !.
+nth1(N, List, Head) :-
+	nth1_(N, List, Head).
+
+nth1_(1, [Head|_], Head).
+nth1_(N, [_|Tail], Elem) :-
     nonvar(N),
     must_be(integer, N),
     M is N-1,
-    nth1(M, Tail, Elem),
+    nth1_(M, Tail, Elem),
     !.
-nth1(N,[_|T],Item) :-
+nth1_(N,[_|T],Item) :-
     var(N),
-    nth1(M,T,Item),
+    nth1_(M,T,Item),
     N is M + 1.
 
-nth0(0, [Head|_], Head).
-nth0(N, [_|Tail], Elem) :-
+nth0(N, List, Head) :-
+    nonvar(N),
+    must_be(integer, N),
+    nth0_(N, List, Head),
+    !.
+nth0(N, List, Head) :-
+	nth0_(N, List, Head).
+
+nth0_(0, [Head|_], Head).
+nth0_(N, [_|Tail], Elem) :-
     nonvar(N),
     must_be(integer, N),
     M is N-1,
-    nth0(M, Tail, Elem),
+    nth0_(M, Tail, Elem),
     !.
-nth0(N,[_|T],Item) :-
+nth0_(N,[_|T],Item) :-
     var(N),
-    nth0(M,T,Item),
+    nth0_(M,T,Item),
     N is M + 1.
 
 last_([], Last, Last).
