@@ -1387,6 +1387,94 @@ static bool dcg_expansion(parser *p)
 	return true;
 }
 
+static bool goal_expansion(parser *p, cell *goal)
+{
+	if (p->error || p->internal || !is_literal(goal))
+		return false;
+
+	predicate *pr = find_functor(p->m, "goal_expansion", 2);
+
+	if (!pr || !pr->cnt)
+		return false;
+
+	query *q = create_query(p->m, false);
+	ensure(q);
+	char *dst = print_canonical_to_strbuf(q, goal, 0, 0);
+	ASTRING(s);
+	ASTRING_sprintf(s, "goal_expansion((%s),_TermOut).", dst);
+	free(dst);
+	parser *p2 = create_parser(p->m);
+	ensure(p2);
+	p2->line_nbr = p->line_nbr;
+	p2->skip = true;
+	p2->srcptr = ASTRING_cstr(s);
+	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
+	execute(q, p2->cl->cells, p2->cl->nbr_vars);
+	ASTRING_free(s);
+
+	if (q->retry != QUERY_OK) {
+		destroy_parser(p2);
+		destroy_query(q);
+		return false;
+	}
+
+	frame *f = GET_FIRST_FRAME();
+	char *src = NULL;
+
+	for (unsigned i = 0; i < p2->cl->nbr_vars; i++) {
+		slot *e = GET_SLOT(f, i);
+
+		if (is_empty(&e->c))
+			continue;
+
+		q->latest_ctx = e->ctx;
+		cell *c;
+
+		if (is_indirect(&e->c)) {
+			c = e->c.val_ptr;
+			q->latest_ctx = e->ctx;
+		} else
+			c = deref(q, &e->c, e->ctx);
+
+		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
+			continue;
+
+		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
+		strcat(src, ".");
+		break;
+	}
+
+	if (!src) {
+		destroy_parser(p2);
+		destroy_query(q);
+		p->error = true;
+		return false;
+	}
+
+	reset(p2);
+	p2->srcptr = src;
+	tokenize(p2, false, false);
+	free(src);
+
+#if 0
+	clear_rule(p->cl);
+	free(p->cl);
+	p->cl = p2->cl;				// Take the completed clause
+	p2->cl = NULL;
+	p->nbr_vars = p2->nbr_vars;
+#else
+	// snip the old goal
+	// paste the new goal
+	// renumber the vars in clause (?)
+#endif
+
+	destroy_parser(p2);
+	destroy_query(q);
+
+	return true;
+}
+
 static bool term_expansion(parser *p)
 {
 	if (p->error || p->internal || !is_literal(p->cl->cells))
