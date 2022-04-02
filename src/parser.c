@@ -997,111 +997,6 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	p->cl->is_fact = !get_logical_body(p->cl->cells);
 }
 
-static cell *insert_here(parser *p, cell *c, cell *p1)
-{
-	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
-	make_room(p);
-
-	cell *last = p->cl->cells + (p->cl->cidx - 1);
-	pl_idx_t cells_to_move = p->cl->cidx - p1_idx;
-	cell *dst = last + 1;
-
-	while (cells_to_move--)
-		*dst-- = *last--;
-
-	p1 = p->cl->cells + p1_idx;
-	p1->tag = TAG_LITERAL;
-	p1->flags = FLAG_BUILTIN;
-	p1->fn = fn_iso_call_n;
-	p1->val_off = g_call_s;
-	p1->nbr_cells = 2;
-	p1->arity = 1;
-
-	p->cl->cidx++;
-	return p->cl->cells + c_idx;
-}
-
-cell *check_body_callable(parser *p, cell *c)
-{
-	if (IS_XFX(c) || IS_XFY(c)) {
-		if (!strcmp(GET_STR(p, c), ",")
-			|| !strcmp(GET_STR(p, c), ";")
-			|| !strcmp(GET_STR(p, c), "->")
-			|| !strcmp(GET_STR(p, c), "*->")
-			|| !strcmp(GET_STR(p, c), ":-")) {
-			cell *lhs = c + 1;
-			cell *tmp;
-
-			if ((tmp = check_body_callable(p, lhs)) != NULL)
-				return tmp;
-
-			cell *rhs = lhs + lhs->nbr_cells;
-
-			if ((tmp = check_body_callable(p, rhs)) != NULL)
-				return tmp;
-		}
-	}
-
-	return !is_callable(c) && !is_variable(c) ? c : NULL;
-}
-
-static cell *term_to_body_conversion(parser *p, cell *c)
-{
-	pl_idx_t c_idx = c - p->cl->cells;
-
-	if (IS_XFX(c) || IS_XFY(c)) {
-		if ((c->val_off == g_conjunction_s)
-			|| (c->val_off == g_disjunction_s)
-			|| (c->val_off == g_if_then_s)
-			|| (c->val_off == g_soft_cut_s)
-			|| (c->val_off == g_neck_s)) {
-			cell *lhs = c + 1;
-			bool norhs = false;
-
-			//if (c->val_off == g_soft_cut_s)
-			//	norhs = true;
-
-			if (is_variable(lhs)) {
-				c = insert_here(p, c, lhs);
-				lhs = c + 1;
-			} else
-				lhs = term_to_body_conversion(p, lhs);
-
-			cell *rhs = lhs + lhs->nbr_cells;
-			c = p->cl->cells + c_idx;
-
-			if (is_variable(rhs) && !norhs)
-				c = insert_here(p, c, rhs);
-			else
-				rhs = term_to_body_conversion(p, rhs);
-
-			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
-		}
-	}
-
-	if (IS_FY(c)) {
-		if (c->val_off == g_negation_s) {
-			cell *rhs = c + 1;
-
-			if (is_variable(rhs)) {
-				c = insert_here(p, c, rhs);
-				rhs = c + 1;
-			} else
-				rhs = term_to_body_conversion(p, rhs);
-
-			c->nbr_cells = 1 + rhs->nbr_cells;
-		}
-	}
-
-	return p->cl->cells + c_idx;
-}
-
-void term_to_body(parser *p)
-{
-	term_to_body_conversion(p, p->cl->cells);
-	p->cl->cells->nbr_cells = p->cl->cidx - 1;	// Drops TAG_END
-}
-
 static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 {
 	pl_idx_t lowest = IDX_MAX, work_idx, end_idx = p->cl->cidx - 1;
@@ -1452,6 +1347,8 @@ static bool goal_expansion(parser *p, cell *goal)
 		return false;
 	}
 
+	printf("*** ge %s\n", src);
+
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
@@ -1558,6 +1455,113 @@ static bool term_expansion(parser *p)
 	destroy_query(q);
 
 	return term_expansion(p);
+}
+
+static cell *insert_here(parser *p, cell *c, cell *p1)
+{
+	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
+	make_room(p);
+
+	cell *last = p->cl->cells + (p->cl->cidx - 1);
+	pl_idx_t cells_to_move = p->cl->cidx - p1_idx;
+	cell *dst = last + 1;
+
+	while (cells_to_move--)
+		*dst-- = *last--;
+
+	p1 = p->cl->cells + p1_idx;
+	p1->tag = TAG_LITERAL;
+	p1->flags = FLAG_BUILTIN;
+	p1->fn = fn_iso_call_n;
+	p1->val_off = g_call_s;
+	p1->nbr_cells = 2;
+	p1->arity = 1;
+
+	p->cl->cidx++;
+	return p->cl->cells + c_idx;
+}
+
+cell *check_body_callable(parser *p, cell *c)
+{
+	if (IS_XFX(c) || IS_XFY(c)) {
+		if (!strcmp(GET_STR(p, c), ",")
+			|| !strcmp(GET_STR(p, c), ";")
+			|| !strcmp(GET_STR(p, c), "->")
+			|| !strcmp(GET_STR(p, c), "*->")
+			|| !strcmp(GET_STR(p, c), ":-")) {
+			cell *lhs = c + 1;
+			cell *tmp;
+
+			if ((tmp = check_body_callable(p, lhs)) != NULL)
+				return tmp;
+
+			cell *rhs = lhs + lhs->nbr_cells;
+
+			if ((tmp = check_body_callable(p, rhs)) != NULL)
+				return tmp;
+		}
+	}
+
+	return !is_callable(c) && !is_variable(c) ? c : NULL;
+}
+
+static cell *term_to_body_conversion(parser *p, cell *c)
+{
+	pl_idx_t c_idx = c - p->cl->cells;
+
+	//goal_expansion(p, c);
+
+	if (IS_XFX(c) || IS_XFY(c)) {
+		if ((c->val_off == g_conjunction_s)
+			|| (c->val_off == g_disjunction_s)
+			|| (c->val_off == g_if_then_s)
+			|| (c->val_off == g_soft_cut_s)
+			|| (c->val_off == g_neck_s)) {
+			cell *lhs = c + 1;
+			bool norhs = false;
+
+			//if (c->val_off == g_soft_cut_s)
+			//	norhs = true;
+
+			if (is_variable(lhs)) {
+				c = insert_here(p, c, lhs);
+				lhs = c + 1;
+			} else
+				lhs = term_to_body_conversion(p, lhs);
+
+			cell *rhs = lhs + lhs->nbr_cells;
+			c = p->cl->cells + c_idx;
+
+			if (is_variable(rhs) && !norhs)
+				c = insert_here(p, c, rhs);
+			else
+				rhs = term_to_body_conversion(p, rhs);
+
+			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
+		}
+	}
+
+	if (IS_FY(c)) {
+		if (c->val_off == g_negation_s) {
+			cell *rhs = c + 1;
+
+			if (is_variable(rhs)) {
+				c = insert_here(p, c, rhs);
+				rhs = c + 1;
+			} else
+				rhs = term_to_body_conversion(p, rhs);
+
+			c->nbr_cells = 1 + rhs->nbr_cells;
+		}
+	}
+
+	return p->cl->cells + c_idx;
+}
+
+void term_to_body(parser *p)
+{
+	term_to_body_conversion(p, p->cl->cells);
+	p->cl->cells->nbr_cells = p->cl->cidx - 1;	// Drops TAG_END
 }
 
 bool virtual_term(parser *p, const char *src)
