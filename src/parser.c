@@ -1287,9 +1287,20 @@ static bool goal_expansion(parser *p, cell *goal)
 	if (p->error || p->internal || !is_literal(goal))
 		return false;
 
+	if (is_builtin(goal) || is_op(goal))
+		return false;
+
+	if ((goal->val_off == g_goal_expansion_s) || (goal->val_off == g_cut_s))
+		return false;
+
 	predicate *pr = find_functor(p->m, "goal_expansion", 2);
 
 	if (!pr || !pr->cnt)
+		return false;
+
+	predicate *pr2 = find_predicate(p->m, goal);
+
+	if (!pr2 || !pr2->cnt)
 		return false;
 
 	query *q = create_query(p->m, false);
@@ -1347,7 +1358,7 @@ static bool goal_expansion(parser *p, cell *goal)
 		return false;
 	}
 
-	printf("*** ge %s\n", src);
+	//printf("*** ge out ==> %s\n", src);
 
 	reset(p2);
 	p2->srcptr = src;
@@ -1509,8 +1520,6 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 {
 	pl_idx_t c_idx = c - p->cl->cells;
 
-	//goal_expansion(p, c);
-
 	if (IS_XFX(c) || IS_XFY(c)) {
 		if ((c->val_off == g_conjunction_s)
 			|| (c->val_off == g_disjunction_s)
@@ -1536,6 +1545,11 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 				c = insert_here(p, c, rhs);
 			else
 				rhs = term_to_body_conversion(p, rhs);
+
+			if ((c->val_off != g_neck_s))
+				goal_expansion(p, lhs);
+
+			goal_expansion(p, rhs);
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
