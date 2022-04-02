@@ -1,5 +1,5 @@
 {
-  "total" : 479,
+  "total" : 480,
   "items" : [ {
     "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
     "name" : "tools/diagrams/tests.lgt::tests",
@@ -67,17 +67,6 @@
       "total" : 46
     }
   }, {
-    "uid" : "f4abb4490ba7176987aa03a26aa339aa",
-    "name" : "contributions/pddl_parser/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 7,
-      "broken" : 0,
-      "skipped" : 1,
-      "passed" : 0,
-      "unknown" : 0,
-      "total" : 8
-    }
-  }, {
     "uid" : "00ed757610be453e6de4bcf92f77203e",
     "name" : "library/nested_dictionaries/tests.lgt::tests(nrbtree)",
     "statistic" : {
@@ -102,6 +91,17 @@
   }, {
     "uid" : "a17f506128c48415bd5f6275182f5e99",
     "name" : "tools/code_metrics/code_metrics_tests.lgt::code_metrics_tests",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 7
+    }
+  }, {
+    "uid" : "d944697bc54dd491703ec3072bfba616",
+    "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,

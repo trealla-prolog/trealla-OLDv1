@@ -1,0 +1,55 @@
+{
+  "uid" : "483cc355f0ab5ab0",
+  "name" : "msglog_02",
+  "fullName" : "msglog_02::tests",
+  "historyId" : "msglog_02::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/msglog/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/msglog/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/msglog/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/msglog/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "38-45"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/bb1ff51c92f29f76a846f22afc92124f6949843b/examples/msglog/tests.lgt#L38"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "483cc355f0ab5ab0.json",
+  "parameterValues" : [ "examples/msglog/tests.lgt", "38-45", "https://github.com/LogtalkDotOrg/logtalk3/tree/bb1ff51c92f29f76a846f22afc92124f6949843b/examples/msglog/tests.lgt#L38" ]
+}
