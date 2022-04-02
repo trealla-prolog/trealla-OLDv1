@@ -1282,21 +1282,21 @@ static bool dcg_expansion(parser *p)
 	return true;
 }
 
-static bool goal_expansion(parser *p, cell *goal)
+static cell *goal_expansion(parser *p, cell *goal)
 {
 	if (p->error || p->internal || !is_literal(goal))
-		return false;
+		return goal;
 
 	if (is_builtin(goal) || is_op(goal))
-		return false;
+		return goal;
 
 	if ((goal->val_off == g_goal_expansion_s) || (goal->val_off == g_cut_s))
-		return false;
+		return goal;
 
 	predicate *pr = find_functor(p->m, "goal_expansion", 2);
 
 	if (!pr || !pr->cnt)
-		return false;
+		return goal;
 
 	query *q = create_query(p->m, false);
 	ensure(q);
@@ -1317,7 +1317,7 @@ static bool goal_expansion(parser *p, cell *goal)
 	if (q->retry != QUERY_OK) {
 		destroy_parser(p2);
 		destroy_query(q);
-		return false;
+		return goal;
 	}
 
 	frame *f = GET_FIRST_FRAME();
@@ -1350,32 +1350,52 @@ static bool goal_expansion(parser *p, cell *goal)
 		destroy_parser(p2);
 		destroy_query(q);
 		p->error = true;
-		return false;
+		return goal;
 	}
 
-	//printf("*** ge out ==> %s\n", src);
+	printf("*** ge out ==> %s\n", src);
 
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
 	free(src);
 
-#if 0
-	clear_rule(p->cl);
-	free(p->cl);
-	p->cl = p2->cl;				// Take the completed clause
-	p2->cl = NULL;
-	p->nbr_vars = p2->nbr_vars;
-#else
 	// snip the old goal
+
+	unsigned goal_idx = goal - p->cl->cells;
+	unsigned nbr_cells = goal->nbr_cells;
+	printf("*** here0 nbr_cells= %u\n", nbr_cells);
+	unsigned end_idx = (goal + nbr_cells) - p->cl->cells;
+	memmove(goal, goal + nbr_cells, p->cl->cidx - end_idx);
+	p->cl->cidx -= nbr_cells;
+
+	// make room for new goal
+
+	if ((p->cl->cidx + (p2->cl->cidx-1)) > p->cl->nbr_cells) {
+		printf("*** here1\n");
+		unsigned extra = (p->cl->cidx + (p2->cl->cidx-1)) - p->cl->nbr_cells;
+		p->cl->cidx += extra;
+		make_room(p);
+	}
+
+	goal = p->cl->cells + goal_idx;
+	unsigned cells_to_move = (p->cl->cidx-1) - goal_idx;
+	printf("*** here2 new nbr_cells= %u, move=%u\n", p2->cl->cidx-1, cells_to_move);
+	memmove(goal+(p2->cl->cidx-1), goal, cells_to_move);
+
 	// paste the new goal
+
+	memmove(goal, p2->cl->cells, p2->cl->cidx-1);
+
 	// renumber the vars in clause (?)
-#endif
+
+
+	// done
 
 	destroy_parser(p2);
 	destroy_query(q);
 
-	return true;
+	return goal;
 }
 
 static bool term_expansion(parser *p)
@@ -1541,10 +1561,12 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			else
 				rhs = term_to_body_conversion(p, rhs);
 
+#if 0
 			if ((c->val_off != g_neck_s))
-				goal_expansion(p, lhs);
+				lhs = goal_expansion(p, lhs);
 
-			goal_expansion(p, rhs);
+			rhs = goal_expansion(p, rhs);
+#endif
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
