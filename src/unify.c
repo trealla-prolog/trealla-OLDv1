@@ -211,6 +211,13 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist
 	if (!is_structure(p1))
 		return false;
 
+	if (is_iso_list(p1)) {
+		bool is_partial;
+
+		if (check_list(q, p1, p1_ctx, &is_partial, NULL))
+			return false;
+	}
+
 	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	p1++;
 
