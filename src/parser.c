@@ -1298,11 +1298,6 @@ static bool goal_expansion(parser *p, cell *goal)
 	if (!pr || !pr->cnt)
 		return false;
 
-	predicate *pr2 = find_predicate(p->m, goal);
-
-	if (!pr2 || !pr2->cnt)
-		return false;
-
 	query *q = create_query(p->m, false);
 	ensure(q);
 	char *dst = print_canonical_to_strbuf(q, goal, 0, 0);
