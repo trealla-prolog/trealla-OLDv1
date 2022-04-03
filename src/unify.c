@@ -216,8 +216,9 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 		if (is_variable(h)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, h->var_nbr);
+			cell *tmp = deref(q, h, p1_ctx);
 
-			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
+			if (!is_variable(tmp) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
 				return true;
 
 			e->cyc_gen = q->cyc_gen;
@@ -230,8 +231,9 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
+			cell *tmp = deref(q, p1, p1_ctx);
 
-			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
+			if (!is_variable(tmp) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
 				return true;
 
 			e->cyc_gen = q->cyc_gen;
@@ -253,8 +255,8 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 	if (is_iso_list(p1))
 		return is_cyclic_list_internal(q, p1, p1_ctx, depth);
 
-	if (depth > MAX_DEPTH)
-		return true;
+	//if (depth > MAX_DEPTH)
+	//	return true;
 
 	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	unsigned arity = p1->arity;
@@ -264,8 +266,9 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
+			cell *tmp = deref(q, p1, p1_ctx);
 
-			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
+			if (!is_variable(tmp) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
 				return true;
 
 			e->cyc_gen = q->cyc_gen;
