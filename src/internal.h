@@ -346,8 +346,8 @@ struct cell_ {
 				uint16_t priority;		// used in parsing operators
 
 				struct {
-					cell *tmp_attrs;	// used with TAG_VAR
-					pl_idx_t tmp_ctx;	// used with TAG_VAR
+					cell *tmp_attrs;	// used with TAG_VAR in copy_term
+					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
 				};
 			};
 
@@ -438,6 +438,8 @@ struct trail_ {
 struct slot_ {
 	cell c;
 	pl_idx_t ctx;
+	uint16_t cyc_gen;
+	uint16_t cyc_depth;
 };
 
 struct frame_ {
@@ -564,6 +566,7 @@ struct query_ {
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint32_t cgen;
+	uint16_t cyc_gen;
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flag;
 	enum q_retry retry;
