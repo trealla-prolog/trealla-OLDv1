@@ -344,15 +344,11 @@ struct cell_ {
 				pl_status (*fn)(query*);
 				predicate *match;
 				uint16_t priority;		// used in parsing operators
-			};
 
-			void *val_spare5;
-		};
-
-		struct {
-			struct {
-				cell *tmp_attrs;
-				pl_idx_t tmp_attrs_ctx;
+				struct {
+					cell *tmp_attrs;
+					pl_idx_t tmp_attrs_ctx;
+				};
 			};
 
 			uint32_t val_off;			// used with TAG_VAR & TAG_LITERAL
