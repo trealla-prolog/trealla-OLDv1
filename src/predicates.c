@@ -7615,11 +7615,20 @@ static void load_ops(query *q)
 		else if (ptr->specifier == OP_XFX)
 			strcpy(specifier, "xfx");
 
-		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+		bool quote = needs_quoting(q->st.m, ptr->name, strlen(ptr->name));
+
+		if (quote)
+			formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
+		else
+			snprintf(name, sizeof(name), "%s", ptr->name);
+
 		char tmpbuf[1024];
 
-		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, (%s)).\n",
-			ptr->priority, specifier, name);
+		if (quote)
+			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
+		else
+			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, (%s)).\n", ptr->priority, specifier, name);
+
 		ASTRING_strcat(pr, tmpbuf);
 	}
 

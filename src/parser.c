@@ -266,7 +266,7 @@ char *relative_to(const char *basefile, const char *relfile)
 	return tmpbuf;
 }
 
-static void do_op(parser *p, cell *c)
+static void do_op(parser *p, cell *c, bool make_public)
 {
 	cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
@@ -319,6 +319,16 @@ static void do_op(parser *p, cell *c)
 				continue;
 			}
 
+			if (make_public) {
+				if (!set_op(p->pl->user_m, name, specifier, get_int(p1))) {
+					if (DUMP_ERRS || !p->do_read_term)
+						fprintf(stdout, "Error: could not set op\n");
+
+					free(name);
+					continue;
+				}
+			}
+
 			free(name);
 		}
 
@@ -334,6 +344,16 @@ static void do_op(parser *p, cell *c)
 
 			free(name);
 			return;
+		}
+
+		if (make_public) {
+			if (!set_op(p->pl->user_m, name, specifier, get_int(p1))) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: could not set op\n");
+
+				free(name);
+				return;
+			}
 		}
 
 		free(name);
@@ -563,8 +583,7 @@ static void directives(parser *p, cell *d)
 
 					pr->is_public = true;
 				} else if (!strcmp(GET_STR(p, head), "op") && (head->arity == 3)) {
-					do_op(p, head);
-					// TO-DO: make public...
+					do_op(p, head, true);
 				}
 			}
 
@@ -697,7 +716,7 @@ static void directives(parser *p, cell *d)
 	}
 
 	if (!strcmp(dirname, "op") && (c->arity == 3)) {
-		do_op(p, c);
+		do_op(p, c, false);
 		return;
 	}
 
