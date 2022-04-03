@@ -994,9 +994,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				int parens = 0;
 
 				if (!braces && is_literal(tmp)) {
-					const char *s = GET_STR(q, tmp);
+					unsigned tmp_priority = search_op(q->st.m, GET_STR(q, tmp), NULL, tmp->arity==1);
 
-					if (!strcmp(s, ",") || !strcmp(s, ";"))
+					if (tmp_priority >= 1000)
 						parens = 1;
 				}
 
@@ -1109,10 +1109,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	int space = iswalpha(peek_char_utf8(src))
 		|| iswspace(*src)
-		|| !strcmp(src, ":-")
-		|| !strcmp(src, "-->")
-		|| !strcmp(src, "->")
-		|| !strcmp(src, "*->")
+		//|| !strcmp(src, ":-")
+		//|| !strcmp(src, "-->")
+		//|| !strcmp(src, "->")
+		//|| !strcmp(src, "*->")
 		|| !strcmp(src, "=~=")
 		|| !strcmp(src, "=..")
 		|| !strcmp(src, "=>")
