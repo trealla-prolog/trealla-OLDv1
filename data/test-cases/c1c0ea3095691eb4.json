@@ -1,0 +1,55 @@
+{
+  "uid" : "c1c0ea3095691eb4",
+  "name" : "abolish_1_19",
+  "fullName" : "abolish_1_19::tests",
+  "historyId" : "abolish_1_19::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/abolish_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/abolish_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/abolish_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/abolish_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "119-130"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/bb1ff51c92f29f76a846f22afc92124f6949843b/tests/logtalk/methods/abolish_1/tests.lgt#L119"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "c1c0ea3095691eb4.json",
+  "parameterValues" : [ "tests/logtalk/methods/abolish_1/tests.lgt", "119-130", "https://github.com/LogtalkDotOrg/logtalk3/tree/bb1ff51c92f29f76a846f22afc92124f6949843b/tests/logtalk/methods/abolish_1/tests.lgt#L119" ]
+}
