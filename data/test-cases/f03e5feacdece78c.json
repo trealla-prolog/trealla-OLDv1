@@ -1,0 +1,55 @@
+{
+  "uid" : "f03e5feacdece78c",
+  "name" : "dictionary_clone_4_02",
+  "fullName" : "dictionary_clone_4_02::tests(avltree)",
+  "historyId" : "dictionary_clone_4_02::tests(avltree)",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "95-101"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/dictionaries/tests.lgt#L95"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f03e5feacdece78c.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "95-101", "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/dictionaries/tests.lgt#L95" ]
+}

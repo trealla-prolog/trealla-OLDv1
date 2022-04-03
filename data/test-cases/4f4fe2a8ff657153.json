@@ -1,0 +1,55 @@
+{
+  "uid" : "4f4fe2a8ff657153",
+  "name" : "coroutining_when_2_04",
+  "fullName" : "coroutining_when_2_04::tests",
+  "historyId" : "coroutining_when_2_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/coroutining/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/coroutining/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/coroutining/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/coroutining/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "108-109"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/coroutining/tests.lgt#L108"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4f4fe2a8ff657153.json",
+  "parameterValues" : [ "library/coroutining/tests.lgt", "108-109", "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/coroutining/tests.lgt#L108" ]
+}

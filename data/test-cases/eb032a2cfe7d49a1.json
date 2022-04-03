@@ -1,0 +1,55 @@
+{
+  "uid" : "eb032a2cfe7d49a1",
+  "name" : "dcs_stand_alone_category_01",
+  "fullName" : "dcs_stand_alone_category_01::tests",
+  "historyId" : "dcs_stand_alone_category_01::tests",
+  "time" : {
+    "duration" : 15
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/dead_code_scanner/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/dead_code_scanner/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/dead_code_scanner/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/dead_code_scanner/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "46-52"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/tools/dead_code_scanner/tests.lgt#L46"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "eb032a2cfe7d49a1.json",
+  "parameterValues" : [ "tools/dead_code_scanner/tests.lgt", "46-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/tools/dead_code_scanner/tests.lgt#L46" ]
+}

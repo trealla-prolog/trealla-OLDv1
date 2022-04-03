@@ -1,0 +1,55 @@
+{
+  "uid" : "9668c9331a790812",
+  "name" : "csv_read_sample_csv_with_spaces",
+  "fullName" : "csv_read_sample_csv_with_spaces::tests",
+  "historyId" : "csv_read_sample_csv_with_spaces::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/csv/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "124-127"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/csv/tests.lgt#L124"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "9668c9331a790812.json",
+  "parameterValues" : [ "library/csv/tests.lgt", "124-127", "https://github.com/LogtalkDotOrg/logtalk3/tree/2c2883ee6bbfaea0785a96c06d7fd9b2a1799695/library/csv/tests.lgt#L124" ]
+}
