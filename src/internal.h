@@ -346,8 +346,8 @@ struct cell_ {
 				uint16_t priority;		// used in parsing operators
 
 				struct {
-					cell *tmp_attrs;
-					pl_idx_t tmp_attrs_ctx;
+					cell *tmp_attrs;	// used with TAG_VAR
+					pl_idx_t tmp_ctx;	// used with TAG_VAR
 				};
 			};
 

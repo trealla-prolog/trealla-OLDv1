@@ -181,7 +181,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
 		tmp->tmp_attrs = e->c.attrs;
-		tmp->tmp_attrs_ctx = e->c.attrs_ctx;
+		tmp->tmp_ctx = e->c.attrs_ctx;
 
 		if (is_anon(p1))
 			tmp->flags |= FLAG_VAR_ANON;
@@ -376,7 +376,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
 			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->tmp_attrs;
-			e->c.attrs_ctx = c->tmp_attrs_ctx;
+			e->c.attrs_ctx = c->tmp_ctx;
 		}
 	}
 
