@@ -233,9 +233,9 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
-			cell *tmp = deref(q, p1, p1_ctx);
+			cell *c = deref(q, p1, p1_ctx);
 
-			if (!is_variable(tmp) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
+			if (!is_variable(c) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
 				return true;
 
 			e->cyc_gen = q->cyc_gen;
@@ -277,8 +277,10 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 			e->cyc_gen = q->cyc_gen;
 			e->cyc_depth = depth;
 
-			if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
-				return true;
+			if (!is_variable(c)) {
+				if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
+					return true;
+			}
 		}
 
 		p1 += p1->nbr_cells;
