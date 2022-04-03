@@ -213,6 +213,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 	while (is_iso_list(p1)) {
 		cell *h = LIST_HEAD(p1);
 
+#if 0
 		if (is_variable(h)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, h->var_nbr);
@@ -224,6 +225,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 			e->cyc_gen = q->cyc_gen;
 			e->cyc_depth = depth;
 		}
+#endif
 
 		p1 = LIST_TAIL(p1);
 		depth++;
