@@ -218,7 +218,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 			slot *e = GET_SLOT(f, h->var_nbr);
 
 			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
-				return q->cycle_error = true;
+				return true;
 
 			e->cyc_gen = q->cyc_gen;
 			e->cyc_depth = depth;
@@ -232,7 +232,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 			slot *e = GET_SLOT(f, p1->var_nbr);
 
 			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
-				return q->cycle_error = true;
+				return true;
 
 			e->cyc_gen = q->cyc_gen;
 			e->cyc_depth = depth;
@@ -253,8 +253,8 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 	if (is_iso_list(p1))
 		return is_cyclic_list_internal(q, p1, p1_ctx, depth);
 
-	//if (depth > MAX_DEPTH)
-	//	return q->cycle_error = true;
+	if (depth > MAX_DEPTH)
+		return true;
 
 	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	unsigned arity = p1->arity;
@@ -266,7 +266,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 			slot *e = GET_SLOT(f, p1->var_nbr);
 
 			if ((e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
-				return q->cycle_error = true;
+				return true;
 
 			e->cyc_gen = q->cyc_gen;
 			e->cyc_depth = depth;
@@ -286,14 +286,12 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->cyc_gen++;
-	q->cycle_error = false;
 	return is_cyclic_term_internal(q, p1, p1_ctx, 0);
 }
 
 bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->cyc_gen++;
-	q->cycle_error = false;
 	return !is_cyclic_term_internal(q, p1, p1_ctx, 0);
 }
 
