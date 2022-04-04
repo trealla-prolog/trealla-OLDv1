@@ -1069,6 +1069,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	}
 
 	e->ctx = v_ctx;
+	e->sweep = false;
 }
 
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing)
