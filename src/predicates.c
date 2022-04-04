@@ -937,49 +937,130 @@ static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth)
+static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+{
+	cell *l = p1;
+	pl_idx_t l_ctx = p1_ctx;
+	bool ret_val = false;
+	LIST_HANDLER(l);
+
+	while (is_iso_list(l) && !g_tpl_interrupt) {
+		cell *c = LIST_HEAD(l);
+		pl_idx_t c_ctx = l_ctx;
+
+		if (is_variable(c)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, c->var_nbr);
+			c = deref(q, c, l_ctx);
+			c_ctx = q->latest_ctx;
+
+			if (is_variable(c)) {
+				ret_val = true;
+				break;
+			}
+
+			if (e->sweep) {
+				e->mark = true;
+				break;
+			}
+
+			e->sweep = true;
+			ret_val = has_vars(q, c, c_ctx, depth+1);
+			e->sweep = false;
+		} else {
+			ret_val = has_vars(q, c, c_ctx, depth+1);
+		}
+
+		if (ret_val)
+			break;
+
+		l = LIST_TAIL(l);
+
+		if (is_variable(l)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
+
+			if (is_variable(l)) {
+				ret_val = true;
+				break;
+			}
+
+			if (!is_variable(l) && e->sweep) {
+				e->mark = true;
+				break;
+			}
+
+			e->sweep = true;
+		}
+	}
+
+	l = p1;
+	l_ctx = p1_ctx;
+
+	while (is_iso_list(l) && !g_tpl_interrupt) {
+		l = LIST_TAIL(l);
+
+		if (is_variable(l)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
+
+			if (!is_variable(l) && e->mark) {
+				e->sweep = false;
+				e->mark = false;
+				break;
+			}
+
+			e->sweep = false;
+		}
+	}
+
+	return ret_val;
+}
+
+bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (depth >= 64000) {
 		q->cycle_error = true;
 		return false;
 	}
 
-	if (is_variable(c))
+	if (is_variable(p1))
 		return true;
 
-	if (!is_structure(c))
+	if (!is_structure(p1))
 		return false;
 
-	LIST_HANDLER(c);
+	if (is_iso_list(p1))
+		return has_list_vars(q, p1, p1_ctx, depth+1);
 
-	while (is_iso_list(c) && !g_tpl_interrupt) {
-		cell *h = LIST_HEAD(c);
-		h = deref(q, h, c_ctx);
-
-		if (is_variable(h))
-			return true;
-
-		c = LIST_TAIL(c);
-		c = deref(q, c, c_ctx);
-		c_ctx = q->latest_ctx;
-	}
-
-	if (is_variable(c))
-		return true;
-
-	unsigned arity = c->arity;
-	c++;
+	unsigned arity = p1->arity;
+	p1++;
 
 	while (arity-- && !g_tpl_interrupt) {
-		cell *c2 = deref(q, c, c_ctx);
+		frame *f = GET_FRAME(p1_ctx);
+		slot *e = GET_SLOT(f, p1->var_nbr);
+		cell *c = deref(q, p1, p1_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
 
-		if (has_vars(q, c2, q->latest_ctx, depth+1))
+		if (is_variable(c))
 			return true;
 
-		if (q->cycle_error)
-			return false;
+		if (e->sweep) {
+		} else {
+			e->sweep = true;
 
-		c += c->nbr_cells;
+			if (has_vars(q, c, c_ctx, depth+1))
+				return true;
+
+			if (q->cycle_error)
+				return false;
+		}
+
+		p1 += p1->nbr_cells;
 	}
 
 	return false;
