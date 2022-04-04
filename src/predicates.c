@@ -1023,11 +1023,6 @@ static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 
 bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
-	if (depth >= 64000) {
-		q->cycle_error = true;
-		return false;
-	}
-
 	if (is_variable(p1))
 		return true;
 
@@ -1037,31 +1032,41 @@ bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	if (is_iso_list(p1))
 		return has_list_vars(q, p1, p1_ctx, depth+1);
 
+	if (depth > MAX_DEPTH)
+		return false;
+
 	unsigned arity = p1->arity;
 	p1++;
 
 	while (arity-- && !g_tpl_interrupt) {
-		frame *f = GET_FRAME(p1_ctx);
-		slot *e = GET_SLOT(f, p1->var_nbr);
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
+		if (is_variable(p1)) {
+			frame *f = GET_FRAME(p1_ctx);
+			slot *e = GET_SLOT(f, p1->var_nbr);
+			cell *c = deref(q, p1, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
 
-		if (is_variable(c))
-			return true;
+			if (!is_variable(c) && e->sweep) {
+				e->sweep = false;
+				return false;
+			}
 
-		if (e->sweep) {
-		} else {
 			e->sweep = true;
+			bool ok = has_vars(q, c, c_ctx, depth+1);
+			e->sweep = false;
+
+			if (ok)
+				return true;
+		} else {
+			cell *c = deref(q, p1, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
 
 			if (has_vars(q, c, c_ctx, depth+1))
 				return true;
-
-			if (q->cycle_error)
-				return false;
 		}
 
 		p1 += p1->nbr_cells;
 	}
+
 
 	return false;
 }
