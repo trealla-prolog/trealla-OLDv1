@@ -231,11 +231,11 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			}
 
 			e->sweep = true;
-			bool ok = is_cyclic_term_internal(q, h, h_ctx);
+			ret_val = is_cyclic_term_internal(q, h, h_ctx);
 			e->sweep = false;
 
-			if (ok)
-				return true;
+			if (ret_val)
+				break;
 		}
 
 		l = LIST_TAIL(l);
