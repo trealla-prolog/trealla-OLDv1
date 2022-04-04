@@ -3,7 +3,7 @@
 		select/3, selectchk/3,
 		append/2, append/3,
 		subtract/3, union/3, intersection/3,
-		nth/3, nth1/3, nth0/3,
+		nth1/3, nth0/3,
 		last/2, flatten/2, same_length/2, sum_list/2,
 		toconjunction/2, numlist/3,
 		length/2, length_checked/2,
@@ -51,29 +51,10 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth(N, List, Head) :-
-    nonvar(N),
-    must_be(integer, N),
-    nth_(N, List, Head),
-    !.
-nth(N, List, Head) :-
-	nth_(N, List, Head).
-
-nth_(1, [Head|_], Head).
-nth_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth_(M, Tail, Elem),
-    !.
-nth_(N,[_|T],Item) :-
-    var(N),
-    nth_(M,T,Item),
-    N is M + 1.
-
 nth1(N, List, Head) :-
     nonvar(N),
     must_be(integer, N),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
     nth1_(N, List, Head),
     !.
 nth1(N, List, Head) :-
@@ -94,6 +75,7 @@ nth1_(N,[_|T],Item) :-
 nth0(N, List, Head) :-
     nonvar(N),
     must_be(integer, N),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
     nth0_(N, List, Head),
     !.
 nth0(N, List, Head) :-
