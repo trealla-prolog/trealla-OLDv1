@@ -1,0 +1,55 @@
+{
+  "uid" : "778773988b149ff4",
+  "name" : "gensym_gensym_2_01",
+  "fullName" : "gensym_gensym_2_01::tests",
+  "historyId" : "gensym_gensym_2_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/gensym/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "36-39"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ff62995963d48583deab9b2ef923e2673c41e0a0/library/gensym/tests.lgt#L36"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "778773988b149ff4.json",
+  "parameterValues" : [ "library/gensym/tests.lgt", "36-39", "https://github.com/LogtalkDotOrg/logtalk3/tree/ff62995963d48583deab9b2ef923e2673c41e0a0/library/gensym/tests.lgt#L36" ]
+}
