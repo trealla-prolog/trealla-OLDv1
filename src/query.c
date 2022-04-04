@@ -95,7 +95,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #endif
 
 	int save_depth = q->max_depth;
-	q->max_depth = 25;
+	q->max_depth = 10;
 	q->quoted = true;
 	print_term(q, stderr, c, c_ctx, -1);
 	q->quoted = false;
