@@ -438,7 +438,8 @@ struct trail_ {
 struct slot_ {
 	cell c;
 	pl_idx_t ctx;
-	bool mark_cyc;
+	bool sweep:1;
+	bool mark:1;
 };
 
 struct frame_ {

@@ -438,7 +438,7 @@ static void unwind_trail(query *q, const choice *ch)
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = tr->attrs;
 		e->c.attrs_ctx = tr->attrs_ctx;
-		e->mark_cyc = false;
+		e->sweep = false;
 	}
 }
 
@@ -461,7 +461,7 @@ pl_status try_me(query *q, unsigned nbr_vars)
 		//unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
-		e->mark_cyc = false;
+		e->sweep = false;
 	}
 
 	q->check_unique = false;
