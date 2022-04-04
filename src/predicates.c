@@ -3044,7 +3044,7 @@ static USE_RESULT pl_status fn_cyclic_term_1(query *q)
 static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_cyclic_term(q, p1, p1_ctx) ? pl_failure : pl_success;
+	return is_acyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)

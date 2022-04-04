@@ -206,56 +206,62 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_t depth)
+static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	LIST_HANDLER(p1);
+	cell *l = p1;
+	pl_idx_t l_ctx = p1_ctx;
+	bool ret_val = false;
+	LIST_HANDLER(l);
 
-	while (is_iso_list(p1)) {
-		cell *h = LIST_HEAD(p1);
+	while (is_iso_list(l)) {
+		l = LIST_TAIL(l);
 
-#if 0
-		if (is_variable(h)) {
-			frame *f = GET_FRAME(p1_ctx);
-			slot *e = GET_SLOT(f, h->var_nbr);
-			cell *tmp = deref(q, h, p1_ctx);
+		if (is_variable(l)) {
+			frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
 
-			if (!is_variable(tmp) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
-				return true;
+			if (!is_variable(l) && e->mark_cyc) {
+				ret_val = true;
+				break;
+			}
 
-			e->cyc_gen = q->cyc_gen;
-			e->cyc_depth = depth;
+			e->mark_cyc = true;
 		}
-#endif
-
-		p1 = LIST_TAIL(p1);
-		depth++;
-
-		if (is_variable(p1)) {
-			frame *f = GET_FRAME(p1_ctx);
-			slot *e = GET_SLOT(f, p1->var_nbr);
-			cell *c = deref(q, p1, p1_ctx);
-
-			if (!is_variable(c) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
-				return true;
-
-			e->cyc_gen = q->cyc_gen;
-			e->cyc_depth = depth;
-		}
-
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
 	}
 
-	return false;
+	l = p1;
+	l_ctx = p1_ctx;
+
+	while (is_iso_list(l)) {
+		l = LIST_TAIL(l);
+
+		if (is_variable(l)) {
+			frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
+
+			if (!is_variable(l) && e->mark_cyc) {
+				e->mark_cyc = false;
+				break;
+			}
+
+			e->mark_cyc = false;
+		}
+	}
+
+	return ret_val;
 }
 
-static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_t depth)
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!is_structure(p1))
 		return false;
 
 	if (is_iso_list(p1))
-		return is_cyclic_list_internal(q, p1, p1_ctx, depth);
+		return is_cyclic_list_internal(q, p1, p1_ctx);
 
 	//if (depth > MAX_DEPTH)
 	//	return true;
@@ -265,31 +271,28 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 	p1++;
 
 	while (arity--) {
-#if 0
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && (e->cyc_gen == q->cyc_gen) && (e->cyc_depth != depth))
+			if (!is_variable(c) && e->mark_cyc)
 				return true;
 
-			e->cyc_gen = q->cyc_gen;
-			e->cyc_depth = depth;
+			e->mark_cyc = true;
+			bool ok = is_cyclic_term_internal(q, c, c_ctx);
+			e->mark_cyc = false;
 
-			if (!is_variable(c)) {
-				if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
-					return true;
-			}
+			if (ok)
+				return true;
+		} else {
+			cell *c = deref(q, p1, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+
+			if (is_cyclic_term_internal(q, c, c_ctx))
+				return true;
 		}
-#else
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-
-		if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
-			return true;
-#endif
 
 		p1 += p1->nbr_cells;
 	}
@@ -299,14 +302,12 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, uint32_
 
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	q->cyc_gen++;
-	return is_cyclic_term_internal(q, p1, p1_ctx, 0);
+	return is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
 bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	q->cyc_gen++;
-	return !is_cyclic_term_internal(q, p1, p1_ctx, 0);
+	return !is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
 static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
