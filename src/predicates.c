@@ -357,7 +357,6 @@ static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
 
 	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
 		GET_FIRST_ARG(p1,any);
-		GET_NEXT_ARG(p2,any);
 		return !is_cyclic_term(q, p1, p1_ctx);
 	}
 
