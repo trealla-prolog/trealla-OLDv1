@@ -355,15 +355,13 @@ static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	bool was_acyclic = is_acyclic_term(q, p1, p1_ctx) || is_acyclic_term(q, p2, p2_ctx);
-
 	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
 		GET_FIRST_ARG(p1,any);
 		GET_NEXT_ARG(p2,any);
 
-		bool is_cyclic = is_cyclic_term(q, p1, p1_ctx) || is_cyclic_term(q, p2, p2_ctx);
+		bool is_cyclic = is_cyclic_term(q, p1, p1_ctx);
 
-		if (was_acyclic && is_cyclic)
+		if (is_cyclic)
 			return pl_failure;
 
 		return pl_success;
