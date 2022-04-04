@@ -206,6 +206,8 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx);
+
 static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *l = p1;
@@ -214,6 +216,28 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	LIST_HANDLER(l);
 
 	while (is_iso_list(l)) {
+		cell *h = LIST_HEAD(l);
+
+		if (is_variable(h)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, h->var_nbr);
+			h = deref(q, h, l_ctx);
+			pl_idx_t h_ctx = q->latest_ctx;
+
+			if (!is_variable(h) && e->sweep) {
+				e->mark = true;
+				ret_val = true;
+				break;
+			}
+
+			e->sweep = true;
+			bool ok = is_cyclic_term_internal(q, h, h_ctx);
+			e->sweep = false;
+
+			if (ok)
+				return true;
+		}
+
 		l = LIST_TAIL(l);
 
 		if (is_variable(l)) {
