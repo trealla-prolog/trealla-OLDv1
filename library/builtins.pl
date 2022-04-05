@@ -418,12 +418,14 @@ unify_with_occurs_check(X, Y) :-
 	acyclic_term([Lx,Ly]).
 unify_with_occurs_check(X, Y) :-
 	var(X), !,
+	term_variables(Y, Ly),
 	X = Y,
-	acyclic_term(X).
+	acyclic_term(Ly).
 unify_with_occurs_check(X, Y) :-
 	var(Y), !,
+	term_variables(X, Lx),
 	X = Y,
-	acyclic_term(Y).
+	acyclic_term(Lx).
 
 iso_dif(X, Y) :-
 	X \== Y,
