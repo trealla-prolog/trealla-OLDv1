@@ -410,22 +410,8 @@ ignore(_).
 not(G) :- G, !, fail.
 not(_).
 
-unify_with_occurs_check(X, Y) :-
-	nonvar(X), nonvar(Y), !,
-	term_variables(X, Lx),
-	term_variables(Y, Ly),
-	X = Y,
-	acyclic_term([Lx,Ly]).
-unify_with_occurs_check(X, Y) :-
-	var(X), !,
-	term_variables(Y, Ly),
-	X = Y,
-	acyclic_term(Ly).
-unify_with_occurs_check(X, Y) :-
-	var(Y), !,
-	term_variables(X, Lx),
-	X = Y,
-	acyclic_term(Lx).
+unify_with_occurs_check(X, X) :-
+	acyclic_term(X).
 
 iso_dif(X, Y) :-
 	X \== Y,
