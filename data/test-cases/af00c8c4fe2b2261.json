@@ -1,0 +1,55 @@
+{
+  "uid" : "af00c8c4fe2b2261",
+  "name" : "tak_01",
+  "fullName" : "tak_01::tests",
+  "historyId" : "tak_01::tests",
+  "time" : {
+    "duration" : 33
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/bench/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "108-109"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/0ad773c83fdb2fed45c89d4db880626e18897952/examples/bench/tests.lgt#L108"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "af00c8c4fe2b2261.json",
+  "parameterValues" : [ "examples/bench/tests.lgt", "108-109", "https://github.com/LogtalkDotOrg/logtalk3/tree/0ad773c83fdb2fed45c89d4db880626e18897952/examples/bench/tests.lgt#L108" ]
+}
