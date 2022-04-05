@@ -350,19 +350,6 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size
 	return make_cstringn(d, s+off, n);
 }
 
-static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-
-	if (unify(q, p1, p1_ctx, p2, p2_ctx)) {
-		GET_FIRST_ARG(p1,any);
-		return !is_cyclic_term(q, p1, p1_ctx);
-	}
-
-	return pl_failure;
-}
-
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -7271,7 +7258,6 @@ static const struct builtins g_iso_bifs[] =
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
 
-	{"unify_with_occurs_check", 2, fn_iso_unify_with_occurs_check_2, NULL, false},
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},
 
