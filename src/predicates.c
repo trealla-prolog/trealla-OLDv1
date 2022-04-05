@@ -2950,10 +2950,6 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		if (arity) {
 			if (!(var_nbr = create_vars(q, arity)))
 				return throw_error(q, p3, p3_ctx, "resource_error", "stack");
-
-			//REGET_FIRST_ARG(p1,any);
-			//REGET_NEXT_ARG(p2,any);
-			//REGET_NEXT_ARG(p3,any);
 		}
 
 		if (is_number(p2)) {
@@ -3839,8 +3835,6 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 	if (new_varno != f->nbr_vars) {
 		if (!create_vars(q, new_varno-f->nbr_vars))
 			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
-
-		//REGET_FIRST_ARG(p1,variable);
 	}
 #endif
 
