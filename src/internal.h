@@ -567,7 +567,7 @@ struct query_ {
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint32_t cgen;
 	uint8_t nv_mask[MAX_ARITY];
-	prolog_flags flag;
+	prolog_flags flags;
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
@@ -621,7 +621,7 @@ struct parser_ {
 	char *token, *save_line, *srcptr, *error_desc, *tmpbuf;
 	cell v;
 	size_t token_size, n_line, toklen, pos_start, tmpbuf_size;
-	prolog_flags flag;
+	prolog_flags flags;
 	unsigned depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
 	int quote_char, line_nbr, line_nbr_start;
@@ -671,7 +671,7 @@ struct module_ {
 	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
 	unsigned id, idx_used, indexing_threshold;
-	prolog_flags flag;
+	prolog_flags flags;
 	bool user_ops:1;
 	bool prebuilt:1;
 	bool use_persist:1;

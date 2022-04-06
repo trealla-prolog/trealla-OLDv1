@@ -894,8 +894,8 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 
-		if (q->flag.occurs_check == OCCURS_TRUE) {
-		} else if (q->flag.occurs_check == OCCURS_ERROR) {
+		if (q->flags.occurs_check == OCCURS_TRUE) {
+		} else if (q->flags.occurs_check == OCCURS_ERROR) {
 		}
 
 		return true;
@@ -904,8 +904,8 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (is_variable(p2)) {
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 
-		if (q->flag.occurs_check == OCCURS_TRUE) {
-		} else if (q->flag.occurs_check == OCCURS_ERROR) {
+		if (q->flags.occurs_check == OCCURS_TRUE) {
+		} else if (q->flags.occurs_check == OCCURS_ERROR) {
 		}
 
 		return true;

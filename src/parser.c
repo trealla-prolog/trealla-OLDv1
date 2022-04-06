@@ -219,7 +219,7 @@ parser *create_parser(module *m)
 	ensure(p->cl, (free(p->token), free(p)));
 	p->cl->nbr_cells = nbr_cells;
 	p->start_term = true;
-	p->flag = m->flag;
+	p->flags = m->flags;
 	p->line_nbr = 1;
 	return p;
 }
@@ -687,14 +687,14 @@ static void directives(parser *p, cell *d)
 
 		if (!strcmp(GET_STR(p, p1), "double_quotes")) {
 			if (!strcmp(GET_STR(p, p2), "atom")) {
-				p->m->flag.double_quote_chars = p->m->flag.double_quote_codes = false;
-				p->m->flag.double_quote_atom = true;
+				p->m->flags.double_quote_chars = p->m->flags.double_quote_codes = false;
+				p->m->flags.double_quote_atom = true;
 			} else if (!strcmp(GET_STR(p, p2), "codes")) {
-				p->m->flag.double_quote_chars = p->m->flag.double_quote_atom = false;
-				p->m->flag.double_quote_codes = true;
+				p->m->flags.double_quote_chars = p->m->flags.double_quote_atom = false;
+				p->m->flags.double_quote_codes = true;
 			} else if (!strcmp(GET_STR(p, p2), "chars")) {
-				p->m->flag.double_quote_atom = p->m->flag.double_quote_codes = false;
-				p->m->flag.double_quote_chars = true;
+				p->m->flags.double_quote_atom = p->m->flags.double_quote_codes = false;
+				p->m->flags.double_quote_chars = true;
 			} else {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: unknown value\n");
@@ -704,14 +704,14 @@ static void directives(parser *p, cell *d)
 			}
 		} else if (!strcmp(GET_STR(p, p1), "character_escapes")) {
 			if (!strcmp(GET_STR(p, p2), "true") || !strcmp(GET_STR(p, p2), "on"))
-				p->m->flag.character_escapes = true;
+				p->m->flags.character_escapes = true;
 			else if (!strcmp(GET_STR(p, p2), "false") || !strcmp(GET_STR(p, p2), "off"))
-				p->m->flag.character_escapes = false;
+				p->m->flags.character_escapes = false;
 		} else {
 			//fprintf(stdout, "Warning: unknown flag: %s\n", GET_STR(p, p1));
 		}
 
-		p->flag = p->m->flag;
+		p->flags = p->m->flags;
 		return;
 	}
 
@@ -1856,7 +1856,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			s++;
 			v = *s++;
 #if 1
-		} else if ((*s == '\'') && !p->flag.not_strict_iso && search_op(p->m, "", NULL, false)) {
+		} else if ((*s == '\'') && !p->flags.not_strict_iso && search_op(p->m, "", NULL, false)) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
@@ -2178,7 +2178,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	if (p->dq_consing) {
 		int ch = get_char_utf8(&src);
 
-		if ((ch == '\\') && p->flag.character_escapes) {
+		if ((ch == '\\') && p->flags.character_escapes) {
 			ch = get_escape(&src, &p->error, false);
 
 			if (p->error) {
@@ -2281,7 +2281,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		p->quote_char = *src++;
 		p->is_quoted = true;
 
-		if ((p->quote_char == '"') && p->flag.double_quote_codes) {
+		if ((p->quote_char == '"') && p->flags.double_quote_codes) {
 			*dst++ = '[';
 
 			if ((*src == '"') && (src[1] != '"')) {
@@ -2298,7 +2298,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->srcptr = (char*)src;
 			p->toklen = dst - p->token;
 			return true;
-		} else if ((p->quote_char == '"') && p->flag.double_quote_chars)
+		} else if ((p->quote_char == '"') && p->flags.double_quote_chars)
 			p->string = true;
 
 		if (p->string && (*src == p->quote_char) && (*src == '"')) {
@@ -2340,7 +2340,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 					return false;
 				}
 
-				if ((ch == '\\') && p->flag.character_escapes) {
+				if ((ch == '\\') && p->flags.character_escapes) {
 					int ch2 = *src;
 					ch = get_escape(&src, &p->error, false);
 
@@ -2853,7 +2853,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
-			if ((*p->srcptr == ',') && !p->flag.double_quote_codes) {
+			if ((*p->srcptr == ',') && !p->flags.double_quote_codes) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line?p->save_line:"");
 
