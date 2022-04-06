@@ -1,0 +1,55 @@
+{
+  "uid" : "e331c4ff148a1daf",
+  "name" : "queue_serve_3_01",
+  "fullName" : "queue_serve_3_01::tests",
+  "historyId" : "queue_serve_3_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/queues/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/queues/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/queues/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/queues/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "181-183"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c7664e6048b822131dcdd38c1add2237320c363e/library/queues/tests.lgt#L181"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e331c4ff148a1daf.json",
+  "parameterValues" : [ "library/queues/tests.lgt", "181-183", "https://github.com/LogtalkDotOrg/logtalk3/tree/c7664e6048b822131dcdd38c1add2237320c363e/library/queues/tests.lgt#L181" ]
+}

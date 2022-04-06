@@ -1,0 +1,55 @@
+{
+  "uid" : "683be6af6fbf21e4",
+  "name" : "uuid_null_chars",
+  "fullName" : "uuid_null_chars::tests",
+  "historyId" : "uuid_null_chars::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/uuid/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/uuid/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/uuid/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/uuid/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "41-42"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c7664e6048b822131dcdd38c1add2237320c363e/library/uuid/tests.lgt#L41"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "683be6af6fbf21e4.json",
+  "parameterValues" : [ "library/uuid/tests.lgt", "41-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/c7664e6048b822131dcdd38c1add2237320c363e/library/uuid/tests.lgt#L41" ]
+}
