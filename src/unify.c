@@ -918,20 +918,20 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		bool was_cyclic = false;
 
 		if (q->flags.occurs_check == OCCURS_TRUE) {
-			if (!was_cyclic && is_cyclic_term(q, p1, p1_ctx))
+			if (is_cyclic_term(q, p1, p1_ctx))
 				was_cyclic = true;
 		} else if (q->flags.occurs_check == OCCURS_ERROR) {
-			if (!was_cyclic && is_cyclic_term(q, p1, p1_ctx))
+			if (is_cyclic_term(q, p1, p1_ctx))
 				was_cyclic = true;
 		}
 
 		set_var(q, p2, p2_ctx, p1, p1_ctx);
 
 		if (q->flags.occurs_check == OCCURS_TRUE) {
-			if (is_cyclic_term(q, p1, p1_ctx))
+			if (!was_cyclic && is_cyclic_term(q, p1, p1_ctx))
 				return false;
 		} else if (q->flags.occurs_check == OCCURS_ERROR) {
-			if (is_cyclic_term(q, p1, p1_ctx))
+			if (!was_cyclic && is_cyclic_term(q, p1, p1_ctx))
 				return (throw_error(q, p1, p1_ctx, "representation_error", "term"), false);
 		}
 
