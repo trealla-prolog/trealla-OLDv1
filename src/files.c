@@ -1292,7 +1292,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	cell *p2_orig = p2, *vnames = NULL;
 	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx = 0;
 	LIST_HANDLER(p2);
@@ -1360,7 +1360,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	cell *p2_orig = p2, *vnames = NULL;
 	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx;
 	LIST_HANDLER(p2);
@@ -2449,7 +2449,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 
 	if (!str->p) {
 		str->p = create_parser(q->st.m);
-		str->p->flag = q->st.m->flag;
+		str->p->flags = q->st.m->flags;
 		str->p->fp = str->fp;
 	} else
 		reset(str->p);
@@ -2533,7 +2533,7 @@ static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {
@@ -2565,7 +2565,7 @@ static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {
@@ -2595,7 +2595,7 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {
@@ -2627,7 +2627,7 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	GET_NEXT_ARG(p2,list_or_nil);
 	cell *vnames = NULL;
 	pl_idx_t vnames_ctx = 0;
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
 	while (is_list(p2) && !g_tpl_interrupt) {

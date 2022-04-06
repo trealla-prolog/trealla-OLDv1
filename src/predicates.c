@@ -350,6 +350,17 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size
 	return make_cstringn(d, s+off, n);
 }
 
+static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,any);
+	bool save = q->flags.occurs_check;
+	q->flags.occurs_check = OCCURS_TRUE;
+	pl_status ok = unify(q, p1, p1_ctx, p2, p2_ctx);
+	q->flags.occurs_check = save;
+	return ok;
+}
+
 static USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -396,18 +407,18 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 
 	if (!CMP_SLICE2(q, c, "character_escapes")) {
 		if (is_literal(c1))
-			p->flag.character_escapes = !CMP_SLICE2(q, c1, "true");
+			p->flags.character_escapes = !CMP_SLICE2(q, c1, "true");
 	} else if (!CMP_SLICE2(q, c, "double_quotes")) {
 		if (is_literal(c1)) {
 			if (!CMP_SLICE2(q, c1, "atom")) {
-				p->flag.double_quote_codes = p->flag.double_quote_chars = false;
-				p->flag.double_quote_atom = true;
+				p->flags.double_quote_codes = p->flags.double_quote_chars = false;
+				p->flags.double_quote_atom = true;
 			} else if (!CMP_SLICE2(q, c1, "chars")) {
-				p->flag.double_quote_atom = p->flag.double_quote_codes = false;
-				p->flag.double_quote_chars = true;
+				p->flags.double_quote_atom = p->flags.double_quote_codes = false;
+				p->flags.double_quote_chars = true;
 			} else if (!CMP_SLICE2(q, c1, "codes")) {
-				p->flag.double_quote_atom = p->flag.double_quote_chars = false;
-				p->flag.double_quote_codes = true;
+				p->flags.double_quote_atom = p->flags.double_quote_chars = false;
+				p->flags.double_quote_codes = true;
 			}
 		}
 	} else if (!CMP_SLICE2(q, c, "variables")) {
@@ -449,7 +460,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 {
 	if (!str->p) {
 		str->p = create_parser(q->st.m);
-		str->p->flag = q->st.m->flag;
+		str->p->flags = q->st.m->flags;
 		str->p->fp = str->fp;
 		str->p->no_fp = q->p->no_fp;
 	} else
@@ -1369,7 +1380,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		parser *p = str->p;
 		reset(p);
 		p->error = false;
-		p->flag = q->st.m->flag;
+		p->flags = q->st.m->flags;
 		p->srcptr = tmpbuf;
 		p->do_read_term = true;
 		bool ok = get_token(p, true, false);
@@ -1793,7 +1804,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		parser *p = str->p;
 		reset(p);
 		p->error = false;
-		p->flag = q->st.m->flag;
+		p->flags = q->st.m->flags;
 		p->srcptr = tmpbuf;
 		p->do_read_term = true;
 		bool ok = get_token(p, true, false);
@@ -3133,18 +3144,18 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	if (!CMP_SLICE2(q, p1, "double_quotes")) {
 		cell tmp;
 
-		if (q->st.m->flag.double_quote_atom)
+		if (q->st.m->flags.double_quote_atom)
 			make_literal(&tmp, index_from_pool(q->pl, "atom"));
-		else if (q->st.m->flag.double_quote_codes)
+		else if (q->st.m->flags.double_quote_codes)
 			make_literal(&tmp, index_from_pool(q->pl, "codes"));
-		else if (q->st.m->flag.double_quote_chars)
+		else if (q->st.m->flags.double_quote_chars)
 			make_literal(&tmp, index_from_pool(q->pl, "chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!CMP_SLICE2(q, p1, "char_conversion")) {
 		cell tmp;
 
-		if (q->st.m->flag.char_conversion)
+		if (q->st.m->flags.char_conversion)
 			make_literal(&tmp, g_on_s);
 		else
 			make_literal(&tmp, g_off_s);
@@ -3165,10 +3176,10 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
 		cell tmp;
 
-		if (q->st.m->flag.occurs_check == OCCURS_TRUE)
-			make_literal(&tmp, g_on_s);
-		else if (q->st.m->flag.occurs_check == OCCURS_FALSE)
-			make_literal(&tmp, g_off_s);
+		if (q->st.m->flags.occurs_check == OCCURS_TRUE)
+			make_literal(&tmp, g_true_s);
+		else if (q->st.m->flags.occurs_check == OCCURS_FALSE)
+			make_literal(&tmp, g_false_s);
 		else
 			make_literal(&tmp, index_from_pool(q->pl, "error"));
 
@@ -3180,7 +3191,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "strict_iso")) {
 		cell tmp;
 
-		if (!q->st.m->flag.not_strict_iso)
+		if (!q->st.m->flags.not_strict_iso)
 			make_literal(&tmp, g_on_s);
 		else
 			make_literal(&tmp, g_off_s);
@@ -3189,7 +3200,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "debug")) {
 		cell tmp;
 
-		if (q->st.m->flag.debug)
+		if (q->st.m->flags.debug)
 			make_literal(&tmp, g_on_s);
 		else
 			make_literal(&tmp, g_off_s);
@@ -3198,7 +3209,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "character_escapes")) {
 		cell tmp;
 
-		if (q->st.m->flag.character_escapes)
+		if (q->st.m->flags.character_escapes)
 			make_literal(&tmp, g_true_s);
 		else
 			make_literal(&tmp, g_false_s);
@@ -3274,9 +3285,9 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "unknown")) {
 		cell tmp;
 		make_literal(&tmp,
-			q->st.m->flag.unknown == UNK_ERROR ? index_from_pool(q->pl, "error") :
-			q->st.m->flag.unknown == UNK_WARNING ? index_from_pool(q->pl, "warning") :
-			q->st.m->flag.unknown == UNK_CHANGEABLE ? index_from_pool(q->pl, "changeable") :
+			q->st.m->flags.unknown == UNK_ERROR ? index_from_pool(q->pl, "error") :
+			q->st.m->flags.unknown == UNK_WARNING ? index_from_pool(q->pl, "warning") :
+			q->st.m->flags.unknown == UNK_CHANGEABLE ? index_from_pool(q->pl, "changeable") :
 			index_from_pool(q->pl, "fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else if (!CMP_SLICE2(q, p1, "generate_debug_info")) {
@@ -3303,14 +3314,14 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 
 	if (!CMP_SLICE2(q, p1, "double_quotes")) {
 		if (!CMP_SLICE2(q, p2, "atom")) {
-			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_codes = false;
-			q->st.m->flag.double_quote_atom = true;
+			q->st.m->flags.double_quote_chars = q->st.m->flags.double_quote_codes = false;
+			q->st.m->flags.double_quote_atom = true;
 		} else if (!CMP_SLICE2(q, p2, "codes")) {
-			q->st.m->flag.double_quote_chars = q->st.m->flag.double_quote_atom = false;
-			q->st.m->flag.double_quote_codes = true;
+			q->st.m->flags.double_quote_chars = q->st.m->flags.double_quote_atom = false;
+			q->st.m->flags.double_quote_codes = true;
 		} else if (!CMP_SLICE2(q, p2, "chars")) {
-			q->st.m->flag.double_quote_atom = q->st.m->flag.double_quote_codes = false;
-			q->st.m->flag.double_quote_chars = true;
+			q->st.m->flags.double_quote_atom = q->st.m->flags.double_quote_codes = false;
+			q->st.m->flags.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3320,12 +3331,12 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
 
-		q->st.m->p->flag = q->st.m->flag;
+		q->st.m->p->flags = q->st.m->flags;
 	} else if (!CMP_SLICE2(q, p1, "character_escapes")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flag.character_escapes = true;
+			q->st.m->flags.character_escapes = true;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flag.character_escapes = false;
+			q->st.m->flags.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3336,9 +3347,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "char_conversion")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flag.char_conversion = true;
+			q->st.m->flags.char_conversion = true;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flag.char_conversion = false;
+			q->st.m->flags.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3349,11 +3360,11 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flag.occurs_check = OCCURS_TRUE;
+			q->st.m->flags.occurs_check = OCCURS_TRUE;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flag.occurs_check = OCCURS_FALSE;
+			q->st.m->flags.occurs_check = OCCURS_FALSE;
 		else if (!CMP_SLICE2(q, p2, "error"))
-			q->st.m->flag.occurs_check = OCCURS_ERROR;
+			q->st.m->flags.occurs_check = OCCURS_ERROR;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3364,9 +3375,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "debug")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flag.debug = true;
+			q->st.m->flags.debug = true;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flag.debug = false;
+			q->st.m->flags.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3377,9 +3388,9 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "strict_iso")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flag.not_strict_iso = !true;
+			q->st.m->flags.not_strict_iso = !true;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flag.not_strict_iso = !false;
+			q->st.m->flags.not_strict_iso = !false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3390,13 +3401,13 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "unknown")) {
 		if (!CMP_SLICE2(q, p2, "fail")) {
-			q->st.m->flag.unknown = UNK_FAIL;
+			q->st.m->flags.unknown = UNK_FAIL;
 		} else if (!CMP_SLICE2(q, p2, "error")) {
-			q->st.m->flag.unknown = UNK_ERROR;
+			q->st.m->flags.unknown = UNK_ERROR;
 		} else if (!CMP_SLICE2(q, p2, "warning")) {
-			q->st.m->flag.unknown = UNK_WARNING;
+			q->st.m->flags.unknown = UNK_WARNING;
 		} else if (!CMP_SLICE2(q, p2, "changeable")) {
-			q->st.m->flag.unknown = UNK_CHANGEABLE;
+			q->st.m->flags.unknown = UNK_CHANGEABLE;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -3423,7 +3434,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "prolog_flag");
 	}
 
-	q->flag = q->st.m->flag;
+	q->flags = q->st.m->flags;
 	return pl_success;
 }
 
@@ -7257,6 +7268,7 @@ static const struct builtins g_iso_bifs[] =
 	{"current_predicate", 1, fn_iso_current_predicate_1, NULL, false},
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false},
 	{"compare", 3, fn_iso_compare_3, NULL, false},
+	{"unify_with_occurs_check", 2, fn_iso_unify_with_occurs_check_2, NULL, false},
 
 	{"=", 2, fn_iso_unify_2, NULL, false},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false},
@@ -7629,13 +7641,13 @@ static void load_flags(query *q)
 	module *m = q->st.m;
 	ASTRING_alloc(pr, 1024);
 
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flag.double_quote_atom?"atom":m->flag.double_quote_chars?"chars":m->flag.double_quote_codes?"codes":"???");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flag.char_conversion?"on":"off");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flag.occurs_check==OCCURS_TRUE?"on":m->flag.occurs_check==OCCURS_FALSE?"off":"error");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flag.character_escapes?"true":"false");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "strict_iso", !m->flag.not_strict_iso?"on":"off");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flag.debug?"on":"off");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unknown", m->flag.unknown == UNK_ERROR?"error":m->flag.unknown == UNK_WARNING?"warning":m->flag.unknown == UNK_CHANGEABLE?"changeable":"fail");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flags.double_quote_atom?"atom":m->flags.double_quote_chars?"chars":m->flags.double_quote_codes?"codes":"???");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flags.char_conversion?"on":"off");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flags.occurs_check==OCCURS_TRUE?"true":m->flags.occurs_check==OCCURS_FALSE?"false":"error");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flags.character_escapes?"true":"false");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "strict_iso", !m->flags.not_strict_iso?"on":"off");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flags.debug?"on":"off");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unknown", m->flags.unknown == UNK_ERROR?"error":m->flags.unknown == UNK_WARNING?"warning":m->flags.unknown == UNK_CHANGEABLE?"changeable":"fail");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "encoding", "'UTF-8'");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "unix", "true");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "dialect", "trealla");

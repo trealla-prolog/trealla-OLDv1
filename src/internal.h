@@ -54,7 +54,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define MAX_SMALL_STRING 15
+#define MAX_SMALL_STRING ((sizeof(void*)*2)-1)
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
@@ -288,7 +288,8 @@ typedef struct reflist_ reflist;
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a Term is. A compound is a variable length array of
 // cells, the length specified by 'nbr_cells' field in the 1st cell.
-// A cell is a tagged union, the size should be 24 bytes.
+// A cell is a tagged union.
+// The size should be 24 bytes (oops, now it is 32 bytes)
 
 struct cell_ {
 	uint8_t tag;
@@ -297,24 +298,23 @@ struct cell_ {
 	pl_idx_t nbr_cells;
 
 	union {
+
+		void *val_dummy[3];
+
 		struct {
 			pl_int_t val_int;
-			void *val_spare1;
 		};
 
 		struct {
 			bigint *val_bigint;
-			void *val_spare2;
 		};
 
 		struct {
 			double val_real;
-			void *val_spare3;
 		};
 
 		struct {
 			cell *val_ptr;
-			void *val_spare4;
 		};
 
 		struct {
@@ -567,7 +567,7 @@ struct query_ {
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint32_t cgen;
 	uint8_t nv_mask[MAX_ARITY];
-	prolog_flags flag;
+	prolog_flags flags;
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
@@ -621,7 +621,7 @@ struct parser_ {
 	char *token, *save_line, *srcptr, *error_desc, *tmpbuf;
 	cell v;
 	size_t token_size, n_line, toklen, pos_start, tmpbuf_size;
-	prolog_flags flag;
+	prolog_flags flags;
 	unsigned depth, read_term;
 	unsigned nesting_parens, nesting_braces, nesting_brackets;
 	int quote_char, line_nbr, line_nbr_start;
@@ -671,7 +671,7 @@ struct module_ {
 	map *index, *nbs, *ops, *defops;
 	struct loaded_file *loaded_files;
 	unsigned id, idx_used, indexing_threshold;
-	prolog_flags flag;
+	prolog_flags flags;
 	bool user_ops:1;
 	bool prebuilt:1;
 	bool use_persist:1;

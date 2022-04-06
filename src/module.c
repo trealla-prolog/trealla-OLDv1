@@ -1576,9 +1576,9 @@ module *create_module(prolog *pl, const char *name)
 	m->pl = pl;
 	m->filename = set_known(m, name);
 	m->name = set_known(m, name);
-	m->flag.unknown = UNK_ERROR;
-	m->flag.double_quote_chars = true;
-	m->flag.character_escapes = true;
+	m->flags.unknown = UNK_ERROR;
+	m->flags.double_quote_chars = true;
+	m->flags.character_escapes = true;
 	m->error = false;
 	m->id = ++pl->next_mod_id;
 	m->defops = m_create((void*)strcmp, NULL, NULL);

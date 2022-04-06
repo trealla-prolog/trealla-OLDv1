@@ -353,7 +353,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 	int cnt = 0;
 
 	while (is_iso_list(l)
-		&& (q->st.m->flag.double_quote_chars || allow_codes)
+		&& (q->st.m->flags.double_quote_chars || allow_codes)
 		&& !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
@@ -1307,7 +1307,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 			if (!pr) {
 				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
-					if (q->st.m->flag.unknown == UNK_ERROR)
+					if (q->st.m->flags.unknown == UNK_ERROR)
 						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
 					else
 						return pl_failure;
@@ -2104,7 +2104,7 @@ query *create_query(module *m, bool is_task)
 	q->pl = m->pl;
 	q->st.m = m;
 	q->trace = m->pl->trace;
-	q->flag = m->flag;
+	q->flags = m->flags;
 	q->time_started = q->get_started = get_time_in_usec();
 	q->time_cpu_last_started = q->time_cpu_started = cpu_time_in_usec();
 	mp_int_init(&q->tmp_ival);

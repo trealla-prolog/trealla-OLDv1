@@ -172,7 +172,7 @@ static mp_result mp_int_divx_value(mp_int a, mp_small b, mp_int q)
 	errno = 0;									\
 												\
 	if (!q->eval) {								\
-		if (q->st.m->flag.unknown == 0)			\
+		if (q->st.m->flags.unknown == 0)			\
 			return false;						\
 		else									\
 			return throw_error(q, q->st.curr_cell, q->st.curr_frame, "existence_error", "procedure");	\
