@@ -410,9 +410,6 @@ ignore(_).
 not(G) :- G, !, fail.
 not(_).
 
-unify_with_occurs_check(X, X) :-
-	acyclic_term(X).
-
 iso_dif(X, Y) :-
 	X \== Y,
 	( X \= Y -> true
