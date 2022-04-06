@@ -666,6 +666,43 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
+	} else if (!strcmp(err_type, "permission_error") && is_builtin(c)) {
+		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
+		tmp = alloc_on_heap(q, 9+extra);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 0;
+		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
+		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
+
+		if (!extra)
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		else {
+			char tmpbuf[1024*8];
+			strcpy(tmpbuf, expected);
+			const char *ptr = tmpbuf;
+			char *ptr2 = strchr(ptr, ',');
+			if (*ptr2) *ptr2++ = '\0';
+
+			while (ptr2) {
+				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				ptr = ptr2;
+				ptr2 = strchr(ptr, ',');
+			}
+
+			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+		}
+
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		tmp[nbr_cells] = *c;
+		share_cell(c);
+		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
+		nbr_cells++;
+		make_int(tmp+nbr_cells++, c->arity);
+		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
+		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		//printf("error(%s,(%s)/%u).\n", err_type, functor, goal->arity);
 		tmp = alloc_on_heap(q, 5);
