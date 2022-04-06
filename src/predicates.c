@@ -3166,9 +3166,9 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		cell tmp;
 
 		if (q->st.m->flag.occurs_check == OCCURS_TRUE)
-			make_literal(&tmp, g_on_s);
+			make_literal(&tmp, g_true_s);
 		else if (q->st.m->flag.occurs_check == OCCURS_FALSE)
-			make_literal(&tmp, g_off_s);
+			make_literal(&tmp, g_false_s);
 		else
 			make_literal(&tmp, index_from_pool(q->pl, "error"));
 
@@ -7631,7 +7631,7 @@ static void load_flags(query *q)
 
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flag.double_quote_atom?"atom":m->flag.double_quote_chars?"chars":m->flag.double_quote_codes?"codes":"???");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flag.char_conversion?"on":"off");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flag.occurs_check==OCCURS_TRUE?"on":m->flag.occurs_check==OCCURS_FALSE?"off":"error");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flag.occurs_check==OCCURS_TRUE?"true":m->flag.occurs_check==OCCURS_FALSE?"false":"error");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flag.character_escapes?"true":"false");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "strict_iso", !m->flag.not_strict_iso?"on":"off");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flag.debug?"on":"off");
