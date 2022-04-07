@@ -3634,7 +3634,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		size_t buflen = strlen(ptr)+1+strlen(s)+1;
 		tmpbuf = malloc(buflen);
 		may_ptr_error(tmpbuf);
-		snprintf(tmpbuf, buflen, "%s/%s", ptr, s);
+		snprintf(tmpbuf, buflen, "%s%c%s", ptr, PATH_SEP_CHAR, s);
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
@@ -3653,7 +3653,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
-				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
+				snprintf(tmp, buflen, "%s%c%s", tmpbuf, PATH_SEP_CHAR, s);
 				free(tmpbuf);
 				tmpbuf = fixup(tmp);
 				may_ptr_error(tmpbuf);

@@ -646,7 +646,7 @@ static void directives(parser *p, cell *d)
 			query q = (query){0};
 			q.pl = p->pl;
 			q.st.m = p->m;
-			snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+			snprintf(dstbuf, sizeof(dstbuf), "%s%c", g_tpl_lib, PATH_SEP_CHAR);
 			char *dst = dstbuf + strlen(dstbuf);
 			pl_idx_t ctx = 0;
 			print_term_to_buf(&q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, false, 0);

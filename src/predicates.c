@@ -6968,7 +6968,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
 			ASTRING(s1);
-			ASTRING_sprintf(s1, "library/%s", lib->name);
+			ASTRING_sprintf(s1, "library%c%s", PATH_SEP_CHAR, lib->name);
 			m = load_text(q->st.m, src, ASTRING_cstr(s1));
 			ASTRING_free(s1);
 			free(src);
@@ -6982,7 +6982,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			return pl_success;
 		}
 
-		snprintf(dstbuf, sizeof(dstbuf), "%s/", g_tpl_lib);
+		snprintf(dstbuf, sizeof(dstbuf), "%s%c", g_tpl_lib, PATH_SEP_CHAR);
 		char *dst = dstbuf + strlen(dstbuf);
 		pl_idx_t ctx = 0;
 		print_term_to_buf(q, dst, sizeof(dstbuf)-strlen(g_tpl_lib), p1, ctx, 1, 0, 0);

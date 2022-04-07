@@ -145,8 +145,11 @@ int main(int ac, char *av[])
 		homedir = ".";
 
 	char histfile[1024];
+#ifdef _WIN32
+	snprintf(histfile, sizeof(histfile), "%s\\%s", homedir, ".tpl_history");
+#else
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
-
+#endif
 	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
 	int version = 0, daemon = 0;
@@ -216,7 +219,11 @@ int main(int ac, char *av[])
 #endif
 
 		if (!strcmp(av[i], "--consult")) {
+#ifdef _WIN32
+			if (!pl_consult_fp(pl, stdin, ".\\")) {
+#else
 			if (!pl_consult_fp(pl, stdin, "./")) {
+#endif
 				pl_destroy(pl);
 				return 1;
 			}
@@ -249,7 +256,11 @@ int main(int ac, char *av[])
 	}
 
 	if (!no_res && !version)
+#ifdef _WIN32
+		pl_consult(pl, "~\\.tplrc");
+#else
 		pl_consult(pl, "~/.tplrc");
+#endif
 
 	if (goal) {
 		if (!pl_eval(pl, goal)) {
