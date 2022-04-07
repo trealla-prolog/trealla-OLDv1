@@ -728,7 +728,6 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	}
 
 	convert_path(filename);
-
 	stream *str = &q->pl->streams[n];
 	may_ptr_error(str->filename = strdup(filename));
 	may_ptr_error(str->name = strdup(filename));
@@ -3681,7 +3680,6 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
 				snprintf(tmp, buflen, "%s%c%s", tmpbuf, PATH_SEP_CHAR, s);
-				convert_path(tmp);
 				free(tmpbuf);
 				tmpbuf = fixup(tmp);
 				may_ptr_error(tmpbuf);
