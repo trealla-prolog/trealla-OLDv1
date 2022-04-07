@@ -566,23 +566,17 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
-static void convert_path(char *filename)
+void convert_path(char *filename)
 {
 	char *src = filename;
 
 	while (*src) {
-#ifdef _WIN32
-		if (*src == '\\')
-#else
-		if (*src == '/')
-#endif
+		if ((*src == '/') || (*src == '\\'))
 			*src = PATH_SEP_CHAR;
 
 		src++;
 	}
 }
-#endif
 
 #ifndef SANDBOX
 #ifndef _WIN32
@@ -3652,10 +3646,10 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		char *dst = envbuf;
 		s++;
 
-		while (*s && (*s != PATH_SEP_CHAR) && ((dst-envbuf-1) != sizeof(envbuf)))
+		while (*s && (*s != '/') && (*s != '\\') && ((dst-envbuf-1) != sizeof(envbuf)))
 			*dst++ = *s++;
 
-		if (*s == PATH_SEP_CHAR)
+		if ((*s == '\\') || (*s == '/'))
 			s++;
 
 		*dst = '\0';
@@ -3667,6 +3661,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		tmpbuf = malloc(buflen);
 		may_ptr_error(tmpbuf);
 		snprintf(tmpbuf, buflen, "%s%c%s", ptr, PATH_SEP_CHAR, s);
+		convert_path(tmpbuf);
 		char *tmpbuf2;
 
 		if ((tmpbuf2 = realpath(tmpbuf, NULL)) == NULL) {
@@ -3686,6 +3681,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
 				snprintf(tmp, buflen, "%s%c%s", tmpbuf, PATH_SEP_CHAR, s);
+				convert_path(tmp);
 				free(tmpbuf);
 				tmpbuf = fixup(tmp);
 				may_ptr_error(tmpbuf);
@@ -4000,6 +3996,8 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 	} else
 		filename2 = DUP_SLICE(q, p2);
 
+	convert_path(filename1);
+	convert_path(filename2);
 	struct stat st = {0};
 
 	if (stat(filename1, &st)) {
@@ -4044,6 +4042,8 @@ static USE_RESULT pl_status fn_copy_file_2(query *q)
 	} else
 		filename2 = DUP_SLICE(q, p2);
 
+	convert_path(filename1);
+	convert_path(filename2);
 	FILE *fp1 = fopen(filename1, "rb");
 
 	if (!fp1) {

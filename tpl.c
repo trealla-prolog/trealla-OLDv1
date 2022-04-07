@@ -30,6 +30,8 @@
 }
 #endif
 
+void convert_path(char *filename);
+
 void sigfn(int s)
 {
 	signal(SIGINT, &sigfn);
@@ -145,11 +147,8 @@ int main(int ac, char *av[])
 		homedir = ".";
 
 	char histfile[1024];
-#ifdef _WIN32
-	snprintf(histfile, sizeof(histfile), "%s\\%s", homedir, ".tpl_history");
-#else
 	snprintf(histfile, sizeof(histfile), "%s/%s", homedir, ".tpl_history");
-#endif
+	convert_path(histfile);
 	//bool did_load = false;
 	int i, do_goal = 0, do_lib = 0;
 	int version = 0, daemon = 0;
@@ -242,6 +241,7 @@ int main(int ac, char *av[])
 			continue;
 		} else if (do_lib) {
 			g_tpl_lib = strdup(av[i]);
+			convert_path(g_tpl_lib);
 			do_lib = 0;
 		} else if (do_goal) {
 			do_goal = 0;

@@ -13,6 +13,8 @@
 #include "module.h"
 #include "prolog.h"
 
+void convert_path(char *filename);
+
 static const size_t INITIAL_POOL_SIZE = 64000;	// bytes
 
 pl_idx_t g_empty_s, g_pair_s, g_dot_s, g_cut_s, g_nil_s, g_true_s, g_fail_s;
@@ -155,8 +157,10 @@ static void g_init()
 {
 	char *ptr = getenv("TPL_LIBRARY_PATH");
 
-	if (ptr)
+	if (ptr) {
 		g_tpl_lib = strdup(ptr);
+		convert_path(g_tpl_lib);
+	}
 }
 
 void pl_destroy(prolog *pl)
