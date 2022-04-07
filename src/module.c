@@ -15,8 +15,6 @@
 #include "query.h"
 #include "utf8.h"
 
-void convert_path(char *filename);
-
 static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},

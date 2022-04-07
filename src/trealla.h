@@ -23,6 +23,8 @@ extern void set_stats(prolog*);
 extern void set_noindex(prolog*);
 extern void set_opt(prolog*, int onoff);
 
+extern void convert_path(char *filename);
+
 extern int g_tpl_interrupt, g_ac, g_avc;
 extern char **g_av, *g_argv0;
 extern char *g_tpl_lib;

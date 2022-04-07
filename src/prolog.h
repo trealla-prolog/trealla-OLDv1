@@ -17,6 +17,7 @@ extern pl_idx_t g_dcg_s, g_throw_s, g_sys_block_catcher_s, g_sys_cut_if_det_s;
 extern pl_idx_t g_sys_soft_cut_s, g_if_then_s, g_soft_cut_s, g_negation_s;
 extern pl_idx_t g_error_s, g_slash_s, g_sys_cleanup_if_det_s;
 extern pl_idx_t g_goal_expansion_s;
+extern void convert_path(char *filename);
 
 inline static module *find_module_id(const prolog *pl, unsigned id)
 {
