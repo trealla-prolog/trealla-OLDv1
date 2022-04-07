@@ -567,6 +567,24 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 }
 
 #ifndef SANDBOX
+static void convert_path(char *filename)
+{
+	char *src = filename;
+
+	while (*src) {
+#ifdef _WIN32
+		if (*src == '\\')
+#else
+		if (*src == '/')
+#endif
+			*src = PATH_SEP_CHAR;
+
+		src++;
+	}
+}
+#endif
+
+#ifndef SANDBOX
 #ifndef _WIN32
 static USE_RESULT pl_status fn_popen_4(query *q)
 {
@@ -580,7 +598,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	if (n < 0)
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
 
-	const char *filename;
+	char *filename;
 
 	if (is_atom(p1))
 		filename = src = DUP_SLICE(q, p1);
@@ -596,6 +614,8 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 		src = chars_list_to_string(q, p1, p1_ctx, len);
 		filename = src;
 	}
+
+	convert_path(filename);
 
 	stream *str = &q->pl->streams[n];
 	str->domain = true;
@@ -688,7 +708,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	if (n < 0)
 		return throw_error(q, p1, p1_ctx, "resource_error", "too_many_streams");
 
-	const char *filename;
+	char *filename;
 	stream *oldstr = NULL;
 
 	if (is_structure(p1) && (p1->arity == 1) && !CMP_SLICE2(q, p1, "stream")) {
@@ -712,6 +732,8 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 
 		filename = src = chars_list_to_string(q, p1, p1_ctx, len);
 	}
+
+	convert_path(filename);
 
 	stream *str = &q->pl->streams[n];
 	may_ptr_error(str->filename = strdup(filename));
@@ -3053,6 +3075,8 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 	} else
 		filename = src = DUP_SLICE(q, p1);
 
+	convert_path(filename);
+
 	bool bom_specified = false, use_bom = false, is_binary = false;
 	LIST_HANDLER(p3);
 
@@ -3144,6 +3168,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (is_atom(p1)) {
 		char *src = DUP_SLICE(q, p1);
 		char *filename = relative_to(q->st.m->filename, src);
+		convert_path(filename);
 		//unload_file(q->st.m, filename);
 		free(src);
 
@@ -3172,6 +3197,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	char *filename = GET_STR(q, file);
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
+	convert_path(filename);
 	unload_file(q->st.m, filename);
 
 	if (!load_file(tmp_m, filename, false)) {
@@ -3191,6 +3217,7 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (is_atom(p1)) {
 		char *src = DUP_SLICE(q, p1);
 		char *filename = relative_to(q->st.m->filename, src);
+		convert_path(filename);
 		unload_file(q->st.m, filename);
 		free(src);
 		free(filename);
@@ -3213,6 +3240,7 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	char *filename = GET_STR(q, file);
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
+	convert_path(filename);
 	unload_file(q->st.m, filename);
 	free(filename);
 	return pl_success;
@@ -3288,6 +3316,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	FILE *fp = fopen(filename, "wb");
 	may_ptr_error(fp);
 	fwrite(GET_STR(q, p2), 1, LEN_STR(q, p2), fp);
@@ -3314,6 +3343,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	FILE *fp = fopen(filename, "rb");
 	free(filename);
 
@@ -3373,6 +3403,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	FILE *fp = fopen(filename, "r");
 	free(filename);
 
@@ -3589,6 +3620,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	LIST_HANDLER(p_opts);
 
 	while (is_list(p_opts) && !g_tpl_interrupt) {
@@ -3797,6 +3829,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 		return throw_error(q, p2, p2_ctx, "domain_error", "mode");
 	}
 
+	convert_path(filename);
 	struct stat st = {0};
 	int status = stat(filename, &st);
 
@@ -3832,6 +3865,7 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
@@ -3872,6 +3906,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 		return throw_error(q, p1, p1_ctx, "existence_error", "directory");
 	}
 
+	convert_path(filename);
 	DIR *dirp = opendir(filename);
 
 	if (!dirp) {
@@ -3922,6 +3957,7 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
@@ -4066,6 +4102,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
@@ -4097,6 +4134,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
@@ -4127,6 +4165,7 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
@@ -4159,6 +4198,7 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	if (!stat(filename, &st)) {
@@ -4190,6 +4230,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	struct stat st = {0};
 
 	for (char *ptr = filename+1; *ptr; ptr++) {
@@ -4249,6 +4290,8 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 		} else
 			filename = DUP_SLICE(q, p_new);
 
+		convert_path(filename);
+
 		if (chdir(filename)) {
 			unshare_cell(&tmp);
 			return throw_error(q, p_new, p_new_ctx, "existence_error", "path");
@@ -4275,6 +4318,7 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 	} else
 		filename = DUP_SLICE(q, p1);
 
+	convert_path(filename);
 	pl_status ok = !chdir(filename);
 	free(filename);
 	return ok;
