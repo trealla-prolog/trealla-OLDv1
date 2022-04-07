@@ -3539,15 +3539,15 @@ static char *fixup(const char *srcptr)
 	char *dst = tmpbuf;
 
 	while (*src) {
-		if ((src[0] == '.') && (src[1] == '.') && (src[2] == '/')) {
+		if ((src[0] == '.') && (src[1] == '.') && (src[2] == PATH_SEP_CHAR)) {
 			dst -= 2;
 
-			while ((dst != tmpbuf) && (*dst != '/'))
+			while ((dst != tmpbuf) && (*dst != PATH_SEP_CHAR))
 				dst--;
 
 			src += 2;
 			dst++;
-		} else if ((src[0] == '.') && (src[1] == '/')) {
+		} else if ((src[0] == '.') && (src[1] == PATH_SEP_CHAR)) {
 			src += 1;
 		} else
 			*dst++ = *src;
@@ -3572,7 +3572,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
 
-	while (*ptr && (*ptr != '/')) {
+	while (*ptr && (*ptr != PATH_SEP_CHAR)) {
 		ptr--;
 		*ptr = '\0';
 	}
@@ -3620,10 +3620,10 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		char *dst = envbuf;
 		s++;
 
-		while (*s && (*s != '/') && ((dst-envbuf-1) != sizeof(envbuf)))
+		while (*s && (*s != PATH_SEP_CHAR) && ((dst-envbuf-1) != sizeof(envbuf)))
 			*dst++ = *s++;
 
-		if (*s == '/')
+		if (*s == PATH_SEP_CHAR)
 			s++;
 
 		*dst = '\0';
@@ -3649,7 +3649,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 			may_ptr_error(tmpbuf);
 
-			if (*s != '/') {
+			if (*s != PATH_SEP_CHAR) {
 				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));

@@ -38,7 +38,7 @@ int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2)
 
 static const char *get_filename(const char *path)
 {
-	const char *ptr = strrchr(path, '/');
+	const char *ptr = strrchr(path, PATH_SEP_CHAR);
 
 	if (!ptr)
 		return path;
@@ -253,11 +253,11 @@ char *relative_to(const char *basefile, const char *relfile)
 		strcpy(tmpbuf, basefile);
 		ptr = tmpbuf + strlen(tmpbuf) - 1;
 
-		while ((ptr != tmpbuf) && (*ptr != '/'))
+		while ((ptr != tmpbuf) && (*ptr != PATH_SEP_CHAR))
 			ptr--;
 
 		if (ptr != tmpbuf)
-			*ptr++ = '/';
+			*ptr++ = PATH_SEP_CHAR;
 
 		*ptr = '\0';
 	}

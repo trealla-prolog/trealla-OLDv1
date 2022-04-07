@@ -30,6 +30,16 @@ typedef uint32_t pl_idx_t;
 #define atomic_t volatile
 #endif
 
+#ifdef _WIN32
+#define PATH_SEP "\\"
+#define PATH_SEP_CHAR '\\'
+#define NEWLINE_MODE "dos"
+#else
+#define PATH_SEP "/"
+#define PATH_SEP_CHAR '/'
+#define NEWLINE_MODE "posix"
+#endif
+
 #include "map.h"
 #include "trealla.h"
 #include "cdebug.h"

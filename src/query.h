@@ -123,13 +123,6 @@ struct cycle_info_ {
 
 #ifdef _WIN32
 #include <io.h>
-#define PATH_SEP "\\"
-#define PATH_SEP_CHAR '\\'
-#define NEWLINE_MODE "dos"
-#else
-#define PATH_SEP "/"
-#define PATH_SEP_CHAR '/'
-#define NEWLINE_MODE "posix"
 #endif
 
 #define PROMPT ""
