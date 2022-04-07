@@ -7,10 +7,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-#ifdef _WIN32
-#define USE_ISOCLINE 1
-#endif
-
 #ifdef USE_ISOCLINE
 #include "isocline/include/isocline.h"
 #else

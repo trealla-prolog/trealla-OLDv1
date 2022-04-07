@@ -3443,7 +3443,6 @@ static char *fixup(const char *srcptr)
 #endif
 
 #ifndef SANDBOX
-#ifndef _WIN32
 static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -3566,7 +3565,6 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
-#endif
 #endif
 
 static USE_RESULT pl_status fn_getline_1(query *q)
@@ -4770,11 +4768,7 @@ const struct builtins g_files_bifs[] =
 	{"make_directory", 1, fn_make_directory_1, "+string", false},
 	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
 	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
-
-#ifndef _WIN32
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
-#endif
-
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},

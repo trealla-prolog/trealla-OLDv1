@@ -5,10 +5,12 @@ CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 	-funsigned-char $(OPT) \
 	-Wno-unused-function -Wno-unused-parameter -Wno-unused-variable
 
-LDFLAGS = -L/usr/local/lib -lreadline -lm
+LDFLAGS = -L/usr/local/lib -lm
 
 ifdef ISOCLINE
 CFLAGS += -DUSE_ISOCLINE=1
+else
+LDFLAGS += -lreadline
 endif
 
 ifndef NOSSL

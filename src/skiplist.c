@@ -150,12 +150,17 @@ static int binary_search2(const skiplist *l, const keyval_t n[], const void *key
 	return imid;
 }
 
-#define frand(seedp) ((double)rand_r(seedp) / RAND_MAX)
+#ifdef _WIN32
+#define rand_r(p1) rand()
+#endif
+
+#define frand(seedp) (((double)rand_r(seedp)) / RAND_MAX)
 
 static int random_level(unsigned *seedp)
 {
 	const double P = 0.5;
-	int lvl = (int)(log(frand(seedp)) / log(1. - P));
+	double r = frand(seedp);
+	int lvl = (int)(log(r) / log(1.0 - P));
 	return lvl < MAX_LEVEL ? lvl : MAX_LEVEL;
 }
 

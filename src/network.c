@@ -7,8 +7,9 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#define close closesocket
-#define ioctl ioctlsocket
+#include <windows.h>
+//#define close closesocket
+//#define ioctl ioctlsocket
 #ifdef errno
 #undef errno
 #endif
@@ -34,12 +35,14 @@
 
 #include "internal.h"
 #include "network.h"
+#include "query.h"
 
 #if USE_OPENSSL
 static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
 
+#ifndef _WIN32
 int net_domain_connect(const char *name, int udp)
 {
 	int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
@@ -304,6 +307,7 @@ size_t net_write(const void *ptr, size_t nbytes, stream *str)
 #endif
 	return fwrite(ptr, 1, nbytes, str->fp);
 }
+#endif
 
 int net_getc(stream *str)
 {
