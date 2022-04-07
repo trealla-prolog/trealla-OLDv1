@@ -1792,6 +1792,7 @@ pl_status start(query *q)
 	bool done = false;
 
 	while (!done && !q->error) {
+#ifndef _WIN32
 		if (g_tpl_interrupt == SIGALRM) {
 			g_tpl_interrupt = 0;
 			pl_status ok = throw_error(q, q->st.curr_cell, q->st.curr_frame, "time_limit_exceeded", "timed_out");
@@ -1801,6 +1802,7 @@ pl_status start(query *q)
 
 			continue;
 		}
+#endif
 
 		if (g_tpl_interrupt) {
 			int ok = check_interrupt(q);
