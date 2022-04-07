@@ -3596,7 +3596,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
 
-	while (*ptr && (*ptr != PATH_SEP_CHAR)) {
+	while (*ptr && (*ptr != '/') && (*ptr != '\\')) {
 		ptr--;
 		*ptr = '\0';
 	}
