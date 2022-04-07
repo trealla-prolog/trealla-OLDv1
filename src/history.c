@@ -6,19 +6,17 @@
 #include <time.h>
 #include <assert.h>
 
-#if !USE_ISOCLINE
+#if defined(_WIN32) || USE_ISOCLINE
+#include "isocline/include/isocline.h"
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
-#else
-#include "isocline/include/isocline.h"
+#include <termios.h>
+#include <unistd.h>
 #endif
 
 #include "history.h"
 #include "utf8.h"
-
-#include <termios.h>
-#include <unistd.h>
-
 #include "cdebug.h"
 
 int history_getch(void)

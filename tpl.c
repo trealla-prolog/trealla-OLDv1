@@ -7,19 +7,14 @@
 #include <errno.h>
 #include <locale.h>
 
-#ifdef _WIN32
-#include <io.h>
-#define snprintf _snprintf
-#define isatty _isatty
-#else
-#include <unistd.h>
-#endif
-
 #include "history.h"
 #include "trealla.h"
 
 #ifdef _WIN32
 #include <windows.h>
+#include <io.h>
+#define snprintf _snprintf
+#define isatty _isatty
 #define msleep Sleep
 #else
 #include <sys/stat.h>
@@ -33,6 +28,7 @@
 	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                          \
 	nanosleep(&tv, &tv);                                               \
 }
+#include <unistd.h>
 #endif
 
 void sigfn(int s)
@@ -91,7 +87,7 @@ static int daemonize(int argc, char *argv[])
 		&startInfo,              // startup info
 		&process)                // process information
 		) {
-		fprintf(stdedrr, "Error: creation of the process failed\n");
+		fprintf(stderr, "Error: creation of the process failed\n");
 		return 1;
 	}
 
@@ -198,10 +194,14 @@ int main(int ac, char *av[])
 		}
 	} else {
 		signal(SIGINT, &sigfn);
+#ifndef _WIN32
 		signal(SIGALRM, &sigfn);
+#endif
 	}
 
+#ifndef _WIN32
 	signal(SIGPIPE, SIG_IGN);
+#endif
 	const char *goal = NULL;
 
 	for (i = 1; i < ac; i++) {
