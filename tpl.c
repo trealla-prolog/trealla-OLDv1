@@ -30,8 +30,6 @@
 }
 #endif
 
-void convert_path(char *filename);
-
 void sigfn(int s)
 {
 	signal(SIGINT, &sigfn);
