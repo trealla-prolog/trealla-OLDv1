@@ -139,6 +139,14 @@ To cross-compile on Linux for Windows...
 ```console
 $ file tpl.exe
 tpl.exe: PE32+ executable (console) x86-64, for MS Windows
+$ wine tpl.exe
+wine: configuration in L"/home/andrew/.wine" has been updated.
+?- true.
+true.
+?- write(hello), nl.
+hello
+true.
+?-
 ```
 
 NOTE: this is untested.
