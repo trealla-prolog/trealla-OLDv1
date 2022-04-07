@@ -36,7 +36,7 @@ typedef uint32_t pl_idx_t;
 #include "imath/imath.h"
 
 #ifdef _WIN32
-#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+char *realpath(const char *path, char resolved_path[PATH_MAX]);
 #endif
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
