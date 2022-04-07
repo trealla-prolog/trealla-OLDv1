@@ -1989,8 +1989,7 @@ static int clock_gettime_realtime(struct timespec *tv)
 	return 0;
 }
 
-#if 0
-static int clock_gettime(clockid_t type, struct timespec *tp)
+static int my_clock_gettime(clockid_t type, struct timespec *tp)
 {
 	if (type == CLOCK_MONOTONIC)
 		return clock_gettime_monotonic(tp);
@@ -2000,20 +1999,21 @@ static int clock_gettime(clockid_t type, struct timespec *tp)
     errno = ENOTSUP;
     return -1;
 }
-#endif
+#else
+#define my_clock_gettime clock_gettime
 #endif
 
 uint64_t cpu_time_in_usec(void)
 {
-	struct timespec now;
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
+	struct timespec now = {0};
+	my_clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now);
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
 uint64_t get_time_in_usec(void)
 {
-	struct timespec now;
-	clock_gettime(CLOCK_REALTIME, &now);
+	struct timespec now = {0};
+	my_clock_gettime(CLOCK_REALTIME, &now);
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
