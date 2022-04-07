@@ -11,6 +11,7 @@
 
 #ifdef _WIN32
 #define USE_MMAP 0
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
 #define mkdir(p1,p2) mkdir(p1)
 #else
 #ifndef USE_MMAP

@@ -8,6 +8,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
 //#define close closesocket
 //#define ioctl ioctlsocket
 #ifdef errno

@@ -15,6 +15,10 @@
 #include "query.h"
 #include "utf8.h"
 
+#ifdef _WIN32
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
