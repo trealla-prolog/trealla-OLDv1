@@ -128,6 +128,22 @@ whereby printing large numbers becomes exponentially slower (100K+ digits)
 and will require a switch to *libtomath* at some point to remedy.
 
 
+Cross-compile for Windows
+=========================
+
+To cross-compile on Linux for Windows...
+
+	sudo apt-get install mingw-w64
+	make CC=x86_64-w64-mingw32-gcc NOSSL=1 ISOCLINE=1
+
+```console
+$ file tpl.exe
+tpl.exe: PE32+ executable (console) x86-64, for MS Windows
+```
+
+NOTE: this is untested.
+
+
 Usage
 =====
 
