@@ -149,8 +149,6 @@ true.
 ?-
 ```
 
-NOTE: this is untested.
-
 
 Usage
 =====
