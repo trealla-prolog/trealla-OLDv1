@@ -4270,7 +4270,8 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 	GET_NEXT_ARG(p_new,atom_or_list_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
-	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%s", oldpath, PATH_SEP);
+	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%c", oldpath, PATH_SEP_CHAR);
+	convert_path(tmpbuf2);
 	oldpath = tmpbuf2;
 	cell tmp;
 	may_error(make_string(&tmp, oldpath));
@@ -4289,8 +4290,6 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 			filename = chars_list_to_string(q, p_new, p_new_ctx, len);
 		} else
 			filename = DUP_SLICE(q, p_new);
-
-		convert_path(filename);
 
 		if (chdir(filename)) {
 			unshare_cell(&tmp);
