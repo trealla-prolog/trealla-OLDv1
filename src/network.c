@@ -42,9 +42,9 @@ static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
 
-#ifndef _WIN32
 int net_domain_connect(const char *name, int udp)
 {
+#ifndef _WIN32
 	int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
 
 	if (fd == -1)
@@ -61,10 +61,14 @@ int net_domain_connect(const char *name, int udp)
 	}
 
 	return fd;
+#else
+	return -1;
+#endif
 }
 
 int net_domain_server(const char *name, int udp)
 {
+#ifndef _WIN32
     struct sockaddr_un server_sockaddr;
     memset(&server_sockaddr, 0, sizeof(struct sockaddr_un));
     int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
@@ -87,10 +91,14 @@ int net_domain_server(const char *name, int udp)
 
 	listen(fd, -1);
 	return fd;
+#else
+	return -1;
+#endif
 }
 
 int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 {
+#ifndef _WIN32
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
 
@@ -135,10 +143,14 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 	flag = nodelay;
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 	return fd;
+#else
+	return -1;
+#endif
 }
 
 int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
 {
+#ifndef _WIN32
 	(void) hostname;
 	struct addrinfo hints, *result, *rp;
 	int fd, status;
@@ -212,10 +224,14 @@ int net_server(const char *hostname, unsigned port, int udp, const char *keyfile
 
 	listen(fd, -1);
 	return fd;
+#else
+	return -1;
+#endif
 }
 
 int net_accept(stream *str)
 {
+#ifndef _WIN32
 	struct sockaddr_in addr = {0};
 	socklen_t len = 0;
 	int fd = accept(fileno(str->fp), (struct sockaddr*)&addr, &len);
@@ -232,12 +248,17 @@ int net_accept(stream *str)
 	flag = str->nodelay;
 	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 	return fd;
+#else
+	return -1;
+#endif
 }
 
 void net_set_nonblocking(stream *str)
 {
+#ifndef _WIN32
 	unsigned long flag = 1;
 	ioctl(fileno(str->fp), FIONBIO, &flag);
+#endif
 }
 
 void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, const char *certfile)
@@ -298,7 +319,6 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	return NULL;
 #endif
 }
-#endif
 
 size_t net_write(const void *ptr, size_t nbytes, stream *str)
 {
