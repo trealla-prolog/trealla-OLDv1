@@ -14,6 +14,7 @@
 #include "utf8.h"
 
 #ifdef _WIN32
+#include <windows.h>
 #define msleep Sleep
 #else
 static void msleep(int ms)
@@ -1952,7 +1953,7 @@ pl_status start(query *q)
 
 static int clock_gettime_monotonic(struct timespec *tv)
 {
-	static LARGE_INTEGER ticksPerSec = 0;
+	static LARGE_INTEGER ticksPerSec = {0};
 	LARGE_INTEGER ticks;
 	double seconds;
 
@@ -1988,6 +1989,7 @@ static int clock_gettime_realtime(struct timespec *tv)
 	return 0;
 }
 
+#if 0
 static int clock_gettime(clockid_t type, struct timespec *tp)
 {
 	if (type == CLOCK_MONOTONIC)
@@ -1998,6 +2000,7 @@ static int clock_gettime(clockid_t type, struct timespec *tp)
     errno = ENOTSUP;
     return -1;
 }
+#endif
 #endif
 
 uint64_t cpu_time_in_usec(void)
