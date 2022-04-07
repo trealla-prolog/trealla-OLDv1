@@ -298,6 +298,7 @@ void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, con
 	return NULL;
 #endif
 }
+#endif
 
 size_t net_write(const void *ptr, size_t nbytes, stream *str)
 {
@@ -307,7 +308,6 @@ size_t net_write(const void *ptr, size_t nbytes, stream *str)
 #endif
 	return fwrite(ptr, 1, nbytes, str->fp);
 }
-#endif
 
 int net_getc(stream *str)
 {
