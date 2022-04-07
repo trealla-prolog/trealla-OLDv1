@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <locale.h>
+#include <unistd.h>
 
 #include "history.h"
 #include "trealla.h"
@@ -20,7 +21,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #define msleep(ms)                                                     \
 {                                                                      \
 	struct timespec tv;                                                \
@@ -28,7 +28,6 @@
 	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;                          \
 	nanosleep(&tv, &tv);                                               \
 }
-#include <unistd.h>
 #endif
 
 void sigfn(int s)
