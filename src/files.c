@@ -11,7 +11,7 @@
 
 #ifdef _WIN32
 #define USE_MMAP 0
-#define mkldir(p1,p2) _mkdir(p1)
+#define mkdir(p1,p2) mkdir(p1)
 #else
 #ifndef USE_MMAP
 #define USE_MMAP 1
