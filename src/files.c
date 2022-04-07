@@ -3639,6 +3639,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 	char *tmpbuf = NULL;
 	const char *s = filename;
+	//printf("*** from=%s", filename);
 
 	if (expand && (*s == '$')) {
 		char envbuf[PATH_MAX];
@@ -3675,7 +3676,11 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 			may_ptr_error(tmpbuf);
 
-			if (*s != PATH_SEP_CHAR) {
+			if ((*s != PATH_SEP_CHAR)
+#ifdef _WIN32
+				&& (s[1] != ':')
+#endif
+				) {
 				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
@@ -3691,6 +3696,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		}
 	}
 
+	//printf(", to=%s\n", tmpbuf);
 	free(filename);
 
 	if (cwd != here)
