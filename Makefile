@@ -78,7 +78,7 @@ test:
 clean:
 	rm -f tpl src/*.o src/imath/*.o src/isocline/src/*.o \
 		library/*.o library/*.c *.o gmon.* \
-		vgcore.* *.core core core.*
+		vgcore.* *.core core core.* *.exe
 	rm -f *.itf *.po samples/*.itf samples/*.po
 
 # from [gcc|clang] -MM src/*.c src/imath/*.c src/isocline/src/isocline.c
