@@ -35,6 +35,10 @@ typedef uint32_t pl_idx_t;
 #include "cdebug.h"
 #include "imath/imath.h"
 
+#ifdef _WIN32
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
 
 typedef enum {
