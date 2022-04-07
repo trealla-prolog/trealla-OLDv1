@@ -25,7 +25,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#define unsetenv(p1)
+#define setenv(p1,p2,p3)
 #define msleep Sleep
+#define localtime_r(p1,p2) localtime(p1)
 #else
 static void msleep(int ms)
 {
@@ -33,68 +36,6 @@ static void msleep(int ms)
 	tv.tv_sec = (ms) / 1000;
 	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
 	nanosleep(&tv, &tv);
-}
-#endif
-
-#ifdef _WIN32
-/* The original code is public domain -- Will Hartung 4/9/09 */
-/* Modifications, public domain as well, by Antti Haapala, 11/10/17
-   - Switched to getc on 5/23/19 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <stdint.h>
-
-// if typedef doesn't exist (msvc, blah)
-typedef intptr_t ssize_t;
-
-ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
-    size_t pos;
-    int c;
-
-    if (lineptr == NULL || stream == NULL || n == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
-
-    c = getc(stream);
-    if (c == EOF) {
-        return -1;
-    }
-
-    if (*lineptr == NULL) {
-        *lineptr = malloc(128);
-        if (*lineptr == NULL) {
-            return -1;
-        }
-        *n = 128;
-    }
-
-    pos = 0;
-    while(c != EOF) {
-        if (pos + 1 >= *n) {
-            size_t new_size = *n + (*n >> 2);
-            if (new_size < 128) {
-                new_size = 128;
-            }
-            char *new_ptr = realloc(*lineptr, new_size);
-            if (new_ptr == NULL) {
-                return -1;
-            }
-            *n = new_size;
-            *lineptr = new_ptr;
-        }
-
-        ((unsigned char *)(*lineptr))[pos ++] = c;
-        if (c == '\n') {
-            break;
-        }
-        c = getc(stream);
-    }
-
-    (*lineptr)[pos] = '\0';
-    return pos;
 }
 #endif
 
@@ -5295,7 +5236,7 @@ static USE_RESULT pl_status fn_date_time_7(query *q)
 	GET_NEXT_ARG(p5,variable);
 	GET_NEXT_ARG(p6,variable);
 	GET_NEXT_ARG(p7,variable);
-	struct tm tm;
+	struct tm tm = {0};
 	time_t now = time(NULL);
 	localtime_r(&now, &tm);
 	cell tmp;
@@ -5324,7 +5265,7 @@ static USE_RESULT pl_status fn_date_time_6(query *q)
 	GET_NEXT_ARG(p4,variable);
 	GET_NEXT_ARG(p5,variable);
 	GET_NEXT_ARG(p6,variable);
-	struct tm tm;
+	struct tm tm = {0};
 	time_t now = time(NULL);
 	localtime_r(&now, &tm);
 	cell tmp;
@@ -7171,6 +7112,9 @@ static USE_RESULT pl_status fn_sys_register_term_1(query *q)
 
 static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 {
+#ifdef _WIN32
+	return pl_failure;
+#else
 	GET_FIRST_ARG(p1,number);
 	int time0 = 0;
 
@@ -7200,6 +7144,7 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 	it.it_value.tv_usec = ms * 1000;
 	setitimer(ITIMER_REAL, &it, NULL);
 	return pl_success;
+#endif
 }
 
 static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)

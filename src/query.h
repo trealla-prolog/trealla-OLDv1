@@ -67,6 +67,10 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx_t *vnames_ctx);
 int new_stream(prolog *pl);
 
+#ifdef _WIN32
+ssize_t getline(char **lineptr, size_t *n, FILE *stream);
+#endif
+
 int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 

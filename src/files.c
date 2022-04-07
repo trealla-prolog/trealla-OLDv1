@@ -33,6 +33,68 @@
 #include "utf8.h"
 #include "history.h"
 
+#ifdef _WIN32
+/* The original code is public domain -- Will Hartung 4/9/09 */
+/* Modifications, public domain as well, by Antti Haapala, 11/10/17
+   - Switched to getc on 5/23/19 */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdint.h>
+
+// if typedef doesn't exist (msvc, blah)
+typedef intptr_t ssize_t;
+
+ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+    size_t pos;
+    int c;
+
+    if (lineptr == NULL || stream == NULL || n == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    c = getc(stream);
+    if (c == EOF) {
+        return -1;
+    }
+
+    if (*lineptr == NULL) {
+        *lineptr = malloc(128);
+        if (*lineptr == NULL) {
+            return -1;
+        }
+        *n = 128;
+    }
+
+    pos = 0;
+    while(c != EOF) {
+        if (pos + 1 >= *n) {
+            size_t new_size = *n + (*n >> 2);
+            if (new_size < 128) {
+                new_size = 128;
+            }
+            char *new_ptr = realloc(*lineptr, new_size);
+            if (new_ptr == NULL) {
+                return -1;
+            }
+            *n = new_size;
+            *lineptr = new_ptr;
+        }
+
+        ((unsigned char *)(*lineptr))[pos ++] = c;
+        if (c == '\n') {
+            break;
+        }
+        c = getc(stream);
+    }
+
+    (*lineptr)[pos] = '\0';
+    return pos;
+}
+#endif
+
 static int get_named_stream(prolog *pl, const char *name, size_t len)
 {
 	for (int i = 0; i < MAX_STREAMS; i++) {
@@ -3380,6 +3442,7 @@ static char *fixup(const char *srcptr)
 #endif
 
 #ifndef SANDBOX
+#ifndef _WIN32
 static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -3502,6 +3565,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
+#endif
 #endif
 
 static USE_RESULT pl_status fn_getline_1(query *q)
@@ -4705,7 +4769,11 @@ const struct builtins g_files_bifs[] =
 	{"make_directory", 1, fn_make_directory_1, "+string", false},
 	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
 	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
+
+#ifndef _WIN32
 	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
+#endif
+
 	{"chdir", 1, fn_chdir_1, "+string", false},
 	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
 	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
