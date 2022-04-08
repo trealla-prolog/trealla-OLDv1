@@ -1112,10 +1112,11 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	r->is_tail_rec = false;
 
 	cell *head = get_head(r->cells);
-	cell *c = head;
-	uint64_t mask = 0;
 
 	// Check if a variable occurs more than once in the head...
+
+	cell *c = head;
+	uint64_t mask = 0;
 
 	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
 		if (!is_variable(c))
@@ -1133,6 +1134,8 @@ void xref_rule(module *m, clause *r, predicate *parent)
 
 	// Other stuff...
 
+	cell *body = get_head(r->cells);
+	bool in_body = false;
 	c = r->cells;
 
 	if (c->val_off == g_sys_record_key_s)
@@ -1140,12 +1143,24 @@ void xref_rule(module *m, clause *r, predicate *parent)
 
 	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
+
+		if (c == body)
+			in_body = true;
+
+		if (is_variable(c)) {
+			if (!in_body)
+				c->flags |= FLAG_VAR_TEMPORARY;
+			else
+				c->flags &= ~FLAG_VAR_TEMPORARY;
+		}
+
 		c->flags &= ~FLAG_TAIL_REC;
 
 		if (!is_literal(c))
 			continue;
 
-		xref_cell(m, r, c, parent);
+		if (in_body)
+			xref_cell(m, r, c, parent);
 	}
 }
 

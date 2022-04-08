@@ -155,6 +155,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_builtin(c) ((c)->flags & FLAG_BUILTIN)
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
+#define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
 #define is_op(c) (c->flags & 0xE000)
 
 typedef struct {
@@ -236,6 +237,7 @@ enum {
 	FLAG_VAR_FIRST_USE=1<<0,			// used with TAG_VAR
 	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
+	FLAG_VAR_TEMPORARY=1<<3,			// used with TAG_VAR
 
 	FLAG_SPARE1=1<<6,
 	FLAG_SPARE2=1<<7,
