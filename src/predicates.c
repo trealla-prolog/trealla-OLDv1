@@ -1057,7 +1057,6 @@ static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 		p1 += p1->nbr_cells;
 	}
 
-
 	return false;
 }
 
