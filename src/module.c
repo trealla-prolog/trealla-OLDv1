@@ -1111,10 +1111,9 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	r->is_unique = false;
 	r->is_tail_rec = false;
 
-	cell *head = get_head(r->cells);
-
 	// Check if a variable occurs more than once in the head...
 
+	cell *head = get_head(r->cells);
 	cell *c = head;
 	uint64_t mask = 0;
 
@@ -1132,10 +1131,9 @@ void xref_rule(module *m, clause *r, predicate *parent)
 		mask |= mask2;
 	}
 
-	// Other stuff... a variable that occurs only in the head
-	// is a temporary variable that could be discard...
+	// Other stuff...
 
-	cell *body = get_head(r->cells);
+	cell *body = get_body(r->cells);
 	bool in_body = false;
 	c = r->cells;
 
@@ -1148,20 +1146,12 @@ void xref_rule(module *m, clause *r, predicate *parent)
 		if (c == body)
 			in_body = true;
 
-		if (is_variable(c)) {
-			if (!in_body)
-				c->flags |= FLAG_VAR_TEMPORARY;
-			else
-				c->flags &= ~FLAG_VAR_TEMPORARY;
-		}
-
 		c->flags &= ~FLAG_TAIL_REC;
 
 		if (!is_literal(c))
 			continue;
 
-		if (in_body)
-			xref_cell(m, r, c, parent);
+		xref_cell(m, r, c, parent);
 	}
 }
 

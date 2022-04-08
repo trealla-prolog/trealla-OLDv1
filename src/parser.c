@@ -949,14 +949,39 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	p->nbr_vars = 0;
 	memset(&p->vartab, 0, sizeof(p->vartab));
 	clause *cl = p->cl;
-	cl->nbr_vars = 0;
+	cl->nbr_vars = cl->nbr_temporaries = 0;
 	cl->is_first_cut = false;
 	cl->is_cut_only = false;
+
+	// Any variable that is only used in the head of a
+	// clause is a temporary variables...
+
+	cell *body = get_body(cl->cells);
+	bool in_body = false;
+
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
+
+		if (c == body)
+			in_body = true;
+
+		if (is_variable(c)) {
+			if (!in_body)
+				c->flags |= FLAG_VAR_TEMPORARY;
+			else
+				c->flags &= ~FLAG_VAR_TEMPORARY;
+		}
+	}
+
+	// Don't assign temporaries yet...
 
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
 
 		if (!is_variable(c))
+			continue;
+
+		if (is_temporary(c))
 			continue;
 
 		if (rebase) {
@@ -983,6 +1008,42 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 	}
 
+	// Do them last...
+
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
+
+		if (!is_variable(c))
+			continue;
+
+		if (!is_temporary(c))
+			continue;
+
+		if (rebase) {
+			char tmpbuf[20];
+			snprintf(tmpbuf, sizeof(tmpbuf), "_V%u", c->var_nbr);
+			c->var_nbr = get_varno(p, tmpbuf);
+		} else
+			c->var_nbr = get_varno(p, GET_STR(p, c));
+
+		c->var_nbr += start;
+
+		if (c->var_nbr == MAX_ARITY) {
+			fprintf(stdout, "Error: max vars reached\n");
+			p->error = true;
+			return;
+		}
+
+		p->vartab.var_name[c->var_nbr] = GET_STR(p, c);
+
+		if (p->vartab.var_used[c->var_nbr]++ == 0) {
+			c->flags |= FLAG_VAR_FIRST_USE;
+			cl->nbr_temporaries++;
+			cl->nbr_vars++;
+			p->nbr_vars++;
+		}
+	}
+
 	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
 		if (p->consulting && !p->do_read_term && (p->vartab.var_used[i] == 1) &&
 			(p->vartab.var_name[i][strlen(p->vartab.var_name[i])-1] != '_') &&
@@ -994,9 +1055,6 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
-
-		//if (is_literal(c)) printf("*** %u : %u %s\n", i, c->tag, GET_STR(p, c));
-		//if (is_variable(c)) printf("*** %u : %u var_nbr=%d, off=%u\n", i, c->tag, c->var_nbr, c->val_off);
 
 		if (!is_variable(c))
 			continue;
