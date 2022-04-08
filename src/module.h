@@ -26,8 +26,8 @@ bool unload_file(module *m, const char *filename);
 void xref_rule(module *m, clause *t, predicate *parent);
 void xref_db(module *m);
 
-db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
-db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting);
+db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting);
+db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting);
 bool retract_from_db(module *m, db_entry *dbe);
 db_entry *find_in_db(module *m, uuid *ref);
 db_entry *erase_from_db(module *m, uuid *ref);

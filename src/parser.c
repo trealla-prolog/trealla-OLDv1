@@ -2662,7 +2662,7 @@ static bool process_term(parser *p, cell *p1)
 		h->arity = 0;
 	}
 
-	if (!p->error && !assertz_to_db(p->m, p->cl->nbr_vars, p1, 1)) {
+	if (!p->error && !assertz_to_db(p->m, p->cl->nbr_vars, p->cl->nbr_temporaries, p1, 1)) {
 #if 0
 		if (DUMP_ERRS || !p->do_read_term)
 			printf("Error: '%s', line %u\n", p->token, p->line_nbr);

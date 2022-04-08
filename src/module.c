@@ -880,7 +880,7 @@ static void check_rule(module *m, db_entry *dbe)
 	}
 }
 
-static db_entry *assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting)
 {
 	cell *c = p1;
 
@@ -939,6 +939,7 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, cell *p1, bool consu
 	copy_cells(dbe->cl.cells, p1, p1->nbr_cells);
 	dbe->cl.cells[p1->nbr_cells] = (cell){0};
 	dbe->cl.cells[p1->nbr_cells].tag = TAG_END;
+	dbe->cl.nbr_temporaries = nbr_temporaries;
 	dbe->cl.nbr_vars = nbr_vars;
 	dbe->cl.nbr_cells = p1->nbr_cells;
 	dbe->cl.cidx = p1->nbr_cells+1;
@@ -1006,13 +1007,13 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 	return true;
 }
 
-db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting)
 {
 	db_entry *dbe;
 	predicate *pr;
 
 	do {
-		dbe = assert_begin(m, nbr_vars, p1, consulting);
+		dbe = assert_begin(m, nbr_vars, nbr_temporaries, p1, consulting);
 		if (!dbe) return NULL;
 		pr = dbe->owner;
 
@@ -1035,13 +1036,13 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
 	return dbe;
 }
 
-db_entry *assertz_to_db(module *m, unsigned nbr_vars, cell *p1, bool consulting)
+db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting)
 {
 	db_entry *dbe;
 	predicate *pr;
 
 	do {
-		dbe = assert_begin(m, nbr_vars, p1, consulting);
+		dbe = assert_begin(m, nbr_vars, nbr_temporaries, p1, consulting);
 		if (!dbe) return NULL;
 		pr = dbe->owner;
 
