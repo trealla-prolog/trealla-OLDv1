@@ -968,6 +968,9 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		if (!is_variable(c))
 			continue;
 
+		if (c->val_off == g_anon_s)
+			c->flags |= FLAG_VAR_ANON;
+
 		if (!in_body)
 			c->flags |= FLAG_VAR_TEMPORARY;
 		else
@@ -1052,16 +1055,6 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 			if (!p->m->pl->quiet)
 				fprintf(stdout, "Warning: singleton: %s, near line %u, file '%s'\n", p->vartab.var_name[i], p->line_nbr, get_filename(p->m->filename));
 		}
-	}
-
-	for (pl_idx_t i = 0; i < cl->cidx; i++) {
-		cell *c = cl->cells + i;
-
-		if (!is_variable(c))
-			continue;
-
-		if (c->val_off == g_anon_s)
-			c->flags |= FLAG_VAR_ANON;
 	}
 
 	cell *c = make_a_cell(p);
