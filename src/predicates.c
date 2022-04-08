@@ -5847,9 +5847,9 @@ static USE_RESULT pl_status fn_getenv_2(query *q)
 	cell tmp;
 
 	if (is_string(p1))
-		may_error(make_string(&tmp, (char*)value));
+		may_error(make_string(&tmp, value));
 	else
-		may_error(make_cstring(&tmp, (char*)value));
+		may_error(make_cstring(&tmp, value));
 
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);

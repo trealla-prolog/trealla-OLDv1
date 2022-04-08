@@ -3563,15 +3563,15 @@ static char *fixup(const char *srcptr)
 	char *dst = tmpbuf;
 
 	while (*src) {
-		if ((src[0] == '.') && (src[1] == '.') && (src[2] == PATH_SEP_CHAR)) {
+		if ((src[0] == '.') && (src[1] == '.') && ((src[2] == '/') || (src[2] == '\\'))) {
 			dst -= 2;
 
-			while ((dst != tmpbuf) && (*dst != PATH_SEP_CHAR))
+			while ((dst != tmpbuf) && ((*dst != '/') || (*dst != '\\') || (*dst != ':')))
 				dst--;
 
 			src += 2;
 			dst++;
-		} else if ((src[0] == '.') && (src[1] == PATH_SEP_CHAR)) {
+		} else if ((src[0] == '.') && ((src[1] == '/') || (src[1] == '\\'))) {
 			src += 1;
 		} else
 			*dst++ = *src;
@@ -3596,7 +3596,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
 
-	while (*ptr && (*ptr != '/') && (*ptr != '\\')) {
+	while (*ptr && (*ptr != '/') && (*ptr != '\\') && (*ptr != ':')) {
 		ptr--;
 		*ptr = '\0';
 	}
@@ -3639,7 +3639,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 	char *tmpbuf = NULL;
 	const char *s = filename;
-	//printf("*** from=%s", filename);
+	//printf("*** from=%s, cwd=%s", filename, cwd);
 
 	if (expand && (*s == '$')) {
 		char envbuf[PATH_MAX];
@@ -3660,7 +3660,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 		size_t buflen = strlen(ptr)+1+strlen(s)+1;
 		tmpbuf = malloc(buflen);
 		may_ptr_error(tmpbuf);
-		snprintf(tmpbuf, buflen, "%s%c%s", ptr, PATH_SEP_CHAR, s);
+		snprintf(tmpbuf, buflen, "%s/%s", ptr, s);
 		convert_path(tmpbuf);
 		char *tmpbuf2;
 
@@ -3676,7 +3676,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 			may_ptr_error(tmpbuf);
 
-			if ((*s != PATH_SEP_CHAR)
+			if ((*s != '/') && (*s != '\\')
 #ifdef _WIN32
 				&& (s[1] != ':')
 #endif
@@ -3684,7 +3684,9 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				size_t buflen = strlen(tmpbuf)+1+strlen(s)+1;
 				char *tmp = malloc(buflen);
 				may_ptr_error(tmp, free(tmpbuf));
-				snprintf(tmp, buflen, "%s%c%s", tmpbuf, PATH_SEP_CHAR, s);
+				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
+				convert_path(tmp);
+				//printf("*** here2 %s\n", tmp);
 				free(tmpbuf);
 				tmpbuf = fixup(tmp);
 				may_ptr_error(tmpbuf);
@@ -3869,6 +3871,7 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 	struct stat st = {0};
 
 	if (stat(filename, &st)) {
+		//printf("*** here %s\n", filename);
 		free(filename);
 		return pl_failure;
 	}
@@ -4274,7 +4277,7 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 	GET_NEXT_ARG(p_new,atom_or_list_or_var);
 	char tmpbuf[PATH_MAX], tmpbuf2[PATH_MAX];
 	char *oldpath = getcwd(tmpbuf, sizeof(tmpbuf));
-	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s%c", oldpath, PATH_SEP_CHAR);
+	snprintf(tmpbuf2, sizeof(tmpbuf2), "%s/", oldpath);
 	convert_path(tmpbuf2);
 	oldpath = tmpbuf2;
 	cell tmp;
