@@ -710,8 +710,8 @@ static void commit_me(query *q, clause *r)
 		tco, q->no_tco, last_match, recursive, choices, slots_ok);
 #endif
 
-	// For now. It would also be good reduce the number of slots
-	// by the number of temporaries...
+	// For now. It would also be good to reduce the number of
+	// slots by the number of temporaries...
 
 	if (last_match && recursive && !choices && slots_ok
 		&& (r->nbr_vars - r->nbr_temporaries) == 0)
