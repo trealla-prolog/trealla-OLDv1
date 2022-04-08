@@ -1,16 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/param.h>
 
 #include "internal.h"
 #include "network.h"
-#include "parser.h"
-#include "module.h"
-#include "prolog.h"
 #include "query.h"
 #include "utf8.h"
 

@@ -1,12 +1,9 @@
 #include <stdlib.h>
-#include <stdlib.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
 #include <float.h>
-#include <sys/time.h>
 
 #include "internal.h"
 #include "library.h"

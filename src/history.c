@@ -1,10 +1,8 @@
-#include <ctype.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <ctype.h>
 #include <string.h>
-#include <time.h>
-#include <assert.h>
 #include <unistd.h>
 
 #ifdef USE_ISOCLINE
