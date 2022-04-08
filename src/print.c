@@ -461,7 +461,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		pl_idx_t l_ctx = q->variable_names_ctx;
 		LIST_HANDLER(l);
 
-		while (is_iso_list(l)) {
+		while (is_iso_list(l) && !g_tpl_interrupt) {
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
@@ -664,11 +664,9 @@ ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_c
 
 static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen, cell *c, pl_idx_t c_ctx, int running, bool cons, unsigned depth)
 {
-	// FIXME make non-recursive
-
 	unsigned print_list = 0, cnt = 0;
 
-	while (is_iso_list(c)) {
+	while (is_iso_list(c) && !g_tpl_interrupt) {
 		if (q->max_depth && (cnt++ >= q->max_depth)) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", ",...]");
@@ -888,7 +886,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	}
 
 	if (is_iso_list(c))
-		return print_iso_list(q, save_dst, dst, dstlen, c, c_ctx, running, cons, depth);
+		return print_iso_list(q, save_dst, dst, dstlen, c, c_ctx, running, cons, depth+1);
 
 	const char *src = GET_STR(q, c);
 	int optype = GET_OP(c);
@@ -921,7 +919,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			pl_idx_t l_ctx = q->variable_names_ctx;
 			LIST_HANDLER(l);
 
-			while (is_iso_list(l)) {
+			while (is_iso_list(l) && !g_tpl_interrupt) {
 				cell *h = LIST_HEAD(l);
 				h = deref(q, h, l_ctx);
 				pl_idx_t h_ctx = q->latest_ctx;
