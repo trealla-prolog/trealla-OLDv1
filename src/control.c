@@ -496,7 +496,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 	fprintf(stdout, "   ");
 
-	if (strcmp(GET_STR(q, e), "error"))
+	if (!is_literal(e) || strcmp(GET_STR(q, e), "error"))
 		fprintf(stdout, "throw(");
 
 	if (is_cyclic_term(q, e, e_ctx)) {
