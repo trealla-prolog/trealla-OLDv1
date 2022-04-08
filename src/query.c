@@ -714,7 +714,7 @@ static void commit_me(query *q, clause *r)
 	// slots by the number of temporaries...
 
 	if (last_match && recursive && !choices && slots_ok
-		&& (r->nbr_vars - r->nbr_temporaries) == 0)
+		&& (r->nbr_vars == r->nbr_temporaries))
 		tco = true;
 
 	if (tco && q->pl->opt)
