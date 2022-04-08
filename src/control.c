@@ -494,20 +494,24 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		return true;
 	}
 
-	fprintf(stdout, "uncaught exception: ");
+	fprintf(stdout, "   ");
+
+	if (strcmp(GET_STR(q, e), "error"))
+		fprintf(stdout, "throw(");
 
 	if (is_cyclic_term(q, e, e_ctx)) {
 		q->quoted = 1;
 		print_term(q, stdout, e, e_ctx, 0);
-		fprintf(stdout, "\n");
-		q->quoted = 0;
 	} else {
 		q->quoted = 1;
 		print_term(q, stdout, e, e_ctx, 1);
-		fprintf(stdout, "\n");
-		q->quoted = 0;
 	}
 
+	if (strcmp(GET_STR(q, e), "error"))
+		fprintf(stdout, ")");
+
+	fprintf(stdout, ".\n");
+	q->quoted = 0;
 	q->pl->did_dump_vars = true;
 	q->exception = NULL;
 	q->error = true;
