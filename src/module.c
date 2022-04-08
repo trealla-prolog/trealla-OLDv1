@@ -1132,7 +1132,8 @@ void xref_rule(module *m, clause *r, predicate *parent)
 		mask |= mask2;
 	}
 
-	// Other stuff...
+	// Other stuff... a variable that occurs only in the head
+	// is a temporary variable that could be discard...
 
 	cell *body = get_head(r->cells);
 	bool in_body = false;
