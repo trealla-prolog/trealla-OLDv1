@@ -55,7 +55,6 @@ pl_status make_cstringn(cell *d, const char *s, size_t n);
 pl_status make_stringn(cell *d, const char *s, size_t n);
 void make_literal(cell *tmp, pl_idx_t offset);
 int get_stream(query *q, cell *p1);
-bool has_vars(query *q, cell *c, pl_idx_t c_ctx, unsigned depth);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
 void do_cleanup(query *q, cell *p1);

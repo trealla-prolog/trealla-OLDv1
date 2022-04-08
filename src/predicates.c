@@ -928,6 +928,8 @@ static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
+static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
+
 static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	cell *l = p1;
@@ -1012,7 +1014,7 @@ static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	return ret_val;
 }
 
-bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (is_variable(p1))
 		return true;
@@ -1048,10 +1050,7 @@ bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 			if (ok)
 				return true;
 		} else {
-			cell *c = deref(q, p1, p1_ctx);
-			pl_idx_t c_ctx = q->latest_ctx;
-
-			if (has_vars(q, c, c_ctx, depth+1))
+			if (has_vars(q, p1, p1_ctx, depth+1))
 				return true;
 		}
 
