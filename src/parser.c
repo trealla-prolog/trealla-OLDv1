@@ -965,12 +965,13 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		if (c == body)
 			in_body = true;
 
-		if (is_variable(c)) {
-			if (!in_body)
-				c->flags |= FLAG_VAR_TEMPORARY;
-			else
-				c->flags &= ~FLAG_VAR_TEMPORARY;
-		}
+		if (!is_variable(c))
+			continue;
+
+		if (!in_body)
+			c->flags |= FLAG_VAR_TEMPORARY;
+		else
+			c->flags &= ~FLAG_VAR_TEMPORARY;
 	}
 
 	// Don't assign temporaries yet...
