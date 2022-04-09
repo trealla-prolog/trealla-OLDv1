@@ -1,0 +1,60 @@
+{
+  "uid" : "819d252a2c24929b",
+  "name" : "xref_diagram_all_files_0_01",
+  "fullName" : "xref_diagram_all_files_0_01::tests",
+  "historyId" : "xref_diagram_all_files_0_01::tests",
+  "time" : {
+    "duration" : 1990
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/diagrams/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/diagrams/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "808-809"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/tools/diagrams/tests.lgt#L808"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "819d252a2c24929b.json",
+  "parameterValues" : [ "tools/diagrams/tests.lgt", "808-809", "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/tools/diagrams/tests.lgt#L808" ]
+}

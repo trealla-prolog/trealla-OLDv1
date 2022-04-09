@@ -1,0 +1,55 @@
+{
+  "uid" : "b13e03c3ad897390",
+  "name" : "debugger_nospy_4_03",
+  "fullName" : "debugger_nospy_4_03::tests",
+  "historyId" : "debugger_nospy_4_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/debugger/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/debugger/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/debugger/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/debugger/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "244-248"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/tools/debugger/tests.lgt#L244"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b13e03c3ad897390.json",
+  "parameterValues" : [ "tools/debugger/tests.lgt", "244-248", "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/tools/debugger/tests.lgt#L244" ]
+}
