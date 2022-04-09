@@ -1093,7 +1093,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			do_work = true;
 		}
 
-		bind_le = IS_XFY(c) || IS_FY(c) ? true : false;
+		bind_le = is_xfy(c) || is_fy(c) ? true : false;
 		i++;
 	}
 
@@ -1125,10 +1125,10 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		// Prefix...
 
-		if (IS_FX(c)) {
+		if (is_fx(c)) {
 			cell *rhs = c + 1;
 
-			if (IS_FX(rhs) && (rhs->priority == c->priority)) {
+			if (is_fx(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
@@ -1140,7 +1140,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			rhs += rhs->nbr_cells;
 
 			if ((((pl_idx_t)(rhs - p->cl->cells)) < end_idx)
-				&& IS_XF(rhs) && (rhs->priority == c->priority)) {
+				&& is_xf(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
@@ -1150,7 +1150,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			}
 		}
 
-		if (IS_FX(c) || IS_FY(c)) {
+		if (is_fx(c) || is_fy(c)) {
 			cell *rhs = c + 1;
 			c->nbr_cells += rhs->nbr_cells;
 			pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
@@ -1172,7 +1172,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		cell *rhs = c + 1;
 		cell save = *c;
 
-		if (IS_XF(rhs) && (rhs->priority == c->priority)) {
+		if (is_xf(rhs) && (rhs->priority == c->priority)) {
 			if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
@@ -1181,7 +1181,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			return false;
 		}
 
-		if (IS_XF(c) || IS_YF(c)) {
+		if (is_xf(c) || is_yf(c)) {
 			cell *lhs = p->cl->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
 			pl_idx_t cells_to_move = lhs->nbr_cells;
@@ -1221,12 +1221,12 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		c->nbr_cells += rhs->nbr_cells;
 		c->arity = 2;
 
-		if (IS_XFX(c)) {
+		if (is_xfx(c)) {
 			cell *next = c + c->nbr_cells;
 			i = next - p->cl->cells;
 
 			if ((i <= end_idx)
-				&& (IS_XFX(next))
+				&& (is_xfx(next))
 				&& (next->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
@@ -1577,7 +1577,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 
 cell *check_body_callable(parser *p, cell *c)
 {
-	if (IS_XFX(c) || IS_XFY(c)) {
+	if (is_xfx(c) || is_xfy(c)) {
 		if (!strcmp(GET_STR(p, c), ",")
 			|| !strcmp(GET_STR(p, c), ";")
 			|| !strcmp(GET_STR(p, c), "->")
@@ -1603,7 +1603,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 {
 	pl_idx_t c_idx = c - p->cl->cells;
 
-	if (IS_XFX(c) || IS_XFY(c)) {
+	if (is_xfx(c) || is_xfy(c)) {
 		if ((c->val_off == g_conjunction_s)
 			|| (c->val_off == g_disjunction_s)
 			|| (c->val_off == g_if_then_s)
@@ -1640,7 +1640,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		}
 	}
 
-	if (IS_FY(c)) {
+	if (is_fy(c)) {
 		if (c->val_off == g_negation_s) {
 			cell *rhs = c + 1;
 

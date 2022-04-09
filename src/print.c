@@ -1025,7 +1025,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	size_t srclen = LEN_STR(q, c);
 
-	if (CELL_POSTFIX(c)) {
+	if (is_postfix(c)) {
 		cell *lhs = c + 1;
 		lhs = running ? deref(q, lhs, c_ctx) : lhs;
 		pl_idx_t lhs_ctx = q->latest_ctx;
@@ -1046,7 +1046,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		return dst - save_dst;
 	}
 
-	if (CELL_PREFIX(c)) {
+	if (is_prefix(c)) {
 		cell *rhs = c + 1;
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
@@ -1058,7 +1058,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (isalpha(*src)) space = true;
 
 		bool parens = false; //is_op(rhs);
-		if (CELL_INFIX(rhs) || CELL_POSTFIX(rhs)) parens = true;
+		if (is_infix(rhs) || is_postfix(rhs)) parens = true;
 		if (rhs_pri > my_priority) parens = true;
 		if (!strcmp(src, "-") && (rhs_pri == my_priority) && (rhs->arity > 1)) parens = true;
 		//if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = false; // Hack
@@ -1096,7 +1096,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	unsigned my_priority = search_op(q->st.m, GET_STR(q, c), NULL, false);
 
 	bool lhs_parens = lhs_pri_1 >= my_priority;
-	if ((lhs_pri_1 == my_priority) && IS_YFX(c)) lhs_parens = false;
+	if ((lhs_pri_1 == my_priority) && is_yfx(c)) lhs_parens = false;
 	if (lhs_pri_2 > 0) lhs_parens = true;
 	if (is_structure(lhs) && (lhs_pri_1 <= my_priority) && (lhs->val_off == g_plus_s)) { lhs_parens = false; }
 
@@ -1139,7 +1139,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	space += is_smallint(rhs) && is_negative(rhs);
 
 	bool rhs_parens = rhs_pri_1 >= my_priority;
-	if ((rhs_pri_1 == my_priority) && IS_XFY(c)) rhs_parens = false;
+	if ((rhs_pri_1 == my_priority) && is_xfy(c)) rhs_parens = false;
 	if (rhs_pri_2 > 0) rhs_parens = true;
 	if (is_structure(rhs) && (rhs_pri_1 <= my_priority)
 		&& ((rhs->val_off == g_plus_s) || (rhs->val_off == g_minus_s))) { rhs_parens = false; space = true; }
