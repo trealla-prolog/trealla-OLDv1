@@ -1,0 +1,55 @@
+{
+  "uid" : "9383f07c43a9b609",
+  "name" : "cbor_parse_2_59",
+  "fullName" : "cbor_parse_2_59::tests_utf_8",
+  "historyId" : "cbor_parse_2_59::tests_utf_8",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/cbor/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "testClass",
+    "value" : "library/cbor/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "package",
+    "value" : "library/cbor/tests_utf_8.lgt::tests_utf_8"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/cbor/tests_utf_8.lgt"
+  }, {
+    "name" : "position",
+    "value" : "51-52"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/library/cbor/tests_utf_8.lgt#L51"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "9383f07c43a9b609.json",
+  "parameterValues" : [ "library/cbor/tests_utf_8.lgt", "51-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/cc6804be5514e7d8d9f2be1888e2616980035da0/library/cbor/tests_utf_8.lgt#L51" ]
+}
