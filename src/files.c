@@ -3212,8 +3212,8 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 		char *filename = relative_to(q->st.m->filename, src);
 		convert_path(filename);
 		unload_file(q->st.m, filename);
-		free(src);
 		free(filename);
+		free(src);
 		return pl_success;
 	}
 
@@ -3400,10 +3400,8 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	FILE *fp = fopen(filename, "r");
 	free(filename);
 
-	if (!fp) {
-		free(filename);
+	if (!fp)
 		return throw_error(q, p1, p1_ctx, "existence_error", "cannot_open_file");
-	}
 
 	// Check for a BOM
 
@@ -3442,7 +3440,6 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 
 	free(line);
 	fclose(fp);
-	free(filename);
 
 	if (!in_list) {
 		cell tmp;
@@ -3654,8 +3651,11 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 		*dst = '\0';
 		char *ptr = getenv(envbuf);
-		if (!ptr)
+
+		if (!ptr) {
+			free(filename);
 			return throw_error(q, p1, p1_ctx, "existence_error", "environment_variable");
+		}
 
 		size_t buflen = strlen(ptr)+1+strlen(s)+1;
 		tmpbuf = malloc(buflen);
@@ -4213,8 +4213,10 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 		return throw_error(q, p1, p1_ctx, "existence_error", "file");
 	}
 
-	if (mkdir(filename, 0777))
+	if (mkdir(filename, 0777)) {
+		free(filename);
 		return throw_error(q, p1, p1_ctx, "permission_error", "file");
+	}
 
 	free(filename);
 	return pl_success;
