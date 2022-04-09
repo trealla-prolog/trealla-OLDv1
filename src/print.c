@@ -1058,6 +1058,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (isalpha(*src)) space = true;
 
 		bool parens = false; //is_op(rhs);
+		if (CELL_INFIX(rhs) || CELL_POSTFIX(rhs)) parens = true;
 		if (rhs_pri > my_priority) parens = true;
 		if (!strcmp(src, "-") && (rhs_pri == my_priority) && (rhs->arity > 1)) parens = true;
 		//if (strcmp(GET_STR(q, c), "\\+")) if (is_atomic(rhs)) parens = false; // Hack
