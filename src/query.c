@@ -562,6 +562,42 @@ static frame *push_frame(query *q, unsigned nbr_vars)
 	return f;
 }
 
+static void reuse_frame(query *q, unsigned nbr_vars)
+{
+	const frame *newf = GET_FRAME(q->st.fp);
+	frame *f = GET_CURR_FRAME();
+
+	const choice *ch = GET_CURR_CHOICE();
+	q->st.sp = ch->st.sp;
+
+	slot *from = GET_FIRST_SLOT(newf);
+	slot *to = GET_FIRST_SLOT(f);
+
+	for (pl_idx_t i = 0; i < nbr_vars; i++) {
+		unshare_cell(&to->c);
+		*to++ = *from++;
+	}
+
+#if 0
+	// If the new frame is smaller then the current one.
+	// I don't think this is possible at the moment...
+
+	for (unsigned i = nbr_vars; i < f->nbr_vars; i++, to++) {
+		unshare_cell(&to->c);
+		to->c.tag = TAG_EMPTY;
+		to->c.attrs = NULL;
+	}
+#endif
+
+	f->cgen = newf->cgen;
+	f->nbr_slots = nbr_vars;
+	f->nbr_vars = nbr_vars;
+	f->overflow = 0;
+
+	q->st.sp = f->base_slot_nbr + nbr_vars;
+	q->tot_tcos++;
+}
+
 void trim_trail(query *q)
 {
 	if (q->undo_hi_tp)
@@ -588,40 +624,6 @@ void trim_trail(query *q)
 
 		q->st.tp--;
 	}
-}
-
-static void reuse_frame(query *q, unsigned nbr_vars)
-{
-	const frame *newf = GET_FRAME(q->st.fp);
-	frame *f = GET_CURR_FRAME();
-
-	const choice *ch = GET_CURR_CHOICE();
-	q->st.sp = ch->st.sp;
-
-	slot *from = GET_FIRST_SLOT(newf);
-	slot *to = GET_FIRST_SLOT(f);
-
-	for (pl_idx_t i = 0; i < nbr_vars; i++) {
-		unshare_cell(&to->c);
-		*to++ = *from++;
-	}
-
-	// If the new frame is smaller then the current one.
-	// I don't think this is possible at the moment...
-
-	for (unsigned i = nbr_vars; i < f->nbr_vars; i++, to++) {
-		unshare_cell(&to->c);
-		to->c.tag = TAG_EMPTY;
-		to->c.attrs = NULL;
-	}
-
-	f->cgen = newf->cgen;
-	f->nbr_slots = nbr_vars;
-	f->nbr_vars = nbr_vars;
-	f->overflow = 0;
-
-	q->st.sp = f->base_slot_nbr + nbr_vars;
-	q->tot_tcos++;
 }
 
 static bool check_slots(const query *q, frame *f, clause *r)
