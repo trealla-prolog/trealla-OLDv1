@@ -107,8 +107,7 @@ static int daemonize(int argc, char *argv[])
 
 		if ((pid = fork()) < 0) // Error
 			return -1;
-		else if (pid != 0) // Parent
-		{
+		else if (pid != 0) { // Parent
 			if (watchdog) {
 				int status;
 				wait(&status);
@@ -152,8 +151,7 @@ int main(int ac, char *av[])
 	int version = 0, daemon = 0;
 	bool ns = false, no_res = false;
 	void *pl = pl_create();
-	if (!pl)
-	{
+	if (!pl) {
 		fprintf(stderr, "Failed to create the prolog system: %s\n", strerror(errno));
 		return 1;
 	}
