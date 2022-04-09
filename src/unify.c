@@ -289,7 +289,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 		return is_cyclic_list_internal(q, p1, p1_ctx, depth);
 
 	if (depth > MAX_DEPTH)
-		return false;
+		return true;
 
 	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	unsigned arity = p1->arity;
