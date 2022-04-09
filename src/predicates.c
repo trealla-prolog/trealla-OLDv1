@@ -2292,6 +2292,8 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 	return unify(q, p2, p2_ctx, l, p1_ctx);
 }
 
+// FIXME: rewrite this using e->mark && q->mgen method..
+
 static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
