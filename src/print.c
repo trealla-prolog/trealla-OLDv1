@@ -994,7 +994,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				if (!braces && is_literal(tmp)) {
 					unsigned tmp_priority = search_op(q->st.m, GET_STR(q, tmp), NULL, tmp->arity==1);
 
-					if (tmp_priority >= 1000)
+					if ((tmp_priority >= 1000) && tmp->arity)
 						parens = 1;
 				}
 
