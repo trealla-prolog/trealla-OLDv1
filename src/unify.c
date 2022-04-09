@@ -303,7 +303,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 			pl_idx_t c_ctx = q->latest_ctx;
 
 			if (!is_variable(c) && e->sweep) {
-				e->sweep = false;
+				e->mark = true;
 				return true;
 			}
 
