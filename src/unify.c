@@ -314,10 +314,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 			if (ok)
 				return true;
 		} else {
-			cell *c = deref(q, p1, p1_ctx);
-			pl_idx_t c_ctx = q->latest_ctx;
-
-			if (is_cyclic_term_internal(q, c, c_ctx, depth))
+			if (is_cyclic_term_internal(q, p1, p1_ctx, depth))
 				return true;
 		}
 
