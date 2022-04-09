@@ -494,7 +494,10 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		return true;
 	}
 
-	fprintf(stdout, "   ");
+	if (!q->is_redo)
+		fprintf(stdout, "   ");
+	else
+		fprintf(stdout, "  ");
 
 	if (!is_literal(e) || strcmp(GET_STR(q, e), "error"))
 		fprintf(stdout, "throw(");
@@ -507,7 +510,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		print_term(q, stdout, e, e_ctx, 1);
 	}
 
-	if (strcmp(GET_STR(q, e), "error"))
+	if (!is_literal(e) || strcmp(GET_STR(q, e), "error"))
 		fprintf(stdout, ")");
 
 	fprintf(stdout, ".\n");

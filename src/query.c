@@ -90,11 +90,6 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		q->st.tp, q->st.fp, q->st.sp, q->st.hp);
 #endif
 
-#if 0
-	for (unsigned i = 0; i < q->cp; i++)
-		fprintf(stderr, "    ");
-#endif
-
 	int save_depth = q->max_depth;
 	q->max_depth = 10;
 	q->quoted = true;
