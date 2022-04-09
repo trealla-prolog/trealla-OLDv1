@@ -928,9 +928,9 @@ static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
 	return !is_variable(p1);
 }
 
-static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
+static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
 
-static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
@@ -947,25 +947,20 @@ static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 			c = deref(q, c, l_ctx);
 			c_ctx = q->latest_ctx;
 
-			if (is_variable(c)) {
-				ret_val = true;
-				break;
-			}
+			if (is_variable(c))
+				return true;
 
-			if (e->sweep) {
-				e->mark = true;
-				break;
-			}
+			if (e->mark != q->mgen) {
+				e->mark = q->mgen;
 
-			e->sweep = true;
-			ret_val = has_vars(q, c, c_ctx, depth+1);
-			e->sweep = false;
+				if (has_vars_internal(q, c, c_ctx, depth+1))
+					return true;
+			} else
+				e->mark = q->mgen;
 		} else {
-			ret_val = has_vars(q, c, c_ctx, depth+1);
+			if (has_vars_internal(q, c, c_ctx, depth+1))
+				return true;
 		}
-
-		if (ret_val)
-			break;
 
 		l = LIST_TAIL(l);
 
@@ -975,46 +970,20 @@ static bool has_list_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (is_variable(l)) {
-				ret_val = true;
-				break;
-			}
+			if (is_variable(l))
+				return true;
 
-			if (!is_variable(l) && e->sweep) {
-				e->mark = true;
+			if (e->mark == q->mgen)
 				break;
-			}
 
-			e->sweep = true;
+			e->mark = q->mgen;
 		}
 	}
 
-	l = p1;
-	l_ctx = p1_ctx;
-
-	while (is_iso_list(l) && !g_tpl_interrupt) {
-		l = LIST_TAIL(l);
-
-		if (is_variable(l)) {
-			const frame *f = GET_FRAME(l_ctx);
-			slot *e = GET_SLOT(f, l->var_nbr);
-			l = deref(q, l, l_ctx);
-			l_ctx = q->latest_ctx;
-
-			if (!is_variable(l) && e->mark) {
-				e->sweep = false;
-				e->mark = false;
-				break;
-			}
-
-			e->sweep = false;
-		}
-	}
-
-	return ret_val;
+	return false;
 }
 
-static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (is_variable(p1))
 		return true;
@@ -1023,7 +992,7 @@ static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 		return false;
 
 	if (is_iso_list(p1))
-		return has_list_vars(q, p1, p1_ctx, depth+1);
+		return has_list_vars_internal(q, p1, p1_ctx, depth+1);
 
 	if (depth > MAX_DEPTH)
 		return false;
@@ -1038,19 +1007,17 @@ static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && e->sweep) {
-				e->sweep = false;
-				return false;
+			if (is_variable(c))
+				return true;
+
+			if (e->mark != q->mgen) {
+				if (has_vars_internal(q, c, c_ctx, depth+1))
+					return true;
 			}
 
-			e->sweep = true;
-			bool ok = has_vars(q, c, c_ctx, depth+1);
-			e->sweep = false;
-
-			if (ok)
-				return true;
+			e->mark = q->mgen;
 		} else {
-			if (has_vars(q, p1, p1_ctx, depth+1))
+			if (has_vars_internal(q, p1, p1_ctx, depth+1))
 				return true;
 		}
 
@@ -1060,10 +1027,16 @@ static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	return false;
 }
 
+static bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	q->mgen++;
+	return has_vars_internal(q, p1, p1_ctx, 0);
+}
+
 static USE_RESULT pl_status fn_iso_ground_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return !has_vars(q, p1, p1_ctx, 0);
+	return !has_vars(q, p1, p1_ctx);
 }
 
 static USE_RESULT pl_status fn_iso_callable_1(query *q)
@@ -2540,7 +2513,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
@@ -2570,7 +2543,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
-	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx, 0))
+	if (!is_variable(p2) && !has_vars(q, p1, p1_ctx))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
