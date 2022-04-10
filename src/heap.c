@@ -134,6 +134,8 @@ static bool is_in_ref_list2(cell *c, pl_idx_t c_ctx, reflist *rlist)
 	return false;
 }
 
+// FIXME: rewrite this using efficient sweep/mark methodology...
+
 static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, bool nonlocals_only, reflist *list)
 {
 	if (depth >= MAX_DEPTH) {
