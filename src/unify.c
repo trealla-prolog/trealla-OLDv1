@@ -266,6 +266,9 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			e->mark = q->mgen;
 		}
 	}
+
+	if (!is_variable(l))
+		collect_vars_internal(q, l, l_ctx);
 }
 
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
@@ -365,6 +368,9 @@ static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			e->mark = q->mgen;
 		}
 	}
+
+	if (has_vars_internal(q, l, l_ctx))
+		return true;
 
 	return false;
 }
