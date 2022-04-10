@@ -33,6 +33,9 @@ void stash_me(query *q, clause *t, bool last_match);
 void trim_trail(query *q);
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 pl_status do_post_unification_hook(query *q, bool is_builtin);
+bool check_redo(query *q);
+void dump_vars(query *q, bool partial);
+int check_interrupt(query *q);
 
 bool find_exception_handler(query *q, cell *e);
 pl_status throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected);

@@ -33,7 +33,8 @@ SRCOBJECTS = tpl.o src/history.o src/functions.o \
 	src/predicates.o src/files.o src/contrib.o src/heap.c \
 	src/control.o src/library.o src/module.o src/parser.o \
 	src/print.o src/prolog.o src/query.o src/format.o src/unify.o \
-	src/skiplist.o src/base64.o src/network.o src/utf8.o
+	src/skiplist.o src/base64.o src/network.o src/toplevel.o \
+	src/utf8.o
 
 LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
@@ -129,6 +130,10 @@ src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
   src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
   src/heap.h src/utf8.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
+src/toplevel.o: src/toplevel.c src/internal.h src/map.h src/skiplist.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h src/history.h \
+  src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
+  src/heap.h src/utf8.h
 src/unify.o: src/unify.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h src/module.h src/query.h \
   src/builtins.h src/heap.h src/utf8.h
