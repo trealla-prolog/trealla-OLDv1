@@ -207,18 +207,16 @@ static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
 			q->pl->tab4[idx]++;
 			found = true;
-			break;
+			return;
 		}
 	}
 
-	if (!found) {
-		q->pl->tab1[q->pl->tab_idx] = c_ctx;
-		q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
-		q->pl->tab3[q->pl->tab_idx] = c->val_off;
-		q->pl->tab4[q->pl->tab_idx] = 1;
-		q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
-		q->pl->tab_idx++;
-	}
+	q->pl->tab1[q->pl->tab_idx] = c_ctx;
+	q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
+	q->pl->tab3[q->pl->tab_idx] = c->val_off;
+	q->pl->tab4[q->pl->tab_idx] = 1;
+	q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
+	q->pl->tab_idx++;
 }
 
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
