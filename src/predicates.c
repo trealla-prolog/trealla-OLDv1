@@ -2296,7 +2296,6 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
 	q->pl->varno = f->nbr_vars;
-	q->pl->tab_idx = 0;
 	collect_vars(q, p1, p1_ctx);
 	const unsigned cnt = q->pl->tab_idx;
 	if (!init_tmp_heap(q)) return NULL;
