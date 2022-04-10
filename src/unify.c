@@ -257,18 +257,14 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (is_variable(l))
-				accum_var(q, l, l_ctx);
-
-			if (e->mark == q->mgen)
-				break;
+			if (!is_variable(l) && (e->mark == q->mgen))
+				return;
 
 			e->mark = q->mgen;
 		}
 	}
 
-	if (!is_variable(l))
-		collect_vars_internal(q, l, l_ctx);
+	collect_vars_internal(q, l, l_ctx);
 }
 
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
@@ -360,20 +356,14 @@ static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (is_variable(l))
-				return true;
-
-			if (e->mark == q->mgen)
-				break;
+			if (!is_variable(l) && (e->mark == q->mgen))
+				return false;
 
 			e->mark = q->mgen;
 		}
 	}
 
-	if (has_vars_internal(q, l, l_ctx))
-		return true;
-
-	return false;
+	return has_vars_internal(q, l, l_ctx);
 }
 
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
@@ -477,10 +467,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		}
 	}
 
-	if (is_cyclic_term_internal(q, l, l_ctx))
-		return true;
-
-	return false;
+	return is_cyclic_term_internal(q, l, l_ctx);
 }
 
 static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
