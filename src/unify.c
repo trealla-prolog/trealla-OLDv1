@@ -315,6 +315,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->mgen++;
+	q->pl->tab_idx = 0;
 	collect_vars_internal(q, p1, p1_ctx);
 }
 
