@@ -779,7 +779,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		c2 = deref(q, c2, p2_ctx);
 		pl_idx_t c2_ctx = q->latest_ctx;
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx)) {
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, 0)) {
 			if (q->cycle_error)
 				return true;
 
@@ -797,7 +797,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 		p2_ctx = q->latest_ctx;
 	}
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 }
 
 static bool unify_integers(query *q, cell *p1, cell *p2)
@@ -887,7 +887,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		if (!p1 || !p2)
 			break;
 
-		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx))
+		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx, 0))
 			return false;
 
 		p1 = LIST_TAIL(p1);
@@ -919,15 +919,18 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 	if (!p1 || !p2)
 		return false;
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 }
 
-static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (p1->arity != p2->arity)
 		return false;
 
 	if (p1->val_off != p2->val_off)
+		return false;
+
+	if (depth > MAX_DEPTH)
 		return false;
 
 	unsigned arity = p1->arity;
@@ -974,7 +977,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 			}
 		}
 
-		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx))
+		if (!unify_internal(q, c1, c1_ctx, c2, c2_ctx, depth+1))
 			return false;
 
 		if (q->info1) {
@@ -994,10 +997,13 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	return true;
 }
 
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if ((p1 == p2) && (p1_ctx == p2_ctx))
 		return true;
+
+	if (depth > MAX_DEPTH)
+		return false;
 
 	if (p1_ctx == q->st.curr_frame)
 		q->no_tco = true;
@@ -1078,7 +1084,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return unify_lists(q, p1, p1_ctx, p2, p2_ctx);
 
 	if (p1->arity || p2->arity)
-		return unify_structs(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_structs(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	return g_disp[p1->tag].fn(q, p1, p2);
 }
@@ -1100,7 +1106,7 @@ bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
 	q->info2 = &info2;
-	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx);
+	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	q->info1 = q->info2 = NULL;
 	q->lists_ok = false;
 	return ok;

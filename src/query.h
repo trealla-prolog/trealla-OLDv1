@@ -31,7 +31,7 @@ pl_status try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);
 void stash_me(query *q, clause *t, bool last_match);
 void trim_trail(query *q);
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
+bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 pl_status do_post_unification_hook(query *q, bool is_builtin);
 
 bool find_exception_handler(query *q, cell *e);
