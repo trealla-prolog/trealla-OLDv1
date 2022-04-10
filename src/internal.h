@@ -66,7 +66,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define MAX_SMALL_STRING ((sizeof(void*)*2)-1)
+#define MAX_SMALL_STRING (((sizeof(void*)*2)+sizeof(pl_idx_t))-1)
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
