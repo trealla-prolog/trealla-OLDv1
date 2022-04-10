@@ -1513,7 +1513,7 @@ static void dump_vars(query *q, bool partial)
 			c_ctx = e->ctx;
 		}
 
-		if (is_anon(c))
+		if (is_variable(c) && is_anon(c))
 			continue;
 
 		if (any)
