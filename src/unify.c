@@ -419,9 +419,9 @@ bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 	return has_vars_internal(q, p1, p1_ctx);
 }
 
-static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx);
 
-static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
@@ -441,10 +441,19 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 				e->sweep = false;
 				return true;
 			}
-		}
 
-		if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
-			return true;
+			e->sweep = true;
+
+			if (is_cyclic_term_internal(q, c, c_ctx)) {
+				e->sweep = false;
+				return true;
+			}
+
+			e->sweep = false;
+		} else {
+			if (is_cyclic_term_internal(q, c, c_ctx))
+				return true;
+		}
 
 		l = LIST_TAIL(l);
 
@@ -458,25 +467,24 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 				e->sweep = false;
 				return true;
 			}
+
+			e->sweep = true;
 		}
 	}
 
-	if (is_cyclic_term_internal(q, l, l_ctx, depth+1))
+	if (is_cyclic_term_internal(q, l, l_ctx))
 		return true;
 
 	return false;
 }
 
-static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!is_structure(p1))
 		return false;
 
-	if (depth > MAX_DEPTH)
-		return true;
-
 	if (is_iso_list(p1))
-		return is_cyclic_list_internal(q, p1, p1_ctx, depth);
+		return is_cyclic_list_internal(q, p1, p1_ctx);
 
 	pl_idx_t nbr_cells = p1->nbr_cells - 1;
 	unsigned arity = p1->arity;
@@ -495,10 +503,15 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 				return true;
 			}
 
-			if (is_cyclic_term_internal(q, c, c_ctx, depth+1))
+			e->sweep = true;
+			if (is_cyclic_term_internal(q, c, c_ctx)) {
+				e->sweep = false;
 				return true;
+			}
+
+			e->sweep = false;
 		} else {
-			if (is_cyclic_term_internal(q, p1, p1_ctx, depth+1))
+			if (is_cyclic_term_internal(q, p1, p1_ctx))
 				return true;
 		}
 
@@ -510,12 +523,12 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigne
 
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	return is_cyclic_term_internal(q, p1, p1_ctx, 0);
+	return is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
 bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
-	return !is_cyclic_term_internal(q, p1, p1_ctx, 0);
+	return !is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
 static cell *term_next(query *q, cell *c, pl_idx_t *c_ctx, bool *done)
