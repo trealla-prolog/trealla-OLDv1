@@ -199,9 +199,9 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
+static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
 
-static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
@@ -224,12 +224,12 @@ static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned
 			if (e->mark != q->mgen) {
 				e->mark = q->mgen;
 
-				if (has_vars_internal(q, c, c_ctx, depth+1))
+				if (has_vars_internal(q, c, c_ctx))
 					return true;
 			} else
 				e->mark = q->mgen;
 		} else {
-			if (has_vars_internal(q, c, c_ctx, depth+1))
+			if (has_vars_internal(q, c, c_ctx))
 				return true;
 		}
 
@@ -254,7 +254,7 @@ static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned
 	return false;
 }
 
-static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
+static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_variable(p1))
 		return true;
@@ -263,10 +263,7 @@ static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dept
 		return false;
 
 	if (is_iso_list(p1))
-		return has_list_vars_internal(q, p1, p1_ctx, depth+1);
-
-	if (depth > MAX_DEPTH)
-		return false;
+		return has_list_vars_internal(q, p1, p1_ctx);
 
 	unsigned arity = p1->arity;
 	p1++;
@@ -282,13 +279,14 @@ static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dept
 				return true;
 
 			if (e->mark != q->mgen) {
-				if (has_vars_internal(q, c, c_ctx, depth+1))
-					return true;
-			}
+				e->mark = q->mgen;
 
-			e->mark = q->mgen;
+				if (has_vars_internal(q, c, c_ctx))
+					return true;
+			} else
+				e->mark = q->mgen;
 		} else {
-			if (has_vars_internal(q, p1, p1_ctx, depth+1))
+			if (has_vars_internal(q, p1, p1_ctx))
 				return true;
 		}
 
@@ -301,7 +299,7 @@ static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dept
 bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->mgen++;
-	return has_vars_internal(q, p1, p1_ctx, 0);
+	return has_vars_internal(q, p1, p1_ctx);
 }
 
 static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth);
