@@ -199,13 +199,130 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
+static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
+{
+	bool found = false;
+
+	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
+		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
+			q->pl->tab4[idx]++;
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		q->pl->tab1[q->pl->tab_idx] = c_ctx;
+		q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
+		q->pl->tab3[q->pl->tab_idx] = c->val_off;
+		q->pl->tab4[q->pl->tab_idx] = 1;
+		q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
+		q->pl->tab_idx++;
+	}
+}
+
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
+
+static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	cell *l = p1;
+	pl_idx_t l_ctx = p1_ctx;
+	LIST_HANDLER(l);
+
+	while (is_iso_list(l) && !g_tpl_interrupt) {
+		cell *c = LIST_HEAD(l);
+		pl_idx_t c_ctx = l_ctx;
+
+		if (is_variable(c)) {
+			const frame *f = GET_FRAME(c_ctx);
+			slot *e = GET_SLOT(f, c->var_nbr);
+			c = deref(q, c, l_ctx);
+			c_ctx = q->latest_ctx;
+
+			if (is_variable(c))
+				accum_var(q, c, c_ctx);
+
+			if (!is_variable(c) && (e->mark != q->mgen)) {
+				e->mark = q->mgen;
+				collect_vars_internal(q, c, c_ctx);
+			} else
+				e->mark = q->mgen;
+		} else {
+			collect_vars_internal(q, c, c_ctx);
+		}
+
+		l = LIST_TAIL(l);
+
+		if (is_variable(l)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			l = deref(q, l, l_ctx);
+			l_ctx = q->latest_ctx;
+
+			if (is_variable(l))
+				accum_var(q, l, l_ctx);
+
+			if (e->mark == q->mgen)
+				break;
+
+			e->mark = q->mgen;
+		}
+	}
+}
+
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	if (is_variable(p1)) {
+		accum_var(q, p1, p1_ctx);
+		return;
+	}
+
+	if (!is_structure(p1))
+		return;
+
+	if (is_iso_list(p1)) {
+		collect_list_vars_internal(q, p1, p1_ctx);
+		return;
+	}
+
+	unsigned arity = p1->arity;
+	p1++;
+
+	while (arity-- && !g_tpl_interrupt) {
+		if (is_variable(p1)) {
+			frame *f = GET_FRAME(p1_ctx);
+			slot *e = GET_SLOT(f, p1->var_nbr);
+			cell *c = deref(q, p1, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+
+			if (is_variable(c))
+				accum_var(q, c, c_ctx);
+
+			if (!is_variable(c) && (e->mark != q->mgen)) {
+				e->mark = q->mgen;
+				collect_vars_internal(q, c, c_ctx);
+			} else
+				e->mark = q->mgen;
+		} else {
+			collect_vars_internal(q, p1, p1_ctx);
+		}
+
+		p1 += p1->nbr_cells;
+	}
+}
+
+void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	q->mgen++;
+	collect_vars_internal(q, p1, p1_ctx);
+}
+
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
 
 static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
-	bool ret_val = false;
 	LIST_HANDLER(l);
 
 	while (is_iso_list(l) && !g_tpl_interrupt) {
@@ -637,63 +754,6 @@ pl_status do_post_unification_hook(query *q, bool is_builtin)
 
 	q->st.curr_cell = tmp;
 	return pl_success;
-}
-
-// TODO : change this to make a list of vars as we go...
-
-static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, reflist *list)
-{
-	pl_idx_t nbr_cells = p1->nbr_cells;
-
-	while (nbr_cells) {
-		if (is_variable(p1)) {
-			if (is_in_ref_list(p1, p1_ctx, list))
-				return;
-
-			reflist nlist;
-			nlist.next = list;
-			nlist.var_nbr = p1->var_nbr;
-			nlist.ctx = p1_ctx;
-			cell *c = deref(q, p1, p1_ctx);
-			pl_idx_t c_ctx = q->latest_ctx;
-
-			if (is_structure(c))
-				collect_vars_internal(q, c, c_ctx, &nlist);
-		}
-
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-
-		if (is_variable(c)) {
-			bool found = false;
-
-			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
-					q->pl->tab4[idx]++;
-					found = true;
-					break;
-				}
-			}
-
-			if (!found) {
-				q->pl->tab1[q->pl->tab_idx] = c_ctx;
-				q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
-				q->pl->tab3[q->pl->tab_idx] = c->val_off;
-				q->pl->tab4[q->pl->tab_idx] = 1;
-				q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
-				q->pl->tab_idx++;
-			}
-		}
-
-		nbr_cells--;
-		p1++;
-	}
-}
-
-bool collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
-{
-	collect_vars_internal(q, p1, p1_ctx, NULL);
-	return true;
 }
 
 // This is for when one arg is a string & the other an iso-list...
