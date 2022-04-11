@@ -546,7 +546,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		}
 	}
 
-	cell *tmp = deep_copy_to_tmp(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	cell *tmp = deep_copy_to_tmp(q, q->st.curr_cell, q->st.curr_frame, false);
 	unify(q, tmp, q->st.curr_frame, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = g_sys_stream_property_s;
 

@@ -2203,7 +2203,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		if (is_variable(p22))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false, false);
+		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
@@ -2396,7 +2396,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		slot *e2 = GET_SLOT(f2, p2->var_nbr);
 
 		if (e1->c.attrs) {
-			cell *tmp = deep_copy_to_heap_with_replacement(q, e1->c.attrs, e1->c.attrs_ctx, false, true, p1, p1_ctx, p2, p2_ctx);
+			cell *tmp = deep_copy_to_heap_with_replacement(q, e1->c.attrs, e1->c.attrs_ctx, true, p1, p1_ctx, p2, p2_ctx);
 			e2->c.attrs = tmp;
 			e2->c.attrs_ctx = q->st.curr_frame;
 		}
@@ -2411,7 +2411,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
-	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, true);
+	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, true);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
@@ -2441,7 +2441,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
-	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false, false);
+	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false);
 
 	if (!tmp || (tmp == ERR_CYCLE_CELL))
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
@@ -2660,7 +2660,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (is_cyclic_term(q, p1, p1_ctx))
 		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -2727,7 +2727,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (is_cyclic_term(q, p1, p1_ctx))
 		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -3752,7 +3752,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	// and we need variables to be in the local context. One day vars
 	// will be able to hold their own context... free the vars!
 
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, true);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, true);
 
 	if (p0 == ERR_CYCLE_CELL)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
@@ -3810,7 +3810,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		may_error(try_me(q, MAX_ARITY));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
-			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 			may_ptr_error(tmp);
 			may_ptr_error(alloc_on_queuen(q, q->st.qnbr, tmp));
 		}
@@ -4057,7 +4057,7 @@ static pl_status do_asserta_2(query *q)
 		return throw_error(q, tmp2, q->latest_ctx, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 	if (tmp == ERR_CYCLE_CELL)
 		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
@@ -4160,7 +4160,7 @@ static pl_status do_assertz_2(query *q)
 		return throw_error(q, tmp2, q->latest_ctx, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
-	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
 
 	if (tmp == ERR_CYCLE_CELL)
@@ -5004,7 +5004,7 @@ static USE_RESULT pl_status fn_yield_0(query *q)
 
 static USE_RESULT pl_status fn_task_n(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
 	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);

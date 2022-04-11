@@ -105,7 +105,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	// and we need variables to be in the local context. One day vars
 	// will be able to hold their own context... free the vars!
 
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false, false);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
 	may_ptr_error(p0);
 
 	if (p0 == ERR_CYCLE_CELL)
@@ -473,7 +473,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
-		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false, false);
+		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false);
 		may_ptr_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e2);
@@ -532,7 +532,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 		//safe_copy_cells(e, p1, p1->nbr_cells);
 		copy_cells(e, p1, p1->nbr_cells);
 	} else {
-		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false, false);
+		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 		may_ptr_error(tmp);
 		e = malloc(sizeof(cell) * tmp->nbr_cells);
 		may_ptr_error(e);
