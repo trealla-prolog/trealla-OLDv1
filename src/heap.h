@@ -3,7 +3,6 @@
 USE_RESULT size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements);
 
 USE_RESULT cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx);
-USE_RESULT cell *clone2_to_tmp(query *q, cell *p1);
 USE_RESULT cell *clone_to_tmp(query *q, cell *p1);
 
 USE_RESULT cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx);
