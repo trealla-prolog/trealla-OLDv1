@@ -334,12 +334,12 @@ struct cell_ {
 		struct {
 			cell *val_ret;
 			uint32_t cgen;				// choice generation
-			uint32_t mod_id;
+			uint16_t mod_id;
 		};
 
 		struct {
-			uint8_t	chr_len;
 			char val_chr[MAX_SMALL_STRING];
+			uint8_t	chr_len;
 		};
 
 		struct {
@@ -699,7 +699,7 @@ struct module_ {
 
 struct prolog_ {
 	stream streams[MAX_STREAMS];
-	module *modmap[MAX_MODULES];;
+	module *modmap[MAX_MODULES];
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
