@@ -74,7 +74,7 @@ inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 	return q->latest_ctx = e->ctx, &e->c;
 }
 
-#define deref(q, c, c_ctx) is_variable(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = c_ctx, c)
+#define deref(q, c, c_ctx) is_variable(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = (c_ctx), (c))
 
 #define GET_FIRST_ARG(p,vt) \
 	cell *p = get_first_arg(q); \
