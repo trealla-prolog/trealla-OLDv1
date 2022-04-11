@@ -1854,7 +1854,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 		p->error_desc = "number";
 		p->error = true;
@@ -1880,7 +1880,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 				if (*s != '\'') {
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 					p->error_desc = "number";
 					p->error = true;
@@ -1893,7 +1893,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 			if (!*s || iscntrl(*s)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 				p->error_desc = "number";
 				p->error = true;
@@ -1907,7 +1907,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 #if 1
 		} else if ((*s == '\'') && !p->flags.not_strict_iso && search_op(p->m, "", NULL, false)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "number";
 			p->error = true;
@@ -1918,7 +1918,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (p->error) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "number";
 			p->error = true;
@@ -2866,7 +2866,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !args && !consing && last_op && !strcmp(p->token, ",")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error quotes needed around operator '%s', line %d\n", p->token, p->line_nbr);
+				fprintf(stdout, "Error: syntax error, quotes needed around operator '%s', line %d\n", p->token, p->line_nbr);
 
 			p->error_desc = "quotes_needed";
 			p->error = true;
@@ -2879,7 +2879,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
+					fprintf(stdout, "Error: syntax error, parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
 
 				p->error_desc = "parens_needed";
 				p->error = true;
@@ -2893,7 +2893,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!last_op && (priority > 999)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
+					fprintf(stdout, "Error: syntax error, parens needed around operator '%s', line %d\n", p->token, p->line_nbr);
 
 				p->error_desc = "parens_needed";
 				p->error = true;
@@ -2904,7 +2904,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
 			if ((*p->srcptr == ',') && !p->flags.double_quote_codes) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error missing element '%s'\n", p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, missing element '%s'\n", p->save_line?p->save_line:"");
 
 				p->error_desc = "missing_element";
 				p->error = true;
@@ -2913,7 +2913,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (p->was_consing) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
 				p->error_desc = "list";
 				p->error = true;
@@ -2936,7 +2936,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (*p->srcptr == ',') {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error missing arg '%s'\n", p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
 
 				p->error_desc = "args";
 				p->error = true;
@@ -2968,7 +2968,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && consing && p->start_term && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
 			p->error_desc = "list";
 			p->error = true;
@@ -2977,7 +2977,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && p->was_consing && consing && !strcmp(p->token, "|")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
 			p->error_desc = "list";
 			p->error = true;
@@ -2986,7 +2986,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->is_quoted && p->was_consing && last_bar && !strcmp(p->token, "]")) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error parsing list '%s'\n", p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
 			p->error_desc = "list";
 			p->error = true;
