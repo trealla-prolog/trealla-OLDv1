@@ -1010,9 +1010,6 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (depth > MAX_DEPTH)
 		return false;
 
-	if (p1_ctx == q->st.curr_frame)
-		q->no_tco = true;
-
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
@@ -1033,6 +1030,9 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		p1_ctx = tmp_ctx;
 	} else if (is_variable(p1))
 		q->has_vars = true;
+
+	if (p1_ctx == q->st.curr_frame)
+		q->no_tco = true;
 
 	if (is_variable(p1)) {
 		bool was_cyclic = false;
