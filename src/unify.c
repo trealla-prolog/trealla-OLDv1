@@ -469,7 +469,35 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		}
 	}
 
-	return is_cyclic_term_internal(q, l, l_ctx);
+	bool ok = is_cyclic_term_internal(q, l, l_ctx);
+
+	l = p1;
+	l_ctx = p1_ctx;
+
+	while (is_iso_list(l) && !g_tpl_interrupt) {
+		cell *c = LIST_HEAD(l);
+
+		if (is_variable(c)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, c->var_nbr);
+			e->sweep = false;
+			e->mark = 0;
+		}
+
+		l = LIST_TAIL(l);
+
+		if (is_variable(l)) {
+			const frame *f = GET_FRAME(l_ctx);
+			slot *e = GET_SLOT(f, l->var_nbr);
+			e->sweep = false;
+			e->mark = 0;
+		}
+
+		l = deref(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
+	}
+
+	return ok;
 }
 
 static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
