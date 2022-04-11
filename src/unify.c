@@ -432,12 +432,13 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			c = deref(q, c, l_ctx);
 			c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && e->sweep) {
+			if (!is_variable(c) && e->sweep && (e->mark == q->mgen)) {
 				e->sweep = false;
 				return true;
 			}
 
 			e->sweep = true;
+			e->mark = q->mgen;
 
 			if (is_cyclic_term_internal(q, c, c_ctx)) {
 				e->sweep = false;
@@ -458,12 +459,13 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (!is_variable(l) && e->sweep) {
+			if (!is_variable(l) && e->sweep && (e->mark == q->mgen)) {
 				e->sweep = false;
 				return true;
 			}
 
 			e->sweep = true;
+			e->mark = q->mgen;
 		}
 	}
 
@@ -490,12 +492,14 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && e->sweep) {
+			if (!is_variable(c) && e->sweep && (e->mark == q->mgen)) {
 				e->sweep = false;
 				return true;
 			}
 
 			e->sweep = true;
+			e->mark = q->mgen;
+
 			if (is_cyclic_term_internal(q, c, c_ctx)) {
 				e->sweep = false;
 				return true;
@@ -515,11 +519,13 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
+	q->mgen++;
 	return is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
 bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx)
 {
+	q->mgen++;
 	return !is_cyclic_term_internal(q, p1, p1_ctx);
 }
 
