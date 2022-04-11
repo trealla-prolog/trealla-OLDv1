@@ -485,7 +485,6 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	p1++;
 
 	while (arity-- && !g_tpl_interrupt) {
-
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
