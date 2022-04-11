@@ -292,6 +292,30 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	return tmp;
 }
 
+cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	if (!init_tmp_heap(q))
+		return NULL;
+
+	frame *f = GET_CURR_FRAME();
+	q->st.m->pl->varno = f->nbr_vars;
+	q->st.m->pl->tab_idx = 0;
+	q->cycle_error = false;
+
+	if (is_variable(p1)) {
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+	}
+
+	reflist nlist = {0};
+	nlist.ptr = p1;
+	nlist.ctx = p1_ctx;
+
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, &nlist);
+	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+	return q->tmp_heap;
+}
+
 cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, cell *from, pl_idx_t from_ctx, cell *to, pl_idx_t to_ctx)
 {
 	if (!init_tmp_heap(q))
@@ -407,30 +431,6 @@ cell *deep_copy_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bo
 	if (!tmp2) return NULL;
 	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return tmp2;
-}
-
-cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
-{
-	if (!init_tmp_heap(q))
-		return NULL;
-
-	frame *f = GET_CURR_FRAME();
-	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->tab_idx = 0;
-	q->cycle_error = false;
-
-	if (is_variable(p1)) {
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
-	reflist nlist = {0};
-	nlist.ptr = p1;
-	nlist.ctx = p1_ctx;
-
-	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, &nlist);
-	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
-	return q->tmp_heap;
 }
 
 cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
