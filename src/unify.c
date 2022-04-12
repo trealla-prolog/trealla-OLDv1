@@ -889,8 +889,11 @@ static const struct dispatch g_disp[] =
 	{0}
 };
 
-static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
+	if (depth > MAX_DEPTH)
+		return true;
+
 	cell *save_p1 = p1, *save_p2 = p2;
 	pl_idx_t save_p1_ctx = p1_ctx, save_p2_ctx = p2_ctx;
 	LIST_HANDLER(p1);
@@ -913,7 +916,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		if (!p1 || !p2)
 			break;
 
-		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx, 0))
+		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx, depth+1))
 			return false;
 
 		p1 = LIST_TAIL(p1);
@@ -945,7 +948,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 	if (!p1 || !p2)
 		return false;
 
-	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
+	return unify_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 }
 
 static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
@@ -957,7 +960,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 		return false;
 
 	if (depth > MAX_DEPTH)
-		return false;
+		return true;
 
 	unsigned arity = p1->arity;
 	p1++; p2++;
@@ -1029,7 +1032,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return true;
 
 	if (depth > MAX_DEPTH)
-		return false;
+		return true;
 
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)
@@ -1058,20 +1061,20 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if (is_variable(p1)) {
 		bool was_cyclic = false;
 
-		if (q->flags.occurs_check == OCCURS_TRUE) {
+		if (q->flags.occurs_check == OCCURS_CHECK_TRUE) {
 			if (is_cyclic_term(q, p2, p2_ctx))
 				was_cyclic = true;
-		} else if (q->flags.occurs_check == OCCURS_ERROR) {
+		} else if (q->flags.occurs_check == OCCURS_CHECK_ERROR) {
 			if (is_cyclic_term(q, p2, p2_ctx))
 				was_cyclic = true;
 		}
 
 		set_var(q, p1, p1_ctx, p2, p2_ctx);
 
-		if (q->flags.occurs_check == OCCURS_TRUE) {
+		if (q->flags.occurs_check == OCCURS_CHECK_TRUE) {
 			if (!was_cyclic && is_cyclic_term(q, p2, p2_ctx))
 				return false;
-		} else if (q->flags.occurs_check == OCCURS_ERROR) {
+		} else if (q->flags.occurs_check == OCCURS_CHECK_ERROR) {
 			if (!was_cyclic && is_cyclic_term(q, p2, p2_ctx))
 				return (throw_error(q, p2, p2_ctx, "representation_error", "term"), false);
 		}
@@ -1091,7 +1094,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return unify_string_to_list(q, p2, p2_ctx, p1, p1_ctx);
 
 	if (q->lists_ok && is_iso_list(p1) && is_iso_list(p2))
-		return unify_lists(q, p1, p1_ctx, p2, p2_ctx);
+		return unify_lists(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 
 	if (p1->arity || p2->arity)
 		return unify_structs(q, p1, p1_ctx, p2, p2_ctx, depth+1);
@@ -1108,7 +1111,7 @@ bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 
 		if (check_list(q, p1, p1_ctx, &is_partial, NULL) && check_list(q, p2, p2_ctx, &is_partial, NULL)) {
 			q->lists_ok = true;
-			pl_status ok = unify_lists(q, p1, p1_ctx, p2, p2_ctx);
+			pl_status ok = unify_lists(q, p1, p1_ctx, p2, p2_ctx, 0);
 			q->lists_ok = false;
 			return ok;
 		}

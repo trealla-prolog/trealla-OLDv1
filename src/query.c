@@ -1075,7 +1075,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	e->ctx = v_ctx;
 
-	if (q->flags.occurs_check != OCCURS_FALSE)
+	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
 }
 

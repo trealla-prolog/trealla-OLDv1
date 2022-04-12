@@ -357,7 +357,7 @@ static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	bool save = q->flags.occurs_check;
-	q->flags.occurs_check = OCCURS_TRUE;
+	q->flags.occurs_check = OCCURS_CHECK_TRUE;
 	pl_status ok = unify(q, p1, p1_ctx, p2, p2_ctx);
 	q->flags.occurs_check = save;
 	return ok;
@@ -3043,9 +3043,9 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
 		cell tmp;
 
-		if (q->st.m->flags.occurs_check == OCCURS_TRUE)
+		if (q->st.m->flags.occurs_check == OCCURS_CHECK_TRUE)
 			make_literal(&tmp, g_true_s);
-		else if (q->st.m->flags.occurs_check == OCCURS_FALSE)
+		else if (q->st.m->flags.occurs_check == OCCURS_CHECK_FALSE)
 			make_literal(&tmp, g_false_s);
 		else
 			make_literal(&tmp, index_from_pool(q->pl, "error"));
@@ -3227,11 +3227,11 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
 		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
-			q->st.m->flags.occurs_check = OCCURS_TRUE;
+			q->st.m->flags.occurs_check = OCCURS_CHECK_TRUE;
 		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
-			q->st.m->flags.occurs_check = OCCURS_FALSE;
+			q->st.m->flags.occurs_check = OCCURS_CHECK_FALSE;
 		else if (!CMP_SLICE2(q, p2, "error"))
-			q->st.m->flags.occurs_check = OCCURS_ERROR;
+			q->st.m->flags.occurs_check = OCCURS_CHECK_ERROR;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
 			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
@@ -7514,7 +7514,7 @@ static void load_flags(query *q)
 
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "double_quotes", m->flags.double_quote_atom?"atom":m->flags.double_quote_chars?"chars":m->flags.double_quote_codes?"codes":"???");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "char_conversion", m->flags.char_conversion?"on":"off");
-	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flags.occurs_check==OCCURS_TRUE?"true":m->flags.occurs_check==OCCURS_FALSE?"false":"error");
+	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "occurs_check", m->flags.occurs_check==OCCURS_CHECK_TRUE?"true":m->flags.occurs_check==OCCURS_CHECK_FALSE?"false":"error");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "character_escapes", m->flags.character_escapes?"true":"false");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "strict_iso", !m->flags.not_strict_iso?"on":"off");
 	ASTRING_sprintf(pr, "'$current_prolog_flag'(%s, %s).\n", "debug", m->flags.debug?"on":"off");

@@ -534,7 +534,7 @@ struct page_ {
 
 enum q_retry { QUERY_OK=0, QUERY_RETRY=1, QUERY_EXCEPTION=2 };
 enum unknowns { UNK_FAIL=0, UNK_ERROR=1, UNK_WARNING=2, UNK_CHANGEABLE=3 };
-enum occurs { OCCURS_FALSE=0, OCCURS_TRUE=1, OCCURS_ERROR = 2 };
+enum occurs { OCCURS_CHECK_FALSE=0, OCCURS_CHECK_TRUE=1, OCCURS_CHECK_ERROR = 2 };
 
 struct prolog_flags_ {
 	enum occurs occurs_check;
