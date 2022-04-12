@@ -897,7 +897,12 @@ static void check_first_cut(parser *p)
 		if (!(c->flags&FLAG_BUILTIN))
 			break;
 
-		if (!strcmp(GET_STR(p, c), ","))
+		if (!strcmp(GET_STR(p, c), ",")
+			|| !strcmp(GET_STR(p, c), ";")
+			|| !strcmp(GET_STR(p, c), "->")
+			|| !strcmp(GET_STR(p, c), "*->")
+			|| !strcmp(GET_STR(p, c), "-->")
+			)
 			;
 		else if (!IS_OP(c) && !strcmp(GET_STR(p, c), "!")) {
 			p->cl->is_first_cut = true;
@@ -3093,6 +3098,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			int nextch = *s;
 
 			if ((nextch == ',')
+				|| (nextch == ';')
 				|| (nextch == ')')
 				|| (nextch == '|')
 				|| (nextch == ']')
