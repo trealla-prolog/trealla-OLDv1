@@ -331,11 +331,11 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		bool is_partial;
 
 		if (check_list(q, c, c_ctx, &is_partial, NULL))
-			q->lists_ok = true;
+			q->lists_ok = false;
 		else
 			q->lists_ok = false;
 	} else
-		q->lists_ok = true;
+		q->lists_ok = false;
 
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
