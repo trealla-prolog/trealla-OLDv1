@@ -1068,6 +1068,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		bool quote = q->quoted && has_spaces(src, LEN_STR(q,c));
 
+		if (is_literal(rhs) && !rhs->arity && !parens) {
+			const char *rhs_src = GET_STR(q, rhs);
+			if (!iswalpha(*rhs_src) && !isdigit(*rhs_src) && strcmp(rhs_src, "[]") && strcmp(rhs_src, "{}"))
+				space = 1;
+		}
+
+
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
