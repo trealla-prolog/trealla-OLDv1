@@ -331,7 +331,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		bool is_partial;
 
 		if (check_list(q, c, c_ctx, &is_partial, NULL))
-			q->lists_ok = false;
+			q->lists_ok = true;
 		else
 			q->lists_ok = false;
 	} else
