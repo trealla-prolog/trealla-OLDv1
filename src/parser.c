@@ -3098,7 +3098,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			int nextch = *s;
 
 			if ((nextch == ',')
-				|| (nextch == ';')
 				|| (nextch == ')')
 				|| (nextch == '|')
 				|| (nextch == ']')
@@ -3106,6 +3105,13 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			) {
 				specifier = 0;
 				priority = 0;
+			} else if ((nextch == ';') || (nextch == '*') || (nextch == '-')) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+				p->error_desc = "syntax_error_incomplete";
+				p->error = true;
+				break;
 			}
 		}
 
