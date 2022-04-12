@@ -797,7 +797,7 @@ static void directives(parser *p, cell *d)
 
 					if (!is_multifile_in_db(p->m->pl, mod, name, arity)) {
 						if (DUMP_ERRS || !p->do_read_term)
-							fprintf(stdout, "Error: not multile %s:%s/%u\n", mod, name, arity);
+							fprintf(stdout, "Error: not multifile %s:%s/%u\n", mod, name, arity);
 
 						p->error = true;
 						return;
