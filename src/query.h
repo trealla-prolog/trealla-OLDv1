@@ -107,6 +107,7 @@ pl_status fn_iso_true_0(query *q);
 pl_status fn_sys_undo_trail_1(query *q);
 pl_status fn_sys_redo_trail_0(query *q);
 pl_status fn_sys_soft_inner_cut_0(query *q);
+pl_status fn_iso_unify_2(query *q);
 
 struct reflist_ {
 	reflist *next;

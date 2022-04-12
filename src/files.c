@@ -1137,6 +1137,482 @@ static USE_RESULT pl_status fn_iso_read_2(query *q)
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
+static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, cell **vars, pl_idx_t *vars_ctx, cell **varnames, pl_idx_t *varnames_ctx, cell **sings, pl_idx_t *sings_ctx)
+{
+	parser *p = str->p;
+
+	if (!is_structure(c)) {
+		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+		return false;
+	}
+
+	cell *c1 = deref(q, c+1, c_ctx);
+	pl_idx_t c1_ctx = q->latest_ctx;
+
+	if (!CMP_SLICE2(q, c, "character_escapes")) {
+		if (is_literal(c1))
+			p->flags.character_escapes = !CMP_SLICE2(q, c1, "true");
+	} else if (!CMP_SLICE2(q, c, "double_quotes")) {
+		if (is_literal(c1)) {
+			if (!CMP_SLICE2(q, c1, "atom")) {
+				p->flags.double_quote_codes = p->flags.double_quote_chars = false;
+				p->flags.double_quote_atom = true;
+			} else if (!CMP_SLICE2(q, c1, "chars")) {
+				p->flags.double_quote_atom = p->flags.double_quote_codes = false;
+				p->flags.double_quote_chars = true;
+			} else if (!CMP_SLICE2(q, c1, "codes")) {
+				p->flags.double_quote_atom = p->flags.double_quote_chars = false;
+				p->flags.double_quote_codes = true;
+			}
+		}
+	} else if (!CMP_SLICE2(q, c, "variables")) {
+		if (is_variable(c1)) {
+			if (vars) *vars = c1;
+			if (vars_ctx) *vars_ctx = c1_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			return false;
+		}
+	} else if (!CMP_SLICE2(q, c, "variable_names")) {
+		if (is_variable(c1)) {
+			if (varnames) *varnames = c1;
+			if (varnames_ctx) *varnames_ctx = c1_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			return false;
+		}
+	} else if (!CMP_SLICE2(q, c, "singletons")) {
+		if (is_variable(c1)) {
+			if (sings) *sings = c1;
+			if (sings_ctx) *sings_ctx = c1_ctx;
+		} else {
+			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			return false;
+		}
+	} else if (!CMP_SLICE2(q, c, "positions") && (c->arity == 2) && str->fp) {
+		p->pos_start = ftello(str->fp);
+	} else if (!CMP_SLICE2(q, c, "line_counts") && (c->arity == 2)) {
+	} else {
+		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+		return false;
+	}
+
+	return true;
+}
+
+pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src)
+{
+	if (!str->p) {
+		str->p = create_parser(q->st.m);
+		str->p->flags = q->st.m->flags;
+		str->p->fp = str->fp;
+		str->p->no_fp = q->p->no_fp;
+	} else
+		reset(str->p);
+
+	parser *p = str->p;
+	p->one_shot = true;
+	cell *vars = NULL, *varnames = NULL, *sings = NULL;
+	pl_idx_t vars_ctx = 0, varnames_ctx = 0, sings_ctx = 0;
+	cell *p21 = p2;
+	pl_idx_t p21_ctx = p2_ctx;
+
+	LIST_HANDLER(p21);
+
+	while (is_list(p21) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p21);
+		h = deref(q, h, p21_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+
+		if (is_variable(h))
+			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
+
+		if (!parse_read_params(q, str, h, h_ctx, &vars, &vars_ctx, &varnames, &varnames_ctx, &sings, &sings_ctx))
+			return pl_success;
+
+		p21 = LIST_TAIL(p21);
+		p21 = deref(q, p21, p21_ctx);
+		p21_ctx = q->latest_ctx;
+	}
+
+	if (is_variable(p21))
+		return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
+
+	if (!is_nil(p21))
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!src && !p->srcptr && str->fp) {
+		if (p->no_fp || getline(&p->save_line, &p->n_line, str->fp) == -1) {
+			if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+				clearerr(str->fp);
+				return do_yield_0(q, 1);
+			}
+
+			p->srcptr = "";
+		} else
+			p->srcptr = p->save_line;
+	}
+
+	if (p->srcptr) {
+		char *src = (char*)eat_space(p);
+		p->line_nbr_start = p->line_nbr;
+		p->srcptr = src;
+	}
+
+	for (;;) {
+#if 0
+		if (isatty(fileno(str->fp)) && !src) {
+			fprintf(str->fp, "%s", PROMPT);
+			fflush(str->fp);
+		}
+#endif
+
+		if (!src && (!p->srcptr || !*p->srcptr || (*p->srcptr == '\n'))) {
+			if (p->srcptr && (*p->srcptr == '\n'))
+				p->line_nbr++;
+
+			if (p->no_fp || getline(&p->save_line, &p->n_line, str->fp) == -1) {
+				if (q->is_task && !feof(str->fp) && ferror(str->fp)) {
+					clearerr(str->fp);
+					return do_yield_0(q, 1);
+				}
+
+				p->srcptr = "";
+				str->at_end_of_file = str->eof_action != eof_action_reset;
+
+				if (str->eof_action == eof_action_reset)
+					clearerr(str->fp);
+
+				if (vars) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (varnames) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+				}
+
+				if (sings) {
+					cell tmp;
+					make_literal(&tmp, g_nil_s);
+					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+				}
+
+				cell *p22 = p2;
+				pl_idx_t p22_ctx = p2_ctx;
+				LIST_HANDLER(p22);
+
+				while (is_list(p22) && !g_tpl_interrupt) {
+					cell *h = LIST_HEAD(p22);
+					h = deref(q, h, p22_ctx);
+					pl_idx_t h_ctx = q->latest_ctx;
+
+					if (is_variable(h))
+						return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
+
+					if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
+						cell *p = h+1;
+						p = deref(q, p, h_ctx);
+						pl_idx_t p_ctx = q->latest_ctx;
+						cell tmp;
+						make_int(&tmp, str->p->pos_start);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+						p = h+2;
+						p = deref(q, p, h_ctx);
+						p_ctx = q->latest_ctx;
+						make_int(&tmp, ftello(str->fp));
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+					} else if (!CMP_SLICE2(q, h, "line_counts") && (h->arity == 2)) {
+						cell *p = h+1;
+						p = deref(q, p, h_ctx);
+						pl_idx_t p_ctx = q->latest_ctx;
+						cell tmp;
+						make_int(&tmp, str->p->line_nbr_start);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+						p = h+2;
+						p = deref(q, p, h_ctx);
+						p_ctx = q->latest_ctx;
+						make_int(&tmp, str->p->line_nbr);
+						unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+					}
+
+					p22 = LIST_TAIL(p22);
+					p22 = deref(q, p22, p22_ctx);
+					p22_ctx = q->latest_ctx;
+				}
+
+				cell tmp;
+				make_literal(&tmp, g_eof_s);
+				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+			}
+
+			//if (!*p->save_line || (*p->save_line == '\r') || (*p->save_line == '\n'))
+			//	continue;
+
+			p->srcptr = p->save_line;
+		} else if (src)
+			p->srcptr = src;
+
+		break;
+	}
+
+	frame *f = GET_CURR_FRAME();
+	p->read_term = f->nbr_vars;
+	p->do_read_term = true;
+	tokenize(p, false, false);
+	p->read_term = 0;
+
+	if (p->error) {
+		p->error = false;
+
+		if (!p->fp || !isatty(fileno(p->fp))) {
+			void *save_fp = p->fp;
+			p->fp = NULL;
+
+			while (get_token(p, false, false)
+				&& p->token[0] && strcmp(p->token, ".")
+				&& !g_tpl_interrupt)
+				;
+
+			p->fp = save_fp;
+			p->did_getline = false;
+		}
+
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		p->do_read_term = false;
+		return throw_error(q, &tmp, q->st.curr_frame, "syntax_error", p->error_desc?p->error_desc:"read_term");
+	}
+
+	p->do_read_term = false;
+
+	cell *p22 = p2;
+	pl_idx_t p22_ctx = p2_ctx;
+	LIST_HANDLER(p22);
+
+	while (is_list(p22) && !g_tpl_interrupt) {
+		cell *h = LIST_HEAD(p22);
+		h = deref(q, h, p22_ctx);
+		pl_idx_t h_ctx = q->latest_ctx;
+
+		if (is_variable(h))
+			return throw_error(q, p2, p2_ctx, "instantiation_error", "read_option");
+
+		if (!CMP_SLICE2(q, h, "positions") && (h->arity == 2)) {
+			cell *p = h+1;
+			p = deref(q, p, h_ctx);
+			pl_idx_t p_ctx = q->latest_ctx;
+			cell tmp;
+			make_int(&tmp, str->p->pos_start);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+			p = h+2;
+			p = deref(q, p, h_ctx);
+			p_ctx = q->latest_ctx;
+			make_int(&tmp, ftello(str->fp));
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+		} else if (!CMP_SLICE2(q, h, "line_counts") && (h->arity == 2)) {
+			cell *p = h+1;
+			p = deref(q, p, h_ctx);
+			pl_idx_t p_ctx = q->latest_ctx;
+			cell tmp;
+			make_int(&tmp, str->p->line_nbr_start);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+			p = h+2;
+			p = deref(q, p, h_ctx);
+			p_ctx = q->latest_ctx;
+			make_int(&tmp, str->p->line_nbr);
+			unify(q, p, p_ctx, &tmp, q->st.curr_frame);
+		}
+
+		p22 = LIST_TAIL(p22);
+		p22 = deref(q, p22, p22_ctx);
+		p22_ctx = q->latest_ctx;
+	}
+
+	if (!p->cl->cidx) {
+		cell tmp;
+		make_literal(&tmp, g_eof_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	xref_rule(p->m, p->cl, NULL);
+
+	if (p->nbr_vars) {
+		if (!create_vars(q, p->nbr_vars))
+			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
+	}
+
+	q->pl->tab_idx = 0;
+
+	if (p->nbr_vars)
+		collect_vars(q, p->cl->cells, q->st.curr_frame);
+
+	if (vars) {
+		unsigned cnt = q->pl->tab_idx;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
+				cell v;
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	if (varnames) {
+		unsigned cnt = 0;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+			if (q->pl->tab5[i])
+				continue;
+
+			cnt++;
+		}
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+				if (q->pl->tab5[i])
+					continue;
+
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
+				cell v;
+				make_literal(&v, g_unify_s);
+				v.flags |= FLAG_BUILTIN;
+				v.fn = fn_iso_unify_2;
+				v.arity = 2;
+				v.nbr_cells = 3;
+				SET_OP(&v,OP_XFX);
+				tmp[idx++] = v;
+				make_literal(&v, q->pl->tab3[i]);
+				tmp[idx++] = v;
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	if (sings) {
+		unsigned cnt = 0;
+		may_ptr_error(init_tmp_heap(q));
+		cell *tmp = alloc_on_tmp(q, (cnt*4)+1);
+		may_ptr_error(tmp);
+		unsigned idx = 0;
+
+		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+			if (q->pl->tab4[i] != 1)
+				continue;
+
+			if (varnames && (q->pl->tab5[i]))
+				continue;
+
+			cnt++;
+		}
+
+		if (cnt) {
+			unsigned done = 0;
+
+			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+				if (q->pl->tab4[i] != 1)
+					continue;
+
+				if (varnames && (q->pl->tab5[i]))
+					continue;
+
+				make_literal(tmp+idx, g_dot_s);
+				tmp[idx].arity = 2;
+				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
+				cell v;
+				make_literal(&v, g_unify_s);
+				v.flags |= FLAG_BUILTIN;
+				v.fn = fn_iso_unify_2;
+				v.arity = 2;
+				v.nbr_cells = 3;
+				SET_OP(&v,OP_XFX);
+				tmp[idx++] = v;
+				make_literal(&v, q->pl->tab3[i]);
+				tmp[idx++] = v;
+				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				tmp[idx++] = v;
+				done++;
+			}
+
+			make_literal(tmp+idx++, g_nil_s);
+			tmp[0].arity = 2;
+			tmp[0].nbr_cells = idx;
+
+			cell *save = tmp;
+			tmp = alloc_on_heap(q, idx);
+			may_ptr_error(tmp);
+			safe_copy_cells(tmp, save, idx);
+			tmp->nbr_cells = idx;
+			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
+		} else {
+			cell tmp;
+			make_literal(&tmp, g_nil_s);
+			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+		}
+	}
+
+	cell *tmp = alloc_on_heap(q, p->cl->cidx-1);
+	may_ptr_error(tmp);
+	safe_copy_cells(tmp, p->cl->cells, p->cl->cidx-1);
+	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
+	clear_rule(p->cl);
+	return ok;
+}
+
 static USE_RESULT pl_status fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
