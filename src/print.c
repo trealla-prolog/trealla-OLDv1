@@ -628,18 +628,23 @@ static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 {
 	for (unsigned i = 0; i < q->pl->tab_idx; i++) {
 		if (q->pl->tab1[i] == slot_idx) {
+			if (q->pl->tab2[i] == slot_idx)
+				return varformat(i);
+
 			unsigned offset = 0;
 
 			while (q->ignore[i+offset])
 				offset++;
 
 			q->ignore[i+offset] = true;
+			q->pl->tab2[i] = slot_idx;
 			return varformat(i+offset);
 		}
 	}
 
 	unsigned i = q->pl->tab_idx++;
 	q->pl->tab1[i] = slot_idx;
+	q->pl->tab2[i] = 0;
 	return varformat(i);
 }
 
