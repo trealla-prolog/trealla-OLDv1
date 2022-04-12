@@ -1118,6 +1118,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		|| !strcmp(src, "?=")
 //		|| (*src == '#')
 		|| !*src;
+
+	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
+		const char *lhs_src = GET_STR(q, lhs);
+		if (!iswalpha(*lhs_src) && !isdigit(*lhs_src) && strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
+			space = 1;
+	}
+
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	int quote = q->quoted && has_spaces(src, LEN_STR(q,c));
