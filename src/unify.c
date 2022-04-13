@@ -480,14 +480,6 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	l_ctx = p1_ctx;
 
 	while (is_iso_list(l) && !g_tpl_interrupt) {
-		cell *c = LIST_HEAD(l);
-
-		if (is_variable(c)) {
-			const frame *f = GET_FRAME(l_ctx);
-			slot *e = GET_SLOT(f, c->var_nbr);
-			e->mark = false;
-		}
-
 		l = LIST_TAIL(l);
 
 		if (is_variable(l)) {
