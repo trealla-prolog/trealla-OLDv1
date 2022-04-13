@@ -1,0 +1,55 @@
+{
+  "uid" : "747d6be2735c2eb",
+  "name" : "sokoban",
+  "fullName" : "sokoban::tests",
+  "historyId" : "sokoban::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "contributions/pddl_parser/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "61-64"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3c7b8e64f184a83712efa4ef7f685fe450860c60/contributions/pddl_parser/tests.lgt#L61"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "747d6be2735c2eb.json",
+  "parameterValues" : [ "contributions/pddl_parser/tests.lgt", "61-64", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c7b8e64f184a83712efa4ef7f685fe450860c60/contributions/pddl_parser/tests.lgt#L61" ]
+}

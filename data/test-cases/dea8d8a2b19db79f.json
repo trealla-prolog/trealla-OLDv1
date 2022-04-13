@@ -1,0 +1,55 @@
+{
+  "uid" : "dea8d8a2b19db79f",
+  "name" : "ports_profiler_port_5_02",
+  "fullName" : "ports_profiler_port_5_02::tests",
+  "historyId" : "ports_profiler_port_5_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/ports_profiler/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/ports_profiler/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/ports_profiler/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/ports_profiler/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "55-56"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3c7b8e64f184a83712efa4ef7f685fe450860c60/tools/ports_profiler/tests.lgt#L55"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "dea8d8a2b19db79f.json",
+  "parameterValues" : [ "tools/ports_profiler/tests.lgt", "55-56", "https://github.com/LogtalkDotOrg/logtalk3/tree/3c7b8e64f184a83712efa4ef7f685fe450860c60/tools/ports_profiler/tests.lgt#L55" ]
+}
