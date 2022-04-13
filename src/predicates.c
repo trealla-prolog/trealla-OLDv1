@@ -358,16 +358,21 @@ static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
 	GET_NEXT_ARG(p2,any);
 	bool save = q->flags.occurs_check;
 	q->flags.occurs_check = OCCURS_CHECK_TRUE;
-	pl_status ok = unify(q, p1, p1_ctx, p2, p2_ctx);
+	bool ok = unify(q, p1, p1_ctx, p2, p2_ctx);
 	q->flags.occurs_check = save;
-	return ok;
+	return ok ? pl_success : pl_failure;
 }
 
 USE_RESULT pl_status fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
-	return unify(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
+	bool ok = unify(q, p1, p1_ctx, p2, p2_ctx);
+
+	if (q->cycle_error)
+		return throw_error(q, p2, p2_ctx, "representation_error", "term");
+
+	return ok ? pl_success : pl_failure;
 }
 
 static USE_RESULT pl_status fn_iso_notunify_2(query *q)

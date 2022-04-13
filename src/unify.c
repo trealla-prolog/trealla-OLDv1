@@ -1082,8 +1082,10 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 			if (!was_cyclic && is_cyclic_term(q, p2, p2_ctx))
 				return false;
 		} else if (q->flags.occurs_check == OCCURS_CHECK_ERROR) {
-			if (!was_cyclic && is_cyclic_term(q, p2, p2_ctx))
-				return (throw_error(q, p2, p2_ctx, "representation_error", "term"), false);
+			if (!was_cyclic && is_cyclic_term(q, p2, p2_ctx)) {
+				q->cycle_error = true;
+				return false;
+			}
 		}
 
 		return true;
@@ -1113,6 +1115,8 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 
 bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
+	q->cycle_error = false;
+
 	if (is_iso_list(p1) && is_iso_list(p2)) {
 		bool is_partial;
 
