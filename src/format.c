@@ -7,7 +7,7 @@
 #include "query.h"
 #include "utf8.h"
 
-#define MYMAX(a,b) (a) > (b) ? (b) : (a)
+#define MYMAX(a,b) (a) > (b) ? (a) : (b)
 
 static int format_integer(char *dst, pl_int_t v, int grouping, int sep, int decimals, int radix)
 {
