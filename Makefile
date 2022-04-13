@@ -36,6 +36,10 @@ SRCOBJECTS = tpl.o src/history.o src/functions.o \
 	src/skiplist.o src/base64.o src/network.o src/toplevel.o \
 	src/utf8.o
 
+ifdef THREADS
+SRCOBJECTS += src/list.o src/threads.o
+endif
+
 LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
 	library/http.o library/atts.o library/error.o library/dcgs.o \
 	library/format.o library/charsio.o library/freeze.o \
@@ -105,6 +109,7 @@ src/heap.o: src/heap.c src/internal.h src/map.h src/skiplist.h src/trealla.h \
   src/cdebug.h src/imath/imath.h src/query.h src/builtins.h src/heap.h
 src/history.o: src/history.c src/history.h src/utf8.h src/cdebug.h
 src/library.o: src/library.c src/library.h
+src/list.o: src/list.c src/list.h
 src/module.o: src/module.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h src/parser.h src/module.h \
   src/prolog.h src/query.h src/builtins.h src/utf8.h
@@ -130,6 +135,7 @@ src/query.o: src/query.c src/internal.h src/map.h src/skiplist.h \
   src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
   src/heap.h src/utf8.h
 src/skiplist.o: src/skiplist.c src/skiplist.h
+src/threads.o: src/threads.c src/threads.h src/list.h
 src/toplevel.o: src/toplevel.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h src/history.h \
   src/parser.h src/module.h src/prolog.h src/query.h src/builtins.h \
