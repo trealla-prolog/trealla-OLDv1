@@ -70,6 +70,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
+#define MAX_IGNORES 64000
 #define MAX_STREAMS 1024
 #define MAX_MODULES 1024
 //#define MAX_DEPTH 9999
@@ -559,7 +560,6 @@ struct query_ {
 	trail *trails;
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
-	bool ignore[MAX_ARITY];
 	page *pages;
 	slot *save_e;
 	db_entry *dirty_list;
@@ -703,7 +703,8 @@ struct prolog_ {
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
-	pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000];
+	pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES], tab3[MAX_IGNORES], tab4[MAX_IGNORES], tab5[MAX_IGNORES];
+	uint8_t ignore[MAX_IGNORES];
 	map *symtab, *funtab, *keyval;
 	char *pool;
 	size_t pool_offset, pool_size;
