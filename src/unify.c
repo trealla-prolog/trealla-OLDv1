@@ -440,7 +440,8 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 				break;
 			}
 
-			e->mark = true;
+			if (!is_variable(c))
+				e->mark = true;
 
 			if (is_cyclic_term_internal(q, c, c_ctx)) {
 				e->mark = false;
@@ -470,7 +471,8 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 				break;
 			}
 
-			e->mark = true;
+			if (!is_variable(l))
+				e->mark = true;
 		}
 
 		depth++;
@@ -526,14 +528,16 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 				return true;
 			}
 
-			e->mark = true;
+			if (!is_variable(c)) {
+				e->mark = true;
 
-			if (is_cyclic_term_internal(q, c, c_ctx)) {
+				if (is_cyclic_term_internal(q, c, c_ctx)) {
+					e->mark = false;
+					return true;
+				}
+
 				e->mark = false;
-				return true;
 			}
-
-			e->mark = false;
 		} else {
 			if (is_cyclic_term_internal(q, p1, p1_ctx))
 				return true;

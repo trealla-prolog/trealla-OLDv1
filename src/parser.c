@@ -3083,7 +3083,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (priority && (last_op || last_bar)
-			&& !IS_POSTFIX(specifier)) {
+			&& !IS_POSTFIX(specifier)&& !IS_PREFIX(specifier)) {
 			char *s = eat_space(p);
 
 			if (!s || !*s) {
