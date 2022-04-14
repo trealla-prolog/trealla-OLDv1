@@ -921,12 +921,11 @@ static void check_first_cut(parser *p)
 
 static pl_idx_t get_varno(parser *p, const char *src)
 {
-	int anon = !strcmp(src, "_");
 	size_t offset = 0;
 	int i = 0;
 
 	while (p->vartab.var_pool[offset]) {
-		if (!strcmp(p->vartab.var_pool+offset, src) && !anon)
+		if (!strcmp(p->vartab.var_pool+offset, src) && strcmp(src, "_"))
 			return i;
 
 		offset += strlen(p->vartab.var_pool+offset) + 1;
@@ -1583,11 +1582,11 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 cell *check_body_callable(parser *p, cell *c)
 {
 	if (is_xfx(c) || is_xfy(c)) {
-		if (!strcmp(GET_STR(p, c), ",")
-			|| !strcmp(GET_STR(p, c), ";")
-			|| !strcmp(GET_STR(p, c), "->")
-			|| !strcmp(GET_STR(p, c), "*->")
-			|| !strcmp(GET_STR(p, c), ":-")) {
+		if ((c->val_off == g_conjunction_s)
+			|| (c->val_off == g_disjunction_s)
+			|| (c->val_off == g_if_then_s)
+			|| (c->val_off == g_soft_cut_s)
+			|| (c->val_off == g_neck_s)) {
 			cell *lhs = c + 1;
 			cell *tmp;
 
