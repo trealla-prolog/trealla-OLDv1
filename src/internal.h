@@ -807,68 +807,69 @@ typedef struct {
 	size_t size;
 } astring;
 
-#define ASTRING(pr) astring pr##_buf;									\
-	pr##_buf.size = 0;													\
-	pr##_buf.buf = NULL;												\
+#define ASTRING(pr) astring pr##_buf;								\
+	pr##_buf.size = 0;												\
+	pr##_buf.buf = NULL;											\
 	pr##_buf.dst = pr##_buf.buf;
 
-#define ASTRING_alloc(pr,len) astring pr##_buf; 						\
-	pr##_buf.size = len;												\
-	pr##_buf.buf = malloc((len)+1);										\
-	ensure(pr##_buf.buf);												\
-	pr##_buf.dst = pr##_buf.buf;										\
+#define ASTRING_alloc(pr,len) astring pr##_buf; 					\
+	pr##_buf.size = len;											\
+	pr##_buf.buf = malloc((len)+1);									\
+	ensure(pr##_buf.buf);											\
+	pr##_buf.dst = pr##_buf.buf;									\
 	*pr##_buf.dst = '\0';
 
 #define ASTRING_strlen(pr) (pr##_buf.dst - pr##_buf.buf)
 
-#define ASTRING_trim(pr,ch) {											\
-	if (ASTRING_strlen(pr)) {											\
-		if (pr##_buf.dst[-1] == (ch)) 									\
-			 *--pr##_buf.dst = '\0';									\
-	}																	\
+#define ASTRING_trim(pr,ch) {										\
+	if (ASTRING_strlen(pr)) {										\
+		if (pr##_buf.dst[-1] == (ch)) 								\
+			 *--pr##_buf.dst = '\0';								\
+	}																\
 }
 
-#define ASTRING_trim_all(pr,ch) {										\
-	while (ASTRING_strlen(pr)) {										\
-		if (pr##_buf.dst[-1] != (ch)) 									\
-			break;														\
-		 *--pr##_buf.dst = '\0';										\
-	}																	\
+#define ASTRING_trim_all(pr,ch) {									\
+	while (ASTRING_strlen(pr)) {									\
+		if (pr##_buf.dst[-1] != (ch)) 								\
+			break;													\
+		 *--pr##_buf.dst = '\0';									\
+	}																\
 }
 
-#define ASTRING_trim_ws(pr) {											\
-	while (ASTRING_strlen(pr)) {										\
-		if (!isspace(pr##_buf.dst[-1]))									\
-			break;														\
-		 *--pr##_buf.dst = '\0';										\
-	}																	\
+#define ASTRING_trim_ws(pr) {										\
+	while (ASTRING_strlen(pr)) {									\
+		if (!isspace(pr##_buf.dst[-1]))								\
+			break;													\
+		 *--pr##_buf.dst = '\0';									\
+	}																\
 }
 
-#define ASTRING_check(pr,len) {											\
-	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
-	if ((size_t)((len)+1) >= rem) {												\
-		size_t offset = ASTRING_strlen(pr);								\
-		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
-		ensure(pr##_buf.buf);											\
-		pr##_buf.dst = pr##_buf.buf + offset;							\
-	}																	\
+#define ASTRING_check(pr,len) {										\
+	size_t rem = pr##_buf.size - ASTRING_strlen(pr);				\
+	if ((size_t)((len)+1) >= rem) {									\
+		size_t offset = ASTRING_strlen(pr);							\
+		pr##_buf.buf = realloc(pr##_buf.buf,						\
+			(pr##_buf.size += ((len)-rem)) + 1);					\
+		ensure(pr##_buf.buf);										\
+		pr##_buf.dst = pr##_buf.buf + offset;						\
+	}																\
 }
 
 #define ASTRING_strcat(pr,s) ASTRING_strcatn(pr,s,strlen(s))
 
-#define ASTRING_strcatn(pr,s,len) {										\
-	ASTRING_check(pr, len);												\
-	memcpy(pr##_buf.dst, s, len);										\
-	pr##_buf.dst += len;												\
-	*pr##_buf.dst = '\0';												\
+#define ASTRING_strcatn(pr,s,len) {									\
+	ASTRING_check(pr, len);											\
+	memcpy(pr##_buf.dst, s, len);									\
+	pr##_buf.dst += len;											\
+	*pr##_buf.dst = '\0';											\
 }
 
-#define ASTRING_sprintf(pr,fmt,...) {									\
-	size_t len = snprintf(NULL, 0, fmt, __VA_ARGS__);					\
-	ASTRING_check(pr, len);												\
-	sprintf(pr##_buf.dst, fmt, __VA_ARGS__);							\
-	pr##_buf.dst += len;												\
-	*pr##_buf.dst = '\0';												\
+#define ASTRING_sprintf(pr,fmt,...) {								\
+	size_t len = snprintf(NULL, 0, fmt, __VA_ARGS__);				\
+	ASTRING_check(pr, len);											\
+	sprintf(pr##_buf.dst, fmt, __VA_ARGS__);						\
+	pr##_buf.dst += len;											\
+	*pr##_buf.dst = '\0';											\
 }
 
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
