@@ -1,0 +1,55 @@
+{
+  "uid" : "c16bdedcf05f644d",
+  "name" : "insert_3_01",
+  "fullName" : "insert_3_01::tests_custom",
+  "historyId" : "insert_3_01::tests_custom",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/sets/tests_custom.lgt::tests_custom"
+  }, {
+    "name" : "testClass",
+    "value" : "library/sets/tests_custom.lgt::tests_custom"
+  }, {
+    "name" : "package",
+    "value" : "library/sets/tests_custom.lgt::tests_custom"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/sets/tests_custom.lgt"
+  }, {
+    "name" : "position",
+    "value" : "76-79"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/96c36c4a7e43b2c290287d35e78f4f73f666c069/library/sets/tests_custom.lgt#L76"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "c16bdedcf05f644d.json",
+  "parameterValues" : [ "library/sets/tests_custom.lgt", "76-79", "https://github.com/LogtalkDotOrg/logtalk3/tree/96c36c4a7e43b2c290287d35e78f4f73f666c069/library/sets/tests_custom.lgt#L76" ]
+}
