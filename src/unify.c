@@ -422,6 +422,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	pl_idx_t l_ctx = p1_ctx;
 	bool ret_val = false;
 	LIST_HANDLER(l);
+	unsigned depth = 0;
 
 	while (is_iso_list(l) && !g_tpl_interrupt) {
 		cell *c = LIST_HEAD(l);
@@ -471,6 +472,8 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 
 			e->mark = true;
 		}
+
+		depth++;
 	}
 
 	if (!ret_val)
@@ -478,6 +481,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	l = p1;
 	l_ctx = p1_ctx;
+	unsigned depth2 = 0;
 
 	while (is_iso_list(l) && !g_tpl_interrupt) {
 		l = LIST_TAIL(l);
@@ -490,6 +494,9 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 
 		l = deref(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
+
+		if (depth2++ > depth)
+			break;
 	}
 
 	return ret_val;
