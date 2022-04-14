@@ -2186,8 +2186,8 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	//if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
@@ -2253,8 +2253,8 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	//if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_ptr_error(tmp);
@@ -3642,8 +3642,8 @@ static USE_RESULT pl_status fn_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	//if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	GET_NEXT_ARG(p2,variable);
 	return do_asserta_2(q);
@@ -3653,8 +3653,8 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	//if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	GET_NEXT_ARG(p2,atom);
 	return do_asserta_2(q);
@@ -3665,8 +3665,8 @@ static pl_status do_assertz_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
-	if (is_variable(head))
-		return throw_error(q, head, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
+	//if (is_variable(head))
+	//	return throw_error(q, head, q->latest_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	bool found = false;
 
@@ -3746,8 +3746,8 @@ static USE_RESULT pl_status fn_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	//if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	GET_NEXT_ARG(p2,variable);
 	return do_assertz_2(q);
@@ -3757,8 +3757,8 @@ static USE_RESULT pl_status fn_sys_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
-	if (is_cyclic_term(q, p1, p1_ctx))
-		return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
+	///if (is_cyclic_term(q, p1, p1_ctx))
+	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	GET_NEXT_ARG(p2,atom);
 	return do_assertz_2(q);
