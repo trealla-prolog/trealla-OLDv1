@@ -63,7 +63,7 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (skip_)
 		*skip_ = skip;
 
-	if (!strcmp(GET_STR(q,c), "[]"))
+	if (c->val_off == g_nil_s)
 		return true;
 
 	if (is_variable(c))
@@ -2890,7 +2890,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 			cell *tmp = deref(q, h, h_ctx);
 			pl_idx_t tmp_ctx = q->latest_ctx;
 
-			if (!is_structure(tmp) || strcmp(GET_STR(q, tmp), "-")) {
+			if (!is_structure(tmp) || (tmp->val_off != g_minus_s)) {
 				*status = throw_error(q, tmp, tmp_ctx, "type_error", "pair");
 				free(base);
 				return NULL;
@@ -3031,7 +3031,7 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p2);
 
-		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || (tmp_h->val_off != g_minus_s)))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -3162,7 +3162,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p4);
 
-		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || (tmp_h->val_off != g_minus_s)))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -4387,7 +4387,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(GET_STR(q,c), "[]")) && !is_variable(c)) {
+	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && (c->val_off == g_nil_s)) && !is_variable(c)) {
 		make_int(&tmp, -1);
 		unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
