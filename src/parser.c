@@ -3105,7 +3105,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			) {
 				specifier = 0;
 				priority = 0;
-			} else if ((nextch == ';') || (nextch == '*') || (nextch == '-')) {
+			} else if (((nextch == ';') || (nextch == '*') || (nextch == '-')) && strcmp(p->token, "+")) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
