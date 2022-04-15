@@ -1886,7 +1886,6 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 		make_variable(&v, g_anon_s, q->pl->varno++);
 		v.flags |= FLAG_VAR_FRESH;
 		make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
-		tmp2.flags |= FLAG_VAR_FRESH;
 		set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
 	}
 
