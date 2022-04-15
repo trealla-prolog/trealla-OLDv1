@@ -1012,7 +1012,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = f->nbr_vars;
 
-	if (check_slot(q, cnt) != pl_success)
+	if (check_slot(q, var_nbr + cnt) != pl_success)
 		return 0;
 
 	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
@@ -1027,7 +1027,7 @@ unsigned create_vars(query *q, unsigned cnt)
 		pl_idx_t save_overflow = f->overflow;
 		f->overflow = q->st.sp;
 		pl_idx_t cnt2 = f->nbr_vars - f->nbr_slots;
-		memmove(q->slots+f->overflow, q->slots+save_overflow, sizeof(slot)*cnt2);
+		memmove(q->slots+f->overflow, q->slots + save_overflow, sizeof(slot)*cnt2);
 		q->st.sp += cnt2 + cnt;
 	}
 
