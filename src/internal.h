@@ -450,8 +450,8 @@ struct trail_ {
 
 struct slot_ {
 	cell c;
-	pl_idx_t ctx, idx;
-	uint16_t mgen, mgen2;
+	pl_idx_t ctx;
+	uint16_t mgen;
 	bool mark:1;
 };
 
@@ -703,7 +703,7 @@ struct prolog_ {
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
 	pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000];
-	map *symtab, *funtab, *keyval;
+	map *symtab, *funtab, *keyval, *vars;
 	char *pool;
 	size_t pool_offset, pool_size;
 	uint64_t s_last, s_cnt, seed, ugen;
