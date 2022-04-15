@@ -1012,7 +1012,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = f->nbr_vars;
 
-	if (check_slot(q, cnt) != pl_success)
+	if (check_slot(q, var_nbr+cnt) != pl_success)
 		return 0;
 
 	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
