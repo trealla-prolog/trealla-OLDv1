@@ -3912,6 +3912,12 @@ static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_trace_0(query *q)
+{
+	q->trace = !q->trace;
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_timer_0(query *q)
 {
 	q->time_started = get_time_in_usec();
@@ -3922,13 +3928,8 @@ static USE_RESULT pl_status fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stdout, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_trace_0(query *q)
-{
-	q->trace = !q->trace;
+	fprintf(stdout, "Time elapsed %.05f secs\n", (double)elapsed/1000/1000);
+	DISCARD_RESULT fn_sys_timer_0(q);
 	return pl_success;
 }
 
