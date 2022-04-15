@@ -201,12 +201,9 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 
 static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 {
-	bool found = false;
-
 	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
 		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
 			q->pl->tab4[idx]++;
-			found = true;
 			return;
 		}
 	}
