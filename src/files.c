@@ -1448,7 +1448,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	q->pl->tab_idx = 0;
 
 	if (p->nbr_vars)
-		collect_vars(q, p->cl->cells, q->st.curr_frame);
+		collect_vars(q, p->cl->cells, q->st.curr_frame, sings?true:false);
 
 	if (vars) {
 		unsigned cnt = q->pl->tab_idx;

@@ -1825,7 +1825,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
 	q->pl->varno = f->nbr_vars;
-	collect_vars(q, p1, p1_ctx);
+	collect_vars(q, p1, p1_ctx, false);
 	const unsigned cnt = q->pl->tab_idx;
 	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
