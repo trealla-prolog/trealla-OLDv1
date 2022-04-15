@@ -1,0 +1,55 @@
+{
+  "uid" : "3fe70996ea550891",
+  "name" : "hex_digits",
+  "fullName" : "hex_digits::tests(codes)",
+  "historyId" : "hex_digits::tests(codes)",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/grammars/tests.lgt::tests(codes)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/grammars/tests.lgt::tests(codes)"
+  }, {
+    "name" : "package",
+    "value" : "library/grammars/tests.lgt::tests(codes)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/grammars/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "145-149"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d2af485917c23a3def3ff59fb57e8a424903b56d/library/grammars/tests.lgt#L145"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3fe70996ea550891.json",
+  "parameterValues" : [ "library/grammars/tests.lgt", "145-149", "https://github.com/LogtalkDotOrg/logtalk3/tree/d2af485917c23a3def3ff59fb57e8a424903b56d/library/grammars/tests.lgt#L145" ]
+}

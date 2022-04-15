@@ -1,0 +1,55 @@
+{
+  "uid" : "a60b0f446fad1c79",
+  "name" : "halstead_h_obj",
+  "fullName" : "halstead_h_obj::halstead_metric_tests",
+  "historyId" : "halstead_h_obj::halstead_metric_tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/halstead_metric_tests.lgt::halstead_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/halstead_metric_tests.lgt::halstead_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/halstead_metric_tests.lgt::halstead_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/halstead_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "64-67"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d2af485917c23a3def3ff59fb57e8a424903b56d/tools/code_metrics/halstead_metric_tests.lgt#L64"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a60b0f446fad1c79.json",
+  "parameterValues" : [ "tools/code_metrics/halstead_metric_tests.lgt", "64-67", "https://github.com/LogtalkDotOrg/logtalk3/tree/d2af485917c23a3def3ff59fb57e8a424903b56d/tools/code_metrics/halstead_metric_tests.lgt#L64" ]
+}
