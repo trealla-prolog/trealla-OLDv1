@@ -1,0 +1,51 @@
+{
+  "uid" : "ab1825b0edca83ae",
+  "name" : "gensym",
+  "fullName" : "gensym::tests",
+  "historyId" : "gensym::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/gensym/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "ab1825b0edca83ae.json",
+  "parameterValues" : [ ]
+}

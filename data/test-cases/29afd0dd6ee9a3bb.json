@@ -1,0 +1,58 @@
+{
+  "uid" : "29afd0dd6ee9a3bb",
+  "name" : "clause_2",
+  "fullName" : "clause_2::tests",
+  "historyId" : "clause_2::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 1,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/clause_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/clause_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/clause_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "f0482d765f8af9d3",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "29afd0dd6ee9a3bb.json",
+  "parameterValues" : [ ]
+}

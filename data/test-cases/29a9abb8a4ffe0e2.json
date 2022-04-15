@@ -1,0 +1,51 @@
+{
+  "uid" : "29a9abb8a4ffe0e2",
+  "name" : "inheritance",
+  "fullName" : "inheritance::tests",
+  "historyId" : "inheritance::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/inheritance/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/inheritance/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/inheritance/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "29a9abb8a4ffe0e2.json",
+  "parameterValues" : [ ]
+}

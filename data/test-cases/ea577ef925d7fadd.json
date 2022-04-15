@@ -1,0 +1,45 @@
+{
+  "uid" : "ea577ef925d7fadd",
+  "name" : "throw_1",
+  "fullName" : "throw_1::tests",
+  "historyId" : "throw_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/control/throw_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : true,
+  "retry" : true,
+  "extra" : {
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ea577ef925d7fadd.json",
+  "parameterValues" : [ ]
+}

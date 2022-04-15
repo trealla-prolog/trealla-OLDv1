@@ -1,0 +1,65 @@
+{
+  "uid" : "429f3bd541c7b4ec",
+  "name" : "multifile_1",
+  "fullName" : "multifile_1::tests",
+  "historyId" : "multifile_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 2,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/syntax/directives/multifile_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/syntax/directives/multifile_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/syntax/directives/multifile_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "b7f68d16063a2363",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    }, {
+      "uid" : "5775b5028e454163",
+      "status" : "failed",
+      "statusDetails" : "Broken",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "429f3bd541c7b4ec.json",
+  "parameterValues" : [ ]
+}

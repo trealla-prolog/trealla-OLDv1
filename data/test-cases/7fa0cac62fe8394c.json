@@ -1,0 +1,51 @@
+{
+  "uid" : "7fa0cac62fe8394c",
+  "name" : "lsb_1",
+  "fullName" : "lsb_1::tests",
+  "historyId" : "lsb_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/functions/lsb_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/functions/lsb_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/functions/lsb_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "7fa0cac62fe8394c.json",
+  "parameterValues" : [ ]
+}

@@ -1,0 +1,51 @@
+{
+  "uid" : "c9e0c89794e4bbee",
+  "name" : "conforms_to_protocol_2_3",
+  "fullName" : "conforms_to_protocol_2_3::tests",
+  "historyId" : "conforms_to_protocol_2_3::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/predicates/conforms_to_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/predicates/conforms_to_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/predicates/conforms_to_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "c9e0c89794e4bbee.json",
+  "parameterValues" : [ ]
+}

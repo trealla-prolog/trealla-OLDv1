@@ -1,0 +1,51 @@
+{
+  "uid" : "974e71d0b2a05216",
+  "name" : "toychr",
+  "fullName" : "toychr::tests",
+  "historyId" : "toychr::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "974e71d0b2a05216.json",
+  "parameterValues" : [ ]
+}

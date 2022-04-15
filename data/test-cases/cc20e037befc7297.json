@@ -1,0 +1,51 @@
+{
+  "uid" : "cc20e037befc7297",
+  "name" : "patches",
+  "fullName" : "patches::tests",
+  "historyId" : "patches::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/patches/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/patches/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/patches/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "cc20e037befc7297.json",
+  "parameterValues" : [ ]
+}

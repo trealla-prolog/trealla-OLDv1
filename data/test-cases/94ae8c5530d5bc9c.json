@@ -1,0 +1,51 @@
+{
+  "uid" : "94ae8c5530d5bc9c",
+  "name" : "localizations",
+  "fullName" : "localizations::tests",
+  "historyId" : "localizations::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/localizations/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/localizations/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/localizations/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "94ae8c5530d5bc9c.json",
+  "parameterValues" : [ ]
+}

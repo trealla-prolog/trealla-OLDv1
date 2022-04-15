@@ -1,0 +1,51 @@
+{
+  "uid" : "a1720f22220a931d",
+  "name" : "proxies",
+  "fullName" : "proxies::tests",
+  "historyId" : "proxies::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "a1720f22220a931d.json",
+  "parameterValues" : [ ]
+}

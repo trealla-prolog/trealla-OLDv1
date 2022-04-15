@@ -1,0 +1,51 @@
+{
+  "uid" : "b9884d93724438d0",
+  "name" : "viewpoints",
+  "fullName" : "viewpoints::tests",
+  "historyId" : "viewpoints::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "b9884d93724438d0.json",
+  "parameterValues" : [ ]
+}

@@ -1,0 +1,51 @@
+{
+  "uid" : "f931b3a4fd7a8f4c",
+  "name" : "recipes",
+  "fullName" : "recipes::tests",
+  "historyId" : "recipes::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "f931b3a4fd7a8f4c.json",
+  "parameterValues" : [ ]
+}

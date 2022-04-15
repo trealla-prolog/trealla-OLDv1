@@ -1,0 +1,51 @@
+{
+  "uid" : "e4a3cf4ac53c03d2",
+  "name" : "planets",
+  "fullName" : "planets::tests",
+  "historyId" : "planets::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "e4a3cf4ac53c03d2.json",
+  "parameterValues" : [ ]
+}

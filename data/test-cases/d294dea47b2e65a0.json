@@ -1,0 +1,51 @@
+{
+  "uid" : "d294dea47b2e65a0",
+  "name" : "parametric",
+  "fullName" : "parametric::tests",
+  "historyId" : "parametric::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Broken",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "d294dea47b2e65a0.json",
+  "parameterValues" : [ ]
+}
