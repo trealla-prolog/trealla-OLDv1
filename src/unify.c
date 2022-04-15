@@ -201,15 +201,19 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 
 // FIXME: exponential slowdown...
 
-static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
+static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 {
-	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
-			q->pl->tab4[idx]++;
-			return;
-		}
+	const frame *f = GET_FRAME(c_ctx);
+	const slot *e = GET_SLOT(f, c->var_nbr);
+	const void *v;
+
+	if (m_get(q->pl->vars, e, &v)) {
+		size_t idx = (size_t)v;
+		q->pl->tab4[idx]++;
+		return;
 	}
 
+	m_set(q->pl->vars, e, (void*)(size_t)q->pl->tab_idx);
 	q->pl->tab1[q->pl->tab_idx] = c_ctx;
 	q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
 	q->pl->tab3[q->pl->tab_idx] = c->val_off;
@@ -311,7 +315,10 @@ void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->mgen++;
 	q->pl->tab_idx = 0;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	m_allow_dups(q->pl->vars, false);
 	collect_vars_internal(q, p1, p1_ctx);
+	m_destroy(q->pl->vars);
 }
 
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
