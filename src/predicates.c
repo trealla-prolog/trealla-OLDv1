@@ -3920,15 +3920,15 @@ static USE_RESULT pl_status fn_trace_0(query *q)
 
 static USE_RESULT pl_status fn_sys_timer_0(query *q)
 {
-	q->time_started = get_time_in_usec();
+	q->time_started = cpu_time_in_usec();
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_elapsed_0(query *q)
 {
-	uint64_t elapsed = get_time_in_usec();
+	uint64_t elapsed = cpu_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stdout, "Time elapsed %.05f secs\n", (double)elapsed/1000/1000);
+	fprintf(stdout, "%% CPU time %.03fs\n", (double)elapsed/1000/1000);
 	DISCARD_RESULT fn_sys_timer_0(q);
 	return pl_success;
 }
