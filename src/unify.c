@@ -199,6 +199,8 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
+// FIXME: exponential slowdown...
+
 static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
