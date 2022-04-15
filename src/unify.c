@@ -199,7 +199,9 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
+// FIXME: needs fast lookup
+
+inline static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 {
 	bool found = false;
 

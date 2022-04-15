@@ -5587,7 +5587,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-unsigned count_bits(const uint8_t *mask, unsigned bit)
+static unsigned count_bits(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 
@@ -6854,7 +6854,7 @@ extern const struct builtins g_functions_bifs[];
 extern const struct builtins g_files_bifs[];
 extern const struct builtins g_contrib_bifs[];
 
-void load_builtins(prolog *pl)
+void load_builtins(const prolog *pl)
 {
 	for (const struct builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);

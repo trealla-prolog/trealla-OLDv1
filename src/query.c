@@ -241,7 +241,7 @@ static bool is_all_vars(cell *c)
 	return true;
 }
 
-static bool is_ground(cell *c)
+static bool is_ground(const cell *c)
 {
 	pl_idx_t nbr_cells = c->nbr_cells;
 
@@ -621,7 +621,7 @@ void trim_trail(query *q)
 	}
 }
 
-static bool check_slots(const query *q, frame *f, clause *r)
+static bool check_slots(const query *q, const frame *f, const clause *r)
 {
 	if (r != NULL) {
 		if (f->nbr_vars != r->nbr_vars)
