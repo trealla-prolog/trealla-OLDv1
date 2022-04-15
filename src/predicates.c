@@ -102,8 +102,9 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 
 void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
@@ -111,32 +112,35 @@ void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
 
 void make_variable2(cell *tmp, pl_idx_t off)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = off;
 }
 
 void make_int(cell *tmp, pl_int_t v)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_INT;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	set_smallint(tmp, v);
 }
 
 void make_real(cell *tmp, double v)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_REAL;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	set_real(tmp, v);
 }
 
 void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
+	tmp->flags = 0;
 	tmp->nbr_cells = 1 + extra_cells;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
 	tmp->fn = fn;
@@ -146,9 +150,11 @@ void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx
 
 void make_end(cell *tmp)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_END;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
+	tmp->val_ret = NULL;
 }
 
 void make_return(query *q, cell *tmp)
@@ -172,16 +178,18 @@ void make_return2(query *q, cell *tmp, cell *c_ret)
 
 void make_literal(cell *tmp, pl_idx_t offset)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = offset;
 }
 
 void make_smalln(cell *tmp, const char *s, size_t n)
 {
-	*tmp = (cell){0};
 	tmp->tag = TAG_CSTR;
+	tmp->flags = 0;
+	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	memcpy(tmp->val_chr, s, n);
 	tmp->val_chr[n] = '\0';
