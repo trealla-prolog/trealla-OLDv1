@@ -199,7 +199,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static void accum_var(query *q, cell *c, pl_idx_t c_ctx, bool singletons)
+static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	bool found = false;
 
@@ -238,7 +238,7 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool
 			c_ctx = q->latest_ctx;
 
 			if (is_variable(c))
-				accum_var(q, c, c_ctx, singletons);
+				accum_var(q, c, c_ctx);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
@@ -270,7 +270,7 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
 {
 	if (is_variable(p1)) {
-		accum_var(q, p1, p1_ctx, singletons);
+		accum_var(q, p1, p1_ctx);
 		return;
 	}
 
@@ -293,7 +293,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool sing
 			pl_idx_t c_ctx = q->latest_ctx;
 
 			if (is_variable(c))
-				accum_var(q, c, c_ctx, singletons);
+				accum_var(q, c, c_ctx);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
