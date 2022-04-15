@@ -63,7 +63,7 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (skip_)
 		*skip_ = skip;
 
-	if (c->val_off == g_nil_s)
+	if (!strcmp(GET_STR(q,c), "[]"))
 		return true;
 
 	if (is_variable(c))
@@ -102,9 +102,8 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 
 void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
@@ -112,35 +111,32 @@ void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
 
 void make_variable2(cell *tmp, pl_idx_t off)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = off;
 }
 
 void make_int(cell *tmp, pl_int_t v)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_INT;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	set_smallint(tmp, v);
 }
 
 void make_real(cell *tmp, double v)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_REAL;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	set_real(tmp, v);
 }
 
 void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
-	tmp->flags = 0;
 	tmp->nbr_cells = 1 + extra_cells;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
 	tmp->fn = fn;
@@ -150,11 +146,9 @@ void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx
 
 void make_end(cell *tmp)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_END;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
-	tmp->val_ret = NULL;
 }
 
 void make_return(query *q, cell *tmp)
@@ -178,18 +172,16 @@ void make_return2(query *q, cell *tmp, cell *c_ret)
 
 void make_literal(cell *tmp, pl_idx_t offset)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	tmp->val_off = offset;
 }
 
 void make_smalln(cell *tmp, const char *s, size_t n)
 {
+	*tmp = (cell){0};
 	tmp->tag = TAG_CSTR;
-	tmp->flags = 0;
-	tmp->arity = 0;
 	tmp->nbr_cells = 1;
 	memcpy(tmp->val_chr, s, n);
 	tmp->val_chr[n] = '\0';
@@ -1833,7 +1825,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
 	q->pl->varno = f->nbr_vars;
-	collect_vars(q, p1, p1_ctx, false);
+	collect_vars(q, p1, p1_ctx);
 	const unsigned cnt = q->pl->tab_idx;
 	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
@@ -1867,26 +1859,26 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	} else
 		make_literal(tmp, g_nil_s);
 
-	if (!cnt)
-		return tmp;		// returns on tmp_heap
+	if (cnt) {
+		unsigned new_vars = q->pl->varno - f->nbr_vars;
+		q->pl->varno = f->nbr_vars;
 
-	unsigned new_vars = q->pl->varno - f->nbr_vars;
-	q->pl->varno = f->nbr_vars;
+		if (new_vars) {
+			if (!create_vars(q, new_vars))
+				return NULL;
+		}
 
-	if (new_vars) {
-		if (!create_vars(q, new_vars))
-			return NULL;
-	}
+		for (unsigned i = 0; i < cnt; i++) {
+			if (q->pl->tab1[i] == q->st.curr_frame)
+				continue;
 
-	for (unsigned i = 0; i < cnt; i++) {
-		if (q->pl->tab1[i] == q->st.curr_frame)
-			continue;
-
-		cell v, tmp2;
-		make_variable(&v, g_anon_s, q->pl->varno++);
-		v.flags |= FLAG_VAR_FRESH;
-		make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
-		set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
+			cell v, tmp2;
+			make_variable(&v, g_anon_s, q->pl->varno++);
+			v.flags |= FLAG_VAR_FRESH;
+			make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
+			tmp2.flags |= FLAG_VAR_FRESH;
+			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
+		}
 	}
 
 	return tmp;		// returns on tmp_heap
@@ -2898,7 +2890,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 			cell *tmp = deref(q, h, h_ctx);
 			pl_idx_t tmp_ctx = q->latest_ctx;
 
-			if (!is_structure(tmp) || (tmp->val_off != g_minus_s)) {
+			if (!is_structure(tmp) || strcmp(GET_STR(q, tmp), "-")) {
 				*status = throw_error(q, tmp, tmp_ctx, "type_error", "pair");
 				free(base);
 				return NULL;
@@ -3039,7 +3031,7 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p2);
 
-		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || (tmp_h->val_off != g_minus_s)))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -3170,7 +3162,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 		pl_idx_t tmp_h_ctx = q->latest_ctx;
 		LIST_TAIL(p4);
 
-		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || (tmp_h->val_off != g_minus_s)))
+		if (!is_variable(tmp_h) && (!is_structure(tmp_h) || strcmp(GET_STR(q, tmp_h), "-")))
 			return throw_error(q, tmp_h, tmp_h_ctx, "type_error", "pair");
 	}
 
@@ -3919,24 +3911,23 @@ static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_trace_0(query *q)
-{
-	q->trace = !q->trace;
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_sys_timer_0(query *q)
 {
-	q->time_started = cpu_time_in_usec();
+	q->time_started = get_time_in_usec();
 	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_elapsed_0(query *q)
 {
-	uint64_t elapsed = cpu_time_in_usec();
+	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stdout, "%% CPU time %.03fs\n", (double)elapsed/1000/1000);
-	DISCARD_RESULT fn_sys_timer_0(q);
+	fprintf(stdout, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_trace_0(query *q)
+{
+	q->trace = !q->trace;
 	return pl_success;
 }
 
@@ -4396,7 +4387,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	if (ok != pl_success)
 		return ok;
 
-	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && (c->val_off == g_nil_s)) && !is_variable(c)) {
+	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(GET_STR(q,c), "[]")) && !is_variable(c)) {
 		make_int(&tmp, -1);
 		unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
@@ -5594,7 +5585,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-static unsigned count_bits(const uint8_t *mask, unsigned bit)
+unsigned count_bits(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 
@@ -5976,7 +5967,7 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 	}
 
 	cell *l = end_list(q);
-	return unify(q, p1, p1_ctx, l, INITIAL_FRAME);
+	return unify(q, p1, p1_ctx, l, 0);
 }
 
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
@@ -6861,7 +6852,7 @@ extern const struct builtins g_functions_bifs[];
 extern const struct builtins g_files_bifs[];
 extern const struct builtins g_contrib_bifs[];
 
-void load_builtins(const prolog *pl)
+void load_builtins(prolog *pl)
 {
 	for (const struct builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
 		m_app(pl->funtab, ptr->name, ptr);

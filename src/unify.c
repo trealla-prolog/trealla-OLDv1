@@ -199,8 +199,18 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-inline static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
+static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 {
+	bool found = false;
+
+	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
+		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
+			q->pl->tab4[idx]++;
+			found = true;
+			return;
+		}
+	}
+
 	q->pl->tab1[q->pl->tab_idx] = c_ctx;
 	q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
 	q->pl->tab3[q->pl->tab_idx] = c->val_off;
@@ -209,19 +219,9 @@ inline static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 	q->pl->tab_idx++;
 }
 
-inline static void accum2_var(const query *q, const cell *c, pl_idx_t c_ctx)
-{
-	for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-		if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
-			q->pl->tab4[idx]++;
-			return;
-		}
-	}
-}
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
 
-static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons);
-
-static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
+static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
@@ -229,31 +229,24 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool
 
 	while (is_iso_list(l) && !g_tpl_interrupt) {
 		cell *c = LIST_HEAD(l);
+		pl_idx_t c_ctx = l_ctx;
 
 		if (is_variable(c)) {
-			const frame *f = GET_FRAME(l_ctx);
+			const frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
 			c = deref(q, c, l_ctx);
-			pl_idx_t c_ctx = q->latest_ctx;
+			c_ctx = q->latest_ctx;
 
-			if (is_variable(c)) {
-				f = GET_FRAME(c_ctx);
-				e = GET_SLOT(f, c->var_nbr);
-
-				if (e->mgen != q->mgen)
-					accum_var(q, c, c_ctx);
-
-				if (singletons && (e->mgen == q->mgen))
-					accum2_var(q, c, c_ctx);
-			}
+			if (is_variable(c))
+				accum_var(q, c, c_ctx);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
-				collect_vars_internal(q, c, c_ctx, singletons);
+				collect_vars_internal(q, c, c_ctx);
 			} else
 				e->mgen = q->mgen;
 		} else {
-			collect_vars_internal(q, c, l_ctx, singletons);
+			collect_vars_internal(q, c, c_ctx);
 		}
 
 		l = LIST_TAIL(l);
@@ -271,23 +264,13 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool
 		}
 	}
 
-	collect_vars_internal(q, l, l_ctx, singletons);
+	collect_vars_internal(q, l, l_ctx);
 }
 
-static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_variable(p1)) {
-		cell *c = p1;
-		pl_idx_t c_ctx = p1_ctx;
-		frame *f = GET_FRAME(c_ctx);
-		slot *e = GET_SLOT(f, c->var_nbr);
-
-		if (e->mgen != q->mgen)
-			accum_var(q, c, c_ctx);
-
-		if (singletons && (e->mgen == q->mgen))
-			accum2_var(q, c, c_ctx);
-
+		accum_var(q, p1, p1_ctx);
 		return;
 	}
 
@@ -295,7 +278,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool sing
 		return;
 
 	if (is_iso_list(p1)) {
-		collect_list_vars_internal(q, p1, p1_ctx, singletons);
+		collect_list_vars_internal(q, p1, p1_ctx);
 		return;
 	}
 
@@ -309,35 +292,27 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool sing
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (is_variable(c)) {
-				f = GET_FRAME(c_ctx);
-				e = GET_SLOT(f, c->var_nbr);
-
-				if (e->mgen != q->mgen)
-					accum_var(q, c, c_ctx);
-
-				if (singletons && (e->mgen == q->mgen))
-					accum2_var(q, c, c_ctx);
-			}
+			if (is_variable(c))
+				accum_var(q, c, c_ctx);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
-				collect_vars_internal(q, c, c_ctx, singletons);
+				collect_vars_internal(q, c, c_ctx);
 			} else
 				e->mgen = q->mgen;
 		} else {
-			collect_vars_internal(q, p1, p1_ctx, singletons);
+			collect_vars_internal(q, p1, p1_ctx);
 		}
 
 		p1 += p1->nbr_cells;
 	}
 }
 
-void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
+void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->mgen++;
 	q->pl->tab_idx = 0;
-	collect_vars_internal(q, p1, p1_ctx, singletons);
+	collect_vars_internal(q, p1, p1_ctx);
 }
 
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);

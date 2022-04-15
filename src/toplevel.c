@@ -13,8 +13,6 @@
 #include "heap.h"
 #include "utf8.h"
 
-#define MYMIN(a,b) (a)<(b)?(a):(b)
-
 #ifdef _WIN32
 #include <windows.h>
 #define msleep Sleep
@@ -124,15 +122,15 @@ void dump_vars(query *q, bool partial)
 
 	// Build the ignore list for variable name clashes....
 
-	for (unsigned i = 0; i < MAX_IGNORES; i++)
-		q->pl->ignore[i] = false;
+	for (unsigned i = 0; i < MAX_ARITY; i++)
+		q->ignore[i] = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		int j;
 
 		if ((p->vartab.var_name[i][0] == '_')
 			&& ((j = varunformat(p->vartab.var_name[i]+1)) != -1))
-			q->pl->ignore[j] = true;
+			q->ignore[j] = true;
 	}
 
 	// Build the variable-names list for dumping vars...
@@ -219,7 +217,7 @@ void dump_vars(query *q, bool partial)
 		int saveq = q->quoted;
 		q->quoted = 1;
 		q->variable_names = vlist;
-		q->variable_names_ctx = INITIAL_FRAME;
+		q->variable_names_ctx = 0;
 		q->max_depth = 9;
 
 		print_term(q, stdout, c, c_ctx, 1);
@@ -237,7 +235,7 @@ void dump_vars(query *q, bool partial)
 
 	if (any_attributed(q) && !q->in_attvar_print) {
 		q->variable_names = vlist;
-		q->variable_names_ctx = INITIAL_FRAME;
+		q->variable_names_ctx = 0;
 		cell p1;
 		make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
 		cell *tmp = clone_to_heap(q, false, &p1, 1);
