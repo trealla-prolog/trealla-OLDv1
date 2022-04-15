@@ -1061,7 +1061,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	if (c_attrs)
 		q->run_hook = true;
 
-	if ((q->cp > INITIAL_FRAME) || c_attrs)
+	if (((q->cp > INITIAL_FRAME) || c_attrs) && !q->no_trail)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
