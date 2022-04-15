@@ -199,7 +199,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
+static void accum_var(query *q, cell *c, pl_idx_t c_ctx, bool singletons)
 {
 	bool found = false;
 
@@ -219,9 +219,9 @@ static void accum_var(query *q, cell *c, pl_idx_t c_ctx)
 	q->pl->tab_idx++;
 }
 
-static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons);
 
-static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
+static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
 {
 	cell *l = p1;
 	pl_idx_t l_ctx = p1_ctx;
@@ -238,15 +238,15 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			c_ctx = q->latest_ctx;
 
 			if (is_variable(c))
-				accum_var(q, c, c_ctx);
+				accum_var(q, c, c_ctx, singletons);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
-				collect_vars_internal(q, c, c_ctx);
+				collect_vars_internal(q, c, c_ctx, singletons);
 			} else
 				e->mgen = q->mgen;
 		} else {
-			collect_vars_internal(q, c, c_ctx);
+			collect_vars_internal(q, c, c_ctx, singletons);
 		}
 
 		l = LIST_TAIL(l);
@@ -264,13 +264,13 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		}
 	}
 
-	collect_vars_internal(q, l, l_ctx);
+	collect_vars_internal(q, l, l_ctx, singletons);
 }
 
-static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
+static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
 {
 	if (is_variable(p1)) {
-		accum_var(q, p1, p1_ctx);
+		accum_var(q, p1, p1_ctx, singletons);
 		return;
 	}
 
@@ -278,7 +278,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		return;
 
 	if (is_iso_list(p1)) {
-		collect_list_vars_internal(q, p1, p1_ctx);
+		collect_list_vars_internal(q, p1, p1_ctx, singletons);
 		return;
 	}
 
@@ -293,26 +293,26 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			pl_idx_t c_ctx = q->latest_ctx;
 
 			if (is_variable(c))
-				accum_var(q, c, c_ctx);
+				accum_var(q, c, c_ctx, singletons);
 
 			if (!is_variable(c) && (e->mgen != q->mgen)) {
 				e->mgen = q->mgen;
-				collect_vars_internal(q, c, c_ctx);
+				collect_vars_internal(q, c, c_ctx, singletons);
 			} else
 				e->mgen = q->mgen;
 		} else {
-			collect_vars_internal(q, p1, p1_ctx);
+			collect_vars_internal(q, p1, p1_ctx, singletons);
 		}
 
 		p1 += p1->nbr_cells;
 	}
 }
 
-void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
+void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx, bool singletons)
 {
 	q->mgen++;
 	q->pl->tab_idx = 0;
-	collect_vars_internal(q, p1, p1_ctx);
+	collect_vars_internal(q, p1, p1_ctx, singletons);
 }
 
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
