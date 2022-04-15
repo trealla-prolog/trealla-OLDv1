@@ -199,8 +199,6 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-// FIXME: exponential slowdown...
-
 static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 {
 	const frame *f = GET_FRAME(c_ctx);
