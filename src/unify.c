@@ -212,6 +212,17 @@ static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 	}
 
 	m_set(q->pl->vars, e, (void*)(size_t)q->pl->tab_idx);
+
+	if (!q->pl->tabs) {
+		q->pl->tabs_size = 64000;
+		q->pl->tabs = malloc(sizeof(collectable)*q->pl->tabs_size);
+	}
+
+	if (q->pl->tab_idx == q->pl->tabs_size) {
+		q->pl->tabs_size *= 2;
+		q->pl->tabs = realloc(q->pl->tabs, sizeof(collectable)*q->pl->tabs_size);
+	}
+
 	q->pl->tabs[q->pl->tab_idx].ctx = c_ctx;
 	q->pl->tabs[q->pl->tab_idx].var_nbr = c->var_nbr;
 	q->pl->tabs[q->pl->tab_idx].val_off = c->val_off;
