@@ -124,7 +124,7 @@ void sl_destroy(skiplist *l)
 }
 
 void sl_allow_dups(skiplist *l, bool mode) { l->allow_dups = mode; }
-size_t sl_count(const skiplist *l) { return l->count; }
+size_t sl_count(const skiplist *l) { return l ? l->count : 0; }
 
 // Modified binary search: return position where it is or ought to be
 

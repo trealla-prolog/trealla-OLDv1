@@ -1841,13 +1841,13 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable2(&v, q->pl->tab3[i]);
+			make_variable2(&v, q->pl->tabs[i].val_off);
 
-			if (q->pl->tab1[i] != q->st.curr_frame) {
+			if (q->pl->tabs[i].ctx != q->st.curr_frame) {
 				v.flags |= FLAG_VAR_FRESH;
 				v.var_nbr = q->pl->varno++;
 			} else
-				v.var_nbr = q->pl->tab2[i];
+				v.var_nbr = q->pl->tabs[i].var_nbr;
 
 			tmp[idx++] = v;
 			done++;
@@ -1869,15 +1869,15 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 		}
 
 		for (unsigned i = 0; i < cnt; i++) {
-			if (q->pl->tab1[i] == q->st.curr_frame)
+			if (q->pl->tabs[i].ctx == q->st.curr_frame)
 				continue;
 
 			cell v, tmp2;
 			make_variable(&v, g_anon_s, q->pl->varno++);
 			v.flags |= FLAG_VAR_FRESH;
-			make_variable(&tmp2, g_anon_s, q->pl->tab2[i]);
+			make_variable(&tmp2, g_anon_s, q->pl->tabs[i].var_nbr);
 			tmp2.flags |= FLAG_VAR_FRESH;
-			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tab1[i]);
+			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tabs[i].ctx);
 		}
 	}
 

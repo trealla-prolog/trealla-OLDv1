@@ -174,6 +174,7 @@ void pl_destroy(prolog *pl)
 	m_destroy(pl->symtab);
 	m_destroy(pl->keyval);
 	free(pl->pool);
+	free(pl->tabs);
 	pl->pool_offset = 0;
 
 	if (!--g_tpl_count)
@@ -337,6 +338,8 @@ prolog *pl_create()
 	}
 
 	pl->curr_m = pl->user_m;
+	pl->tabs_size = 0;
+	pl->tabs = NULL;
 	pl->s_last = 0;
 	pl->s_cnt = 0;
 	pl->seed = 0;

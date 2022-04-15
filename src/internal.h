@@ -696,16 +696,24 @@ struct module_ {
 	bool error:1;
 };
 
+typedef struct {
+	pl_idx_t ctx, val_off;
+	unsigned var_nbr, cnt;
+	bool is_anon;
+}
+ collectable;
+
 struct prolog_ {
 	stream streams[MAX_STREAMS];
 	module *modmap[MAX_MODULES];
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
-	pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000];
-	map *symtab, *funtab, *keyval;
+	collectable *tabs;
+	struct { pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000]; };
+	map *symtab, *funtab, *keyval, *vars;
 	char *pool;
-	size_t pool_offset, pool_size;
+	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;
 	unsigned tab_idx, varno, next_mod_id;
 	uint8_t current_input, current_output, current_error;
