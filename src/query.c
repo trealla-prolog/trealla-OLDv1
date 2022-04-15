@@ -498,7 +498,7 @@ static void trim_heap(query *q, const choice *ch)
 
 pl_idx_t drop_choice(query *q)
 {
-	if (q->cp <= INITIAL_FRAME)
+	if (!q->cp)
 		return q->cp;
 
 	return --q->cp;
@@ -508,7 +508,7 @@ bool retry_choice(query *q)
 {
 LOOP:
 
-	if (q->cp <= INITIAL_FRAME)
+	if (!q->cp)
 		return false;
 
 	pl_idx_t curr_choice = drop_choice(q);
@@ -598,14 +598,14 @@ void trim_trail(query *q)
 	if (q->undo_hi_tp)
 		return;
 
-	if (q->cp <= INITIAL_FRAME) {
+	if (!q->cp) {
 		q->st.tp = 0;
 		return;
 	}
 
 	pl_idx_t tp;
 
-	if (q->cp > INITIAL_FRAME) {
+	if (q->cp) {
 		const choice *ch = GET_CURR_CHOICE();
 		tp = ch->st.tp;
 	} else
@@ -821,7 +821,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 {
 	frame *f = GET_CURR_FRAME();
 
-	while (q->cp > INITIAL_FRAME) {
+	while (q->cp) {
 		choice *ch = GET_CURR_CHOICE();
 		choice *save_ch = ch;
 
@@ -889,7 +889,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #endif
 	}
 
-	if ((q->cp <= INITIAL_FRAME) && !q->undo_hi_tp) {
+	if (!q->cp && !q->undo_hi_tp) {
 		q->st.tp = 0;
 	}
 }
@@ -900,7 +900,7 @@ bool cut_if_det(query *q)
 {
 	frame *f = GET_CURR_FRAME();
 
-	if (q->cp <= INITIAL_FRAME)		// redundant
+	if (!q->cp)				// redundant
 		return true;
 
 	choice *ch = GET_CURR_CHOICE();
@@ -1064,7 +1064,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	// The q->cp-1 is because we have to allow for the temporary
 	// choice-point we are in...
 
-	if ((q->cp > INITIAL_FRAME) || c_attrs)
+	if (q->cp || c_attrs)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
@@ -1101,7 +1101,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	e->ctx = v_ctx;
 
-	if ((q->cp > INITIAL_FRAME) && trailing)
+	if (q->cp && trailing)
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
@@ -1372,7 +1372,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 static bool any_outstanding_choices(query *q)
 {
-	if (q->cp <= INITIAL_FRAME)
+	if (!q->cp)
 		return false;
 
 	choice *ch = GET_CURR_CHOICE();

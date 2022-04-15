@@ -5967,7 +5967,7 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 	}
 
 	cell *l = end_list(q);
-	return unify(q, p1, p1_ctx, l, INITIAL_FRAME);
+	return unify(q, p1, p1_ctx, l, 0);
 }
 
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
