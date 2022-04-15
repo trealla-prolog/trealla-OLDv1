@@ -207,16 +207,16 @@ static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 
 	if (m_get(q->pl->vars, e, &v)) {
 		size_t idx = (size_t)v;
-		q->pl->tab4[idx]++;
+		q->pl->tabs[idx].cnt++;
 		return;
 	}
 
 	m_set(q->pl->vars, e, (void*)(size_t)q->pl->tab_idx);
-	q->pl->tab1[q->pl->tab_idx] = c_ctx;
-	q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
-	q->pl->tab3[q->pl->tab_idx] = c->val_off;
-	q->pl->tab4[q->pl->tab_idx] = 1;
-	q->pl->tab5[q->pl->tab_idx] = is_anon(c) ? 1 : 0;
+	q->pl->tabs[q->pl->tab_idx].ctx = c_ctx;
+	q->pl->tabs[q->pl->tab_idx].var_nbr = c->var_nbr;
+	q->pl->tabs[q->pl->tab_idx].val_off = c->val_off;
+	q->pl->tabs[q->pl->tab_idx].is_anon = is_anon(c) ? true : false;
+	q->pl->tabs[q->pl->tab_idx].cnt = 1;
 	q->pl->tab_idx++;
 }
 

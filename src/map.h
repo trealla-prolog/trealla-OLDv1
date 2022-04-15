@@ -20,6 +20,7 @@
 #define m_app sl_app
 #define m_get sl_get
 #define m_del sl_del
+#define m_count sl_count
 #define m_find sl_find
 #define m_is_next sl_is_next
 #define m_next sl_next

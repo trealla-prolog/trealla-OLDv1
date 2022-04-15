@@ -174,7 +174,7 @@ void pl_destroy(prolog *pl)
 	m_destroy(pl->symtab);
 	m_destroy(pl->keyval);
 	free(pl->pool);
-	pl->pool_offset = 0;
+		pl->pool_offset = 0;
 
 	if (!--g_tpl_count)
 		g_destroy();

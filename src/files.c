@@ -1465,7 +1465,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
-				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -1495,7 +1495,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		unsigned idx = 0;
 
 		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-			if (q->pl->tab5[i])
+			if (q->pl->tabs[i].is_anon)
 				continue;
 
 			cnt++;
@@ -1505,7 +1505,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-				if (q->pl->tab5[i])
+				if (q->pl->tabs[i].is_anon)
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -1519,9 +1519,9 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->pl->tab3[i]);
+				make_literal(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -1551,10 +1551,10 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		unsigned idx = 0;
 
 		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-			if (q->pl->tab4[i] != 1)
+			if (q->pl->tabs[i].cnt != 1)
 				continue;
 
-			if (varnames && (q->pl->tab5[i]))
+			if (varnames && (q->pl->tabs[i].is_anon))
 				continue;
 
 			cnt++;
@@ -1564,10 +1564,10 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-				if (q->pl->tab4[i] != 1)
+				if (q->pl->tabs[i].cnt != 1)
 					continue;
 
-				if (varnames && (q->pl->tab5[i]))
+				if (varnames && (q->pl->tabs[i].is_anon))
 					continue;
 
 				make_literal(tmp+idx, g_dot_s);
@@ -1581,9 +1581,9 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->pl->tab3[i]);
+				make_literal(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tab3[i], q->pl->tab2[i]);
+				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
