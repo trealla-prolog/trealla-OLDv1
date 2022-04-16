@@ -3002,7 +3002,7 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status;
+	pl_status status = pl_failure;
 	cell *l = nodesort(q, p1, p1_ctx, false, false, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
