@@ -1,13 +1,6 @@
 Trealla Prolog
 ==============
 
-NOTE: after the move, access will be automatically redirected to the
-new repo location. However it is best to set your repo origin directly...
-
-```console
-$ git remote set-url origin https://github.com/trealla-prolog/trealla
-```
-
 A compact, efficient Prolog interpreter with
 [ISO compliant](https://trealla-prolog.github.io/trealla/) aspirations.
 
