@@ -5531,21 +5531,8 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 		pl_idx_t c_ctx = q->latest_ctx;
 
 		if (is_variable(c)) {
-			bool found = false;
-
-			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
-					found = true;
-					break;
-				}
-			}
-
-			if (found)
+			if (accum_var(q, c, c_ctx))
 				continue;
-
-			q->pl->tab1[q->pl->tab_idx] = c_ctx;
-			q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
-			q->pl->tab_idx++;
 
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
@@ -5565,7 +5552,11 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 	GET_FIRST_ARG(p1,any);
 	int end = 0;
 	q->numbervars = true;
+	q->pl->tab_idx = 0;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	m_allow_dups(q->pl->vars, false);
 	do_numbervars(q, p1, p1_ctx, &end, 0);
+	m_destroy(q->pl->vars);
 	return pl_success;
 }
 
@@ -5576,7 +5567,11 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p3,integer_or_var);
 	int end = q->nv_start = get_int(p2);
 	q->numbervars = true;
+	q->pl->tab_idx = 0;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	m_allow_dups(q->pl->vars, false);
 	unsigned cnt = do_numbervars(q, p1, p1_ctx, &end, 0);
+	m_destroy(q->pl->vars);
 	cell tmp;
 	make_int(&tmp, get_int(p2)+cnt);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
