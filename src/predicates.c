@@ -5520,6 +5520,56 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 	if (!is_structure(p1))
 		return cnt;
 
+	if (is_iso_list(p1)) {
+		LIST_HANDLER(p1);
+
+		while (is_iso_list(p1) && !g_tpl_interrupt) {
+			cell *c = LIST_HEAD(p1);
+			pl_idx_t c_ctx = p1_ctx;
+
+			if (is_variable(c)) {
+				const frame *f = GET_FRAME(p1_ctx);
+				slot *e = GET_SLOT(f, c->var_nbr);
+				c = deref(q, c, p1_ctx);
+				c_ctx = q->latest_ctx;
+
+				if (e->mgen != q->mgen) {
+					e->mgen = q->mgen;
+
+					if (is_variable(c)) {
+						if (!accum_var(q, c, c_ctx)) {
+							cell *tmp = alloc_on_heap(q, 2);
+							make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
+							make_int(tmp+1, *end); *end = *end + 1;
+							tmp->flags |= FLAG_CSTR_QUOTED;
+							set_var(q, c, c_ctx, tmp, q->st.curr_frame);
+							cnt++;
+						}
+					}
+
+					if (is_structure(c))
+						cnt += do_numbervars(q, c, c_ctx, end, depth+1);
+				} else
+					return cnt;
+			} else if (is_structure(c))
+				cnt += do_numbervars(q, c, c_ctx, end, depth+1);
+
+			p1 = LIST_TAIL(p1);
+
+			if (is_variable(p1)) {
+				const frame *f = GET_FRAME(p1_ctx);
+				slot *e = GET_SLOT(f, p1->var_nbr);
+				p1 = deref(q, p1, p1_ctx);
+				p1_ctx = q->latest_ctx;
+
+				if (!is_variable(p1) && (e->mgen == q->mgen))
+					return cnt;
+
+				e->mgen = q->mgen;
+			}
+		}
+	}
+
 	unsigned arity = p1->arity;
 	p1++;
 
@@ -5550,6 +5600,7 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 	int end = 0;
 	q->numbervars = true;
 	q->pl->tab_idx = 0;
+	q->mgen++;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	m_allow_dups(q->pl->vars, false);
 	do_numbervars(q, p1, p1_ctx, &end, 0);
@@ -5565,6 +5616,7 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	int end = q->nv_start = get_int(p2);
 	q->numbervars = true;
 	q->pl->tab_idx = 0;
+	q->mgen++;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	m_allow_dups(q->pl->vars, false);
 	unsigned cnt = do_numbervars(q, p1, p1_ctx, &end, 0);
