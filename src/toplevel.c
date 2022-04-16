@@ -335,7 +335,7 @@ bool check_redo(query *q)
 	}
 
 	for (;;) {
-		printf("\n");
+		printf("\n;");
 		fflush(stdout);
 		int ch = history_getch();
 
@@ -356,7 +356,7 @@ bool check_redo(query *q)
 		}
 
 		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
-			printf(";");
+			//printf(";");
 			fflush(stdout);
 			q->is_redo = true;
 			q->retry = QUERY_RETRY;
@@ -365,7 +365,8 @@ bool check_redo(query *q)
 		}
 
 		if ((ch == '\n') || (ch == 'e')) {
-			printf(";  ... .\n");
+			//printf(";  ... .\n");
+			printf("  ... .\n");
 			q->pl->did_dump_vars = true;
 			q->abort = true;
 			return true;

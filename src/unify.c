@@ -199,7 +199,7 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
+bool accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 {
 	const frame *f = GET_FRAME(c_ctx);
 	const slot *e = GET_SLOT(f, c->var_nbr);
@@ -208,7 +208,7 @@ static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 	if (m_get(q->pl->vars, e, &v)) {
 		size_t idx = (size_t)v;
 		q->pl->tabs[idx].cnt++;
-		return;
+		return true;
 	}
 
 	m_set(q->pl->vars, e, (void*)(size_t)q->pl->tab_idx);
@@ -229,6 +229,7 @@ static void accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
 	q->pl->tabs[q->pl->tab_idx].is_anon = is_anon(c) ? true : false;
 	q->pl->tabs[q->pl->tab_idx].cnt = 1;
 	q->pl->tab_idx++;
+	return false;
 }
 
 static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
