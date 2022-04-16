@@ -710,7 +710,7 @@ struct prolog_ {
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
 	collectable *tabs;
-	struct { pl_idx_t tab1[64000], tab2[64000], tab3[64000], tab4[64000], tab5[64000]; };
+	struct { pl_idx_t tab1[64000], tab2[64000]; };
 	map *symtab, *funtab, *keyval, *vars;
 	char *pool;
 	size_t pool_offset, pool_size, tabs_size;
