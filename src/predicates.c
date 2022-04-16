@@ -5523,7 +5523,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 	if (!is_structure(p1))
 		return cnt;
 
-	if (is_iso_list(p1)) {
+	if (is_iso_list(p1) && is_acyclic_term(q, p1, p1_ctx)) {
 		LIST_HANDLER(p1);
 
 		while (is_iso_list(p1) && !g_tpl_interrupt) {
