@@ -5520,9 +5520,6 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 	if (!is_structure(p1))
 		return cnt;
 
-	if (!depth)
-		q->pl->tab_idx = 0;
-
 	unsigned arity = p1->arity;
 	p1++;
 
