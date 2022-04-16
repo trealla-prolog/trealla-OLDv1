@@ -1,5 +1,5 @@
 {
-  "total" : 479,
+  "total" : 477,
   "items" : [ {
     "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
     "name" : "tools/diagrams/tests.lgt::tests",
@@ -100,8 +100,8 @@
       "total" : 27
     }
   }, {
-    "uid" : "d944697bc54dd491703ec3072bfba616",
-    "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
+    "uid" : "a17f506128c48415bd5f6275182f5e99",
+    "name" : "tools/code_metrics/code_metrics_tests.lgt::code_metrics_tests",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,
