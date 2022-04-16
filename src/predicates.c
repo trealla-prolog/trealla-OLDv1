@@ -2971,7 +2971,7 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status;
+	pl_status status = pl_failure;
 	cell *l = nodesort(q, p1, p1_ctx, true, false, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
@@ -3044,7 +3044,7 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = 0;
+	pl_status status = pl_failure;
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
@@ -3175,7 +3175,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = 0;
+	pl_status status = pl_failure;
 	cell *l = nodesort4(q, p3, p3_ctx, dedup, ascending, arg, &status);
 	if (!l) return status;
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
