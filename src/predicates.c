@@ -5505,6 +5505,9 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
 {
+	if (depth == MAX_DEPTH)
+		return 0;
+
 	unsigned cnt = 0;
 
 	if (is_variable(p1)) {
@@ -5519,6 +5522,32 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 
 	if (!is_structure(p1))
 		return cnt;
+
+	if (is_iso_list(p1)) {
+		LIST_HANDLER(p1);
+
+		while (is_iso_list(p1) && !g_tpl_interrupt) {
+			cell *c = LIST_HEAD(p1);
+			c = deref(q, c, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+
+			if (is_variable(c)) {
+				if (!accum_var(q, c, c_ctx)) {
+					cell *tmp = alloc_on_heap(q, 2);
+					make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
+					make_int(tmp+1, *end); *end = *end + 1;
+					tmp->flags |= FLAG_CSTR_QUOTED;
+					set_var(q, c, c_ctx, tmp, q->st.curr_frame);
+					cnt++;
+				}
+			} else if (is_structure(c))
+				cnt += do_numbervars(q, c, c_ctx, end, depth+1);
+
+			p1 = LIST_TAIL(p1);
+			p1 = deref(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+		}
+	}
 
 	unsigned arity = p1->arity;
 	p1++;
