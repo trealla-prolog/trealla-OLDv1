@@ -5547,6 +5547,9 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 			p1 = deref(q, p1, p1_ctx);
 			p1_ctx = q->latest_ctx;
 		}
+
+		cnt += do_numbervars(q, p1, p1_ctx, end, depth+1);
+		return cnt;
 	}
 
 	unsigned arity = p1->arity;
