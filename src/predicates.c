@@ -5527,12 +5527,14 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 	p1++;
 
 	for (; arity--; p1 += p1->nbr_cells) {
+		cell *c = deref(q, p1, p1_ctx);
+		pl_idx_t c_ctx = q->latest_ctx;
 
-		if (is_variable(p1)) {
+		if (is_variable(c)) {
 			bool found = false;
 
 			for (unsigned idx = 0; idx < q->pl->tab_idx; idx++) {
-				if ((q->pl->tab1[idx] == p1_ctx) && (q->pl->tab2[idx] == p1->var_nbr)) {
+				if ((q->pl->tab1[idx] == c_ctx) && (q->pl->tab2[idx] == c->var_nbr)) {
 					found = true;
 					break;
 				}
@@ -5541,15 +5543,10 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 			if (found)
 				continue;
 
-			q->pl->tab1[q->pl->tab_idx] = p1_ctx;
-			q->pl->tab2[q->pl->tab_idx] = p1->var_nbr;
+			q->pl->tab1[q->pl->tab_idx] = c_ctx;
+			q->pl->tab2[q->pl->tab_idx] = c->var_nbr;
 			q->pl->tab_idx++;
-		}
 
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-
-		if (is_variable(c)) {
 			cell *tmp = alloc_on_heap(q, 2);
 			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
