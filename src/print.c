@@ -1061,6 +1061,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		bool space = (c->val_off == g_minus_s) && (is_number(rhs) || search_op(q->st.m, GET_STR(q, rhs), NULL, true));
 		if ((c->val_off == g_plus_s) && search_op(q->st.m, GET_STR(q, rhs), NULL, true) && rhs->arity) space = true;
 		if (isalpha(*src)) space = true;
+		if (is_op(rhs)) space = true;
 
 		bool parens = false; //is_op(rhs);
 		if (is_infix(rhs) || is_postfix(rhs)) parens = true;
