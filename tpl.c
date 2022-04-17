@@ -324,9 +324,9 @@ int main(int ac, char *av[])
 
 		if (!get_dump_vars(pl)) {
 			if (get_redo(pl))
-				printf("  %s", get_status(pl) ? "true" : "false");
+				printf(" %s", get_status(pl) ? "true" : "false");
 			else
-				printf("   %s", get_status(pl) ? "true" : "false");
+				printf(" %s", get_status(pl) ? "true" : "false");
 
 			printf(".\n");
 		}
