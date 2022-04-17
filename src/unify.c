@@ -697,7 +697,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	return slow;
 }
 
-static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
+static void make_new_variable(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
 {
 	make_variable(tmp, g_anon_s, create_vars(q, 1));
 	cell v;
@@ -705,7 +705,7 @@ static void make_var_ref(query *q, cell *tmp, unsigned var_nbr, pl_idx_t ctx)
 	set_var(q, tmp, q->st.curr_frame, &v, ctx);
 }
 
-static void make_cell_ref(query *q, cell *tmp, cell *v, pl_idx_t ctx)
+static void set_new_variable(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 {
 	make_variable(tmp, g_anon_s, create_vars(q, 1));
 	set_var(q, tmp, q->st.curr_frame, v, ctx);
@@ -737,8 +737,8 @@ pl_status fn_sys_undo_trail_1(query *q)
 		q->save_e[j] = *e;
 
 		cell lhs, rhs;
-		make_var_ref(q, &lhs, tr->var_nbr, tr->ctx);
-		make_cell_ref(q, &rhs, &e->c, e->ctx);
+		make_new_variable(q, &lhs, tr->var_nbr, tr->ctx);
+		set_new_variable(q, &rhs, &e->c, e->ctx);
 
 		cell tmp[3];
 		make_structure(tmp, g_minus_s, NULL, 2, 2);
