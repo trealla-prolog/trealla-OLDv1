@@ -178,7 +178,7 @@ void dump_vars(query *q, bool partial)
 		else if (!q->is_redo)
 			fprintf(stdout, "   ");
 		else
-			fprintf(stdout, "  ");
+			fprintf(stdout, " ");
 
 		fprintf(stdout, "%s = ", p->vartab.var_name[i]);
 
@@ -356,7 +356,7 @@ bool check_redo(query *q)
 		}
 
 		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
-			//printf(";");
+			printf(" ");
 			fflush(stdout);
 			q->is_redo = true;
 			q->retry = QUERY_RETRY;
