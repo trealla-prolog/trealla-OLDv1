@@ -215,7 +215,7 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 	pl_idx_t save_ctx = q->st.curr_frame;
 	cell *tmp = clone_to_heap(q, true, c, 2);
 	pl_idx_t nbr_cells = 1 + c->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;

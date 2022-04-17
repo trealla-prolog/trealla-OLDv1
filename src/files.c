@@ -313,7 +313,7 @@ static void del_stream_properties(query *q, int n)
 	cell *tmp = alloc_on_heap(q, 3);
 	make_literal(tmp+0, g_sys_stream_property_s);
 	make_int(tmp+1, n);
-	make_variable(tmp+2, g_anon_s, create_vars(q, 1));
+	make_var(tmp+2, g_anon_s, create_vars(q, 1));
 	tmp->nbr_cells = 3;
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
@@ -1465,7 +1465,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
-				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+				make_var(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -1521,7 +1521,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				tmp[idx++] = v;
 				make_literal(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+				make_var(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
@@ -1583,7 +1583,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				tmp[idx++] = v;
 				make_literal(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
-				make_variable(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+				make_var(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}

@@ -30,7 +30,7 @@ void do_cleanup(query *q, cell *p1)
 {
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
+	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0); // ???
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 }
@@ -89,7 +89,7 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 		tmp = clone_to_heap(q, false, p1, 2);
 
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -151,7 +151,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -194,7 +194,7 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -213,7 +213,7 @@ USE_RESULT pl_status fn_if_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -235,7 +235,7 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -257,7 +257,7 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
@@ -322,8 +322,8 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
@@ -392,7 +392,7 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 		cell *tmp = clone_to_heap(q, true, p3, 2);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -408,7 +408,7 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 3);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_1, 1, 1);
+	make_struct(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_1, 1, 1);
 	make_int(tmp+nbr_cells++, cp);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
@@ -435,7 +435,7 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 		cell *tmp = clone_to_heap(q, true, p3, 2);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -450,7 +450,7 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	may_ptr_error(tmp);
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
@@ -600,7 +600,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 3);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
 		make_literal(tmp+nbr_cells, index_from_pool(q->pl, expected));
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
@@ -609,11 +609,11 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1+(c->nbr_cells-1));
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1+(c->nbr_cells-1));
 		copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		nbr_cells += c->nbr_cells;
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -622,17 +622,17 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
 		share_cell(c);
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
 		make_int(tmp+nbr_cells++, c->arity);
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -641,8 +641,8 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
 
 		if (!extra)
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
@@ -662,14 +662,14 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
 		share_cell(c);
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
 		make_int(tmp+nbr_cells++, c->arity);
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -678,8 +678,8 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 9+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
 
 		if (!extra)
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
@@ -699,14 +699,14 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
 		share_cell(c);
 		if (is_callable(c)) { tmp[nbr_cells].arity = 0; tmp[nbr_cells].nbr_cells = 1; CLR_OP(tmp+nbr_cells); }
 		nbr_cells++;
 		make_int(tmp+nbr_cells++, c->arity);
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -715,9 +715,9 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 5);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -726,14 +726,14 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, GET_STR(q, c)));
 		make_int(tmp+nbr_cells++, c->arity);
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -745,10 +745,10 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 6);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1);
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
@@ -757,8 +757,8 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
-		make_structure(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
-		make_structure(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
+		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
+		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
 
 		if (!extra) {
 			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
@@ -779,7 +779,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		}
 
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, c, c->nbr_cells);
-		make_structure(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
+		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
