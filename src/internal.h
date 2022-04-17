@@ -700,8 +700,7 @@ typedef struct {
 	pl_idx_t ctx, val_off;
 	unsigned var_nbr, cnt;
 	bool is_anon;
-}
- collectable;
+} var_item;
 
 struct prolog_ {
 	stream streams[MAX_STREAMS];
@@ -709,7 +708,7 @@ struct prolog_ {
 	module *modules;
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
-	collectable *tabs;
+	var_item *tabs;
 	struct { pl_idx_t tab1[64000], tab2[64000]; };
 	map *symtab, *funtab, *keyval, *vars;
 	char *pool;
