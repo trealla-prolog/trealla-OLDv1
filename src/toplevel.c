@@ -326,7 +326,7 @@ bool check_redo(query *q)
 	fflush(stdout);
 
 	if (q->autofail) {
-		printf("\n;");
+		printf("\n; ");
 		fflush(stdout);
 		q->is_redo = true;
 		q->retry = QUERY_RETRY;
@@ -346,7 +346,7 @@ bool check_redo(query *q)
 		}
 
 		if (ch == 'a') {
-			printf(";");
+			printf(" ");
 			fflush(stdout);
 			q->is_redo = true;
 			q->retry = QUERY_RETRY;
