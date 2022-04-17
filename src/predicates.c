@@ -100,7 +100,7 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 	if (p2) *p2 = ch->v2;
 }
 
-void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
+void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr)
 {
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
@@ -109,7 +109,7 @@ void make_variable(cell *tmp, pl_idx_t off, unsigned var_nbr)
 	tmp->var_nbr = var_nbr;
 }
 
-void make_variable2(cell *tmp, pl_idx_t off)
+void make_var2(cell *tmp, pl_idx_t off)
 {
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
@@ -133,7 +133,7 @@ void make_real(cell *tmp, double v)
 	set_real(tmp, v);
 }
 
-void make_structure(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
+void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
 	*tmp = (cell){0};
 	tmp->tag = TAG_LITERAL;
@@ -383,7 +383,7 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_RAW_ARG(p2,any);
 	cell tmp2;
-	make_structure(&tmp2, g_unify_s, fn_iso_unify_2, 2, 0);
+	make_struct(&tmp2, g_unify_s, fn_iso_unify_2, 2, 0);
 	cell *tmp = clone_to_heap(q, true, &tmp2, p1->nbr_cells+p2->nbr_cells+3);
 	pl_idx_t nbr_cells = 1;
 	tmp[nbr_cells].nbr_cells += p1->nbr_cells+p2->nbr_cells;
@@ -392,8 +392,8 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	nbr_cells += p1->nbr_cells;
 	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	nbr_cells += p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
@@ -1841,7 +1841,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			cell v;
-			make_variable2(&v, q->pl->tabs[i].val_off);
+			make_var2(&v, q->pl->tabs[i].val_off);
 
 			if (q->pl->tabs[i].ctx != q->st.curr_frame) {
 				v.flags |= FLAG_VAR_FRESH;
@@ -1873,9 +1873,9 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 				continue;
 
 			cell v, tmp2;
-			make_variable(&v, g_anon_s, q->pl->varno++);
+			make_var(&v, g_anon_s, q->pl->varno++);
 			v.flags |= FLAG_VAR_FRESH;
-			make_variable(&tmp2, g_anon_s, q->pl->tabs[i].var_nbr);
+			make_var(&tmp2, g_anon_s, q->pl->tabs[i].var_nbr);
 			tmp2.flags |= FLAG_VAR_FRESH;
 			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tabs[i].ctx);
 		}
@@ -2720,7 +2720,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2735,7 +2735,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2748,7 +2748,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2763,7 +2763,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.occurs_check = OCCURS_CHECK_ERROR;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2776,7 +2776,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2789,7 +2789,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.not_strict_iso = !false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2806,7 +2806,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.unknown = UNK_CHANGEABLE;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
-			make_structure(tmp, g_plus_s, fn_iso_add_2, 2, 2);
+			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
@@ -2930,7 +2930,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 		cell tmp;
 
 		if (is_variable(c) || is_structure(c)) {
-			make_variable(&tmp, c->val_off, create_vars(q, 1));
+			make_var(&tmp, c->val_off, create_vars(q, 1));
 			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 			c = &tmp;
 		}
@@ -3100,7 +3100,7 @@ static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool asc
 		cell tmp;
 
 		if (is_variable(c) || is_structure(c)) {
-			make_variable(&tmp, c->val_off, create_vars(q, 1));
+			make_var(&tmp, c->val_off, create_vars(q, 1));
 			unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 			c = &tmp;
 		}
@@ -3295,10 +3295,10 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		assert(q->st.qnbr < MAX_QUEUES);
 		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+2);
 		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
+		make_struct(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+p1->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
-		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		may_error(push_barrier(q));
 		q->st.curr_cell = tmp;
@@ -3937,7 +3937,7 @@ static USE_RESULT pl_status fn_time_1(query *q)
 	DISCARD_RESULT fn_sys_timer_0(q);
 	cell *tmp = clone_to_heap(q, true, p1, 2);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -4149,7 +4149,7 @@ static USE_RESULT pl_status fn_forall_2(query *q)
 
 	cell *tmp = get_heap(q, off);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
-	make_structure(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+	make_struct(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(push_choice(q));
 	q->st.curr_cell = tmp;
 	return pl_success;
@@ -5512,7 +5512,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 
 	if (is_variable(p1)) {
 		cell *tmp = alloc_on_heap(q, 2);
-		make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
+		make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
 		make_int(tmp+1, *end); *end = *end + 1;
 		tmp->flags |= FLAG_CSTR_QUOTED;
 		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
@@ -5534,7 +5534,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 			if (is_variable(c)) {
 				if (!accum_var(q, c, c_ctx)) {
 					cell *tmp = alloc_on_heap(q, 2);
-					make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
+					make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
 					make_int(tmp+1, *end); *end = *end + 1;
 					tmp->flags |= FLAG_CSTR_QUOTED;
 					set_var(q, c, c_ctx, tmp, q->st.curr_frame);
@@ -5564,7 +5564,7 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 				continue;
 
 			cell *tmp = alloc_on_heap(q, 2);
-			make_structure(tmp+0, g_sys_var_s, NULL, 1, 1);
+			make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
 			make_int(tmp+1, *end); *end = *end + 1;
 			tmp->flags |= FLAG_CSTR_QUOTED;
 			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
@@ -5798,7 +5798,7 @@ static USE_RESULT pl_status fn_limit_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p2, 4);
 	pl_idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
+	make_struct(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p1));
 	make_return(q, tmp+nbr_cells);
@@ -5826,7 +5826,7 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	GET_NEXT_ARG(p2,callable);
 	cell *tmp = clone_to_heap(q, true, p2, 4);
 	pl_idx_t nbr_cells = 1 + p2->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
+	make_struct(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p1));
 	make_return(q, tmp+nbr_cells);
@@ -5874,7 +5874,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	if (is_variable(p2)) {
 		cell *tmp = clone_to_heap(q, true, p1, 4);
 		pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_2, 2, 2);
+		make_struct(tmp+nbr_cells++, g_sys_incr_s, fn_sys_incr_2, 2, 2);
 		GET_RAW_ARG(2,p2_raw);
 		tmp[nbr_cells] = *p2_raw;
 		tmp[nbr_cells++].nbr_cells = 1;
@@ -5886,7 +5886,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 
 	cell *tmp = clone_to_heap(q, true, p1, 4);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-	make_structure(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
+	make_struct(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_int(p2));
 	make_return(q, tmp+nbr_cells);
@@ -5928,10 +5928,10 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 
 		cell *tmp = malloc(sizeof(cell)*(2+c->nbr_cells));
 		may_ptr_error(tmp);
-		make_structure(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
+		make_struct(tmp, g_unify_s, fn_iso_unify_2, 2, 1+c->nbr_cells);
 		SET_OP(tmp, OP_XFX);
 		cell v;
-		make_variable(&v, g_anon_s, tr->var_nbr);
+		make_var(&v, g_anon_s, tr->var_nbr);
 		tmp[1] = v;
 		safe_copy_cells(tmp+2, c, c->nbr_cells);
 
@@ -5972,7 +5972,7 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 			continue;
 
 		cell v;
-		make_variable(&v, index_from_pool(q->pl, p->vartab.var_name[i]), i);
+		make_var(&v, index_from_pool(q->pl, p->vartab.var_name[i]), i);
 
 		if (first) {
 			allocate_list(q, &v);
@@ -6566,8 +6566,8 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 		GET_FIRST_ARG(p1,callable);
 		cell *tmp = clone_to_heap(q, true, p1, 3);
 		pl_idx_t nbr_cells = 1 + p1->nbr_cells;
-		make_structure(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
-		make_structure(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
 		return pl_success;

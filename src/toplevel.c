@@ -137,9 +137,9 @@ void dump_vars(query *q, bool partial)
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		cell tmp[3];
-		make_structure(tmp, g_eq_s, NULL, 2, 2);
+		make_struct(tmp, g_eq_s, NULL, 2, 2);
 		make_cstring(tmp+1, p->vartab.var_name[i]);
-		make_variable(tmp+2, g_anon_s, i);
+		make_var(tmp+2, g_anon_s, i);
 
 		if (i == 0)
 			allocate_list(q, tmp);
