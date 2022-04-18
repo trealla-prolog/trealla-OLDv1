@@ -8,6 +8,17 @@
 #include "query.h"
 #include "heap.h"
 
+static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
+{
+	const void *v;
+
+	if (m_get(q->pl->vars, (void*)(size_t)slot_nbr, &v))
+		return (unsigned)(size_t)v;
+
+	m_set(q->pl->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
+	return -1;
+}
+
 size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
@@ -188,7 +199,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
 		q->st.m->pl->tab_idx++;
-		assert(q->pl->tab_idx <= 64000);
 		return tmp;
 	}
 
@@ -352,7 +362,6 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = from_slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = to->var_nbr;
 		q->st.m->pl->tab_idx++;
-		assert(q->pl->tab_idx <= 64000);
 	}
 
 	if (is_variable(save_p1)) {
@@ -362,7 +371,6 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
 		q->st.m->pl->tab_idx++;
-		assert(q->pl->tab_idx <= 64000);
 	}
 
 	if (is_variable(p1)) {
@@ -538,7 +546,8 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->tab_idx = 0;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	m_allow_dups(q->pl->vars, false);
 
 	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
 		*dst = *src;
@@ -549,23 +558,12 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 
 		slot *e = GET_SLOT(f, src->var_nbr);
 		pl_idx_t slot_nbr = e - q->slots;
-		int found = 0;
+		int found = 0, var_nbr;
 
-		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab1[i] == slot_nbr) {
-				dst->var_nbr = q->st.m->pl->tab2[i];
-				break;
-			}
-		}
+		if ((var_nbr = accum_slot(q, slot_nbr, q->st.m->pl->varno)) == -1)
+			var_nbr = q->st.m->pl->varno++;
 
-		if (!found) {
-			dst->var_nbr = q->st.m->pl->varno;
-			q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
-			q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
-			q->st.m->pl->tab_idx++;
-			assert(q->pl->tab_idx <= 64000);
-		}
-
+		dst->var_nbr = var_nbr;
 		dst->flags = FLAG_VAR_FRESH;
 	}
 
