@@ -567,6 +567,8 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 		dst->flags = FLAG_VAR_FRESH;
 	}
 
+	m_destroy(q->pl->vars);
+
 	if (q->st.m->pl->varno != f->nbr_vars) {
 		if (!create_vars(q, q->st.m->pl->varno-f->nbr_vars)) {
 			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "stack");
