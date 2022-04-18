@@ -1408,7 +1408,12 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 
 	LIST_HANDLER(l);
 
-	while (is_list(l) && !g_tpl_interrupt) {
+	while (is_list(l)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(l);
 		h = deref(q, h, l_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -1544,8 +1549,8 @@ pl_status start(query *q)
 			}
 		}
 
-		if (g_tpl_interrupt)
-			continue;
+		//if (g_tpl_interrupt)
+		//	continue;
 
 		Trace(q, save_cell, save_ctx, EXIT);
 		q->resume = false;
