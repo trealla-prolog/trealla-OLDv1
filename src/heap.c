@@ -188,6 +188,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
 		q->st.m->pl->tab_idx++;
+		assert(q->pl->tab_idx <= 64000);
 		return tmp;
 	}
 
@@ -351,6 +352,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = from_slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = to->var_nbr;
 		q->st.m->pl->tab_idx++;
+		assert(q->pl->tab_idx <= 64000);
 	}
 
 	if (is_variable(save_p1)) {
@@ -360,6 +362,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
 		q->st.m->pl->tab_idx++;
+		assert(q->pl->tab_idx <= 64000);
 	}
 
 	if (is_variable(p1)) {
@@ -560,6 +563,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 			q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
 			q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
 			q->st.m->pl->tab_idx++;
+			assert(q->pl->tab_idx <= 64000);
 		}
 
 		dst->flags = FLAG_VAR_FRESH;
