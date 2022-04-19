@@ -307,7 +307,6 @@ static void add_stream_properties(query *q, int n)
 	destroy_parser(p);
 }
 
-#ifndef SANDBOX
 static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
@@ -337,7 +336,6 @@ static void del_stream_properties(query *q, int n)
 
 	q->retry = QUERY_OK;
 }
-#endif
 
 static pl_status do_stream_property(query *q)
 {
@@ -578,7 +576,6 @@ void convert_path(char *filename)
 	}
 }
 
-#ifndef SANDBOX
 #ifndef _WIN32
 static USE_RESULT pl_status fn_popen_4(query *q)
 {
@@ -687,9 +684,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 	return pl_success;
 }
 #endif
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -928,9 +923,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_close_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -964,9 +957,7 @@ static USE_RESULT pl_status fn_iso_close_1(query *q)
 	free(str->data);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_iso_close_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
@@ -995,7 +986,6 @@ static USE_RESULT pl_status fn_iso_close_2(query *q)
 
 	return fn_iso_close_1(q);
 }
-#endif
 
 static USE_RESULT pl_status fn_iso_at_end_of_stream_0(query *q)
 {
@@ -3669,7 +3659,6 @@ static USE_RESULT pl_status fn_read_file_to_string_3(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
@@ -3716,9 +3705,7 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (is_atom(p1)) {
@@ -3752,9 +3739,7 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -3783,9 +3768,7 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_unload_files_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
@@ -3814,9 +3797,7 @@ static USE_RESULT pl_status fn_unload_files_1(query *q)
 
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -3841,9 +3822,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -3901,9 +3880,7 @@ static USE_RESULT pl_status fn_loadfile_2(query *q)
 	free(s);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -3982,7 +3959,6 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_getlines_1(query *q)
 {
@@ -4090,7 +4066,6 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static char *fixup(const char *srcptr)
 {
 	char *tmpbuf = strdup(srcptr);
@@ -4117,9 +4092,7 @@ static char *fixup(const char *srcptr)
 	*dst = '\0';
 	return tmpbuf;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -4260,7 +4233,6 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
-#endif
 
 static USE_RESULT pl_status fn_getline_1(query *q)
 {
@@ -4339,7 +4311,6 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 	return ok;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_access_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4392,9 +4363,7 @@ static USE_RESULT pl_status fn_access_file_2(query *q)
 	free(filename);
 	return ok;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4426,9 +4395,7 @@ static USE_RESULT pl_status fn_exists_file_1(query *q)
 
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_directory_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4485,9 +4452,7 @@ static USE_RESULT pl_status fn_directory_files_2(query *q)
 	pl_status ok = unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	return ok;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4515,9 +4480,7 @@ static USE_RESULT pl_status fn_delete_file_1(query *q)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4561,9 +4524,7 @@ static USE_RESULT pl_status fn_rename_file_2(query *q)
 	free(filename2);
 	return ok ? pl_success : pl_failure;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_copy_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4633,9 +4594,7 @@ static USE_RESULT pl_status fn_copy_file_2(query *q)
 	fclose(fp1);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4665,9 +4624,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 	make_real(&tmp, st.st_mtime);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4697,9 +4654,7 @@ static USE_RESULT pl_status fn_size_file_2(query *q)
 	make_int(&tmp, st.st_size);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4730,9 +4685,7 @@ static USE_RESULT pl_status fn_exists_directory_1(query *q)
 
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4764,9 +4717,7 @@ static USE_RESULT pl_status fn_make_directory_1(query *q)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4813,9 +4764,7 @@ static USE_RESULT pl_status fn_make_directory_path_1(query *q)
 	free(filename);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
@@ -4855,9 +4804,7 @@ static USE_RESULT pl_status fn_working_directory_2(query *q)
 	unshare_cell(&tmp);
 	return ok;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
@@ -4874,7 +4821,6 @@ static USE_RESULT pl_status fn_chdir_1(query *q)
 	free(filename);
 	return ok;
 }
-#endif
 
 static void parse_host(const char *src, char hostname[1024], char path[4096], unsigned *port, int *ssl, int *domain)
 {
@@ -5419,7 +5365,6 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 
 const struct builtins g_files_bifs[] =
 {
-#ifndef SANDBOX
 	// ISO...
 
 	{"open", 4, fn_iso_open_4, NULL, false},
@@ -5523,7 +5468,6 @@ const struct builtins g_files_bifs[] =
 
 #ifndef _WIN32
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
-#endif
 #endif
 
 	{0}

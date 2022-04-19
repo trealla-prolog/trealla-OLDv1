@@ -4045,7 +4045,6 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	return pl_failure;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_sleep_1(query *q)
 {
 	if (q->retry)
@@ -4059,9 +4058,7 @@ static USE_RESULT pl_status fn_sleep_1(query *q)
 	sleep((unsigned)get_int(p1));
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_delay_1(query *q)
 {
 	if (q->retry)
@@ -4075,7 +4072,6 @@ static USE_RESULT pl_status fn_delay_1(query *q)
 	msleep((unsigned)get_int(p1));
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_busy_1(query *q)
 {
@@ -4752,7 +4748,6 @@ static USE_RESULT pl_status fn_date_time_6(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -4762,9 +4757,7 @@ static USE_RESULT pl_status fn_shell_1(query *q)
 	else
 		return pl_failure;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_shell_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -4775,7 +4768,6 @@ static USE_RESULT pl_status fn_shell_2(query *q)
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_format_2(query *q)
 {
@@ -5813,15 +5805,12 @@ void do_db_load(module *m)
 	ensure(m->fp);
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_db_load_0(query *q)
 {
 	do_db_load(q->st.m);
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 {
 	if (!q->st.m->fp)
@@ -5845,7 +5834,6 @@ static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 	may_ptr_error(q->st.m->fp);
 	return pl_success;
 }
-#endif
 
 static USE_RESULT pl_status fn_abolish_2(query *q)
 {
@@ -6431,7 +6419,6 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 	return pl_success;
 }
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -6554,16 +6541,13 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 
 	return pl_success;
 }
-#endif
 
-#ifndef SANDBOX
 static USE_RESULT pl_status fn_use_module_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return fn_use_module_1(q);
 }
-#endif
 
 static USE_RESULT pl_status fn_module_1(query *q)
 {
@@ -6797,8 +6781,6 @@ static const struct builtins g_other_bifs[] =
 	{"current_module", 1, fn_current_module_1, NULL, false},
 	{"module", 1, fn_module_1, NULL, false},
 	{"using", 0, fn_using_0, NULL, false},
-
-#ifndef SANDBOX
 	{"use_module", 1, fn_use_module_1, NULL, false},
 	{"use_module", 2, fn_use_module_2, NULL, false},
 
@@ -6816,7 +6798,6 @@ static const struct builtins g_other_bifs[] =
 	{"$db_load", 0, fn_sys_db_load_0, NULL, false},
 	{"$db_save", 0, fn_sys_db_save_0, NULL, false},
 
-#endif
 
 	{"listing", 0, fn_listing_0, NULL, false},
 	{"listing", 1, fn_listing_1, NULL, false},

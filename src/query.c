@@ -1395,9 +1395,8 @@ static bool any_outstanding_choices(query *q)
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
-#ifdef SANDBOX
 	return pl_failure;
-#endif
+
 	if (is_string(l)) {
 		char *s = DUP_SLICE(q, l);
 
