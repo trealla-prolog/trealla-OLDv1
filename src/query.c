@@ -349,8 +349,12 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 	int cnt = 0;
 
 	while (is_iso_list(l)
-		&& (q->st.m->flags.double_quote_chars || allow_codes)
-		&& !g_tpl_interrupt) {
+		&& (q->st.m->flags.double_quote_chars || allow_codes)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
 

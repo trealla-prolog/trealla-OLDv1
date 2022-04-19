@@ -1219,7 +1219,12 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 	LIST_HANDLER(p21);
 
-	while (is_list(p21) && !g_tpl_interrupt) {
+	while (is_list(p21)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p21);
 		h = deref(q, h, p21_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -1305,7 +1310,12 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				pl_idx_t p22_ctx = p2_ctx;
 				LIST_HANDLER(p22);
 
-				while (is_list(p22) && !g_tpl_interrupt) {
+				while (is_list(p22)) {
+					if (g_tpl_interrupt) {
+						if (check_interrupt(q))
+							break;
+					}
+
 					cell *h = LIST_HEAD(p22);
 					h = deref(q, h, p22_ctx);
 					pl_idx_t h_ctx = q->latest_ctx;
@@ -1373,9 +1383,12 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			p->fp = NULL;
 
 			while (get_token(p, false, false)
-				&& p->token[0] && strcmp(p->token, ".")
-				&& !g_tpl_interrupt)
-				;
+				&& p->token[0] && strcmp(p->token, ".")) {
+				if (g_tpl_interrupt) {
+					if (check_interrupt(q))
+						break;
+				}
+			}
 
 			p->fp = save_fp;
 			p->did_getline = false;
@@ -1393,7 +1406,12 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	pl_idx_t p22_ctx = p2_ctx;
 	LIST_HANDLER(p22);
 
-	while (is_list(p22) && !g_tpl_interrupt) {
+	while (is_list(p22)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p22);
 		h = deref(q, h, p22_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -3208,7 +3226,12 @@ static USE_RESULT pl_status fn_write_term_to_atom_3(query *q)
 	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
-	while (is_list(p2) && !g_tpl_interrupt) {
+	while (is_list(p2)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -3240,7 +3263,12 @@ static USE_RESULT pl_status fn_write_canonical_to_atom_3(query *q)
 	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
-	while (is_list(p2) && !g_tpl_interrupt) {
+	while (is_list(p2)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -3270,7 +3298,12 @@ static USE_RESULT pl_status fn_write_term_to_chars_3(query *q)
 	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
-	while (is_list(p2) && !g_tpl_interrupt) {
+	while (is_list(p2)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -3302,7 +3335,12 @@ static USE_RESULT pl_status fn_write_canonical_to_chars_3(query *q)
 	q->flags = q->st.m->flags;
 	LIST_HANDLER(p2);
 
-	while (is_list(p2) && !g_tpl_interrupt) {
+	while (is_list(p2)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p2);
 		h = deref(q, h, p2_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -3728,7 +3766,12 @@ static USE_RESULT pl_status fn_load_files_2(query *q)
 
 	LIST_HANDLER(p1);
 
-	while (is_list(p1) && !g_tpl_interrupt) {
+	while (is_list(p1)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p1);
 		cell *c = deref(q, h, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
@@ -3754,7 +3797,12 @@ static USE_RESULT pl_status fn_unload_files_1(query *q)
 
 	LIST_HANDLER(p1);
 
-	while (is_list(p1) && !g_tpl_interrupt) {
+	while (is_list(p1)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p1);
 		cell *c = deref(q, h, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
@@ -3890,7 +3938,12 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 	size_t len = 0;
 	int nbr = 1, in_list = 0;
 
-	while ((getline(&line, &len, fp) != -1) && !g_tpl_interrupt) {
+	while (getline(&line, &len, fp) != -1) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		int len = strlen(line);
 
 		if (len && (line[len-1] == '\n')) {
@@ -3940,7 +3993,11 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 	size_t len = 0;
 	int nbr = 1, in_list = 0;
 
-	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
+	while (getline(&line, &len, str->fp) != -1) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
 		int len = strlen(line);
 
 		if (len && (line[len-1] == '\n')) {
@@ -3989,7 +4046,12 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 	size_t len = 0;
 	int nbr = 1, in_list = 0;
 
-	while ((getline(&line, &len, str->fp) != -1) && !g_tpl_interrupt) {
+	while (getline(&line, &len, str->fp) != -1) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		int len = strlen(line);
 
 		if (len && (line[len-1] == '\n')) {
@@ -4089,7 +4151,12 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	convert_path(filename);
 	LIST_HANDLER(p_opts);
 
-	while (is_list(p_opts) && !g_tpl_interrupt) {
+	while (is_list(p_opts)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p_opts);
 		h = deref(q, h, p_opts_ctx);
 
@@ -4846,7 +4913,12 @@ static USE_RESULT pl_status fn_server_3(query *q)
 	path[0] = '\0';
 	LIST_HANDLER(p3);
 
-	while (is_list(p3) && !g_tpl_interrupt) {
+	while (is_list(p3)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p3);
 		cell *c = deref(q, h, p3_ctx);
 
@@ -5022,7 +5094,12 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	unsigned port = 80;
 	LIST_HANDLER(p5);
 
-	while (is_list(p5) && !g_tpl_interrupt) {
+	while (is_list(p5)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p5);
 		cell *c = deref(q, h, p5_ctx);
 
@@ -5076,7 +5153,12 @@ static USE_RESULT pl_status fn_client_5(query *q)
 	parse_host(url, hostname, path, &port, &ssl, &domain);
 	nonblock = q->is_task;
 
-	while (is_list(p5) && !g_tpl_interrupt) {
+	while (is_list(p5)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(p5);
 		cell *c = deref(q, h, p5_ctx);
 
@@ -5265,7 +5347,12 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 	const char *src = GET_STR(q, p1);
 	size_t len = LEN_STR(q, p1);
 
-	while (len && !g_tpl_interrupt) {
+	while (len) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		size_t nbytes = net_write(src, len, str);
 
 		if (!nbytes) {
