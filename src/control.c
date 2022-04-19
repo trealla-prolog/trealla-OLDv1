@@ -97,7 +97,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	// This copy is because we are building the call structure
 	// and we need variables to be in the local context. One day vars
-	// will be able to hold their own context... free the vars!
+	// will be able to hold their own context... explore using refs!
 
 	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
 	may_ptr_error(p0);
