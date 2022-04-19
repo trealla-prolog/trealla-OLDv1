@@ -471,6 +471,11 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	if (!tmp) return NULL;
 	copy_cells(tmp, p1, 1);
 
+	if (is_variable(tmp)) {
+		tmp->flags |= FLAG_VAR_REF;
+		tmp->ref_ctx = p1_ctx;
+	}
+
 	if (!is_structure(p1))
 		return tmp;
 
@@ -514,7 +519,18 @@ cell *clone2_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
 	ensure(tmp);
-	copy_cells(tmp, p1, p1->nbr_cells);
+	cell *src = p1, *dst = tmp;
+
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+
+		if (!is_variable(src))
+			continue;
+
+		dst->flags |= FLAG_VAR_REF;
+		dst->ref_ctx = q->st.curr_frame;
+	}
+
 	return tmp;
 }
 
@@ -526,8 +542,7 @@ cell *clone_to_tmp(query *q, cell *p1)
 
 cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 {
-	pl_idx_t nbr_cells = p1->nbr_cells;
-	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
 	ensure(tmp);
 	frame *f = GET_CURR_FRAME();
 
@@ -541,7 +556,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 
-	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		share_cell(src);
 
@@ -557,8 +572,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 
 cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix)
 {
-	pl_idx_t nbr_cells = p1->nbr_cells;
-	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
 	ensure(tmp);
 
 	if (prefix) {
@@ -576,7 +590,7 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 	q->pl->tab_idx = 0;
 	m_allow_dups(q->pl->vars, false);
 
-	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		share_cell(src);
 
