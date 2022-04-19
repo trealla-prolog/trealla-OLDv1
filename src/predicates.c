@@ -100,6 +100,17 @@ static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 	if (p2) *p2 = ch->v2;
 }
 
+void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
+{
+	*tmp = (cell){0};
+	tmp->tag = TAG_VAR;
+	tmp->nbr_cells = 1;
+	tmp->flags = FLAG_VAR_REF;
+	tmp->val_off = off;
+	tmp->var_nbr = var_nbr;
+	tmp->var_ctx = ctx;
+}
+
 void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr)
 {
 	*tmp = (cell){0};
