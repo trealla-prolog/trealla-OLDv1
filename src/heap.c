@@ -471,7 +471,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	if (!tmp) return NULL;
 	copy_cells(tmp, p1, 1);
 
-	if (is_variable(tmp)) {
+	if (is_variable(tmp) && !is_ref(tmp)) {
 		tmp->flags |= FLAG_VAR_REF;
 		tmp->ref_ctx = p1_ctx;
 	}
@@ -524,7 +524,7 @@ cell *clone2_to_tmp(query *q, cell *p1)
 	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 
-		if (!is_variable(src))
+		if (!is_variable(src) || is_ref(src))
 			continue;
 
 		dst->flags |= FLAG_VAR_REF;
@@ -560,7 +560,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 		*dst = *src;
 		share_cell(src);
 
-		if (!is_variable(src))
+		if (!is_variable(src) || is_ref(src))
 			continue;
 
 		dst->flags |= FLAG_VAR_REF;
