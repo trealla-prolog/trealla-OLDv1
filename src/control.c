@@ -80,19 +80,13 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
 		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
-	cell *tmp;
-
-	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, false, p1, p1_ctx, 2);
-		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	} else
-		tmp = clone_to_heap(q, false, p1, 2);
-
+	cell *tmp = clone_to_heap(q, false, p1, 2);
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
+	q->st.curr_frame = p1_ctx;
 	return pl_success;
 }
 
