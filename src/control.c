@@ -90,6 +90,32 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	return pl_success;
 }
 
+// module:goal
+
+USE_RESULT pl_status fn_iso_invoke_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,callable);
+
+	module *m = find_module(q->pl, GET_STR(q, p1));
+
+	if (!m)
+		m = create_module(q->pl, GET_STR(q, p1));
+
+	cell *tmp = clone_to_heap(q, true, p2, 1);
+	pl_idx_t nbr_cells = 1;
+
+	if (!is_builtin(p2) /*&& !tmp[nbr_cells].match*/)
+		tmp[nbr_cells].match = find_predicate(m, p2);
+
+	nbr_cells += p2->nbr_cells;
+	make_return(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+	q->st.curr_frame = p2_ctx;
+	q->st.m = q->save_m = m;
+	return pl_success;
+}
+
 USE_RESULT pl_status fn_iso_call_n(query *q)
 {
 	if (q->retry)
@@ -149,31 +175,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
-// module:goal
-
-USE_RESULT pl_status fn_iso_invoke_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,callable);
-
-	module *m = find_module(q->pl, GET_STR(q, p1));
-
-	if (!m)
-		m = create_module(q->pl, GET_STR(q, p1));
-
-	cell *tmp = clone_to_heap(q, true, p2, 1);
-	pl_idx_t nbr_cells = 1;
-
-	if (!is_builtin(p2) /*&& !tmp[nbr_cells].match*/)
-		tmp[nbr_cells].match = find_predicate(m, p2);
-
-	nbr_cells += p2->nbr_cells;
-	make_return(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	q->st.m = q->save_m = m;
 	return pl_success;
 }
 
