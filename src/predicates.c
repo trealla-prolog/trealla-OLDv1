@@ -108,7 +108,7 @@ void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
 	tmp->flags = FLAG_VAR_REF;
 	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
-	tmp->var_ctx = ctx;
+	tmp->ref_ctx = ctx;
 }
 
 void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr)

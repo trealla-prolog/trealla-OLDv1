@@ -529,6 +529,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 	pl_idx_t nbr_cells = p1->nbr_cells;
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
 	ensure(tmp);
+	frame *f = GET_CURR_FRAME();
 
 	if (prefix) {
 		// Needed for follow() to work
@@ -538,7 +539,19 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	safe_copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
+	cell *src = p1, *dst = tmp+(prefix?1:0);
+
+	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+		share_cell(src);
+
+		if (!is_variable(src))
+			continue;
+
+		dst->flags |= FLAG_VAR_REF;
+		dst->ref_ctx = q->st.curr_frame;
+	}
+
 	return tmp;
 }
 
