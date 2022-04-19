@@ -4076,14 +4076,22 @@ static char *fixup(const char *srcptr)
 		if ((src[0] == '.') && (src[1] == '.') && ((src[2] == '/') || (src[2] == '\\'))) {
 			dst -= 2;
 
-			while ((dst != tmpbuf) && ((*dst != '/') || (*dst != '\\') || (*dst != ':')))
+			while ((dst != tmpbuf) && ((*dst != '/') && (*dst != '\\')
+#ifdef _WIN32
+				&& (*dst != ':')
+#endif
+				))
 				dst--;
 
 			src += 2;
 			dst++;
-		} else if ((src[0] == '.') && ((src[1] == '/') || (src[1] == '\\'))) {
+		} else if ((src[0] == '.') && ((src[1] == '/') || (src[1] == '\\')
+#ifdef _WIN32
+				|| (src[1] == ':')
+#endif
+			))
 			src += 1;
-		} else
+		else
 			*dst++ = *src;
 
 		src++;
@@ -4104,11 +4112,10 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 	may_ptr_error(here);
 	char *ptr = here + strlen(here) - 1;
 
-	while (*ptr && (*ptr != '/') && (*ptr != '\\') && (*ptr != ':')) {
+	while ((ptr != here) && *ptr && (*ptr != '/') && (*ptr != '\\') && (*ptr != ':'))
 		ptr--;
-		*ptr = '\0';
-	}
 
+	ptr[1] = '\0';
 	char *cwd = here;
 
 	if (is_iso_list(p1)) {
@@ -4202,12 +4209,12 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 				may_ptr_error(tmp, free(tmpbuf));
 				snprintf(tmp, buflen, "%s/%s", tmpbuf, s);
 				convert_path(tmp);
-				//printf("*** here2 %s\n", tmp);
 				free(tmpbuf);
 				tmpbuf = fixup(tmp);
 				may_ptr_error(tmpbuf);
 				free(tmp);
 			} else {
+				free(tmpbuf);
 				tmpbuf = fixup(s);
 				may_ptr_error(tmpbuf);
 			}
