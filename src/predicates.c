@@ -1918,16 +1918,8 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			tmp[idx].arity = 2;
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
-			cell v;
-			make_var2(&v, q->pl->tabs[i].val_off);
-
-			if (q->pl->tabs[i].ctx != q->st.curr_frame) {
-				v.flags |= FLAG_VAR_FRESH;
-				v.var_nbr = q->pl->varno++;
-			} else
-				v.var_nbr = q->pl->tabs[i].var_nbr;
-
-			tmp[idx++] = v;
+			make_ref(tmp+idx, q->pl->tabs[i].ctx, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+			idx++;
 			done++;
 		}
 
@@ -1936,28 +1928,6 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 		tmp[0].nbr_cells = idx;
 	} else
 		make_literal(tmp, g_nil_s);
-
-	if (cnt) {
-		unsigned new_vars = q->pl->varno - f->nbr_vars;
-		q->pl->varno = f->nbr_vars;
-
-		if (new_vars) {
-			if (!create_vars(q, new_vars))
-				return NULL;
-		}
-
-		for (unsigned i = 0; i < cnt; i++) {
-			if (q->pl->tabs[i].ctx == q->st.curr_frame)
-				continue;
-
-			cell v, tmp2;
-			make_var(&v, g_anon_s, q->pl->varno++);
-			v.flags |= FLAG_VAR_FRESH;
-			make_var(&tmp2, g_anon_s, q->pl->tabs[i].var_nbr);
-			tmp2.flags |= FLAG_VAR_FRESH;
-			set_var(q, &v, q->st.curr_frame, &tmp2, q->pl->tabs[i].ctx);
-		}
-	}
 
 	return tmp;		// returns on tmp_heap
 }

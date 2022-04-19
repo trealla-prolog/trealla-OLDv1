@@ -56,7 +56,7 @@
 inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	if (is_ref(c))
-		return deref_var(q, c, c->var_ctx);
+		c_ctx = c->var_ctx;
 
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
