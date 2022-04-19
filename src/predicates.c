@@ -1805,12 +1805,11 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		if (is_variable(p22))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-		cell *tmp = deep_copy_to_heap(q, p2, p2_ctx, false);
+		cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 		may_ptr_error(tmp);
 		if (tmp == ERR_CYCLE_CELL)
 			return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
 
-		unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 		p2 = tmp;
 		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
