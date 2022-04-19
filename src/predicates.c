@@ -1919,6 +1919,10 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
 			idx++;
 			make_ref(tmp+idx, q->pl->tabs[i].ctx, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+
+			if (q->pl->tabs[i].is_anon)
+				tmp[idx].flags |= FLAG_VAR_ANON;
+
 			idx++;
 			done++;
 		}
