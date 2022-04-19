@@ -179,7 +179,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			var_nbr = q->st.m->pl->varno;
 
 		if (!q->st.m->pl->tab_idx) {
-			q->st.m->pl->tab0 = var_nbr;
+			q->st.m->pl->tab0_varno = var_nbr;
 			q->st.m->pl->tab_idx++;
 		}
 
@@ -221,7 +221,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
 				*tmp = *h;
-				tmp->var_nbr = q->st.m->pl->tab0;
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
@@ -240,7 +240,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				tmp->flags = 0;
 				tmp->nbr_cells = 1;
 				tmp->val_off = g_anon_s;
-				tmp->var_nbr = q->st.m->pl->tab0;
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				cyclic = true;
 				break;
@@ -280,7 +280,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
 				*tmp = *p1;
-				tmp->var_nbr = q->st.m->pl->tab0;
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
@@ -364,7 +364,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		const pl_idx_t slot_nbr = e - q->slots;
 
 		if (!q->st.m->pl->tab_idx) {
-			q->st.m->pl->tab0 = to->var_nbr;
+			q->st.m->pl->tab0_varno = to->var_nbr;
 			q->st.m->pl->tab_idx++;
 		}
 
@@ -377,7 +377,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 		const pl_idx_t slot_nbr = e - q->slots;
 
 		if (!q->st.m->pl->tab_idx) {
-			q->st.m->pl->tab0 = q->st.m->pl->varno;
+			q->st.m->pl->tab0_varno = q->st.m->pl->varno;
 			q->st.m->pl->tab_idx++;
 		}
 
@@ -410,7 +410,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 	if (is_variable(save_p1)) {
 		cell tmp;
 		tmp = *save_p1;
-		tmp.var_nbr = q->st.m->pl->tab0;
+		tmp.var_nbr = q->st.m->pl->tab0_varno;
 		unify(q, &tmp, q->st.curr_frame, rec, q->st.curr_frame);
 	}
 

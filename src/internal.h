@@ -718,7 +718,7 @@ struct prolog_ {
 	char *pool;
 	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;
-	unsigned tab_idx, varno, next_mod_id, tab0;
+	unsigned tab_idx, varno, next_mod_id, tab0_varno;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
 	bool is_redo:1;

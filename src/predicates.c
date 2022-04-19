@@ -2015,7 +2015,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
-		tmpv.var_nbr = q->st.m->pl->tab0;
+		tmpv.var_nbr = q->st.m->pl->tab0_varno;
 		unify(q, p2, p2_ctx, &tmpv, q->st.curr_frame);
 	}
 
@@ -2045,7 +2045,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
-		tmpv.var_nbr = q->st.m->pl->tab0;
+		tmpv.var_nbr = q->st.m->pl->tab0_varno;
 		unify(q, p2, p2_ctx, &tmpv, q->st.curr_frame);
 	}
 
