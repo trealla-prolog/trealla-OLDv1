@@ -3280,25 +3280,6 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
-
-#if 0
-	frame *f = GET_CURR_FRAME();
-	unsigned new_varno = f->nbr_vars;
-	cell *c = l;
-
-	for (pl_idx_t i = 0; i < l->nbr_cells; i++, c++) {
-		if (is_variable(c) && is_anon(c)) {
-			c->var_nbr = new_varno++;
-			c->flags = FLAG_VAR_FRESH | FLAG_VAR_ANON;
-		}
-	}
-
-	if (new_varno != f->nbr_vars) {
-		if (!create_vars(q, new_varno-f->nbr_vars))
-			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
-	}
-#endif
-
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
