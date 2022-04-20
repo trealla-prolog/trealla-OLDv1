@@ -1006,8 +1006,10 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (!cnt)
 		return f->nbr_vars;
 
-	if ((q->st.sp + cnt) > MAX_VARS)
+	if ((q->st.sp + cnt) > MAX_VARS) {
+		printf("*** Ooops %s %d\n", __FILE__, __LINE__);
 		return 0;
+	}
 
 	unsigned var_nbr = f->nbr_vars;
 
