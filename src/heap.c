@@ -309,7 +309,6 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->varno = f->nbr_vars;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	q->pl->tab_idx = 0;
 	q->cycle_error = false;
@@ -329,7 +328,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	return q->tmp_heap;
 }
 
-cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, cell *from, pl_idx_t from_ctx, cell *to, pl_idx_t to_ctx)
+static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, cell *from, pl_idx_t from_ctx, cell *to, pl_idx_t to_ctx)
 {
 	if (!init_tmp_heap(q))
 		return NULL;
@@ -600,56 +599,6 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 
 		dst->flags |= FLAG_VAR_REF;
 		dst->ref_ctx = q->st.curr_frame;
-	}
-
-	return tmp;
-}
-
-cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix)
-{
-	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
-	ensure(tmp);
-
-	if (prefix) {
-		// Needed for follow() to work
-		*tmp = (cell){0};
-		tmp->tag = TAG_EMPTY;
-		tmp->nbr_cells = 1;
-		tmp->flags = FLAG_BUILTIN;
-	}
-
-	cell *src = p1, *dst = tmp+(prefix?1:0);
-	frame *f = GET_CURR_FRAME();
-	q->st.m->pl->varno = f->nbr_vars;
-	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
-	q->pl->tab_idx = 0;
-	m_allow_dups(q->pl->vars, false);
-
-	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
-		*dst = *src;
-		share_cell(src);
-
-		if (!is_variable(src))
-			continue;
-
-		slot *e = GET_SLOT(f, src->var_nbr);
-		pl_idx_t slot_nbr = e - q->slots;
-		int found = 0, var_nbr;
-
-		if ((var_nbr = accum_slot(q, slot_nbr, q->st.m->pl->varno)) == -1)
-			var_nbr = q->st.m->pl->varno++;
-
-		dst->var_nbr = var_nbr;
-		dst->flags = FLAG_VAR_FRESH;
-	}
-
-	m_destroy(q->pl->vars);
-
-	if (q->st.m->pl->varno != f->nbr_vars) {
-		if (!create_vars(q, q->st.m->pl->varno-f->nbr_vars)) {
-			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "stack");
-			return NULL;
-		}
 	}
 
 	return tmp;
