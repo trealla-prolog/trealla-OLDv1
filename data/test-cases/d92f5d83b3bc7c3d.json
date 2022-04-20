@@ -1,0 +1,55 @@
+{
+  "uid" : "d92f5d83b3bc7c3d",
+  "name" : "csv_guess_arity",
+  "fullName" : "csv_guess_arity::tests",
+  "historyId" : "csv_guess_arity::tests",
+  "time" : {
+    "duration" : 19
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/csv/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/csv/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "302-304"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/library/csv/tests.lgt#L302"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d92f5d83b3bc7c3d.json",
+  "parameterValues" : [ "library/csv/tests.lgt", "302-304", "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/library/csv/tests.lgt#L302" ]
+}

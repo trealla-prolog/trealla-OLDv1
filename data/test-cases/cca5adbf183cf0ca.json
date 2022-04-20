@@ -1,0 +1,55 @@
+{
+  "uid" : "cca5adbf183cf0ca",
+  "name" : "asserta_1_15",
+  "fullName" : "asserta_1_15::tests",
+  "historyId" : "asserta_1_15::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/asserta_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/asserta_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "74-85"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/tests/logtalk/methods/asserta_1/tests.lgt#L74"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "cca5adbf183cf0ca.json",
+  "parameterValues" : [ "tests/logtalk/methods/asserta_1/tests.lgt", "74-85", "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/tests/logtalk/methods/asserta_1/tests.lgt#L74" ]
+}

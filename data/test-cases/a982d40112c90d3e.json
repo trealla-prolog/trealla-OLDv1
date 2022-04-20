@@ -1,0 +1,55 @@
+{
+  "uid" : "a982d40112c90d3e",
+  "name" : "sics_at_end_of_stream_1_09",
+  "fullName" : "sics_at_end_of_stream_1_09::tests",
+  "historyId" : "sics_at_end_of_stream_1_09::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/predicates/at_end_of_stream_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/predicates/at_end_of_stream_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/predicates/at_end_of_stream_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/predicates/at_end_of_stream_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "69-72"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/tests/prolog/predicates/at_end_of_stream_1/tests.lgt#L69"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a982d40112c90d3e.json",
+  "parameterValues" : [ "tests/prolog/predicates/at_end_of_stream_1/tests.lgt", "69-72", "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/tests/prolog/predicates/at_end_of_stream_1/tests.lgt#L69" ]
+}

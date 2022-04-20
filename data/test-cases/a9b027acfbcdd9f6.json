@@ -1,0 +1,55 @@
+{
+  "uid" : "a9b027acfbcdd9f6",
+  "name" : "viewpoints_05",
+  "fullName" : "viewpoints_05::tests",
+  "historyId" : "viewpoints_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/viewpoints/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/viewpoints/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "52-53"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/examples/viewpoints/tests.lgt#L52"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a9b027acfbcdd9f6.json",
+  "parameterValues" : [ "examples/viewpoints/tests.lgt", "52-53", "https://github.com/LogtalkDotOrg/logtalk3/tree/9a5633c8f044067d6c12dee65c90713f262c62c5/examples/viewpoints/tests.lgt#L52" ]
+}
