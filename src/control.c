@@ -80,19 +80,39 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
 		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
-	cell *tmp;
-
-	if (p1_ctx != q->st.curr_frame) {
-		tmp = copy_to_heap(q, false, p1, p1_ctx, 2);
-		unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	} else
-		tmp = clone_to_heap(q, false, p1, 2);
-
+	cell *tmp = clone_to_heap(q, false, p1, 2);
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
+	q->st.curr_frame = p1_ctx;
+	return pl_success;
+}
+
+// module:goal
+
+USE_RESULT pl_status fn_iso_invoke_2(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,callable);
+
+	module *m = find_module(q->pl, GET_STR(q, p1));
+
+	if (!m)
+		m = create_module(q->pl, GET_STR(q, p1));
+
+	cell *tmp = clone_to_heap(q, true, p2, 1);
+	pl_idx_t nbr_cells = 1;
+
+	if (!is_builtin(p2) /*&& !tmp[nbr_cells].match*/)
+		tmp[nbr_cells].match = find_predicate(m, p2);
+
+	nbr_cells += p2->nbr_cells;
+	make_return(q, tmp+nbr_cells);
+	q->st.curr_cell = tmp;
+	q->st.curr_frame = p2_ctx;
+	q->st.m = q->save_m = m;
 	return pl_success;
 }
 
@@ -101,17 +121,11 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	// This copy is because we are building the call structure
-	// and we need variables to be in the local context. One day vars
-	// will be able to hold their own context... free the vars!
-
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
+	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	may_ptr_error(p0);
 
 	if (p0 == ERR_CYCLE_CELL)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "list");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_ptr_error(clone_to_tmp(q, p1));
@@ -155,31 +169,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
-}
-
-// module:goal
-
-USE_RESULT pl_status fn_iso_invoke_2(query *q)
-{
-	GET_FIRST_ARG(p1,atom);
-	GET_NEXT_ARG(p2,callable);
-
-	module *m = find_module(q->pl, GET_STR(q, p1));
-
-	if (!m)
-		m = create_module(q->pl, GET_STR(q, p1));
-
-	cell *tmp = clone_to_heap(q, true, p2, 1);
-	pl_idx_t nbr_cells = 1;
-
-	if (!is_builtin(p2) /*&& !tmp[nbr_cells].match*/)
-		tmp[nbr_cells].match = find_predicate(m, p2);
-
-	nbr_cells += p2->nbr_cells;
-	make_return(q, tmp+nbr_cells);
-	q->st.curr_cell = tmp;
-	q->st.m = q->save_m = m;
 	return pl_success;
 }
 

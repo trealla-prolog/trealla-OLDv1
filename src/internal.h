@@ -74,6 +74,8 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define MAX_MODULES 1024
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
+#define MAX_IGNORES 64000
+
 #define STREAM_BUFLEN 1024
 
 #define GET_CHOICE(i) (q->choices+(i))
@@ -363,6 +365,7 @@ struct cell_ {
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term
 					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
+					pl_idx_t ref_ctx;	// used with TAG_VAR & refs
 				};
 			};
 
@@ -560,7 +563,7 @@ struct query_ {
 	trail *trails;
 	cell *tmp_heap, *last_arg, *exception, *variable_names;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
-	bool ignore[MAX_ARITY];
+	bool ignores[MAX_IGNORES];
 	page *pages;
 	slot *save_e;
 	db_entry *dirty_list;
@@ -711,12 +714,12 @@ struct prolog_ {
 	module *system_m, *user_m, *curr_m, *dcgs;
 	parser *p;
 	var_item *tabs;
-	struct { pl_idx_t tab1[64000], tab2[64000]; };
+	struct { pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES]; };
 	map *symtab, *funtab, *keyval, *vars;
 	char *pool;
 	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;
-	unsigned tab_idx, varno, next_mod_id;
+	unsigned tab_idx, varno, next_mod_id, tab0_varno;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
 	bool is_redo:1;

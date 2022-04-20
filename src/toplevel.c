@@ -122,15 +122,15 @@ void dump_vars(query *q, bool partial)
 
 	// Build the ignore list for variable name clashes....
 
-	for (unsigned i = 0; i < MAX_ARITY; i++)
-		q->ignore[i] = false;
+	for (unsigned i = 0; i < MAX_IGNORES; i++)
+		q->ignores[i] = false;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		int j;
 
 		if ((p->vartab.var_name[i][0] == '_')
 			&& ((j = varunformat(p->vartab.var_name[i]+1)) != -1))
-			q->ignore[j] = true;
+			q->ignores[j] = true;
 	}
 
 	// Build the variable-names list for dumping vars...
@@ -283,16 +283,16 @@ int check_interrupt(query *q)
 
 		if (ch == 't') {
 			q->trace = !q->trace;
-			return 0;
+			break;
 		}
 
 		if (ch == 'p') {
 			q->trace = q->creep = !q->creep;
-			return 0;
+			break;
 		}
 
-		if ((ch == ';') || (ch == ' ') || (ch == 'r')) {
-			return 0;
+		if ((ch == ';') || (ch == ' ') || (ch == 'r') || (ch == 'c')) {
+			break;
 		}
 
 		if (ch == '\n')
@@ -312,6 +312,8 @@ int check_interrupt(query *q)
 			return 1;
 		}
 	}
+
+	return 0;
 }
 
 bool check_redo(query *q)
@@ -326,7 +328,7 @@ bool check_redo(query *q)
 	fflush(stdout);
 
 	if (q->autofail) {
-		printf("\n;");
+		printf("\n; ");
 		fflush(stdout);
 		q->is_redo = true;
 		q->retry = QUERY_RETRY;
@@ -346,7 +348,7 @@ bool check_redo(query *q)
 		}
 
 		if (ch == 'a') {
-			printf(";");
+			printf(" ");
 			fflush(stdout);
 			q->is_redo = true;
 			q->retry = QUERY_RETRY;

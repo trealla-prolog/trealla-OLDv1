@@ -61,9 +61,6 @@ tpl: $(OBJECTS) Makefile README.md LICENSE
 	$(CC) $(CFLAGS) -o src/version.o -c src/version.c
 	$(CC) -o tpl $(OBJECTS) $(OPT) $(LDFLAGS)
 
-sandbox:
-	$(MAKE) 'OPT=$(OPT) -O0 -pg -DSANDBOX'
-
 profile:
 	$(MAKE) 'OPT=$(OPT) -O0 -pg -DDEBUG'
 

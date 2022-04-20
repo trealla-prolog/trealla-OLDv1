@@ -8,6 +8,17 @@
 #include "query.h"
 #include "heap.h"
 
+static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
+{
+	const void *v;
+
+	if (m_get(q->pl->vars, (void*)(size_t)slot_nbr, &v))
+		return (unsigned)(size_t)v;
+
+	m_set(q->pl->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
+	return -1;
+}
+
 size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements)
 {
 	assert(min_elements <= max_elements);
@@ -110,7 +121,7 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist)
 {
-	while (rlist && !g_tpl_interrupt) {
+	while (rlist) {
 		if ((c->var_nbr == rlist->var_nbr)
 			&& (c_ctx == rlist->ctx))
 			return true;
@@ -123,7 +134,7 @@ bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist)
 
 static bool is_in_ref_list2(cell *c, pl_idx_t c_ctx, reflist *rlist)
 {
-	while (rlist && !g_tpl_interrupt) {
+	while (rlist) {
 		if ((c == rlist->ptr)
 			&& (c_ctx == rlist->ctx))
 			return true;
@@ -162,21 +173,18 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		const frame *f = GET_FRAME(p1_ctx);
 		const slot *e = GET_SLOT(f, p1->var_nbr);
 		const pl_idx_t slot_nbr = e - q->slots;
+		int var_nbr;
 
-		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab1[i] == slot_nbr) {
-				tmp->var_nbr = q->st.m->pl->tab2[i];
-				tmp->flags = FLAG_VAR_FRESH;
+		if ((var_nbr = accum_slot(q, slot_nbr, q->st.m->pl->varno)) == -1)
+			var_nbr = q->st.m->pl->varno;
 
-				if (is_anon(p1))
-					tmp->flags |= FLAG_VAR_ANON;
-
-				tmp->val_off = p1->val_off;
-				return tmp;
-			}
+		if (!q->st.m->pl->tab_idx) {
+			q->st.m->pl->tab0_varno = var_nbr;
+			q->st.m->pl->tab_idx++;
 		}
 
-		tmp->var_nbr = q->st.m->pl->varno;
+		q->st.m->pl->varno++;
+		tmp->var_nbr = var_nbr;
 		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
 		tmp->tmp_attrs = e->c.attrs;
@@ -185,9 +193,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		if (is_anon(p1))
 			tmp->flags |= FLAG_VAR_ANON;
 
-		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
-		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
-		q->st.m->pl->tab_idx++;
 		return tmp;
 	}
 
@@ -197,7 +202,12 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	if (is_iso_list(p1)) {
 		LIST_HANDLER(p1);
 
-		while (is_iso_list(p1) && !g_tpl_interrupt) {
+		while (is_iso_list(p1)) {
+			if (g_tpl_interrupt) {
+				if (check_interrupt(q))
+					break;
+			}
+
 			cell *h = LIST_HEAD(p1);
 			cell *c = h;
 			pl_idx_t c_ctx = p1_ctx;
@@ -211,7 +221,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
 				*tmp = *h;
-				tmp->var_nbr = q->st.m->pl->tab2[0];
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
@@ -230,7 +240,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				tmp->flags = 0;
 				tmp->nbr_cells = 1;
 				tmp->val_off = g_anon_s;
-				tmp->var_nbr = q->st.m->pl->tab2[0];
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				cyclic = true;
 				break;
@@ -270,7 +280,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
 				*tmp = *p1;
-				tmp->var_nbr = q->st.m->pl->tab2[0];
+				tmp->var_nbr = q->st.m->pl->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
@@ -299,7 +309,9 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->tab_idx = 0;
+	q->st.m->pl->varno = f->nbr_vars;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	q->pl->tab_idx = 0;
 	q->cycle_error = false;
 
 	if (is_variable(p1)) {
@@ -312,6 +324,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	nlist.ctx = p1_ctx;
 
 	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, &nlist);
+	m_destroy(q->pl->vars);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	return q->tmp_heap;
 }
@@ -339,27 +352,37 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->tab_idx = 0;
+	q->st.m->pl->varno = f->nbr_vars;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	q->pl->tab_idx = 0;
 	q->cycle_error = false;
 	int nbr_vars = f->nbr_vars;
 
 	if (from && to) {
 		f = GET_FRAME(from_ctx);
 		const slot *e = GET_SLOT(f, from->var_nbr);
-		const pl_idx_t from_slot_nbr = e - q->slots;
+		const pl_idx_t slot_nbr = e - q->slots;
 
-		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = from_slot_nbr;
-		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = to->var_nbr;
-		q->st.m->pl->tab_idx++;
+		if (!q->st.m->pl->tab_idx) {
+			q->st.m->pl->tab0_varno = to->var_nbr;
+			q->st.m->pl->tab_idx++;
+		}
+
+		m_set(q->pl->vars, (void*)(size_t)slot_nbr, (void*)(size_t)to->var_nbr);
 	}
 
 	if (is_variable(save_p1)) {
 		const frame *f = GET_FRAME(p1_ctx);
 		const slot *e = GET_SLOT(f, p1->var_nbr);
 		const pl_idx_t slot_nbr = e - q->slots;
-		q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
-		q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
-		q->st.m->pl->tab_idx++;
+
+		if (!q->st.m->pl->tab_idx) {
+			q->st.m->pl->tab0_varno = q->st.m->pl->varno;
+			q->st.m->pl->tab_idx++;
+		}
+
+		m_set(q->pl->vars, (void*)(size_t)slot_nbr, (void*)(size_t)q->st.m->pl->varno);
+		q->st.m->pl->varno++;
 	}
 
 	if (is_variable(p1)) {
@@ -373,6 +396,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 
 	cell *rec = deep_copy2_to_tmp(q, c, c_ctx, 0, !q->lists_ok ? &nlist : NULL);
 	q->lists_ok = false;
+	m_destroy(q->pl->vars);
 	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
@@ -386,7 +410,7 @@ cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, boo
 	if (is_variable(save_p1)) {
 		cell tmp;
 		tmp = *save_p1;
-		tmp.var_nbr = q->st.m->pl->tab2[0];
+		tmp.var_nbr = q->st.m->pl->tab0_varno;
 		unify(q, &tmp, q->st.curr_frame, rec, q->st.curr_frame);
 	}
 
@@ -447,15 +471,55 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	if (!tmp) return NULL;
 	copy_cells(tmp, p1, 1);
 
+	if (is_variable(tmp) && !is_ref(tmp)) {
+		tmp->flags |= FLAG_VAR_REF;
+		tmp->ref_ctx = p1_ctx;
+	}
+
 	if (!is_structure(p1))
 		return tmp;
+
+	if (is_iso_list(p1)) {
+		LIST_HANDLER(p1);
+
+		while (is_iso_list(p1)) {
+			if (g_tpl_interrupt) {
+				if (check_interrupt(q))
+					break;
+			}
+
+			cell *h = LIST_HEAD(p1);
+			cell *c = deref(q, h, p1_ctx);
+			pl_idx_t c_ctx = q->latest_ctx;
+
+			cell *rec = deep_clone2_to_tmp(q, c, c_ctx, depth+1);
+			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+
+			p1 = LIST_TAIL(p1);
+			p1 = deref(q, p1, p1_ctx);
+			p1_ctx = q->latest_ctx;
+
+			if (is_iso_list(p1)) {
+				cell *tmp = alloc_on_tmp(q, 1);
+				if (!tmp) return NULL;
+				copy_cells(tmp, p1, 1);
+			}
+		}
+
+		cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, depth+1);
+		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+		tmp = get_tmp_heap(q, save_idx);
+		tmp->nbr_cells = tmp_heap_used(q) - save_idx;
+		return tmp;
+	}
 
 	unsigned arity = p1->arity;
 	p1++;
 
 	while (arity--) {
 		cell *c = deref(q, p1, p1_ctx);
-		cell *rec = deep_clone2_to_tmp(q, c, q->latest_ctx, depth+1);
+		pl_idx_t c_ctx = q->latest_ctx;
+		cell *rec = deep_clone2_to_tmp(q, c, c_ctx, depth+1);
 		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
 		p1 += p1->nbr_cells;
 	}
@@ -490,7 +554,18 @@ cell *clone2_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
 	ensure(tmp);
-	copy_cells(tmp, p1, p1->nbr_cells);
+	cell *src = p1, *dst = tmp;
+
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+
+		if (!is_variable(src) || is_ref(src))
+			continue;
+
+		dst->flags |= FLAG_VAR_REF;
+		dst->ref_ctx = q->st.curr_frame;
+	}
+
 	return tmp;
 }
 
@@ -502,9 +577,9 @@ cell *clone_to_tmp(query *q, cell *p1)
 
 cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 {
-	pl_idx_t nbr_cells = p1->nbr_cells;
-	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
 	ensure(tmp);
+	frame *f = GET_CURR_FRAME();
 
 	if (prefix) {
 		// Needed for follow() to work
@@ -514,14 +589,25 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 		tmp->flags = FLAG_BUILTIN;
 	}
 
-	safe_copy_cells(tmp+(prefix?1:0), p1, nbr_cells);
+	cell *src = p1, *dst = tmp+(prefix?1:0);
+
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
+		*dst = *src;
+		share_cell(src);
+
+		if (!is_variable(src) || is_ref(src))
+			continue;
+
+		dst->flags |= FLAG_VAR_REF;
+		dst->ref_ctx = q->st.curr_frame;
+	}
+
 	return tmp;
 }
 
 cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t suffix)
 {
-	pl_idx_t nbr_cells = p1->nbr_cells;
-	cell *tmp = alloc_on_heap(q, (prefix?1:0)+nbr_cells+suffix);
+	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
 	ensure(tmp);
 
 	if (prefix) {
@@ -535,9 +621,11 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 	cell *src = p1, *dst = tmp+(prefix?1:0);
 	frame *f = GET_CURR_FRAME();
 	q->st.m->pl->varno = f->nbr_vars;
-	q->st.m->pl->tab_idx = 0;
+	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
+	q->pl->tab_idx = 0;
+	m_allow_dups(q->pl->vars, false);
 
-	for (pl_idx_t i = 0; i < nbr_cells; i++, dst++, src++) {
+	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
 		*dst = *src;
 		share_cell(src);
 
@@ -546,24 +634,16 @@ cell *copy_to_heap(query *q, bool prefix, cell *p1, pl_idx_t p1_ctx, pl_idx_t su
 
 		slot *e = GET_SLOT(f, src->var_nbr);
 		pl_idx_t slot_nbr = e - q->slots;
-		int found = 0;
+		int found = 0, var_nbr;
 
-		for (size_t i = 0; i < q->st.m->pl->tab_idx; i++) {
-			if (q->st.m->pl->tab1[i] == slot_nbr) {
-				dst->var_nbr = q->st.m->pl->tab2[i];
-				break;
-			}
-		}
+		if ((var_nbr = accum_slot(q, slot_nbr, q->st.m->pl->varno)) == -1)
+			var_nbr = q->st.m->pl->varno++;
 
-		if (!found) {
-			dst->var_nbr = q->st.m->pl->varno;
-			q->st.m->pl->tab1[q->st.m->pl->tab_idx] = slot_nbr;
-			q->st.m->pl->tab2[q->st.m->pl->tab_idx] = q->st.m->pl->varno++;
-			q->st.m->pl->tab_idx++;
-		}
-
+		dst->var_nbr = var_nbr;
 		dst->flags = FLAG_VAR_FRESH;
 	}
+
+	m_destroy(q->pl->vars);
 
 	if (q->st.m->pl->varno != f->nbr_vars) {
 		if (!create_vars(q, q->st.m->pl->varno-f->nbr_vars)) {

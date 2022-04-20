@@ -349,8 +349,12 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 	int cnt = 0;
 
 	while (is_iso_list(l)
-		&& (q->st.m->flags.double_quote_chars || allow_codes)
-		&& !g_tpl_interrupt) {
+		&& (q->st.m->flags.double_quote_chars || allow_codes)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
 
@@ -1074,6 +1078,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
+	e->c.flags &= ~FLAG_VAR_REF;
 	e->ctx = v_ctx;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
@@ -1390,9 +1395,8 @@ static bool any_outstanding_choices(query *q)
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
-#ifdef SANDBOX
 	return pl_failure;
-#endif
+
 	if (is_string(l)) {
 		char *s = DUP_SLICE(q, l);
 
@@ -1408,7 +1412,12 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 
 	LIST_HANDLER(l);
 
-	while (is_list(l) && !g_tpl_interrupt) {
+	while (is_list(l)) {
+		if (g_tpl_interrupt) {
+			if (check_interrupt(q))
+				break;
+		}
+
 		cell *h = LIST_HEAD(l);
 		h = deref(q, h, l_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
@@ -1544,8 +1553,8 @@ pl_status start(query *q)
 			}
 		}
 
-		if (g_tpl_interrupt)
-			continue;
+		//if (g_tpl_interrupt)
+		//	continue;
 
 		Trace(q, save_cell, save_ctx, EXIT);
 		q->resume = false;
