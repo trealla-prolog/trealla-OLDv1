@@ -544,8 +544,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 		}
 	}
 
-	cell *tmp = deep_copy_to_tmp(q, q->st.curr_cell, q->st.curr_frame, false);
-	unify(q, tmp, q->st.curr_frame, q->st.curr_cell, q->st.curr_frame);
+	cell *tmp = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
 	tmp->val_off = g_sys_stream_property_s;
 
 	if (match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE) != pl_success) {
