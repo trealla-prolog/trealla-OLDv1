@@ -463,7 +463,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 		while (is_iso_list(l)) {
 			CHECK_INTERRUPT();
-
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
@@ -930,7 +929,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 			while (is_iso_list(l)) {
 				CHECK_INTERRUPT();
-
 				cell *h = LIST_HEAD(l);
 				h = deref(q, h, l_ctx);
 				pl_idx_t h_ctx = q->latest_ctx;

@@ -9,6 +9,7 @@
 static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
 		return ERR_CYCLE_CMP;
 	}
@@ -972,8 +973,10 @@ static const struct dispatch g_disp[] =
 
 static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
-	if (depth > MAX_DEPTH)
-		return true;
+	if (depth > MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		return false;
+	}
 
 	cell *save_p1 = p1, *save_p2 = p2;
 	pl_idx_t save_p1_ctx = p1_ctx, save_p2_ctx = p2_ctx;
@@ -1045,8 +1048,10 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	if (p1->val_off != p2->val_off)
 		return false;
 
-	if (depth > MAX_DEPTH)
-		return true;
+	if (depth > MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		return false;
+	}
 
 	unsigned arity = p1->arity;
 	p1++; p2++;
@@ -1122,8 +1127,10 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 	if ((p1 == p2) && (p1_ctx == p2_ctx))
 		return true;
 
-	if (depth > MAX_DEPTH)
-		return true;
+	if (depth > MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		return false;
+	}
 
 	if (is_variable(p1) && is_variable(p2)) {
 		if (p2_ctx > p1_ctx)

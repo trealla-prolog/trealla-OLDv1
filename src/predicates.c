@@ -5470,8 +5470,10 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
 {
-	if (depth == MAX_DEPTH)
+	if (depth == MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		return 0;
+	}
 
 	unsigned cnt = 0;
 
