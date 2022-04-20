@@ -3324,11 +3324,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	if (is_iso_list(xp3) && !check_list(q, xp3, xp3_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, xp3, xp3_ctx, "type_error", "list");
 
-	// This copy is because we are putting found items in the queue area
-	// and we need variables to be in the local context. One day vars
-	// will be able to hold their own context... free the vars!
-
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, true);
+	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 
 	if (p0 == ERR_CYCLE_CELL)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
@@ -3359,12 +3355,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		q->st.qnbr--;
 		cell tmp;
 		make_literal(&tmp, g_nil_s);
-		pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-
-		if (ok == pl_success)
-			unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-		return ok;
+		return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	}
 
 	// Retry takes a copy
@@ -3402,12 +3393,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	q->tmpq[q->st.qnbr] = NULL;
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
-	pl_status ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
-
-	if (ok == pl_success)
-		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-	return ok;
+	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
 static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
