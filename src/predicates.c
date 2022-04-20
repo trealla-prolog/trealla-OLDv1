@@ -4591,8 +4591,8 @@ static USE_RESULT pl_status fn_yield_0(query *q)
 
 static USE_RESULT pl_status fn_task_n(query *q)
 {
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+	pl_idx_t save_hp = q->st.hp;
+	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_ptr_error(clone_to_tmp(q, p1));
@@ -4616,6 +4616,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
+	q->st.hp = save_hp;
 	cell *tmp = clone_to_heap(q, false, tmp2, 0);
 	query *task = create_sub_query(q, tmp);
 	task->yielded = task->spawned = true;
