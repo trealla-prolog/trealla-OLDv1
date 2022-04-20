@@ -17,7 +17,6 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 
 void clear_rule(clause *t);
 void do_reduce(cell *n);
-void fix_list(cell *c);
 bool check_if_rule(const cell *c);
 cell *get_head(cell *c);
 cell *get_body(cell *c);
