@@ -138,6 +138,12 @@ struct cycle_info_ {
 	printf("\n");									\
 }
 
+#define CHECK_INTERRUPT()							\
+	if (g_tpl_interrupt) {							\
+		if (check_interrupt(q))						\
+			break;									\
+	}
+
 inline static pl_status make_cstring(cell *d, const char *s)
 {
 	return make_cstringn(d, s, strlen(s));
