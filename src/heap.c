@@ -314,11 +314,6 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	q->pl->tab_idx = 0;
 	q->cycle_error = false;
 
-	if (is_variable(p1)) {
-		p1 = deref(q, p1, p1_ctx);
-		p1_ctx = q->latest_ctx;
-	}
-
 	reflist nlist = {0};
 	nlist.ptr = p1;
 	nlist.ctx = p1_ctx;
@@ -351,7 +346,6 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 		q->lists_ok = false;
 
 	frame *f = GET_CURR_FRAME();
-	q->st.m->pl->varno = f->nbr_vars;
 	q->st.m->pl->varno = f->nbr_vars;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	q->pl->tab_idx = 0;
