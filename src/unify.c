@@ -87,11 +87,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		LIST_HANDLER(p2);
 
 		while (is_list(p1) && is_list(p2)) {
-			if (g_tpl_interrupt) {
-				if (check_interrupt(q))
-					break;
-			}
-
+			CHECK_INTERRUPT();
 			cell *h1 = LIST_HEAD(p1);
 			h1 = deref(q, h1, p1_ctx);
 			pl_idx_t h1_ctx = q->latest_ctx;
@@ -247,11 +243,7 @@ static void collect_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	LIST_HANDLER(l);
 
 	while (is_iso_list(l)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *c = LIST_HEAD(l);
 		pl_idx_t c_ctx = l_ctx;
 
@@ -310,10 +302,7 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	p1++;
 
 	while (arity--) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		if (is_variable(p1)) {
 			const frame *f = GET_FRAME(p1_ctx);
@@ -356,11 +345,7 @@ static bool has_list_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	LIST_HANDLER(l);
 
 	while (is_iso_list(l)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *c = LIST_HEAD(l);
 		pl_idx_t c_ctx = l_ctx;
 
@@ -418,11 +403,7 @@ static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	p1++;
 
 	while (arity--) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
@@ -467,11 +448,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	unsigned depth = 0;
 
 	while (is_iso_list(l)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *c = LIST_HEAD(l);
 		pl_idx_t c_ctx = l_ctx;
 
@@ -533,11 +510,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	unsigned depth2 = 0;
 
 	while (is_iso_list(l)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		l = LIST_TAIL(l);
 
 		if (is_variable(l)) {
@@ -569,10 +542,7 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 	p1++;
 
 	while (arity--) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		if (is_variable(p1)) {
 			const frame *f = GET_FRAME(p1_ctx);
@@ -679,10 +649,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	int power = 1;
 
 	while (!done) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
@@ -730,10 +697,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	pl_int_t len = 0;
 
 	while (true) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		if ((fast == slow) && (fast_ctx == slow_ctx))
 			break;
@@ -875,10 +839,7 @@ static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, 
 	LIST_HANDLER(p2);
 
 	while (is_list(p1) && is_iso_list(p2)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		cell *c1 = LIST_HEAD(p1);
 		cell *c2 = LIST_HEAD(p2);
@@ -984,11 +945,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 	LIST_HANDLER(p2);
 
 	while (is_iso_list(p1) && is_iso_list(p2)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *h1 = LIST_HEAD(p1);
 		h1 = deref(q, h1, p1_ctx);
 		pl_idx_t h1_ctx = q->latest_ctx;
@@ -1057,11 +1014,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	p1++; p2++;
 
 	while (arity--) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *c1 = deref(q, p1, p1_ctx);
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
