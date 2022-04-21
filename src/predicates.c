@@ -2000,7 +2000,8 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause2->next;
+			db_entry *dbe = q->st.curr_clause2;
+			bool last_match = !dbe->next || (dbe->owner->cnt <= 1);
 			stash_me(q, r, last_match);
 			return pl_success;
 		}
@@ -3504,7 +3505,8 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 
 		if (ok) {
 			if (is_variable(p3)) {
-				bool last_match = !q->st.curr_clause2->next;
+				db_entry *dbe = q->st.curr_clause2;
+				bool last_match = !dbe->next || (dbe->owner->cnt <= 1);
 				stash_me(q, r, last_match);
 			}
 
