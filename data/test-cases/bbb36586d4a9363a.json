@@ -1,0 +1,55 @@
+{
+  "uid" : "bbb36586d4a9363a",
+  "name" : "roles_08",
+  "fullName" : "roles_08::tests",
+  "historyId" : "roles_08::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/roles/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/roles/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/roles/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/roles/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "59-61"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/3e0a7ee07316a931167ab83232cb0609de96154e/examples/roles/tests.lgt#L59"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "bbb36586d4a9363a.json",
+  "parameterValues" : [ "examples/roles/tests.lgt", "59-61", "https://github.com/LogtalkDotOrg/logtalk3/tree/3e0a7ee07316a931167ab83232cb0609de96154e/examples/roles/tests.lgt#L59" ]
+}
