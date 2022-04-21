@@ -150,6 +150,7 @@ static bool is_in_ref_list2(cell *c, pl_idx_t c_ctx, reflist *rlist)
 static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, reflist *list)
 {
 	if (depth >= MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}
@@ -459,6 +460,7 @@ cell *deep_copy_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bo
 cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 {
 	if (depth >= MAX_DEPTH) {
+		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
 		return ERR_CYCLE_CELL;
 	}

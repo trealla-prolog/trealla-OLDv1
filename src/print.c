@@ -462,11 +462,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		LIST_HANDLER(l);
 
 		while (is_iso_list(l)) {
-			if (g_tpl_interrupt) {
-				if (check_interrupt(q))
-					break;
-			}
-
+			CHECK_INTERRUPT();
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
@@ -677,10 +673,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
+		CHECK_INTERRUPT();
 
 		if (q->max_depth && (cnt++ >= q->max_depth)) {
 			dst--;
@@ -921,9 +914,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
-		cell *c1 = deref(q, c+1, c_ctx);
+		cell *c1 = c->arity ? deref(q, c+1, c_ctx) : NULL;
 
-		if (running && is_literal(c) && !strcmp(src, "$VAR")
+		if (running && is_literal(c) && !strcmp(src, "$VAR") && c1
 			&& q->numbervars && (!q->is_dump_vars || depth) && is_integer(c1)) {
 			dst += snprintf(dst, dstlen, "%s", varformat2(c1, q->nv_start));
 			return dst - save_dst;
@@ -935,11 +928,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			LIST_HANDLER(l);
 
 			while (is_iso_list(l)) {
-				if (g_tpl_interrupt) {
-					if (check_interrupt(q))
-						break;
-				}
-
+				CHECK_INTERRUPT();
 				cell *h = LIST_HEAD(l);
 				h = deref(q, h, l_ctx);
 				pl_idx_t h_ctx = q->latest_ctx;

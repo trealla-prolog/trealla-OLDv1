@@ -350,11 +350,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 
 	while (is_iso_list(l)
 		&& (q->st.m->flags.double_quote_chars || allow_codes)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *h = LIST_HEAD(l);
 		cell *c = deref(q, h, l_ctx);
 
@@ -1010,8 +1006,10 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (!cnt)
 		return f->nbr_vars;
 
-	if ((q->st.sp + cnt) > MAX_VARS)
+	if ((q->st.sp + cnt) > MAX_VARS) {
+		printf("*** Ooops %s %d\n", __FILE__, __LINE__);
 		return 0;
+	}
 
 	unsigned var_nbr = f->nbr_vars;
 
@@ -1063,9 +1061,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	if (c_attrs)
 		q->run_hook = true;
-
-	// The q->cp-1 is because we have to allow for the temporary
-	// choice-point we are in...
 
 	if (q->cp || c_attrs)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
@@ -1410,11 +1405,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 	LIST_HANDLER(l);
 
 	while (is_list(l)) {
-		if (g_tpl_interrupt) {
-			if (check_interrupt(q))
-				break;
-		}
-
+		CHECK_INTERRUPT();
 		cell *h = LIST_HEAD(l);
 		h = deref(q, h, l_ctx);
 		pl_idx_t h_ctx = q->latest_ctx;
