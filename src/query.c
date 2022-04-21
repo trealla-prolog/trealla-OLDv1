@@ -187,7 +187,7 @@ static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
 		if (m_is_next(q->st.iter))
-			return true;
+			return q->st.curr_clause->owner->cnt > 1;
 
 		q->st.iter = NULL;
 		return false;
