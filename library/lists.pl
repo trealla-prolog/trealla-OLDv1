@@ -4,7 +4,8 @@
 		append/2, append/3,
 		subtract/3, union/3, intersection/3,
 		nth1/3, nth0/3,
-		last/2, flatten/2, same_length/2, sum_list/2,
+		last/2, flatten/2, same_length/2,
+		sum_list/2, prod_list/2, max_list/2, min_list/2,
 		toconjunction/2, numlist/3,
 		length/2, length_checked/2,
 		reverse/2
@@ -116,9 +117,31 @@ flatten_(NonList, Tl, [NonList|Tl]).
 same_length([], []).
 same_length([_|As], [_|Bs]) :- same_length(As, Bs).
 
-sum_list(Ls, S) :- foldl(lists:sum_, Ls, 0, S).
-
+sum_list(Ls, S) :- foldl(sum_, Ls, 0, S).
 sum_(L, S0, S) :- S is S0 + L.
+
+prod_list(Ls, S) :- foldl(prod_, Ls, 0, S).
+prod_(L, S0, S) :- S is S0 * L.
+
+max_list([H|T], Max) :-
+	max_list_(T, H, Max).
+max_list([], _) :- fail.
+
+max_list_([], Max0, Max) :-
+	Max = Max0.
+max_list_([H|T], Max0, Max) :-
+	Max1 is max(H, Max0),
+	max_list_(T, Max1, Max).
+
+min_list([H|T], Min) :-
+	min_list_(T, H, Min).
+min_list([], _) :- fail.
+
+min_list_([], Min0, Min) :-
+	Min = Min0.
+min_list_([H|T], Min0, Min) :-
+	Min1 is min(H, Min0),
+	min_list_(T, Min1, Min).
 
 toconjunction(List0, Goal) :-
 	reverse(List0, List),

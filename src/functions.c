@@ -2471,7 +2471,7 @@ static USE_RESULT pl_status fn_sys_prob_1(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "less_than_one");
 
 	q->st.prob *= p1->val_real;
-	return rnd() < p1->val_real;
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_sys_get_prob_1(query *q)
