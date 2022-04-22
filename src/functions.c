@@ -2460,7 +2460,7 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_prob_1(query *q)
+static USE_RESULT pl_status fn_sys_prob_1(query *q)
 {
 	GET_FIRST_ARG(p1,real);
 
@@ -2471,11 +2471,10 @@ static USE_RESULT pl_status fn_prob_1(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "less_than_one");
 
 	q->st.prob *= p1->val_real;
-	q->st.prob_cnt++;
 	return rnd() < p1->val_real;
 }
 
-static USE_RESULT pl_status fn_get_prob_1(query *q)
+static USE_RESULT pl_status fn_sys_get_prob_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
@@ -2559,8 +2558,6 @@ const struct builtins g_functions_bifs[] =
 	{"rand", 1, fn_rand_1, "?integer", false},
 	{"random", 1, fn_random_1, "?integer", false},
 	{"random_between", 3, fn_random_between_3, "?integer,?integer,-integer", false},
-	{"prob", 1, fn_prob_1, "+real", false},
-	{"get_prob", 1, fn_get_prob_1, "-real", false},
 
 	// Functions...
 
@@ -2624,6 +2621,9 @@ const struct builtins g_functions_bifs[] =
 	{"random_float", 0, fn_random_float_0, NULL, true},
 	{"rand", 0, fn_rand_0, NULL, true},
 	{"gcd", 2, fn_gcd_2, "?integer,?integer", true},
+
+	{"$prob", 1, fn_sys_prob_1, "+real", false},
+	{"$get_prob", 1, fn_sys_get_prob_1, "-real", false},
 
 	{0}
 };

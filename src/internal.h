@@ -504,7 +504,7 @@ struct prolog_state_ {
 	miter *iter;
 	double prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
-	uint32_t curr_page, prob_cnt;
+	uint32_t curr_page;
 	uint8_t qnbr;
 	bool definite:1;
 	bool arg1_is_ground:1;
