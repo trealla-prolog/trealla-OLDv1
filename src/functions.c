@@ -2460,7 +2460,7 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_prob_1(query *q)
+static USE_RESULT pl_status fn_sys_set_prob_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	double p;
@@ -2488,7 +2488,7 @@ static USE_RESULT pl_status fn_sys_prob_1(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
 
 	if (p > 1.0)
-		return throw_error(q, p1, p1_ctx, "domain_error", "less_than_one");
+		return throw_error(q, p1, p1_ctx, "domain_error", "range_error");
 
 	q->st.prob *= p;
 	return pl_success;
@@ -2643,7 +2643,7 @@ const struct builtins g_functions_bifs[] =
 	{"rand", 0, fn_rand_0, NULL, true},
 	{"gcd", 2, fn_gcd_2, "?integer,?integer", true},
 
-	{"$prob", 1, fn_sys_prob_1, "+real", false},
+	{"$set_prob", 1, fn_sys_set_prob_1, "+real", false},
 	{"$get_prob", 1, fn_sys_get_prob_1, "-real", false},
 
 	{0}
