@@ -117,11 +117,23 @@ flatten_(NonList, Tl, [NonList|Tl]).
 same_length([], []).
 same_length([_|As], [_|Bs]) :- same_length(As, Bs).
 
-sum_list(Ls, S) :- foldl(sum_, Ls, 0, S).
-sum_(L, S0, S) :- S is S0 + L.
+sum_list(Xs, Sum) :-
+	sum_list_(Xs, 0, Sum).
 
-prod_list(Ls, S) :- foldl(prod_, Ls, 0, S).
-prod_(L, S0, S) :- S is S0 * L.
+sum_list_([], Sum0, Sum) :-
+	Sum = Sum0.
+sum_list_([X|Xs], Sum0, Sum) :-
+	Sum1 is Sum0 + X,
+	sum_list_(Xs, Sum1, Sum).
+
+prod_list(Xs, Prod) :-
+	prod_list_(Xs, 1, Prod).
+
+prod_list_([], Prod0, Prod) :-
+	Prod = Prod0.
+prod_list_([X|Xs], Prod0, Prod) :-
+	Prod1 is Prod0 * X,
+	prod_list_(Xs, Prod1, Prod).
 
 max_list([H|T], Max) :-
 	max_list_(T, H, Max).
