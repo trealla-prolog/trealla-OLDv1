@@ -2462,15 +2462,35 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 
 static USE_RESULT pl_status fn_sys_prob_1(query *q)
 {
-	GET_FIRST_ARG(p1,real);
+	GET_FIRST_ARG(p1,any);
+	double p;
 
-	if (p1->val_real < 0.0)
+	if (is_real(p1))
+		p = p1->val_real;
+	else if (is_smallint(p1))
+		p = p1->val_int;
+	else if (is_structure(p1) && (p1->arity == 2) && !strcmp(GET_STR(q, p1), "/")) {
+		cell *c1 = p1+1;
+
+		if (!is_smallint(c1))
+			return throw_error(q, p1, p1_ctx, "type_error", "integer");
+
+		cell *c2 = p1+2;
+
+		if (!is_smallint(c2))
+			return throw_error(q, p1, p1_ctx, "type_error", "integer");
+
+		p = (double)c1->val_int / c2->val_int;
+	} else
+		return throw_error(q, p1, p1_ctx, "type_error", "number");
+
+	if (p < 0.0)
 		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
 
-	if (p1->val_real > 1.0)
+	if (p > 1.0)
 		return throw_error(q, p1, p1_ctx, "domain_error", "less_than_one");
 
-	q->st.prob *= p1->val_real;
+	q->st.prob *= p;
 	return pl_success;
 }
 
@@ -2480,6 +2500,7 @@ static USE_RESULT pl_status fn_sys_get_prob_1(query *q)
 	cell tmp;
 	make_real(&tmp, q->st.prob);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	q->st.prob = 1.0;
 	return pl_success;
 }
 
