@@ -1763,6 +1763,8 @@ query *create_query(module *m, bool is_task)
 	q->flags = m->flags;
 	q->time_started = q->get_started = get_time_in_usec();
 	q->time_cpu_last_started = q->time_cpu_started = cpu_time_in_usec();
+	q->st.prob = 1.0;
+	q->st.prob_cnt = 0;
 	mp_int_init(&q->tmp_ival);
 
 	// Allocate these now...

@@ -2460,6 +2460,30 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_prob_1(query *q)
+{
+	GET_FIRST_ARG(p1,real);
+
+	if (p1->val_real < 0.0)
+		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
+
+	if (p1->val_real > 1.0)
+		return throw_error(q, p1, p1_ctx, "domain_error", "less_than_one");
+
+	q->st.prob *= p1->val_real;
+	q->st.prob_cnt++;
+	return rnd() < p1->val_real;
+}
+
+static USE_RESULT pl_status fn_get_prob_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_real(&tmp, q->st.prob);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	return pl_success;
+}
+
 static pl_int_t gcd(pl_int_t num, pl_int_t remainder)
 {
 	if (remainder == 0)
@@ -2535,6 +2559,8 @@ const struct builtins g_functions_bifs[] =
 	{"rand", 1, fn_rand_1, "?integer", false},
 	{"random", 1, fn_random_1, "?integer", false},
 	{"random_between", 3, fn_random_between_3, "?integer,?integer,-integer", false},
+	{"prob", 1, fn_prob_1, "+real", false},
+	{"get_prob", 1, fn_get_prob_1, "-real", false},
 
 	// Functions...
 

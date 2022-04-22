@@ -1632,37 +1632,6 @@ static void db_log(query *q, db_entry *dbe, enum log_type l)
 	q->quoted = 0;
 }
 
-pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
-{
-	cell *head = deref(q, get_head(p1), p1_ctx);
-
-	if (is_variable(head))
-		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
-
-	if (!is_callable(head))
-		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
-
-	pl_status match;
-
-	if (check_if_rule(p1))
-		match = match_rule(q, p1, p1_ctx);
-	else
-		match = match_clause(q, p1, p1_ctx, is_retract);
-
-	if ((match != pl_success) || q->did_throw)
-		return match;
-
-	db_entry *dbe = q->st.curr_clause2;
-	bool last_match = (!dbe->next || !more_data(dbe->owner)) && (is_retract == DO_RETRACT);
-	stash_me(q, &dbe->cl, last_match);
-
-	if (!q->st.m->loading && dbe->owner->is_persist)
-		db_log(q, dbe, LOG_ERASE);
-
-	add_to_dirty_list(q->st.m, dbe);
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_arg_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -2012,6 +1981,37 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	}
 
 	return pl_failure;
+}
+
+pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
+{
+	cell *head = deref(q, get_head(p1), p1_ctx);
+
+	if (is_variable(head))
+		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!is_callable(head))
+		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
+
+	pl_status match;
+
+	if (check_if_rule(p1))
+		match = match_rule(q, p1, p1_ctx);
+	else
+		match = match_clause(q, p1, p1_ctx, is_retract);
+
+	if ((match != pl_success) || q->did_throw)
+		return match;
+
+	db_entry *dbe = q->st.curr_clause2;
+	bool last_match = (!dbe->next || !more_data(dbe->owner)) && (is_retract == DO_RETRACT);
+	stash_me(q, &dbe->cl, last_match);
+
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ERASE);
+
+	add_to_dirty_list(q->st.m, dbe);
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_retract_1(query *q)

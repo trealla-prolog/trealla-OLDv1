@@ -502,8 +502,9 @@ struct prolog_state_ {
 	predicate *pr, *pr2;
 	module *m;
 	miter *iter;
+	double prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
-	uint32_t curr_page;
+	uint32_t curr_page, prob_cnt;
 	uint8_t qnbr;
 	bool definite:1;
 	bool arg1_is_ground:1;
