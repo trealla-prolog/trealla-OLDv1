@@ -183,11 +183,16 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
+bool more_data(const predicate *pr)
+{
+	return (pr->cnt > 1) || (pr->ref_cnt > 1);
+}
+
 static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
 		if (m_is_next(q->st.iter))
-			return true;
+			return more_data(q->st.curr_clause->owner);
 
 		q->st.iter = NULL;
 		return false;
@@ -646,7 +651,7 @@ void share_predicate(predicate *pr)
 	if (!pr)
 		return;
 
-	pr->use_cnt++;
+	pr->ref_cnt++;
 }
 
 void unshare_predicate(query *q, predicate *pr)
@@ -654,7 +659,7 @@ void unshare_predicate(query *q, predicate *pr)
 	if (!pr)
 		return;
 
-	if (--pr->use_cnt != 0)
+	if (--pr->ref_cnt != 0)
 		return;
 
 	if (!pr->dirty_list)
@@ -1758,6 +1763,7 @@ query *create_query(module *m, bool is_task)
 	q->flags = m->flags;
 	q->time_started = q->get_started = get_time_in_usec();
 	q->time_cpu_last_started = q->time_cpu_started = cpu_time_in_usec();
+	q->st.prob = 1.0;
 	mp_int_init(&q->tmp_ival);
 
 	// Allocate these now...

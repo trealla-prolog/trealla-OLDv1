@@ -36,6 +36,7 @@ pl_status do_post_unification_hook(query *q, bool is_builtin);
 bool check_redo(query *q);
 void dump_vars(query *q, bool partial);
 int check_interrupt(query *q);
+bool more_data(const predicate *pr);
 
 bool find_exception_handler(query *q, cell *e);
 pl_status throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected);

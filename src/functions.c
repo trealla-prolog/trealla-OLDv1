@@ -2460,6 +2460,50 @@ static USE_RESULT pl_status fn_rand_1(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_set_prob_1(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	double p;
+
+	if (is_real(p1))
+		p = p1->val_real;
+	else if (is_smallint(p1))
+		p = p1->val_int;
+	else if (is_structure(p1) && (p1->arity == 2) && !strcmp(GET_STR(q, p1), "/")) {
+		cell *c1 = p1+1;
+
+		if (!is_smallint(c1))
+			return throw_error(q, p1, p1_ctx, "type_error", "integer");
+
+		cell *c2 = p1+2;
+
+		if (!is_smallint(c2))
+			return throw_error(q, p1, p1_ctx, "type_error", "integer");
+
+		p = (double)c1->val_int / c2->val_int;
+	} else
+		return throw_error(q, p1, p1_ctx, "type_error", "number");
+
+	if (p < 0.0)
+		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
+
+	if (p > 1.0)
+		return throw_error(q, p1, p1_ctx, "domain_error", "range_error");
+
+	q->st.prob *= p;
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_sys_get_prob_1(query *q)
+{
+	GET_FIRST_ARG(p1,variable);
+	cell tmp;
+	make_real(&tmp, q->st.prob);
+	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	q->st.prob = 1.0;
+	return pl_success;
+}
+
 static pl_int_t gcd(pl_int_t num, pl_int_t remainder)
 {
 	if (remainder == 0)
@@ -2598,6 +2642,9 @@ const struct builtins g_functions_bifs[] =
 	{"random_float", 0, fn_random_float_0, NULL, true},
 	{"rand", 0, fn_rand_0, NULL, true},
 	{"gcd", 2, fn_gcd_2, "?integer,?integer", true},
+
+	{"$set_prob", 1, fn_sys_set_prob_1, "+real", false},
+	{"$get_prob", 1, fn_sys_get_prob_1, "-real", false},
 
 	{0}
 };

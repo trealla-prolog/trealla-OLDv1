@@ -419,7 +419,7 @@ struct predicate_ {
 	map *idx, *idx_save;
 	db_entry *dirty_list;
 	cell key;
-	uint64_t cnt, use_cnt, db_id;
+	uint64_t cnt, ref_cnt, db_id;
 	bool is_prebuilt:1;
 	bool is_public:1;
 	bool is_dynamic:1;
@@ -502,6 +502,7 @@ struct prolog_state_ {
 	predicate *pr, *pr2;
 	module *m;
 	miter *iter;
+	double prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
 	uint8_t qnbr;

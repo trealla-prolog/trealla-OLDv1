@@ -1231,15 +1231,18 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		p->do_read_term = false;
 
 		if (q->did_throw) {
+			p->srcptr = NULL;
 			free(tmpbuf);
 			return ok;
 		}
 
 		if (!is_number(&p->v) || *p->srcptr) {
+			p->srcptr = NULL;
 			free(tmpbuf);
 			return throw_error(q, orig_p2, p2_ctx, "syntax_error", p->error?p->error_desc:"number");
 		}
 
+		p->srcptr = NULL;
 		free(tmpbuf);
 		cell tmp = p->v;
 		pl_status ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -1632,37 +1635,6 @@ static void db_log(query *q, db_entry *dbe, enum log_type l)
 	q->quoted = 0;
 }
 
-pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
-{
-	cell *head = deref(q, get_head(p1), p1_ctx);
-
-	if (is_variable(head))
-		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
-
-	if (!is_callable(head))
-		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
-
-	pl_status match;
-
-	if (check_if_rule(p1))
-		match = match_rule(q, p1, p1_ctx);
-	else
-		match = match_clause(q, p1, p1_ctx, is_retract);
-
-	if ((match != pl_success) || q->did_throw)
-		return match;
-
-	db_entry *dbe = q->st.curr_clause2;
-	bool last_match = !dbe->next && (is_retract == DO_RETRACT);
-	stash_me(q, &dbe->cl, last_match);
-
-	if (!q->st.m->loading && dbe->owner->is_persist)
-		db_log(q, dbe, LOG_ERASE);
-
-	add_to_dirty_list(q->st.m, dbe);
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_iso_arg_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -2000,7 +1972,8 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			bool last_match = !q->st.curr_clause2->next;
+			db_entry *dbe = q->st.curr_clause2;
+			bool last_match = !dbe->next || !more_data(dbe->owner);
 			stash_me(q, r, last_match);
 			return pl_success;
 		}
@@ -2011,6 +1984,37 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 	}
 
 	return pl_failure;
+}
+
+pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
+{
+	cell *head = deref(q, get_head(p1), p1_ctx);
+
+	if (is_variable(head))
+		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!is_callable(head))
+		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
+
+	pl_status match;
+
+	if (check_if_rule(p1))
+		match = match_rule(q, p1, p1_ctx);
+	else
+		match = match_clause(q, p1, p1_ctx, is_retract);
+
+	if ((match != pl_success) || q->did_throw)
+		return match;
+
+	db_entry *dbe = q->st.curr_clause2;
+	bool last_match = (!dbe->next || !more_data(dbe->owner)) && (is_retract == DO_RETRACT);
+	stash_me(q, &dbe->cl, last_match);
+
+	if (!q->st.m->loading && dbe->owner->is_persist)
+		db_log(q, dbe, LOG_ERASE);
+
+	add_to_dirty_list(q->st.m, dbe);
+	return pl_success;
 }
 
 static USE_RESULT pl_status fn_iso_retract_1(query *q)
@@ -3504,7 +3508,8 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 
 		if (ok) {
 			if (is_variable(p3)) {
-				bool last_match = !q->st.curr_clause2->next;
+				db_entry *dbe = q->st.curr_clause2;
+				bool last_match = !dbe->next || !more_data(dbe->owner);
 				stash_me(q, r, last_match);
 			}
 
