@@ -126,7 +126,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	may_ptr_error(p0);
 
 	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "list");
+		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_ptr_error(clone_to_tmp(q, p1));

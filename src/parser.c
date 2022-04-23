@@ -3224,7 +3224,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 bool run(parser *p, const char *pSrc, bool dump)
 {
-
 	if ((*pSrc == '.') && !pSrc[1]) {
 		fprintf(stdout, "Error: syntax error, unexpected end of rule\n");
 		return false;
@@ -3245,8 +3244,6 @@ bool run(parser *p, const char *pSrc, bool dump)
 		p->one_shot = true;
 		p->consulting = false;
 
-		//printf("*** '%s'\n", p->srcptr);
-
 		if (!tokenize(p, false, false))
 			break;
 
@@ -3257,16 +3254,23 @@ bool run(parser *p, const char *pSrc, bool dump)
 
 		if (p->error) {
 			p->pl->did_dump_vars = true;
+			p->srcptr = NULL;
+			ASTRING_free(src);
 			return false;
 		}
 
 		if (p->skip) {
 			p->m->pl->status = true;
+			p->srcptr = NULL;
+			ASTRING_free(src);
 			return true;
 		}
 
-		if (!analyze(p, 0, true))
+		if (!analyze(p, 0, true)) {
+			p->srcptr = NULL;
+			ASTRING_free(src);
 			return false;
+		}
 
 		term_assign_vars(p, 0, false);
 
@@ -3276,7 +3280,13 @@ bool run(parser *p, const char *pSrc, bool dump)
 		xref_rule(p->m, p->cl, NULL);
 
 		query *q = create_query(p->m, false);
-		if (!q) return false;
+
+		if (!q) {
+			p->srcptr = NULL;
+			ASTRING_free(src);
+			return false;
+		}
+
 		q->p = p;
 		q->do_dump_vars = dump;
 		q->run_init = p->run_init;
@@ -3305,6 +3315,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 			break;
 	}
 
+	p->srcptr = NULL;
 	ASTRING_free(src);
 	return ok;
 }

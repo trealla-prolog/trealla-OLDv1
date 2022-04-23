@@ -1399,8 +1399,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 
 		if (!load_file(q->p->m, s, false)) {
 			free(s);
-			pl_status ok = throw_error(q, l, q->st.curr_frame, "existence_error", "source_sink");
-			return ok;
+			return throw_error(q, l, q->st.curr_frame, "existence_error", "source_sink");
 		}
 
 		free(s);
@@ -1422,9 +1421,8 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 			char *s = DUP_SLICE(q, h);
 
 			if (!load_file(q->p->m, s, false)) {
-				pl_status ok = throw_error(q, h, q->st.curr_frame, "existence_error", "source_sink");
 				free(s);
-				return ok;
+				return throw_error(q, h, q->st.curr_frame, "existence_error", "source_sink");
 			}
 
 			free(s);
