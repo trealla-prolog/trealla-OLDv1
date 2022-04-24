@@ -201,9 +201,17 @@ static bool can_view(const frame *f, const db_entry *dbe)
 
 static bool is_next_key(query *q, clause *r)
 {
+	const frame *f = GET_CURR_FRAME();
+
 	if (q->st.iter) {
-		if (m_is_next(q->st.iter))
-			return more_data(q->st.curr_clause->owner);
+		db_entry *next;
+
+		while (m_is_next(q->st.iter, (void*)&next)) {
+			if (can_view(f, next))
+				return true;
+
+			m_next(q->st.iter, (void*)&next);
+		}
 
 		q->st.iter = NULL;
 		return false;
@@ -222,7 +230,6 @@ static bool is_next_key(query *q, clause *r)
 		return false;
 
 	db_entry *next = q->st.curr_clause->next;
-	const frame *f = GET_CURR_FRAME();
 
 	while (next && !can_view(f, next))
 		next = next->next;
