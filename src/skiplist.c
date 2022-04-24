@@ -478,13 +478,16 @@ sliter *sl_first(skiplist *l)
 	return iter;
 }
 
-bool sl_is_next(sliter *iter)
+bool sl_is_next(sliter *iter, void **val)
 {
 	if (!iter)
 		return false;
 
 	while (iter->p) {
 		if (iter->idx < iter->p->nbr) {
+			if (val)
+				*val = iter->p->bkt[iter->idx].val;
+
 			return true;
 		}
 

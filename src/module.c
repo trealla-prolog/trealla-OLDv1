@@ -828,6 +828,9 @@ static void check_rule(module *m, db_entry *dbe)
 		p3 = p2 + p2->nbr_cells;
 
 	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+		if (dbe->cl.ugen_erased)
+			continue;
+
 		if (!me) {
 			if (&dbe->cl == r)
 				me = true;
@@ -1032,7 +1035,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, false);
 
-	if (!consulting && 0)
+	if (!consulting && (pr->cnt > 1))
 		check_rule(m, dbe);
 
 	return dbe;

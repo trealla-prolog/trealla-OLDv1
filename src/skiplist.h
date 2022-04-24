@@ -37,7 +37,7 @@ extern bool sl_is_next_key(sliter *i);
 extern bool sl_next_key(sliter *i, void **v);
 
 extern sliter *sl_first(skiplist *l);
-extern bool sl_is_next(sliter *i);
+extern bool sl_is_next(sliter *i, void **v);
 extern bool sl_next(sliter *i, void **v);
 
 extern size_t sl_iter_count(const sliter *i);
