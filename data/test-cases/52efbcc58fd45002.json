@@ -1,0 +1,55 @@
+{
+  "uid" : "52efbcc58fd45002",
+  "name" : "default_workflow_hook_02",
+  "fullName" : "default_workflow_hook_02::tests",
+  "historyId" : "default_workflow_hook_02::tests",
+  "time" : {
+    "duration" : 7
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/hook_objects/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/hook_objects/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/hook_objects/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/hook_objects/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "99-104"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2cddf9a5f8a505d4340b9c45bd636bfe50b5a7d9/library/hook_objects/tests.lgt#L99"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "52efbcc58fd45002.json",
+  "parameterValues" : [ "library/hook_objects/tests.lgt", "99-104", "https://github.com/LogtalkDotOrg/logtalk3/tree/2cddf9a5f8a505d4340b9c45bd636bfe50b5a7d9/library/hook_objects/tests.lgt#L99" ]
+}

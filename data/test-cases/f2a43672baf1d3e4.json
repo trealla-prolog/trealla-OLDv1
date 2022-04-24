@@ -1,0 +1,55 @@
+{
+  "uid" : "f2a43672baf1d3e4",
+  "name" : "planets_01",
+  "fullName" : "planets_01::tests",
+  "historyId" : "planets_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/planets/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/planets/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-41"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2cddf9a5f8a505d4340b9c45bd636bfe50b5a7d9/examples/planets/tests.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f2a43672baf1d3e4.json",
+  "parameterValues" : [ "examples/planets/tests.lgt", "40-41", "https://github.com/LogtalkDotOrg/logtalk3/tree/2cddf9a5f8a505d4340b9c45bd636bfe50b5a7d9/examples/planets/tests.lgt#L40" ]
+}
