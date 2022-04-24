@@ -188,6 +188,17 @@ bool more_data(const predicate *pr)
 	return (pr->cnt > 1) || (pr->ref_cnt > 1);
 }
 
+static bool can_view(const frame *f, const db_entry *dbe)
+{
+	if (dbe->cl.ugen_created > f->ugen)
+		return false;
+
+	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
+		return false;
+
+	return true;
+}
+
 static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
@@ -211,8 +222,9 @@ static bool is_next_key(query *q, clause *r)
 		return false;
 
 	db_entry *next = q->st.curr_clause->next;
+	const frame *f = GET_CURR_FRAME();
 
-	while (next && next->cl.ugen_erased)
+	while (next && !can_view(f, next))
 		next = next->next;
 
 	return next ? true : false;
@@ -1109,17 +1121,6 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
-static bool check_update_view(const frame *f, const db_entry *c)
-{
-	if (c->cl.ugen_created > f->ugen)
-		return false;
-
-	if (c->cl.ugen_erased && (c->cl.ugen_erased <= f->ugen))
-		return false;
-
-	return true;
-}
-
 // Match HEAD :- BODY.
 
 USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
@@ -1174,7 +1175,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (!check_update_view(f, q->st.curr_clause2))
+		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
 		clause *r = &q->st.curr_clause2->cl;
@@ -1276,7 +1277,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
-		if (!check_update_view(f, q->st.curr_clause2))
+		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
 		clause *r = &q->st.curr_clause2->cl;
@@ -1349,7 +1350,7 @@ static USE_RESULT pl_status match_head(query *q)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
-		if (!check_update_view(f, q->st.curr_clause))
+		if (!can_view(f, q->st.curr_clause))
 			continue;
 
 		clause *r = &q->st.curr_clause->cl;

@@ -959,8 +959,10 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx))
 			p2 = NULL;
 
-		if (!p1 || !p2)
+		if (!p1 || !p2) {
+			printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
+		}
 
 		if (!unify_internal(q, h1, h1_ctx, h2, h2_ctx, depth+1))
 			return false;
@@ -978,8 +980,10 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx))
 			p2 = NULL;
 
-		if (!p1 || !p2)
+		if (!p1 || !p2) {
+			printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
+		}
 	}
 
 	if (!p1 && !p2)
