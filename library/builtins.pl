@@ -423,8 +423,8 @@ iso_dif(X, Y) :-
         (   '$table_'(Goal)
         ->  true
         ;   assertz('$table_'(Goal), Ref),
-			once(Goal),
-            erase(Ref),
+			Goal,
+            (ground(Goal) -> erase(Ref) ; true),
             assertz('$table_'(Goal))
         ).
 
