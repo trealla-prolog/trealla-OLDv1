@@ -422,6 +422,7 @@ struct predicate_ {
 	uint64_t cnt, ref_cnt, db_id;
 	bool is_prebuilt:1;
 	bool is_public:1;
+	bool is_table:1;
 	bool is_dynamic:1;
 	bool is_meta_predicate:1;
 	bool is_persist:1;

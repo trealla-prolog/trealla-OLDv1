@@ -33,6 +33,7 @@ db_entry *find_in_db(module *m, uuid *ref);
 db_entry *erase_from_db(module *m, uuid *ref);
 
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity);
+void set_table_in_db(module *m, const char *name, unsigned arity);
 void set_dynamic_in_db(module *m, const char *name, unsigned arity);
 void set_meta_predicate_in_db(module *m, cell *c);
 void set_persist_in_db(module *m, const char *name, unsigned arity);

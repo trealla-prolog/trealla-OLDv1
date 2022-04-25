@@ -30,7 +30,7 @@ predicate_property(P, A) :-
 predicate_property(P, A) :-
 	'$load_properties',
 	(	var(A) -> true
-	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
+	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,tabled,persist,multifile,meta_predicate(_)],
 			memberchk(A, Controls)) -> true
 		;	throw(error(domain_error(predicate_property, A), P))
 		)
@@ -415,6 +415,18 @@ iso_dif(X, Y) :-
 	( X \= Y -> true
 	; throw(error(instantiation_error,iso_dif/2))
 	).
+
+:- meta_predicate('$table'(0)).
+:- dynamic('$table_'/1).
+
+'$table'(Goal) :-
+        (   '$table_'(Goal)
+        ->  true
+        ;   assertz('$table_'(Goal), Ref),
+			once(Goal),
+            erase(Ref),
+            assertz('$table_'(Goal))
+        ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible

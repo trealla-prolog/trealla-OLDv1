@@ -170,7 +170,7 @@ void clear_rule(clause *cl)
 
 static bool make_room(parser *p)
 {
-	if (p->cl->cidx >= p->cl->nbr_cells) {
+	while (p->cl->cidx >= p->cl->nbr_cells) {
 		pl_idx_t nbr_cells = p->cl->nbr_cells * 3 / 2;
 
 		clause *cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*nbr_cells));
@@ -617,6 +617,7 @@ static void directives(parser *p, cell *d)
 				|| !strcmp(name, "terms")
 				|| !strcmp(name, "types")
 				|| !strcmp(name, "iso_ext")
+				|| !strcmp(name, "tabling")
 				|| !strcmp(name, "files"))
 				return;
 
@@ -757,8 +758,6 @@ static void directives(parser *p, cell *d)
 			cell tmp = *c_name;
 			tmp.arity = arity;
 
-			//printf("*** %s => %s / %u\n", dirname, GET_STR(p, c_name), arity);
-
 			if (!strcmp(dirname, "dynamic")) {
 				predicate * pr = find_predicate(p->m, &tmp);
 
@@ -783,6 +782,9 @@ static void directives(parser *p, cell *d)
 				}
 
 				set_persist_in_db(p->m, GET_STR(p, c_name), arity);
+			} else if (!strcmp(dirname, "public")) {
+			} else if (!strcmp(dirname, "table")) {
+				set_table_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
@@ -816,8 +818,6 @@ static void directives(parser *p, cell *d)
 	if (is_nil(p1))
 		return;
 
-	//printf("*** %s\n", dirname);
-
 	while (is_literal(p1) && !g_tpl_interrupt) {
 		module *m = p->m;
 		cell *c_id = p1;
@@ -838,8 +838,6 @@ static void directives(parser *p, cell *d)
 			cell tmp = *c_name;
 			tmp.arity = arity;
 
-			//printf("*** *** *** %s : %s / %u\n", m->name, GET_STR(p, c_name), arity);
-
 			if (!strcmp(GET_STR(p, c_id), "//"))
 				arity += 2;
 
@@ -847,6 +845,10 @@ static void directives(parser *p, cell *d)
 				set_multifile_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(m, GET_STR(p, c_name), arity);
+			else if (!strcmp(dirname, "public"))
+				;
+			else if (!strcmp(dirname, "table"))
+				set_table_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "dynamic")) {
 				predicate * pr = find_predicate(p->m, &tmp);
 
@@ -1557,8 +1559,9 @@ static bool term_expansion(parser *p)
 	return term_expansion(p);
 }
 
-static cell *insert_here(parser *p, cell *c, cell *p1)
+static cell *insert_call_here(parser *p, cell *c, cell *p1)
 {
+	unsigned save_nbr_cells = p1->nbr_cells;
 	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
 	make_room(p);
 
@@ -1574,7 +1577,32 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = fn_iso_call_n;
 	p1->val_off = g_call_s;
-	p1->nbr_cells = 2;
+	p1->nbr_cells = 1 + save_nbr_cells;
+	p1->arity = 1;
+
+	p->cl->cidx++;
+	return p->cl->cells + c_idx;
+}
+
+static cell *insert_table_here(parser *p, cell *c, cell *p1)
+{
+	unsigned save_nbr_cells = p1->nbr_cells;
+	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
+	make_room(p);
+
+	cell *last = p->cl->cells + (p->cl->cidx - 1);
+	pl_idx_t cells_to_move = p->cl->cidx - p1_idx;
+	cell *dst = last + 1;
+
+	while (cells_to_move--)
+		*dst-- = *last--;
+
+	p1 = p->cl->cells + p1_idx;
+	p1->tag = TAG_LITERAL;
+	p1->flags = 0;
+	p1->fn = NULL;
+	p1->val_off = g_sys_table_s;
+	p1->nbr_cells = 1 + save_nbr_cells;
 	p1->arity = 1;
 
 	p->cl->cidx++;
@@ -1615,25 +1643,36 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			|| (c->val_off == g_if_then_s)
 			|| (c->val_off == g_soft_cut_s)
 			|| (c->val_off == g_neck_s)) {
+			cell *save_c = c;
 			cell *lhs = c + 1;
-			bool norhs = false;
-
-			//if (c->val_off == g_soft_cut_s)
-			//	norhs = true;
 
 			if (is_variable(lhs)) {
-				c = insert_here(p, c, lhs);
+				c = insert_call_here(p, c, lhs);
 				lhs = c + 1;
-			} else
-				lhs = term_to_body_conversion(p, lhs);
+			} else {
+				predicate *pr = find_predicate(p->m, lhs);
+
+				if (pr && pr->is_table && (save_c->val_off != g_neck_s)) {
+					c = insert_table_here(p, c, lhs);
+					lhs = c + 1;
+				} else
+					lhs = term_to_body_conversion(p, lhs);
+			}
 
 			cell *rhs = lhs + lhs->nbr_cells;
 			c = p->cl->cells + c_idx;
 
-			if (is_variable(rhs) && !norhs)
-				c = insert_here(p, c, rhs);
-			else
+			if (is_variable(rhs))
+				c = insert_call_here(p, c, rhs);
+			else {
+				predicate *pr = find_predicate(p->m, rhs);
+
+				if (pr && pr->is_table) {
+					c = insert_table_here(p, c, rhs);
+					rhs = c + 1;
+				} else
 				rhs = term_to_body_conversion(p, rhs);
+			}
 
 #if 0
 			if ((c->val_off != g_neck_s))
@@ -1648,13 +1687,21 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 
 	if (is_fy(c)) {
 		if (c->val_off == g_negation_s) {
+			cell *save_c = c;
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
-				c = insert_here(p, c, rhs);
+				c = insert_call_here(p, c, rhs);
 				rhs = c + 1;
-			} else
-				rhs = term_to_body_conversion(p, rhs);
+			} else {
+				predicate *pr = find_predicate(p->m, rhs);
+
+				if (pr && pr->is_table && (save_c->val_off != g_neck_s)) {
+					c = insert_table_here(p, c, rhs);
+					rhs = c + 1;
+				} else
+					rhs = term_to_body_conversion(p, rhs);
+			}
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
 		}

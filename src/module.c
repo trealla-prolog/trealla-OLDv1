@@ -28,7 +28,8 @@ static const op_table g_ops[] =
 	//{"multifile", OP_FX, 1150},
 	//{"attribute", OP_FX, 1150},
 	//{"op", OP_FX, 1150},
-	//{"dynamic", OP_FX, 1150},
+	{"table", OP_FX, 1150},
+	{"dynamic", OP_FX, 1150},
 	//{"persist", OP_FX, 1150},
 	//{"initialization", OP_FX, 1150},
 	//{"set_prolog_flag", OP_FX, 1150},
@@ -414,6 +415,23 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 	if (pr) {
 		push_property(m, name, arity, "multifile");
 		pr->is_multifile = true;
+	} else
+		m->error = true;
+}
+
+void set_table_in_db(module *m, const char *name, unsigned arity)
+{
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
+
+	if (pr) {
+		push_property(m, name, arity, "tabled");
+		pr->is_table = true;
 	} else
 		m->error = true;
 }
@@ -1208,7 +1226,7 @@ module *load_text(module *m, const char *src, const char *filename)
 			p->consulting = false;
 			p->command = true;
 			ASTRING(src);
-			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), (__G_ -> true ; format('Warning: call(~w) failed~n', [__G_])))", p->m->name);
+			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), ((__G_ -> true ; format('Warning: call(~w) failed~n', [__G_])), retractall('$table_'(_))))", p->m->name);
 
 			if (run(p, ASTRING_cstr(src), false))
 				p->m->pl->status = false;
@@ -1341,7 +1359,7 @@ module *load_fp(module *m, FILE *fp, const char *filename, bool including)
 			p->command = true;
 			p->consulting = false;
 			ASTRING(src);
-			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), (__G_ -> true ; format('Warning: call(~w) failed~n', [__G_])))", p->m->name);
+			ASTRING_sprintf(src, "forall(%s:retract((:- initialization(__G_))), ((__G_ -> true ; format('Warning: call(~w) failed~n', [__G_])), retractall('$table_'(_))))", p->m->name);
 
 			if (run(p, ASTRING_cstr(src), false))
 				p->m->pl->status = false;

@@ -5405,7 +5405,7 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	if (get_builtin(q->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
 		make_literal(&tmp, index_from_pool(q->pl, "built_in"));
 
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "predicate_property");
@@ -5415,61 +5415,67 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 	if (pr && !pr->is_dynamic && !is_variable(p2)) {
 		make_literal(&tmp, index_from_pool(q->pl, "built_in"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && pr->is_multifile) {
 		make_literal(&tmp, index_from_pool(q->pl, "multifile"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && pr->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->pl, "dynamic"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && !pr->is_dynamic) {
 		make_literal(&tmp, index_from_pool(q->pl, "static"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
+			return pl_success;
+	}
+
+	if (pr && pr->is_table) {
+		make_literal(&tmp, index_from_pool(q->pl, "tabled"));
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && pr->is_persist) {
 		make_literal(&tmp, index_from_pool(q->pl, "persist"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && pr->is_public) {
 		make_literal(&tmp, index_from_pool(q->pl, "public"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr && pr->is_public) {
 		make_literal(&tmp, index_from_pool(q->pl, "exported"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr) {
 		make_literal(&tmp, index_from_pool(q->pl, "static"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr) {
 		make_literal(&tmp, index_from_pool(q->pl, "meta_predicate"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
 	if (pr) {
 		make_literal(&tmp, index_from_pool(q->pl, "visible"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame))
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
 			return pl_success;
 	}
 
