@@ -66,7 +66,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	if (box == CALL)
 		box = q->retry?REDO:q->resume?NEXT:CALL;
 
-#if 0
+#if 1
 	const char *src = GET_STR(q, c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->") || !strcmp(src, "*->"))
