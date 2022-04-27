@@ -1,0 +1,55 @@
+{
+  "uid" : "a8074f7ce4b55e7e",
+  "name" : "parametric_10",
+  "fullName" : "parametric_10::tests",
+  "historyId" : "parametric_10::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/parametric/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/parametric/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "76-78"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/35670cba712d4e836657c2ec4d2cf571e44a0edd/examples/parametric/tests.lgt#L76"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a8074f7ce4b55e7e.json",
+  "parameterValues" : [ "examples/parametric/tests.lgt", "76-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/35670cba712d4e836657c2ec4d2cf571e44a0edd/examples/parametric/tests.lgt#L76" ]
+}
