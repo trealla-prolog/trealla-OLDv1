@@ -123,6 +123,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 	p2 = p2 + 1;
 
 	while (arity--) {
+		CHECK_INTERRUPT();
 		cell *c1 = deref(q, p1, p1_ctx);
 		pl_idx_t c1_ctx = q->latest_ctx;
 		cell *c2 = deref(q, p2, p2_ctx);
@@ -404,6 +405,7 @@ static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	while (arity--) {
 		CHECK_INTERRUPT();
+
 		if (is_variable(p1)) {
 			frame *f = GET_FRAME(p1_ctx);
 			slot *e = GET_SLOT(f, p1->var_nbr);
