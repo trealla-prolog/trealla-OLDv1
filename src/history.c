@@ -10,9 +10,9 @@
 #else
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <termios.h>
 #endif
 
+#include <termios.h>
 
 #include "history.h"
 #include "utf8.h"
