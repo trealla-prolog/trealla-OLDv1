@@ -12,7 +12,9 @@
 #include <readline/history.h>
 #endif
 
+#ifndef _WIN32
 #include <termios.h>
+#endif
 
 #include "history.h"
 #include "utf8.h"
