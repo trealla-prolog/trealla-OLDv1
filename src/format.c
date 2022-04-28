@@ -498,6 +498,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
         {
 			int saveq = q->quoted;
 			bool canonical = false, quoted = false;
+			q->numbervars = true;
 
 			if (ch == 'k') {
 				canonical = true;
