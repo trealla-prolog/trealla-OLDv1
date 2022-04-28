@@ -1883,6 +1883,86 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
+static cell *do_term_singletons(query *q, cell *p1, pl_idx_t p1_ctx)
+{
+	frame *f = GET_CURR_FRAME();
+	q->pl->varno = f->nbr_vars;
+	collect_vars(q, p1, p1_ctx);
+	const unsigned cnt = q->pl->tab_idx;
+	unsigned cnt2 = 0;
+
+	if (cnt) {
+		for (unsigned i = 0; i < cnt; i++) {
+			if (q->pl->tabs[i].cnt != 1)
+				continue;
+
+			cnt2++;
+		}
+	}
+
+	if (!init_tmp_heap(q)) return NULL;
+	cell *tmp = alloc_on_tmp(q, (cnt2*2)+1);
+	ensure(tmp);
+	unsigned idx = 0;
+
+	if (cnt2) {
+		unsigned done = 0;
+
+		for (unsigned i = 0; i < cnt; i++) {
+			if (q->pl->tabs[i].cnt != 1)
+				continue;
+
+			make_literal(tmp+idx, g_dot_s);
+			tmp[idx].arity = 2;
+			tmp[idx].nbr_cells = ((cnt2-done)*2)+1;
+			idx++;
+			make_ref(tmp+idx, q->pl->tabs[i].ctx, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
+
+			if (q->pl->tabs[i].is_anon)
+				tmp[idx].flags |= FLAG_VAR_ANON;
+
+			idx++;
+			done++;
+		}
+
+		make_literal(tmp+idx++, g_nil_s);
+		tmp[0].arity = 2;
+		tmp[0].nbr_cells = idx;
+	} else
+		make_literal(tmp, g_nil_s);
+
+	return tmp;		// returns on tmp_heap
+}
+
+static USE_RESULT pl_status fn_term_singletons_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!is_variable(p1) && (is_atom(p1) || is_number(p1))) {
+		cell tmp;
+		make_literal(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	cell *tmp = do_term_singletons(q, p1, p1_ctx);
+
+	if (!tmp)
+		return throw_error(q, p1, p1_ctx, "resource_error", "out_of_memory");
+
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
+	may_ptr_error(tmp2);
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -6701,6 +6781,7 @@ static const struct builtins g_other_bifs[] =
 
 	{"sort", 4, fn_sort_4, NULL, false},
 
+	{"term_singletons", 2, fn_term_singletons_2, NULL, false},
 	{"pid", 1, fn_pid_1, "-integer", false},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false},
 	{"get_unbuffered_char", 1, fn_get_unbuffered_char_1, "?char", false},
