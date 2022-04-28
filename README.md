@@ -312,6 +312,7 @@ Non-standard predicates
 	term_expansion/2
 	goal_expansion/2			# TODO
 	cyclic_term/1
+	term_singletons/2
 	findall/4
 	sort/4
 	var_number/2

@@ -59,7 +59,7 @@ cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 {
 	pl_idx_t new_size = q->tmphp + nbr_cells;
 
-	if (new_size >= q->tmph_size) {
+	while (new_size >= q->tmph_size) {
 		size_t elements = alloc_grow((void**)&q->tmp_heap, sizeof(cell), new_size, (new_size*3)/2);
 		if (!elements) return NULL;
 		q->tmph_size = elements;
