@@ -1656,7 +1656,9 @@ static USE_RESULT pl_status fn_iso_write_1(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
+	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
+	q->numbervars = false;
 	return !ferror(str->fp);
 }
 
@@ -1677,6 +1679,7 @@ static USE_RESULT pl_status fn_iso_write_2(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
+	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->numbervars = false;
 	return !ferror(str->fp);
@@ -1957,6 +1960,7 @@ static USE_RESULT pl_status fn_iso_write_term_2(query *q)
 	}
 
 	q->flags = q->st.m->flags;
+	q->numbervars = false;
 	cell *p2_orig = p2, *vnames = NULL;
 	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx = 0;
 	LIST_HANDLER(p2);
@@ -2025,6 +2029,7 @@ static USE_RESULT pl_status fn_iso_write_term_3(query *q)
 	}
 
 	q->flags = q->st.m->flags;
+	q->numbervars = false;
 	cell *p2_orig = p2, *vnames = NULL;
 	pl_idx_t p2_orig_ctx = p2_ctx, vnames_ctx;
 	LIST_HANDLER(p2);

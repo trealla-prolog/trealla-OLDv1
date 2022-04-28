@@ -5476,8 +5476,6 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	return pl_failure;
 }
 
-// FIXME: rewrite this using efficient sweep/mark methodology...
-
 static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
 {
 	if (depth == MAX_DEPTH) {
@@ -5534,7 +5532,6 @@ static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int
 	p1++;
 
 	for (; arity--; p1 += p1->nbr_cells) {
-		CHECK_INTERRUPT();
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 
@@ -5559,7 +5556,6 @@ static USE_RESULT pl_status fn_numbervars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int end = 0;
-	q->numbervars = true;
 	q->pl->tab_idx = 0;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	m_allow_dups(q->pl->vars, false);
@@ -5574,7 +5570,6 @@ static USE_RESULT pl_status fn_numbervars_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 	int end = q->nv_start = get_int(p2);
-	q->numbervars = true;
 	q->pl->tab_idx = 0;
 	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
 	m_allow_dups(q->pl->vars, false);

@@ -916,8 +916,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
 		cell *c1 = c->arity ? deref(q, c+1, c_ctx) : NULL;
 
-		if (running && is_literal(c) && !strcmp(src, "$VAR") && c1
-			&& q->numbervars && (!q->is_dump_vars || depth) && is_integer(c1)) {
+		if (running && is_literal(c) && c->arity && !strcmp(src, "$VAR") && c1
+			&& q->numbervars && is_integer(c1) && q->nv_start != -1) {
 			dst += snprintf(dst, dstlen, "%s", varformat2(c1, q->nv_start));
 			return dst - save_dst;
 		}
