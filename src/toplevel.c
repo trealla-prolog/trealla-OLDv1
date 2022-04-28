@@ -26,6 +26,132 @@ static void msleep(int ms)
 }
 #endif
 
+
+int check_interrupt(query *q)
+{
+	signal(SIGINT, &sigfn);
+	g_tpl_interrupt = 0;
+
+	for (;;) {
+		printf("\nAction or (h)elp: ");
+
+		LOOP:
+
+		fflush(stdout);
+		int ch = history_getch();
+		printf("%c\n", ch);
+
+		if (ch == 'h') {
+			printf("Action (a)ll, (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
+			goto LOOP;
+		}
+
+		if (ch == 't') {
+			q->trace = !q->trace;
+			break;
+		}
+
+		if (ch == 'p') {
+			q->trace = q->creep = !q->creep;
+			break;
+		}
+
+		if ((ch == ';') || (ch == ' ') || (ch == 'r') || (ch == 'c')) {
+			break;
+		}
+
+		if (ch == '\n')
+			return -1;
+
+		if (ch == 'e') {
+			q->abort = true;
+			return 1;
+		}
+
+		if (ch == 'x') {
+			if (!q->run_init)
+				printf("\n");
+
+			signal(SIGINT, NULL);
+			q->halt = true;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+bool check_redo(query *q)
+{
+	if (q->do_dump_vars && q->cp) {
+		dump_vars(q, true);
+
+		if (!q->pl->did_dump_vars)
+			printf("   true");
+	}
+
+	fflush(stdout);
+
+	if (q->autofail) {
+		printf("\n; ");
+		fflush(stdout);
+		q->is_redo = true;
+		q->retry = QUERY_RETRY;
+		q->pl->did_dump_vars = false;
+		return false;
+	}
+
+	for (;;) {
+		printf("\n;");
+		fflush(stdout);
+		int ch = history_getch();
+
+		if ((ch == 'h') || (ch == '?')) {
+			printf("Action (a)ll, e(x)it, (r)etry, (e)nd:\n");
+			fflush(stdout);
+			continue;
+		}
+
+		if (ch == 'a') {
+			printf(" ");
+			fflush(stdout);
+			q->is_redo = true;
+			q->retry = QUERY_RETRY;
+			q->pl->did_dump_vars = false;
+			q->autofail = true;
+			break;
+		}
+
+		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
+			printf(" ");
+			fflush(stdout);
+			q->is_redo = true;
+			q->retry = QUERY_RETRY;
+			q->pl->did_dump_vars = false;
+			break;
+		}
+
+		if ((ch == '\n') || (ch == 'e')) {
+			//printf(";  ... .\n");
+			printf("  ... .\n");
+			q->pl->did_dump_vars = true;
+			q->abort = true;
+			return true;
+		}
+
+		if (ch == 'x') {
+			if (!q->run_init)
+				printf("\n");
+
+			signal(SIGINT, NULL);
+			q->error = q->halt = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 typedef struct item_ item;
 
 struct item_ {
@@ -218,6 +344,7 @@ void dump_vars(query *q, bool partial)
 		q->quoted = 1;
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
+		q->numbervars = true;
 		q->max_depth = 9;
 
 		print_term(q, stdout, c, c_ctx, 1);
@@ -225,6 +352,7 @@ void dump_vars(query *q, bool partial)
 		if (parens) fputc(')', stdout);
 		if (q->did_quote) space = false;
 		q->quoted = saveq;
+		q->numbervars = false;
 		any = true;
 	}
 
@@ -261,129 +389,3 @@ void dump_vars(query *q, bool partial)
 	clear_write_options(q);
 	clear_results();
 }
-
-int check_interrupt(query *q)
-{
-	signal(SIGINT, &sigfn);
-	g_tpl_interrupt = 0;
-
-	for (;;) {
-		printf("\nAction or (h)elp: ");
-
-		LOOP:
-
-		fflush(stdout);
-		int ch = history_getch();
-		printf("%c\n", ch);
-
-		if (ch == 'h') {
-			printf("Action (a)ll, (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
-			goto LOOP;
-		}
-
-		if (ch == 't') {
-			q->trace = !q->trace;
-			break;
-		}
-
-		if (ch == 'p') {
-			q->trace = q->creep = !q->creep;
-			break;
-		}
-
-		if ((ch == ';') || (ch == ' ') || (ch == 'r') || (ch == 'c')) {
-			break;
-		}
-
-		if (ch == '\n')
-			return -1;
-
-		if (ch == 'e') {
-			q->abort = true;
-			return 1;
-		}
-
-		if (ch == 'x') {
-			if (!q->run_init)
-				printf("\n");
-
-			signal(SIGINT, NULL);
-			q->halt = true;
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
-bool check_redo(query *q)
-{
-	if (q->do_dump_vars && q->cp) {
-		dump_vars(q, true);
-
-		if (!q->pl->did_dump_vars)
-			printf("   true");
-	}
-
-	fflush(stdout);
-
-	if (q->autofail) {
-		printf("\n; ");
-		fflush(stdout);
-		q->is_redo = true;
-		q->retry = QUERY_RETRY;
-		q->pl->did_dump_vars = false;
-		return false;
-	}
-
-	for (;;) {
-		printf("\n;");
-		fflush(stdout);
-		int ch = history_getch();
-
-		if ((ch == 'h') || (ch == '?')) {
-			printf("Action (a)ll, e(x)it, (r)etry, (e)nd:\n");
-			fflush(stdout);
-			continue;
-		}
-
-		if (ch == 'a') {
-			printf(" ");
-			fflush(stdout);
-			q->is_redo = true;
-			q->retry = QUERY_RETRY;
-			q->pl->did_dump_vars = false;
-			q->autofail = true;
-			break;
-		}
-
-		if ((ch == ' ') || (ch == ';') || (ch == 'r')) {
-			printf(" ");
-			fflush(stdout);
-			q->is_redo = true;
-			q->retry = QUERY_RETRY;
-			q->pl->did_dump_vars = false;
-			break;
-		}
-
-		if ((ch == '\n') || (ch == 'e')) {
-			//printf(";  ... .\n");
-			printf("  ... .\n");
-			q->pl->did_dump_vars = true;
-			q->abort = true;
-			return true;
-		}
-
-		if (ch == 'x') {
-			if (!q->run_init)
-				printf("\n");
-
-			signal(SIGINT, NULL);
-			q->error = q->halt = true;
-			return true;
-		}
-	}
-
-	return false;
-}
-
