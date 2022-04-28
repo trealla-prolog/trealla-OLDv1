@@ -1,0 +1,60 @@
+{
+  "uid" : "e3d898a76da7dc9",
+  "name" : "protocol_property_2_18",
+  "fullName" : "protocol_property_2_18::tests",
+  "historyId" : "protocol_property_2_18::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/predicates/protocol_property_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/predicates/protocol_property_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/predicates/protocol_property_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/predicates/protocol_property_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "144-145"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b73c84868313123f688e54ec8a35859b879ff366/tests/logtalk/predicates/protocol_property_2/tests.lgt#L144"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "e3d898a76da7dc9.json",
+  "parameterValues" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "144-145", "https://github.com/LogtalkDotOrg/logtalk3/tree/b73c84868313123f688e54ec8a35859b879ff366/tests/logtalk/predicates/protocol_property_2/tests.lgt#L144" ]
+}

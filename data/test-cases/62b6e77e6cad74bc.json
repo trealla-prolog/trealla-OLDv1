@@ -1,0 +1,55 @@
+{
+  "uid" : "62b6e77e6cad74bc",
+  "name" : "now_you_see_me_02",
+  "fullName" : "now_you_see_me_02::tests",
+  "historyId" : "now_you_see_me_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/now_you_see_me/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/now_you_see_me/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/now_you_see_me/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/now_you_see_me/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-42"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b73c84868313123f688e54ec8a35859b879ff366/examples/now_you_see_me/tests.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "62b6e77e6cad74bc.json",
+  "parameterValues" : [ "examples/now_you_see_me/tests.lgt", "40-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/b73c84868313123f688e54ec8a35859b879ff366/examples/now_you_see_me/tests.lgt#L40" ]
+}
