@@ -1,0 +1,55 @@
+{
+  "uid" : "74360e805217aef7",
+  "name" : "recipes_06",
+  "fullName" : "recipes_06::tests",
+  "historyId" : "recipes_06::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/recipes/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/recipes/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "52-54"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c12a9df28f110e1291e74e5f34be6085551bd5fc/examples/recipes/tests.lgt#L52"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "74360e805217aef7.json",
+  "parameterValues" : [ "examples/recipes/tests.lgt", "52-54", "https://github.com/LogtalkDotOrg/logtalk3/tree/c12a9df28f110e1291e74e5f34be6085551bd5fc/examples/recipes/tests.lgt#L52" ]
+}

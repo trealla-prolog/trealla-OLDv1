@@ -1,0 +1,55 @@
+{
+  "uid" : "807db7d527059f98",
+  "name" : "boyer_01",
+  "fullName" : "boyer_01::tests",
+  "historyId" : "boyer_01::tests",
+  "time" : {
+    "duration" : 260
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/bench/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "32-33"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c12a9df28f110e1291e74e5f34be6085551bd5fc/examples/bench/tests.lgt#L32"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "807db7d527059f98.json",
+  "parameterValues" : [ "examples/bench/tests.lgt", "32-33", "https://github.com/LogtalkDotOrg/logtalk3/tree/c12a9df28f110e1291e74e5f34be6085551bd5fc/examples/bench/tests.lgt#L32" ]
+}
