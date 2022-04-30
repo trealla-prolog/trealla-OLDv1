@@ -152,17 +152,18 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		convert_to_literal(q->st.m, tmp2);
 	}
 
+	const char *functor = GET_STR(q, tmp2);
 	bool found = false;
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+	} else if ((tmp2->fn = get_builtin(q->pl, functor, tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
 	unsigned specifier;
 
-	if (search_op(q->st.m, GET_STR(q, tmp2), &specifier, false))
+	if (search_op(q->st.m, functor, &specifier, false))
 		SET_OP(tmp2, specifier);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
