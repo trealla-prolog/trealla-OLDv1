@@ -86,8 +86,14 @@ bool check_redo(query *q)
 	if (q->do_dump_vars && q->cp) {
 		dump_vars(q, true);
 
-		if (!q->pl->did_dump_vars)
-			printf("   true");
+		if (!q->pl->did_dump_vars) {
+			if (q->is_redo)
+				printf(" ");
+			else
+				printf("   ");
+
+			printf("true");
+		}
 	}
 
 	fflush(stdout);

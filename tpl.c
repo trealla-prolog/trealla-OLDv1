@@ -322,8 +322,15 @@ int main(int ac, char *av[])
 		if (get_halt(pl))
 			break;
 
-		if (!get_dump_vars(pl))
-			printf(" %s.\n", get_status(pl) ? "true" : "false");
+		if (!get_dump_vars(pl)) {
+			if (get_redo(pl))
+				printf(" ");
+			else
+				printf("   ");
+		} else
+			printf("   ");
+
+		printf("%s.\n", get_status(pl) ? "true" : "false");
 	}
 
 	if (isatty(0))
