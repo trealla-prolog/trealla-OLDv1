@@ -1389,15 +1389,12 @@ static bool any_outstanding_choices(query *q)
 
 	choice *ch = GET_CURR_CHOICE();
 
-	for (;;) {
-		if (!ch->barrier)
-			break;
-
-		ch--;
+	while (ch->barrier) {
 		drop_choice(q);
+		ch--;
 	}
 
-	return q->cp;
+	return q->cp ? true : false;
 }
 
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
