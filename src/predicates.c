@@ -5193,10 +5193,6 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	mpz_t v2;
 	mp_int_init(&v2);
 	mp_small val;
-
-	if (!q->p)
-		q->p = create_parser(q->st.m);
-
 	read_integer(q->p, &v2, 16, s, &s);
 	free(src);
 	cell tmp = {0};
@@ -5250,10 +5246,6 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	mpz_t v2;
 	mp_int_init(&v2);
 	mp_small val;
-
-	if (!q->p)
-		q->p = create_parser(q->st.m);
-
 	read_integer(q->p, &v2, 16, s, &s);
 	free(src);
 	cell tmp = {0};
