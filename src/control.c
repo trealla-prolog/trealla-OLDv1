@@ -142,6 +142,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		arity++;
 	}
 
+	q->st.hp = save_hp;
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
