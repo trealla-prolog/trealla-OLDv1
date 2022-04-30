@@ -457,18 +457,17 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (is_variable(c)) {
 			const frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
+
+			if (e->mark) {
+				e->mark = false;
+				ret_val = true;
+				break;
+			}
+
+			e->mark = true;
+
 			c = deref(q, c, c_ctx);
 			c_ctx = q->latest_ctx;
-
-			if (!is_variable(c)) {
-				if (e->mark) {
-					e->mark = false;
-					ret_val = true;
-					break;
-				}
-
-				e->mark = true;
-			}
 
 			if (is_cyclic_term_internal(q, c, c_ctx)) {
 				e->mark = false;
@@ -492,15 +491,12 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (!is_variable(l)) {
-				if (e->mark) {
-					e->mark = false;
-					ret_val = true;
-					break;
-				}
-
-				e->mark = true;
+			if (e->mark) {
+				ret_val = true;
+				break;
 			}
+
+			e->mark = true;
 		}
 
 		depth++;
@@ -526,7 +522,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		l = deref(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 
-		if (depth2++ > depth)
+		if (depth2++ >= depth)
 			break;
 	}
 
