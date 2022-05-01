@@ -327,11 +327,9 @@ int main(int ac, char *av[])
 				printf(" ");
 			else
 				printf("   ");
-		} else if (!did_dump_vars(pl))
-			printf("   ");
 
-		if (!did_dump_vars(pl))
 			printf("%s.\n", get_status(pl) ? "true" : "false");
+		}
 	}
 
 	if (isatty(0))
