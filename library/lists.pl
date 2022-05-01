@@ -200,7 +200,7 @@ length(Xs0, N) :-
    ;  nonvar(Xs) -> var(N), Xs = [_|_], throw(error(resource_error(finite_memory),length/2))
    ;  nonvar(N) -> R is N-M, length_rundown(Xs2, R), Xs2=Xs
    ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
-   ;  length_addendum(Xs, N, M)
+   ;  length_addendum(Xs2, N, M), Xs = Xs2
    ).
 length(_, N) :-
    integer(N), !,
