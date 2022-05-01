@@ -1134,7 +1134,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		if (is_fx(c)) {
 			cell *rhs = c + 1;
 
-			if (is_fx(rhs) && (rhs->priority > c->priority)) {
+			if (is_fx(rhs) && !rhs->arity && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
