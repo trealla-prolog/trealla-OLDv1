@@ -981,7 +981,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 			p2 = NULL;
 
 		if (!p1 || !p2) {
-			printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+			//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
 		}
 	}
