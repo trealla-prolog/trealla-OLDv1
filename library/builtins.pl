@@ -416,18 +416,7 @@ iso_dif(X, Y) :-
 	; throw(error(instantiation_error,iso_dif/2))
 	).
 
-:- meta_predicate(call(0)).
-:- meta_predicate(call(0,?)).
-:- meta_predicate(call(0,?,?,?)).
-:- meta_predicate(call(0,?,?,?,?)).
-:- meta_predicate(call(0,?,?,?,?,?)).
-:- meta_predicate(call(0,?,?,?,?,?,?)).
-:- meta_predicate(call(0,?,?,?,?,?,?,?)).
-
 :- meta_predicate(forall(0,0)).
-:- meta_predicate(findall(?,0,-)).
-:- meta_predicate(bagof(?,0,-)).
-:- meta_predicate(setof(?,0,-)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
