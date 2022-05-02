@@ -1644,9 +1644,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
-	}
-
-	if (is_fx(c) || is_fy(c)) {
+	} else if (is_fx(c) || is_fy(c)) {
 		if ((c->val_off == g_negation_s)
 		|| (c->val_off == g_neck_s)) {
 			cell *rhs = c + 1;
@@ -1660,6 +1658,20 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			}
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
+		}
+	} else if (c->arity) {
+		predicate *pr = find_predicate(p->m, c);
+
+		if (pr && pr->is_meta_predicate) {
+			cell *arg = c + 1;
+			unsigned arity = c->arity;
+
+			while (arity--) {
+				c->nbr_cells -= arg->nbr_cells;
+				arg = goal_expansion(p, arg);
+				c->nbr_cells += arg->nbr_cells;
+				arg += arg->nbr_cells;
+			}
 		}
 	}
 
