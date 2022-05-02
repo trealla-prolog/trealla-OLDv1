@@ -1654,8 +1654,10 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(rhs)) {
 				c = insert_here(p, c, rhs);
 				rhs = c + 1;
-			} else
+			} else {
+				rhs = goal_expansion(p, rhs);
 				rhs = term_to_body_conversion(p, rhs);
+			}
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
 		}
