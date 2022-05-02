@@ -1426,8 +1426,6 @@ static cell *goal_expansion(parser *p, cell *goal)
 		return goal;
 	}
 
-	//printf("*** ge out ==> %s\n", src);
-
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
@@ -1438,7 +1436,6 @@ static cell *goal_expansion(parser *p, cell *goal)
 	unsigned goal_idx = goal - p->cl->cells;
 	unsigned old_cells = goal->nbr_cells;
 	unsigned rem_cells = p->cl->cidx - (goal_idx + old_cells);
-	//printf("*** here0 old_cells=%u, rem_cells=%u\n", old_cells, rem_cells);
 	memmove(goal, goal + old_cells, sizeof(cell)*rem_cells);
 	p->cl->cidx -= old_cells;
 
@@ -1449,20 +1446,16 @@ static cell *goal_expansion(parser *p, cell *goal)
 
 	if ((p->cl->cidx + new_cells) > p->cl->nbr_cells) {
 		unsigned extra = (p->cl->cidx + new_cells) - p->cl->nbr_cells;
-		//printf("*** here1 extra=%u\n", extra);
 		make_room(p, extra);
-		goal = p->cl->cells + goal_idx;
+		goal = p->cl->cells + goal_idx;	// in case of a realloc
 	}
 
-	//printf("*** here2 new_cells=%u, trailing_cells=%u\n", new_cells, trailing_cells);
 	memmove(goal+new_cells, goal, sizeof(cell)*trailing_cells);
 
 	// paste the new goal...
 
 	memcpy(goal, p2->cl->cells, sizeof(cell)*new_cells);
 	p->cl->cidx += new_cells;
-
-	// renumber the vars in clause (?)
 
 	// done
 
