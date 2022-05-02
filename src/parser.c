@@ -1305,8 +1305,9 @@ static bool dcg_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
-	ASTRING_free(s);
+	xref_rule(p2->m, p2->cl, NULL);
 	execute(q, p2->cl->cells, p2->cl->nbr_vars);
+	ASTRING_free(s);
 	frame *f = GET_FIRST_FRAME();
 	char *src = NULL;
 
@@ -1343,6 +1344,7 @@ static bool dcg_expansion(parser *p)
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
 	clear_rule(p->cl);
@@ -1384,6 +1386,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	execute(q, p2->cl->cells, p2->cl->nbr_vars);
 	ASTRING_free(s);
 
@@ -1431,6 +1434,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
 	// snip the old goal...
@@ -1540,6 +1544,7 @@ static bool term_expansion(parser *p)
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
 	clear_rule(p->cl);
