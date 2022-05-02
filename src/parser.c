@@ -168,9 +168,9 @@ void clear_rule(clause *cl)
 	cl->cidx = 0;
 }
 
-static bool make_room(parser *p)
+static bool make_room(parser *p, unsigned nbr)
 {
-	if (p->cl->cidx >= p->cl->nbr_cells) {
+	while ((p->cl->cidx+nbr) >= p->cl->nbr_cells) {
 		pl_idx_t nbr_cells = p->cl->nbr_cells * 3 / 2;
 
 		clause *cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*nbr_cells));
@@ -188,7 +188,7 @@ static bool make_room(parser *p)
 
 static cell *make_a_cell(parser *p)
 {
-	make_room(p);
+	make_room(p, 1);
 	cell *ret = p->cl->cells + p->cl->cidx++;
 	*ret = (cell){0};
 	return ret;
@@ -1449,7 +1449,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 		printf("*** here1\n");
 		unsigned extra = (p->cl->cidx + (p2->cl->cidx-1)) - p->cl->nbr_cells;
 		p->cl->cidx += extra;
-		make_room(p);
+		make_room(p, 1);
 	}
 
 	goal = p->cl->cells + goal_idx;
@@ -1560,7 +1560,7 @@ static bool term_expansion(parser *p)
 static cell *insert_here(parser *p, cell *c, cell *p1)
 {
 	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
-	make_room(p);
+	make_room(p, 1);
 
 	cell *last = p->cl->cells + (p->cl->cidx - 1);
 	pl_idx_t cells_to_move = p->cl->cidx - p1_idx;
