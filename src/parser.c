@@ -1426,6 +1426,8 @@ static cell *goal_expansion(parser *p, cell *goal)
 		return goal;
 	}
 
+	//printf("*** GE %s\n", src);
+
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
@@ -1532,6 +1534,8 @@ static bool term_expansion(parser *p)
 		p->error = true;
 		return false;
 	}
+
+	//printf("*** TE %s\n", src);
 
 	reset(p2);
 	p2->srcptr = src;
