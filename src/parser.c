@@ -1611,7 +1611,11 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			|| (c->val_off == g_disjunction_s)
 			|| (c->val_off == g_if_then_s)
 			|| (c->val_off == g_soft_cut_s)
-			|| (c->val_off == g_neck_s)) {
+			|| (c->val_off == g_neck_s)
+			|| !strcmp(GET_STR(p, c), "<=")
+			|| !strcmp(GET_STR(p, c), "=>")
+			)
+			{
 			cell *lhs = c + 1;
 			bool norhs = false;
 
@@ -1622,7 +1626,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
 			} else {
-				if ((c->val_off != g_neck_s))
+				//if ((c->val_off != g_neck_s))
 					lhs = goal_expansion(p, lhs);
 
 				lhs = term_to_body_conversion(p, lhs);
@@ -1642,8 +1646,9 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		}
 	}
 
-	if (is_fy(c)) {
-		if (c->val_off == g_negation_s) {
+	if (is_fx(c) || is_fy(c)) {
+		if ((c->val_off == g_negation_s)
+		|| (c->val_off == g_neck_s)) {
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
@@ -3269,6 +3274,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 		}
 
 		term_assign_vars(p, 0, false);
+		term_to_body(p);
 
 		if (!p->command)
 			term_expansion(p);
