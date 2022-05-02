@@ -310,7 +310,7 @@ Non-standard predicates
 	unifiable/3                 # unifiable(+term1,+term2,-Goals)
 	?=/2                        # ?=(+term1,+term2)
 	term_expansion/2
-	goal_expansion/2			# TODO
+	goal_expansion/2
 	cyclic_term/1
 	term_singletons/2
 	findall/4

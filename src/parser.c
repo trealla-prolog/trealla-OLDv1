@@ -1384,7 +1384,6 @@ static cell *goal_expansion(parser *p, cell *goal)
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
-	xref_rule(p2->m, p2->cl, NULL);
 	execute(q, p2->cl->cells, p2->cl->nbr_vars);
 	ASTRING_free(s);
 
@@ -1415,7 +1414,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
+		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 0);
 		strcat(src, ".");
 		break;
 	}
@@ -1427,42 +1426,43 @@ static cell *goal_expansion(parser *p, cell *goal)
 		return goal;
 	}
 
-	printf("*** ge out ==> %s\n", src);
+	//printf("*** ge out ==> %s\n", src);
 
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
 	free(src);
 
-	// snip the old goal
+	// snip the old goal...
 
 	unsigned goal_idx = goal - p->cl->cells;
-	unsigned nbr_cells = goal->nbr_cells;
-	printf("*** here0 nbr_cells= %u\n", nbr_cells);
-	unsigned end_idx = (goal + nbr_cells) - p->cl->cells;
-	memmove(goal, goal + nbr_cells, p->cl->cidx - end_idx);
-	p->cl->cidx -= nbr_cells;
+	unsigned old_cells = goal->nbr_cells;
+	unsigned rem_cells = p->cl->cidx - (goal_idx + old_cells);
+	//printf("*** here0 old_cells=%u, rem_cells=%u\n", old_cells, rem_cells);
+	memmove(goal, goal + old_cells, sizeof(cell)*rem_cells);
+	p->cl->cidx -= old_cells;
 
-	// make room for new goal
+	// make room for new goal...
 
-	if ((p->cl->cidx + (p2->cl->cidx-1)) > p->cl->nbr_cells) {
-		printf("*** here1\n");
-		unsigned extra = (p->cl->cidx + (p2->cl->cidx-1)) - p->cl->nbr_cells;
-		p->cl->cidx += extra;
-		make_room(p, 1);
+	unsigned new_cells = p2->cl->cidx-1;
+	unsigned trailing_cells = p->cl->cidx - goal_idx;
+
+	if ((p->cl->cidx + new_cells) > p->cl->nbr_cells) {
+		unsigned extra = (p->cl->cidx + new_cells) - p->cl->nbr_cells;
+		//printf("*** here1 extra=%u\n", extra);
+		make_room(p, extra);
+		goal = p->cl->cells + goal_idx;
 	}
 
-	goal = p->cl->cells + goal_idx;
-	unsigned cells_to_move = (p->cl->cidx-1) - goal_idx;
-	printf("*** here2 new nbr_cells= %u, move=%u\n", p2->cl->cidx-1, cells_to_move);
-	memmove(goal+(p2->cl->cidx-1), goal, cells_to_move);
+	//printf("*** here2 new_cells=%u, trailing_cells=%u\n", new_cells, trailing_cells);
+	memmove(goal+new_cells, goal, sizeof(cell)*trailing_cells);
 
-	// paste the new goal
+	// paste the new goal...
 
-	memmove(goal, p2->cl->cells, p2->cl->cidx-1);
+	memcpy(goal, p2->cl->cells, sizeof(cell)*new_cells);
+	p->cl->cidx += new_cells;
 
 	// renumber the vars in clause (?)
-
 
 	// done
 
@@ -1624,23 +1624,22 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(lhs)) {
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
-			} else
+			} else {
+				if ((c->val_off != g_neck_s))
+					lhs = goal_expansion(p, lhs);
+
 				lhs = term_to_body_conversion(p, lhs);
+			}
 
 			cell *rhs = lhs + lhs->nbr_cells;
 			c = p->cl->cells + c_idx;
 
 			if (is_variable(rhs) && !norhs)
 				c = insert_here(p, c, rhs);
-			else
+			else {
+				rhs = goal_expansion(p, rhs);
 				rhs = term_to_body_conversion(p, rhs);
-
-#if 0
-			if ((c->val_off != g_neck_s))
-				lhs = goal_expansion(p, lhs);
-
-			rhs = goal_expansion(p, rhs);
-#endif
+			}
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
