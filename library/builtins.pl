@@ -383,7 +383,6 @@ writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 open(F, M, S) :- open(F, M, S, []).
 samsort(L, R) :- msort(L, R).
-expand_term(In, Out) :- term_expansion(In, Out).
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 partial_string(S, P) :- append(S, _, P).
 partial_string(S, P, V) :- append(S, V, P).
@@ -420,7 +419,7 @@ iso_dif(X, Y) :-
 	).
 
 :- meta_predicate(once(0)).
-:- meta_predicate(once(0)).
+:- meta_predicate(ignore(0)).
 :- meta_predicate(not(0)).
 :- meta_predicate(forall(0,0)).
 :- meta_predicate(catch(0,?,0)).
