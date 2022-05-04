@@ -1,0 +1,3 @@
+a :- .. = .. .
+
+:- initialization(listing).
