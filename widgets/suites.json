@@ -89,15 +89,15 @@
       "total" : 27
     }
   }, {
-    "uid" : "d944697bc54dd491703ec3072bfba616",
-    "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
+    "uid" : "d06c898ae8d0f4bde9c9d86956894988",
+    "name" : "library/assignvars/tests.lgt::tests",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 1,
+      "passed" : 6,
       "unknown" : 0,
-      "total" : 7
+      "total" : 12
     }
   }, {
     "uid" : "a17f506128c48415bd5f6275182f5e99",
