@@ -124,7 +124,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	pl_idx_t save_hp = q->st.hp;
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	may_ptr_error(p0);
 
@@ -142,7 +141,6 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		arity++;
 	}
 
-	q->st.hp = save_hp;
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
