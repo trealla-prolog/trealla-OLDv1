@@ -57,6 +57,9 @@ cell *init_tmp_heap(query *q)
 
 cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 {
+	if (((uint64_t)q->tmphp + nbr_cells) > UINT32_MAX)
+		return NULL;
+
 	pl_idx_t new_size = q->tmphp + nbr_cells;
 
 	while (new_size >= q->tmph_size) {
