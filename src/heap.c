@@ -81,6 +81,9 @@ cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 
 cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 {
+	if (((uint64_t)q->st.hp + nbr_cells) > UINT32_MAX)
+		return NULL;
+
 	if (!q->pages) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
@@ -93,9 +96,6 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
 	}
-
-	if (((uint64_t)q->st.hp + nbr_cells) > UINT32_MAX)
-		return NULL;
 
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		page *a = calloc(1, sizeof(page));
