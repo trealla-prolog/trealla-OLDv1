@@ -1116,7 +1116,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if ((lhs_pri_1 == my_priority) && is_yfx(c)) lhs_parens = false;
 	if (lhs_pri_2 > 0) lhs_parens = true;
 	if (is_structure(lhs) && (lhs_pri_1 <= my_priority) && (lhs->val_off == g_plus_s)) { lhs_parens = false; }
+	bool lhs_space = false;
 
+	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
+		const char *lhs_src = GET_STR(q, lhs);
+		if (!strcmp(lhs_src, ".."))
+			lhs_space = 1;
+	}
+
+	if (lhs_space) dst += snprintf(dst, dstlen, "%s", " ");
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
 	ssize_t res = print_term_to_buf(q, dst, dstlen, lhs, lhs_ctx, running, 0, depth+1);
 	if (res < 0) return -1;
@@ -1138,7 +1146,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
 		const char *lhs_src = GET_STR(q, lhs);
-		if (!iswalpha(*lhs_src) && !isdigit(*lhs_src) && strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
+		if (!isalpha(*lhs_src) && !isdigit(*lhs_src) && strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
 			space = 1;
 	}
 
@@ -1176,6 +1184,15 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	dst += res;
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 
+	bool rhs_space = false;
+
+	if (is_literal(rhs) && !rhs->arity && !rhs_parens) {
+		const char *rhs_src = GET_STR(q, rhs);
+		if (!strcmp(rhs_src, ".."))
+			rhs_space = 1;
+	}
+
+	if (rhs_space) dst += snprintf(dst, dstlen, "%s", " ");
 	return dst - save_dst;
 }
 

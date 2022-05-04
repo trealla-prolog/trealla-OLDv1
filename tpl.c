@@ -322,13 +322,13 @@ int main(int ac, char *av[])
 		if (get_halt(pl))
 			break;
 
-		if (!get_dump_vars(pl)) {
+		if (!did_dump_vars(pl)) {
 			if (get_redo(pl))
-				printf(" %s", get_status(pl) ? "true" : "false");
+				printf(" ");
 			else
-				printf(" %s", get_status(pl) ? "true" : "false");
+				printf("   ");
 
-			printf(".\n");
+			printf("%s.\n", get_status(pl) ? "true" : "false");
 		}
 	}
 

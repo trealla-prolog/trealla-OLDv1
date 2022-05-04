@@ -15,7 +15,7 @@ extern int get_halt_code(prolog*);
 extern bool get_halt(prolog*);
 extern bool get_status(prolog*);
 extern bool get_redo(prolog*);
-extern bool get_dump_vars(prolog*);
+extern bool did_dump_vars(prolog*);
 
 extern void set_trace(prolog*);
 extern void set_quiet(prolog*);

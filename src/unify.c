@@ -9,7 +9,6 @@
 static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (depth == MAX_DEPTH) {
-		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
 		return ERR_CYCLE_CMP;
 	}
@@ -455,19 +454,19 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		pl_idx_t c_ctx = l_ctx;
 
 		if (is_variable(c)) {
-			const frame *f = GET_FRAME(l_ctx);
+			const frame *f = GET_FRAME(c_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
-			c = deref(q, c, l_ctx);
-			c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && e->mark) {
+			if (e->mark) {
 				e->mark = false;
 				ret_val = true;
 				break;
 			}
 
-			if (!is_variable(c))
-				e->mark = true;
+			e->mark = true;
+
+			c = deref(q, c, c_ctx);
+			c_ctx = q->latest_ctx;
 
 			if (is_cyclic_term_internal(q, c, c_ctx)) {
 				e->mark = false;
@@ -491,14 +490,12 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			l = deref(q, l, l_ctx);
 			l_ctx = q->latest_ctx;
 
-			if (!is_variable(l) && e->mark) {
-				e->mark = false;
+			if (e->mark) {
 				ret_val = true;
 				break;
 			}
 
-			if (!is_variable(l))
-				e->mark = true;
+			e->mark = true;
 		}
 
 		depth++;
@@ -524,7 +521,7 @@ static bool is_cyclic_list_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 		l = deref(q, l, l_ctx);
 		l_ctx = q->latest_ctx;
 
-		if (depth2++ > depth)
+		if (depth2++ >= depth)
 			break;
 	}
 
@@ -552,12 +549,12 @@ static bool is_cyclic_term_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 			cell *c = deref(q, p1, p1_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
 
-			if (!is_variable(c) && e->mark) {
-				e->mark = false;
-				return true;
-			}
-
 			if (!is_variable(c)) {
+				if (e->mark) {
+					e->mark = false;
+					return true;
+				}
+
 				e->mark = true;
 
 				if (is_cyclic_term_internal(q, c, c_ctx)) {
@@ -983,7 +980,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 			p2 = NULL;
 
 		if (!p1 || !p2) {
-			printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+			//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
 		}
 	}

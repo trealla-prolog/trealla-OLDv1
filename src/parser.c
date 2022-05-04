@@ -168,9 +168,9 @@ void clear_rule(clause *cl)
 	cl->cidx = 0;
 }
 
-static bool make_room(parser *p)
+static bool make_room(parser *p, unsigned nbr)
 {
-	if (p->cl->cidx >= p->cl->nbr_cells) {
+	while ((p->cl->cidx+nbr) >= p->cl->nbr_cells) {
 		pl_idx_t nbr_cells = p->cl->nbr_cells * 3 / 2;
 
 		clause *cl = realloc(p->cl, sizeof(clause)+(sizeof(cell)*nbr_cells));
@@ -188,7 +188,7 @@ static bool make_room(parser *p)
 
 static cell *make_a_cell(parser *p)
 {
-	make_room(p);
+	make_room(p, 1);
 	cell *ret = p->cl->cells + p->cl->cidx++;
 	*ret = (cell){0};
 	return ret;
@@ -1134,7 +1134,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		if (is_fx(c)) {
 			cell *rhs = c + 1;
 
-			if (is_fx(rhs) && (rhs->priority == c->priority)) {
+			if (is_fx(rhs) && !rhs->arity && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
 
@@ -1305,8 +1305,9 @@ static bool dcg_expansion(parser *p)
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
 	tokenize(p2, false, false);
-	ASTRING_free(s);
+	xref_rule(p2->m, p2->cl, NULL);
 	execute(q, p2->cl->cells, p2->cl->nbr_vars);
+	ASTRING_free(s);
 	frame *f = GET_FIRST_FRAME();
 	char *src = NULL;
 
@@ -1343,6 +1344,7 @@ static bool dcg_expansion(parser *p)
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
 	clear_rule(p->cl);
@@ -1415,7 +1417,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
 
-		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
+		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 0);
 		strcat(src, ".");
 		break;
 	}
@@ -1427,42 +1429,39 @@ static cell *goal_expansion(parser *p, cell *goal)
 		return goal;
 	}
 
-	printf("*** ge out ==> %s\n", src);
+	//printf("*** GE %s\n", src);
 
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
-	// snip the old goal
+	// snip the old goal...
 
 	unsigned goal_idx = goal - p->cl->cells;
-	unsigned nbr_cells = goal->nbr_cells;
-	printf("*** here0 nbr_cells= %u\n", nbr_cells);
-	unsigned end_idx = (goal + nbr_cells) - p->cl->cells;
-	memmove(goal, goal + nbr_cells, p->cl->cidx - end_idx);
-	p->cl->cidx -= nbr_cells;
+	unsigned old_cells = goal->nbr_cells;
+	unsigned rem_cells = p->cl->cidx - (goal_idx + old_cells);
+	memmove(goal, goal + old_cells, sizeof(cell)*rem_cells);
+	p->cl->cidx -= old_cells;
 
-	// make room for new goal
+	// make room for new goal...
 
-	if ((p->cl->cidx + (p2->cl->cidx-1)) > p->cl->nbr_cells) {
-		printf("*** here1\n");
-		unsigned extra = (p->cl->cidx + (p2->cl->cidx-1)) - p->cl->nbr_cells;
-		p->cl->cidx += extra;
-		make_room(p);
+	unsigned new_cells = p2->cl->cidx-1;
+	unsigned trailing_cells = p->cl->cidx - goal_idx;
+
+	if ((p->cl->cidx + new_cells) > p->cl->nbr_cells) {
+		unsigned extra = (p->cl->cidx + new_cells) - p->cl->nbr_cells;
+		make_room(p, extra);
+		goal = p->cl->cells + goal_idx;	// in case of a realloc
 	}
 
-	goal = p->cl->cells + goal_idx;
-	unsigned cells_to_move = (p->cl->cidx-1) - goal_idx;
-	printf("*** here2 new nbr_cells= %u, move=%u\n", p2->cl->cidx-1, cells_to_move);
-	memmove(goal+(p2->cl->cidx-1), goal, cells_to_move);
+	memmove(goal+new_cells, goal, sizeof(cell)*trailing_cells);
 
-	// paste the new goal
+	// paste the new goal...
 
-	memmove(goal, p2->cl->cells, p2->cl->cidx-1);
-
-	// renumber the vars in clause (?)
-
+	memcpy(goal, p2->cl->cells, sizeof(cell)*new_cells);
+	p->cl->cidx += new_cells;
 
 	// done
 
@@ -1540,9 +1539,12 @@ static bool term_expansion(parser *p)
 		return false;
 	}
 
+	//printf("*** TE %s\n", src);
+
 	reset(p2);
 	p2->srcptr = src;
 	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
 	free(src);
 
 	clear_rule(p->cl);
@@ -1560,7 +1562,7 @@ static bool term_expansion(parser *p)
 static cell *insert_here(parser *p, cell *c, cell *p1)
 {
 	pl_idx_t c_idx = c - p->cl->cells, p1_idx = p1 - p->cl->cells;
-	make_room(p);
+	make_room(p, 1);
 
 	cell *last = p->cl->cells + (p->cl->cidx - 1);
 	pl_idx_t cells_to_move = p->cl->cidx - p1_idx;
@@ -1614,7 +1616,11 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			|| (c->val_off == g_disjunction_s)
 			|| (c->val_off == g_if_then_s)
 			|| (c->val_off == g_soft_cut_s)
-			|| (c->val_off == g_neck_s)) {
+			|| (c->val_off == g_neck_s)
+			|| !strcmp(GET_STR(p, c), "<=")
+			|| !strcmp(GET_STR(p, c), "=>")
+			)
+			{
 			cell *lhs = c + 1;
 			bool norhs = false;
 
@@ -1624,39 +1630,53 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			if (is_variable(lhs)) {
 				c = insert_here(p, c, lhs);
 				lhs = c + 1;
-			} else
+			} else {
+				//if ((c->val_off != g_neck_s))
+					lhs = goal_expansion(p, lhs);
+
 				lhs = term_to_body_conversion(p, lhs);
+			}
 
 			cell *rhs = lhs + lhs->nbr_cells;
 			c = p->cl->cells + c_idx;
 
 			if (is_variable(rhs) && !norhs)
 				c = insert_here(p, c, rhs);
-			else
+			else {
+				rhs = goal_expansion(p, rhs);
 				rhs = term_to_body_conversion(p, rhs);
-
-#if 0
-			if ((c->val_off != g_neck_s))
-				lhs = goal_expansion(p, lhs);
-
-			rhs = goal_expansion(p, rhs);
-#endif
+			}
 
 			c->nbr_cells = 1 + lhs->nbr_cells + rhs->nbr_cells;
 		}
-	}
-
-	if (is_fy(c)) {
-		if (c->val_off == g_negation_s) {
+	} else if (is_fx(c) || is_fy(c)) {
+		if ((c->val_off == g_negation_s)
+		|| (c->val_off == g_neck_s)) {
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
 				c = insert_here(p, c, rhs);
 				rhs = c + 1;
-			} else
+			} else {
+				rhs = goal_expansion(p, rhs);
 				rhs = term_to_body_conversion(p, rhs);
+			}
 
 			c->nbr_cells = 1 + rhs->nbr_cells;
+		}
+	} else if (c->arity) {
+		predicate *pr = find_predicate(p->m, c);
+
+		if (pr && pr->is_meta_predicate) {
+			cell *arg = c + 1;
+			unsigned arity = c->arity;
+
+			while (arity--) {
+				c->nbr_cells -= arg->nbr_cells;
+				arg = goal_expansion(p, arg);
+				c->nbr_cells += arg->nbr_cells;
+				arg += arg->nbr_cells;
+			}
 		}
 	}
 
@@ -3273,6 +3293,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 		}
 
 		term_assign_vars(p, 0, false);
+		term_to_body(p);
 
 		if (!p->command)
 			term_expansion(p);

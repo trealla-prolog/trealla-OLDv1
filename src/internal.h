@@ -836,7 +836,7 @@ typedef struct {
 #define ASTRING_trim(pr,ch) {											\
 	if (ASTRING_strlen(pr)) {											\
 		if (pr##_buf.dst[-1] == (ch)) 									\
-			 *--pr##_buf.dst = '\0';									\
+			*--pr##_buf.dst = '\0';										\
 	}																	\
 }
 
@@ -844,7 +844,7 @@ typedef struct {
 	while (ASTRING_strlen(pr)) {										\
 		if (pr##_buf.dst[-1] != (ch)) 									\
 			break;														\
-		 *--pr##_buf.dst = '\0';										\
+		*--pr##_buf.dst = '\0';											\
 	}																	\
 }
 
@@ -852,13 +852,13 @@ typedef struct {
 	while (ASTRING_strlen(pr)) {										\
 		if (!isspace(pr##_buf.dst[-1]))									\
 			break;														\
-		 *--pr##_buf.dst = '\0';										\
+		*--pr##_buf.dst = '\0';											\
 	}																	\
 }
 
 #define ASTRING_check(pr,len) {											\
 	size_t rem = pr##_buf.size - ASTRING_strlen(pr);					\
-	if ((size_t)((len)+1) >= rem) {												\
+	if ((size_t)((len)+1) >= rem) {										\
 		size_t offset = ASTRING_strlen(pr);								\
 		pr##_buf.buf = realloc(pr##_buf.buf, (pr##_buf.size += ((len)-rem)) + 1); \
 		ensure(pr##_buf.buf);											\

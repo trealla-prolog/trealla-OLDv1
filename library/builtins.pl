@@ -82,6 +82,8 @@ findall(T, G, B, Tail) :-
 	findall(T, G, B0),
 	append(B0, Tail, B), !.
 
+:- meta_predicate(findall(?,0,-,?)).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 
@@ -148,13 +150,14 @@ setof(Template, Generator, Set) :-
 	bagof_(Template, Generator, Bag),
 	sort(Bag, Set).
 
+:- meta_predicate(setof(-,0,?)).
+
 bagof(Template, Generator, Bag) :-
     (	var(Bag) ->	true
 	;	must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
 	bagof_(Template, Generator, Bag).
 
-:- meta_predicate(setof(-,0,?)).
 :- meta_predicate(bagof(-,0,?)).
 
 bagof_(Template, Generator, Bag) :-
@@ -380,7 +383,6 @@ writeln(T) :- write(T), nl.
 format(F) :- format(F, []).
 open(F, M, S) :- open(F, M, S, []).
 samsort(L, R) :- msort(L, R).
-expand_term(In, Out) :- term_expansion(In, Out).
 atomic_list_concat(L, Atom) :- atomic_list_concat(L, '', Atom).
 partial_string(S, P) :- append(S, _, P).
 partial_string(S, P, V) :- append(S, V, P).
@@ -415,6 +417,12 @@ iso_dif(X, Y) :-
 	( X \= Y -> true
 	; throw(error(instantiation_error,iso_dif/2))
 	).
+
+:- meta_predicate(once(0)).
+:- meta_predicate(ignore(0)).
+:- meta_predicate(not(0)).
+:- meta_predicate(forall(0,0)).
+:- meta_predicate(catch(0,?,0)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible

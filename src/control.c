@@ -124,26 +124,12 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-#if 0
 	pl_idx_t save_hp = q->st.hp;
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	may_ptr_error(p0);
 
 	if (p0 == ERR_CYCLE_CELL)
 		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
-#else
-	// This copy is because we are building the call structure
-	// and we need variables to be in the local context. One day vars
-	// will be able to hold their own context... free the vars!
-
-	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
-	may_ptr_error(p0);
-
-	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "list");
-
-	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-#endif
 
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_ptr_error(clone_to_tmp(q, p1));
@@ -156,6 +142,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		arity++;
 	}
 
+	q->st.hp = save_hp;
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 	tmp2->arity = arity;
@@ -165,17 +152,18 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		convert_to_literal(q->st.m, tmp2);
 	}
 
+	const char *functor = GET_STR(q, tmp2);
 	bool found = false;
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+	} else if ((tmp2->fn = get_builtin(q->pl, functor, tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
 	unsigned specifier;
 
-	if (search_op(q->st.m, GET_STR(q, tmp2), &specifier, false))
+	if (search_op(q->st.m, functor, &specifier, false))
 		SET_OP(tmp2, specifier);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)

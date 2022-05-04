@@ -5193,10 +5193,6 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	mpz_t v2;
 	mp_int_init(&v2);
 	mp_small val;
-
-	if (!q->p)
-		q->p = create_parser(q->st.m);
-
 	read_integer(q->p, &v2, 16, s, &s);
 	free(src);
 	cell tmp = {0};
@@ -5250,10 +5246,6 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	mpz_t v2;
 	mp_int_init(&v2);
 	mp_small val;
-
-	if (!q->p)
-		q->p = create_parser(q->st.m);
-
 	read_integer(q->p, &v2, 16, s, &s);
 	free(src);
 	cell tmp = {0};
@@ -6978,39 +6970,28 @@ static void load_properties(module *m)
 	ASTRING_alloc(pr, 1024*64);
 	char tmpbuf[1024];
 
-	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "*->", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "*->", 2, "meta_predicate((0*->0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "if", 3, "meta_predicate(if(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "meta_predicate(call(0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "once", 1, "meta_predicate(once(0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "ignore", 1, "meta_predicate(ignore(0))"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "meta_predicate(findall(?,0,-))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "meta_predicate(findall(?,0,-,?))"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "setof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-
-	format_property(m, tmpbuf, sizeof(tmpbuf), "throw", 1, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "!", 0, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "true", 0, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "fail", 0, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "*->", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "setof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "throw", 1, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+
+	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "*->", 2, "meta_predicate((0*->0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "if", 3, "meta_predicate(if(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "meta_predicate(call(0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "meta_predicate(findall(?,0,-))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "time", 1, "meta_predicate(time(0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "asserta", 1, "meta_predicate(asserta(:))"); ASTRING_strcat(pr, tmpbuf);
