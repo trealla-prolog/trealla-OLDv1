@@ -1,0 +1,55 @@
+{
+  "uid" : "ec2041f606490b95",
+  "name" : "lambdas_compiled_09",
+  "fullName" : "lambdas_compiled_09::tests",
+  "historyId" : "lambdas_compiled_09::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/lambdas_compiled/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/lambdas_compiled/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/lambdas_compiled/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/lambdas_compiled/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "70-71"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6222a79c8f4cfe375560f078f259b25e4f68ec18/examples/lambdas_compiled/tests.lgt#L70"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ec2041f606490b95.json",
+  "parameterValues" : [ "examples/lambdas_compiled/tests.lgt", "70-71", "https://github.com/LogtalkDotOrg/logtalk3/tree/6222a79c8f4cfe375560f078f259b25e4f68ec18/examples/lambdas_compiled/tests.lgt#L70" ]
+}
