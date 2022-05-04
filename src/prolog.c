@@ -32,7 +32,7 @@ char **g_av = NULL, *g_argv0 = NULL;
 
 static atomic_t int g_tpl_count = 0;
 
-bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, pl_idx_t arity)
+bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, unsigned arity)
 {
 	module *m = find_module(pl, mod);
 	if (!m) return false;

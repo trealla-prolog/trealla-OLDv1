@@ -57,6 +57,9 @@ cell *init_tmp_heap(query *q)
 
 cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 {
+	if (((uint64_t)q->tmphp + nbr_cells) >= UINT32_MAX)
+		return NULL;
+
 	pl_idx_t new_size = q->tmphp + nbr_cells;
 
 	while (new_size >= q->tmph_size) {
@@ -83,26 +86,32 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 			q->h_size = nbr_cells;
 
 		page *a = calloc(1, sizeof(page));
-		ensure(a);
+		if (!a) return NULL;
 		a->heap = calloc(q->h_size, sizeof(cell));
-		ensure(a->heap);
+		if (!a->heap) { free(a); return NULL; }
 		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
 	}
 
+	if (((uint64_t)q->st.hp + nbr_cells) >= UINT32_MAX)
+		return NULL;
+
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		page *a = calloc(1, sizeof(page));
-		ensure(a);
+		if (!a) return NULL;
 		a->next = q->pages;
 
 		if (q->h_size < nbr_cells) {
 			q->h_size = nbr_cells;
 			q->h_size += nbr_cells / 2;
+		} else {
+			q->h_size *= 3;
+			q->h_size /= 2;
 		}
 
 		a->heap = calloc(q->h_size, sizeof(cell));
-		ensure(a->heap);
+		if (!a->heap) { free(a); return NULL; }
 		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
@@ -152,7 +161,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 	if (depth >= MAX_DEPTH) {
 		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
-		return ERR_CYCLE_CELL;
+		return NULL;
 	}
 
 	const pl_idx_t save_idx = tmp_heap_used(q);
@@ -227,7 +236,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				//tmp->attrs = NULL;
 			} else {
 				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, list);
-				if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+				if (!rec) return rec;
 			}
 
 			p1 = LIST_TAIL(p1);
@@ -256,7 +265,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 
 		if (!cyclic) {
 			cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, depth+1, list);
-			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+			if (!rec) return rec;
 		}
 
 		tmp = get_tmp_heap(q, save_idx);
@@ -290,7 +299,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				nlist.ctx = save_p1_ctx;
 
 				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, !q->lists_ok ? &nlist : NULL);
-				if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+				if (!rec) return rec;
 			}
 
 			p1 += p1->nbr_cells;
@@ -320,7 +329,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, &nlist);
 	m_destroy(q->pl->vars);
-	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+	if (!rec) return rec;
 	return q->tmp_heap;
 }
 
@@ -391,7 +400,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 	cell *rec = deep_copy2_to_tmp(q, c, c_ctx, 0, !q->lists_ok ? &nlist : NULL);
 	q->lists_ok = false;
 	m_destroy(q->pl->vars);
-	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+	if (!rec) return rec;
 	int cnt = q->st.m->pl->varno - nbr_vars;
 
 	if (cnt) {
@@ -432,7 +441,7 @@ cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs)
 cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs)
 {
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, copy_attrs);
-	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
+	if (!tmp) return tmp;
 
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
@@ -443,7 +452,7 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs)
 cell *deep_copy_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, cell *from, pl_idx_t from_ctx, cell *to, pl_idx_t to_ctx)
 {
 	cell *tmp = deep_copy_to_tmp_with_replacement(q, p1, p1_ctx, copy_attrs, from, from_ctx, to, to_ctx);
-	if (!tmp || (tmp == ERR_CYCLE_CELL)) return tmp;
+	if (!tmp) return tmp;
 
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
@@ -456,7 +465,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 	if (depth >= MAX_DEPTH) {
 		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		q->cycle_error = true;
-		return ERR_CYCLE_CELL;
+		return NULL;
 	}
 
 	pl_idx_t save_idx = tmp_heap_used(q);
@@ -488,7 +497,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 			pl_idx_t c_ctx = q->latest_ctx;
 
 			cell *rec = deep_clone2_to_tmp(q, c, c_ctx, depth+1);
-			if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+			if (!rec) return rec;
 
 			p1 = LIST_TAIL(p1);
 			p1 = deref(q, p1, p1_ctx);
@@ -502,7 +511,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 		}
 
 		cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, depth+1);
-		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+		if (!rec) return rec;
 		tmp = get_tmp_heap(q, save_idx);
 		tmp->nbr_cells = tmp_heap_used(q) - save_idx;
 		return tmp;
@@ -515,7 +524,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth)
 		cell *c = deref(q, p1, p1_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 		cell *rec = deep_clone2_to_tmp(q, c, c_ctx, depth+1);
-		if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+		if (!rec) return rec;
 		p1 += p1->nbr_cells;
 	}
 
@@ -531,14 +540,14 @@ cell *deep_clone_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	q->cycle_error = false;
 	cell *rec = deep_clone2_to_tmp(q, p1, p1_ctx, 0);
-	if (!rec || (rec == ERR_CYCLE_CELL)) return rec;
+	if (!rec) return rec;
 	return q->tmp_heap;
 }
 
 cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	p1 = deep_clone_to_tmp(q, p1, p1_ctx);
-	if (!p1 || (p1 == ERR_CYCLE_CELL)) return p1;
+	if (!p1) return p1;
 	cell *tmp = alloc_on_heap(q, p1->nbr_cells);
 	if (!tmp) return NULL;
 	safe_copy_cells(tmp, p1, p1->nbr_cells);
@@ -548,7 +557,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx)
 cell *clone2_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	cell *src = p1, *dst = tmp;
 
 	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
@@ -573,7 +582,7 @@ cell *clone_to_tmp(query *q, cell *p1)
 cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 {
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	frame *f = GET_CURR_FRAME();
 
 	if (prefix) {

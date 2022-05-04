@@ -74,9 +74,6 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	return false;
 }
 
-static cell err_cell = {0};
-cell *ERR_CYCLE_CELL = &err_cell;
-
 pl_status do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
@@ -1729,10 +1726,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
 		cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
-		may_ptr_error(tmp);
-		if (tmp == ERR_CYCLE_CELL)
-			return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
+		may_heap_error(tmp);
 		p2 = tmp;
 		p2_ctx = q->st.curr_frame;
 		unsigned arity = 0;
@@ -1991,9 +1985,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
 	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, true);
-
-	if (!tmp || (tmp == ERR_CYCLE_CELL))
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+	may_heap_error(tmp);
 
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
@@ -2021,9 +2013,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 
 	GET_FIRST_RAW_ARG(p1_raw,any);
 	cell *tmp = deep_copy_to_heap(q, p1_raw, p1_raw_ctx, false);
-
-	if (!tmp || (tmp == ERR_CYCLE_CELL))
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+	may_heap_error(tmp);
 
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
@@ -2272,11 +2262,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
+	may_heap_error(tmp);
 	cell *head = get_head(tmp);
 
 	if (is_variable(head))
@@ -2339,11 +2325,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cycle_limit");
-
+	may_heap_error(tmp);
 	cell *head = get_head(tmp);
 
 	if (is_variable(head))
@@ -3305,13 +3287,8 @@ static USE_RESULT pl_status fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *tmp = deep_raw_copy_to_tmp(q, p1, p1_ctx);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		may_ptr_error(alloc_on_queuen(q, 0, p1));
-	else
-		may_ptr_error(alloc_on_queuen(q, 0, tmp));
-
+	may_heap_error(tmp);
+	may_ptr_error(alloc_on_queuen(q, 0, tmp));
 	return pl_success;
 }
 
@@ -3320,13 +3297,8 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
 	cell *tmp = deep_raw_copy_to_tmp(q, p2, p2_ctx);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		may_ptr_error(alloc_on_queuen(q, get_int(p1), p2));
-	else
-		may_ptr_error(alloc_on_queuen(q, get_int(p1), tmp));
-
+	may_heap_error(tmp);
+	may_ptr_error(alloc_on_queuen(q, get_int(p1), tmp));
 	return pl_success;
 }
 
@@ -3344,10 +3316,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		return throw_error(q, xp3, xp3_ctx, "type_error", "list");
 
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
-
-	if (p0 == ERR_CYCLE_CELL)
-		return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "cyclic_term");
-
+	may_heap_error(p0);
 	GET_FIRST_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
@@ -3640,10 +3609,7 @@ static pl_status do_asserta_2(query *q)
 
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-	may_ptr_error(tmp);
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
+	may_heap_error(tmp);
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
@@ -3743,11 +3709,7 @@ static pl_status do_assertz_2(query *q)
 
 	GET_NEXT_ARG(p2,atom_or_var);
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-	may_ptr_error(tmp);
-
-	if (tmp == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
-
+	may_heap_error(tmp);
 	pl_idx_t nbr_cells = tmp->nbr_cells;
 	parser *p = q->st.m->p;
 
@@ -4636,10 +4598,7 @@ static USE_RESULT pl_status fn_send_1(query *q)
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
-	may_ptr_error(c);
-
-	if (c == ERR_CYCLE_CELL)
-		return throw_error(q, p1, p1_ctx, "resource_error", "cyclic_term");
+	may_heap_error(c);
 
 	for (pl_idx_t i = 0; i < c->nbr_cells; i++) {
 		cell *c2 = c + i;
