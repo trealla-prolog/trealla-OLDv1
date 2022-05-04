@@ -381,8 +381,6 @@ struct cell_ {
 	};
 };
 
-extern cell* ERR_CYCLE_CELL;
-
 typedef struct {
 	uint64_t u1, u2;
 } uuid;
