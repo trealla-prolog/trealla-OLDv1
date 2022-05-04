@@ -76,7 +76,7 @@ cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 // The heap is used for long-life allocations and a realloc() can't be
 // done as it will invalidate existing pointers. Build any compounds
 // first on the tmp heap, then allocate in one go here and copy in.
-// When more space is need allocate a new heap and keep them in the
+// When more space is need allocate a new page and keep them in the
 // page list. Backtracking will garbage collect and free as needed.
 
 cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
