@@ -83,9 +83,9 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 			q->h_size = nbr_cells;
 
 		page *a = calloc(1, sizeof(page));
-		ensure(a);
+		if (!a) return NULL;
 		a->heap = calloc(q->h_size, sizeof(cell));
-		ensure(a->heap);
+		if (!a->heap) { free(a); return NULL; }
 		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
@@ -93,7 +93,7 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		page *a = calloc(1, sizeof(page));
-		ensure(a);
+		if (!a) return NULL;
 		a->next = q->pages;
 
 		if (q->h_size < nbr_cells) {
@@ -102,7 +102,7 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		}
 
 		a->heap = calloc(q->h_size, sizeof(cell));
-		ensure(a->heap);
+		if (!a->heap) { free(a); return NULL; }
 		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
@@ -548,7 +548,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx)
 cell *clone2_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	cell *src = p1, *dst = tmp;
 
 	for (pl_idx_t i = 0; i < p1->nbr_cells; i++, dst++, src++) {
@@ -573,7 +573,7 @@ cell *clone_to_tmp(query *q, cell *p1)
 cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 {
 	cell *tmp = alloc_on_heap(q, (prefix?1:0)+p1->nbr_cells+suffix);
-	ensure(tmp);
+	if (!tmp) return NULL;
 	frame *f = GET_CURR_FRAME();
 
 	if (prefix) {
