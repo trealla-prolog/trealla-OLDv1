@@ -1,0 +1,51 @@
+{
+  "uid" : "407a36b1aebfb0b",
+  "name" : "lgtdoc",
+  "fullName" : "lgtdoc::tests",
+  "historyId" : "lgtdoc::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "407a36b1aebfb0b.json",
+  "parameterValues" : [ ]
+}

@@ -1,0 +1,55 @@
+{
+  "uid" : "9acb19fc2d1478e7",
+  "name" : "iso_bitwise_left_shift_2_03",
+  "fullName" : "iso_bitwise_left_shift_2_03::tests",
+  "historyId" : "iso_bitwise_left_shift_2_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "skipped",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/functions/bitwise_left_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/functions/bitwise_left_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/functions/bitwise_left_shift_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/functions/bitwise_left_shift_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-42"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6222a79c8f4cfe375560f078f259b25e4f68ec18/tests/prolog/functions/bitwise_left_shift_2/tests.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "9acb19fc2d1478e7.json",
+  "parameterValues" : [ "tests/prolog/functions/bitwise_left_shift_2/tests.lgt", "40-42", "https://github.com/LogtalkDotOrg/logtalk3/tree/6222a79c8f4cfe375560f078f259b25e4f68ec18/tests/prolog/functions/bitwise_left_shift_2/tests.lgt#L40" ]
+}
