@@ -91,6 +91,9 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		q->pages = a;
 	}
 
+	if (((uint64_t)q->st.hp + nbr_cells) > UINT32_MAX)
+		return NULL;
+
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		page *a = calloc(1, sizeof(page));
 		if (!a) return NULL;
