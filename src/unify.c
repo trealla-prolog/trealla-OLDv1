@@ -934,7 +934,7 @@ static const struct dispatch g_disp[] =
 static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if (depth > MAX_DEPTH) {
-		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		return false;
 	}
 
@@ -959,7 +959,7 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 			p2 = NULL;
 
 		if (!p1 || !p2) {
-			printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+			//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
 		}
 
@@ -1009,7 +1009,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 		return false;
 
 	if (depth > MAX_DEPTH) {
-		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		return false;
 	}
 
@@ -1084,7 +1084,7 @@ bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_c
 		return true;
 
 	if (depth > MAX_DEPTH) {
-		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
+		//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 		return false;
 	}
 
