@@ -1,0 +1,51 @@
+{
+  "uid" : "dcbbe92fa0020391",
+  "name" : "symdiff",
+  "fullName" : "symdiff::tests",
+  "historyId" : "symdiff::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/symdiff/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/symdiff/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/symdiff/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "dcbbe92fa0020391.json",
+  "parameterValues" : [ ]
+}

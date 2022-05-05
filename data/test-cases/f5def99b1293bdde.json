@@ -1,0 +1,72 @@
+{
+  "uid" : "f5def99b1293bdde",
+  "name" : "op_3",
+  "fullName" : "op_3::tests",
+  "historyId" : "op_3::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 3,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/directives/op_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "61234d67568e7bfa",
+      "status" : "failed",
+      "statusDetails" : "Crash",
+      "time" : {
+        "duration" : 0
+      }
+    }, {
+      "uid" : "e071a671c84c793b",
+      "status" : "failed",
+      "statusDetails" : "Crash",
+      "time" : {
+        "duration" : 0
+      }
+    }, {
+      "uid" : "15015bb5ec00725",
+      "status" : "failed",
+      "statusDetails" : "Crash",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "f5def99b1293bdde.json",
+  "parameterValues" : [ ]
+}

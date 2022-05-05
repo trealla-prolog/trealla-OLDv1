@@ -1,114 +1,114 @@
 {
-  "total" : 467,
+  "total" : 503,
   "items" : [ {
-    "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
-    "name" : "tools/diagrams/tests.lgt::tests",
+    "uid" : "06d3df69336f502bcd194716b05d5fd5",
+    "name" : "tests/prolog/unicode/builtins/tests.lgt::tests",
     "statistic" : {
-      "failed" : 93,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 93,
-      "unknown" : 0,
-      "total" : 186
-    }
-  }, {
-    "uid" : "a0bf07a93ae3abe80d02c8212e1848b7",
-    "name" : "tests/logtalk/predicates/category_property_2/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 13,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 52,
-      "unknown" : 0,
-      "total" : 65
-    }
-  }, {
-    "uid" : "989b09abb7fb900a0e7ed980a1e19859",
-    "name" : "tools/lgtdoc/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 12,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
       "passed" : 0,
       "unknown" : 0,
-      "total" : 12
+      "total" : 1
     }
   }, {
-    "uid" : "ca0b36cfcb9cdd10ff496c52b6096985",
-    "name" : "tests/logtalk/predicates/protocol_property_2/tests.lgt::tests",
+    "uid" : "4849ae01b5ce7195bc80fba4918e4f84",
+    "name" : "examples/constraints/bp/tests.lgt::tests",
     "statistic" : {
-      "failed" : 8,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 11,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 19
+      "total" : 1
     }
   }, {
-    "uid" : "84be0135f4f242a99c5fdddb596af3cb",
-    "name" : "library/statistics/tests.lgt::tests",
+    "uid" : "2e8a7ff1d71d20d21a894c12d783d391",
+    "name" : "tests/prolog/predicates/ground_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 7,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 39,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 46
+      "total" : 1
     }
   }, {
-    "uid" : "00ed757610be453e6de4bcf92f77203e",
-    "name" : "library/nested_dictionaries/tests.lgt::tests(nrbtree)",
+    "uid" : "6775bed0e751ecb8fc744eab536099f1",
+    "name" : "library/grammars/tests.lgt::tests",
     "statistic" : {
-      "failed" : 6,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 42,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 48
+      "total" : 1
     }
   }, {
-    "uid" : "f7fb34a8f9e5c1b84903a4ff3495e1ea",
-    "name" : "tests/prolog/predicates/length_2/tests.lgt::tests",
+    "uid" : "4e76d174d0f54552a34896641f7a441b",
+    "name" : "tests/logtalk/predicates/create_object_4/tests.lgt::tests",
     "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 3,
-      "passed" : 18,
-      "unknown" : 0,
-      "total" : 27
-    }
-  }, {
-    "uid" : "d06c898ae8d0f4bde9c9d86956894988",
-    "name" : "library/assignvars/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 6,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 6,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 12
+      "total" : 1
     }
   }, {
-    "uid" : "ac3efbb8eff82b3668361622fcaf20d6",
-    "name" : "tools/debugger/tests.lgt::tests",
+    "uid" : "ffbadf06206caaecb9fe602ea42bb096",
+    "name" : "tests/prolog/predicates/callable_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 4,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 32,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 36
+      "total" : 1
     }
   }, {
-    "uid" : "211108ee09d578e3f717599bb52e10eb",
-    "name" : "tests/logtalk/methods/predicate_property_2/tests.lgt::tests",
+    "uid" : "e44dba53c26449b5c7baef2315c919f7",
+    "name" : "tests/logtalk/directives/protected_1/tests.lgt::tests",
     "statistic" : {
-      "failed" : 4,
+      "failed" : 1,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 30,
+      "passed" : 0,
       "unknown" : 0,
-      "total" : 34
+      "total" : 1
+    }
+  }, {
+    "uid" : "99eba674bd06892c77bd74279ed538c8",
+    "name" : "tests/prolog/predicates/flush_output_1/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "adc8b11e51cb8ae80966418820716a24",
+    "name" : "examples/people/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
+    }
+  }, {
+    "uid" : "7e80669bb2d1880ab305b7fa7b52db86",
+    "name" : "tests/prolog/predicates/set_prolog_flag_2/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 1,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 1
     }
   } ]
 }

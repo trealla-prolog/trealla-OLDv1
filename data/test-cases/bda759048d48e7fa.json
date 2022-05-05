@@ -1,0 +1,51 @@
+{
+  "uid" : "bda759048d48e7fa",
+  "name" : "verdi_neruda",
+  "fullName" : "verdi_neruda::tests",
+  "historyId" : "verdi_neruda::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/verdi_neruda/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/verdi_neruda/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/verdi_neruda/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "bda759048d48e7fa.json",
+  "parameterValues" : [ ]
+}

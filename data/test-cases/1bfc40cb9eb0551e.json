@@ -1,0 +1,51 @@
+{
+  "uid" : "1bfc40cb9eb0551e",
+  "name" : "dif",
+  "fullName" : "dif::tests",
+  "historyId" : "dif::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dif/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dif/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/dif/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "1bfc40cb9eb0551e.json",
+  "parameterValues" : [ ]
+}

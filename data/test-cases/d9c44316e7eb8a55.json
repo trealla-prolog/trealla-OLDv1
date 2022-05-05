@@ -1,0 +1,51 @@
+{
+  "uid" : "d9c44316e7eb8a55",
+  "name" : "laptops",
+  "fullName" : "laptops::tests",
+  "historyId" : "laptops::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "d9c44316e7eb8a55.json",
+  "parameterValues" : [ ]
+}

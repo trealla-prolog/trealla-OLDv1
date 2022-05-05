@@ -1,0 +1,51 @@
+{
+  "uid" : "9f2866261a152108",
+  "name" : "yield",
+  "fullName" : "yield::tests",
+  "historyId" : "yield::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/engines/yield/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/engines/yield/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/engines/yield/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "9f2866261a152108.json",
+  "parameterValues" : [ ]
+}

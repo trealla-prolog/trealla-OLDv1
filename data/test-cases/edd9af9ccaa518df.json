@@ -1,0 +1,51 @@
+{
+  "uid" : "edd9af9ccaa518df",
+  "name" : "metered_concurrency",
+  "fullName" : "metered_concurrency::tests",
+  "historyId" : "metered_concurrency::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/threads/metered_concurrency/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/threads/metered_concurrency/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/threads/metered_concurrency/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "edd9af9ccaa518df.json",
+  "parameterValues" : [ ]
+}

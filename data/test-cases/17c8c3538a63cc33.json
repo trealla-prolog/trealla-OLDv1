@@ -1,0 +1,51 @@
+{
+  "uid" : "17c8c3538a63cc33",
+  "name" : "pmq",
+  "fullName" : "pmq::tests",
+  "historyId" : "pmq::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/engines/pmq/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/engines/pmq/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/engines/pmq/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "17c8c3538a63cc33.json",
+  "parameterValues" : [ ]
+}

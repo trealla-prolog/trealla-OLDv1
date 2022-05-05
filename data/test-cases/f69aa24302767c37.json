@@ -1,0 +1,51 @@
+{
+  "uid" : "f69aa24302767c37",
+  "name" : "clustering",
+  "fullName" : "clustering::tests",
+  "historyId" : "clustering::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/clustering/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/clustering/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/clustering/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "f69aa24302767c37.json",
+  "parameterValues" : [ ]
+}

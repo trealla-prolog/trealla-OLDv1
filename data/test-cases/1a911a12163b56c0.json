@@ -1,0 +1,51 @@
+{
+  "uid" : "1a911a12163b56c0",
+  "name" : "instmethods",
+  "fullName" : "instmethods::tests",
+  "historyId" : "instmethods::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/instmethods/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/instmethods/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/instmethods/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "1a911a12163b56c0.json",
+  "parameterValues" : [ ]
+}

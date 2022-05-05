@@ -1,0 +1,51 @@
+{
+  "uid" : "a9195b7cc12c9eb4",
+  "name" : "tbbt",
+  "fullName" : "tbbt::tests",
+  "historyId" : "tbbt::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "failed",
+  "statusMessage" : "Crash",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/engines/tbbt/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/engines/tbbt/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/engines/tbbt/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "a9195b7cc12c9eb4.json",
+  "parameterValues" : [ ]
+}
