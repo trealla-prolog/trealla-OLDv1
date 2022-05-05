@@ -85,29 +85,23 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		return NULL;
 
 	if (!q->pages) {
-		if (q->h_size < nbr_cells)
-			q->h_size = nbr_cells;
-
 		page *a = calloc(1, sizeof(page));
 		if (!a) return NULL;
-		a->heap = calloc(q->h_size, sizeof(cell));
+		a->next = q->pages;
+		unsigned n = MAX_OF(q->h_size, nbr_cells);
+		a->heap = calloc(a->h_size=n, sizeof(cell));
 		if (!a->heap) { free(a); return NULL; }
-		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
 	}
 
-	if ((q->st.hp + nbr_cells) >= q->h_size) {
+	if ((q->st.hp + nbr_cells) >= q->pages->h_size) {
 		page *a = calloc(1, sizeof(page));
 		if (!a) return NULL;
 		a->next = q->pages;
-
-		if (q->h_size < nbr_cells)
-			q->h_size = nbr_cells;
-
-		a->heap = calloc(q->h_size, sizeof(cell));
+		unsigned n = MAX_OF(q->h_size, nbr_cells);
+		a->heap = calloc(a->h_size=n, sizeof(cell));
 		if (!a->heap) { free(a); return NULL; }
-		a->h_size = q->h_size;
 		a->nbr = q->st.curr_page++;
 		q->pages = a;
 		q->st.hp = 0;
