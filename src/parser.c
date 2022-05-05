@@ -1265,6 +1265,8 @@ void reset(parser *p)
 	p->comment = false;
 	p->error = false;
 	p->last_close = false;
+	p->nesting_parens = p->nesting_brackets = p->nesting_braces = 0;
+	p->error_desc = NULL;
 }
 
 static bool dcg_expansion(parser *p)
