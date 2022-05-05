@@ -1,0 +1,55 @@
+{
+  "uid" : "fe70a239e920d4f8",
+  "name" : "interval_overlaps_2_03",
+  "fullName" : "interval_overlaps_2_03::tests",
+  "historyId" : "interval_overlaps_2_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/intervals/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/intervals/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/intervals/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/intervals/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "132-135"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/c71a2d7fb4d1bebe7dfedec84757bdb63224fc31/library/intervals/tests.lgt#L132"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "fe70a239e920d4f8.json",
+  "parameterValues" : [ "library/intervals/tests.lgt", "132-135", "https://github.com/LogtalkDotOrg/logtalk3/tree/c71a2d7fb4d1bebe7dfedec84757bdb63224fc31/library/intervals/tests.lgt#L132" ]
+}
