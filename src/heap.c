@@ -101,7 +101,6 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		page *a = calloc(1, sizeof(page));
 		if (!a) return NULL;
 		a->next = q->pages;
-		q->h_size = nbr_cells + (nbr_cells / 2);
 
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
