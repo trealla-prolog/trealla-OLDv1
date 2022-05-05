@@ -57,6 +57,9 @@ cell *init_tmp_heap(query *q)
 
 cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 {
+	if (((uint64_t)q->tmphp + nbr_cells) > UINT32_MAX)
+		return NULL;
+
 	pl_idx_t new_size = q->tmphp + nbr_cells;
 
 	while (new_size >= q->tmph_size) {
@@ -73,11 +76,14 @@ cell *alloc_on_tmp(query *q, pl_idx_t nbr_cells)
 // The heap is used for long-life allocations and a realloc() can't be
 // done as it will invalidate existing pointers. Build any compounds
 // first on the tmp heap, then allocate in one go here and copy in.
-// When more space is need allocate a new heap and keep them in the
+// When more space is need allocate a new page and keep them in the
 // page list. Backtracking will garbage collect and free as needed.
 
 cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 {
+	if (((uint64_t)q->st.hp + nbr_cells) > UINT32_MAX)
+		return NULL;
+
 	if (!q->pages) {
 		if (q->h_size < nbr_cells)
 			q->h_size = nbr_cells;
@@ -91,17 +97,14 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 		q->pages = a;
 	}
 
-	if (((uint64_t)q->st.hp + nbr_cells) > UINT32_MAX)
-		return NULL;
-
 	if ((q->st.hp + nbr_cells) >= q->h_size) {
 		page *a = calloc(1, sizeof(page));
 		if (!a) return NULL;
 		a->next = q->pages;
 		q->h_size = nbr_cells + (nbr_cells / 2);
 
-		if (q->h_size < 1024)
-			q->h_size = 1024;
+		if (q->h_size < nbr_cells)
+			q->h_size = nbr_cells;
 
 		a->heap = calloc(q->h_size, sizeof(cell));
 		if (!a->heap) { free(a); return NULL; }
@@ -115,8 +118,8 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 	q->st.hp += nbr_cells;
 	q->pages->hp = q->st.hp;
 
-	if (q->st.hp > q->pages->max_hp_used)
-		q->pages->max_hp_used = q->st.hp;
+	if (q->pages->hp > q->pages->max_hp_used)
+		q->pages->max_hp_used = q->pages->hp;
 
 	return c;
 }

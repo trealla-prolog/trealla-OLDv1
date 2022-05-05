@@ -510,6 +510,7 @@ static void trim_heap(query *q, const choice *ch)
 		free(save);
 	}
 
+#if 0
 	const page *a = q->pages;
 
 	for (pl_idx_t i = ch->st.hp; a && (i < a->max_hp_used) && (i < q->st.hp); i++) {
@@ -518,6 +519,7 @@ static void trim_heap(query *q, const choice *ch)
 		c->tag = TAG_EMPTY;
 		c->attrs = NULL;
 	}
+#endif
 }
 
 pl_idx_t drop_choice(query *q)
