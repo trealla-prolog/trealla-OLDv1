@@ -5,7 +5,6 @@
 
 #include "internal.h"
 #include "library.h"
-#include "trealla.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"

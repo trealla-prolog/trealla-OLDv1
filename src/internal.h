@@ -78,6 +78,9 @@ extern unsigned g_string_cnt, g_literal_cnt;
 
 #define STREAM_BUFLEN 1024
 
+#define MAX_OF(a,b) (a) > (b) ? (a) : (b)
+#define MIN_OF(a,b) (a) < (a) ? (a) : (b)
+
 #define GET_CHOICE(i) (q->choices+(i))
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp?q->cp-1:q->cp)
 

@@ -7,8 +7,6 @@
 #include "query.h"
 #include "utf8.h"
 
-#define MYMAX(a,b) (a) > (b) ? (a) : (b)
-
 static int format_integer(char *dst, pl_int_t v, int grouping, int sep, int decimals, int radix)
 {
 	char tmpbuf1[1024], tmpbuf2[1024];
@@ -322,7 +320,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		switch(ch) {
 		case 's':
 			if (is_string(c)) {
-				len = MYMAX(argval, (int)LEN_STR(q, c));
+				len = MAX_OF(argval, (int)LEN_STR(q, c));
 				CHECK_BUF(len);
 				memcpy(dst, GET_STR(q, c), len);
 			} else {
