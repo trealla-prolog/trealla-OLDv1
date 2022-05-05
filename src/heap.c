@@ -117,8 +117,8 @@ cell *alloc_on_heap(query *q, pl_idx_t nbr_cells)
 	q->st.hp += nbr_cells;
 	q->pages->hp = q->st.hp;
 
-	if (q->st.hp > q->pages->max_hp_used)
-		q->pages->max_hp_used = q->st.hp;
+	if (q->pages->hp > q->pages->max_hp_used)
+		q->pages->max_hp_used = q->pages->hp;
 
 	return c;
 }
