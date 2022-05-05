@@ -1787,7 +1787,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 
 		unsigned specifier;
 
-		if (search_op(q->st.m, GET_STR(q, tmp), &specifier, false))
+		if (search_op(q->st.m, GET_STR(q, tmp), &specifier, arity == 1))
 			SET_OP(tmp, specifier);
 
 		return unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
