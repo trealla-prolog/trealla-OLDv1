@@ -497,6 +497,7 @@ void convert_to_literal(module *m, cell *c)
 	c->tag = TAG_LITERAL;
 	c->val_off = off;
 	c->match = NULL;
+	c->arity = 0;
 	c->flags = 0;
 	free(src);
 }
