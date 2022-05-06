@@ -1355,7 +1355,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	tokenize(p, false, false);
 	p->read_term = 0;
 
-	if (p->error) {
+	if (p->error || !p->end_of_term) {
 		p->error = false;
 
 		if (!p->fp || !isatty(fileno(p->fp))) {
