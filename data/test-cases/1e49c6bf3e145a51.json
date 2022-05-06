@@ -1,0 +1,55 @@
+{
+  "uid" : "1e49c6bf3e145a51",
+  "name" : "self_5",
+  "fullName" : "::(self_5,tests)",
+  "historyId" : "::(self_5,tests)",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "::(tests/logtalk/methods/self_1/tests.lgt,tests)"
+  }, {
+    "name" : "testClass",
+    "value" : "::(tests/logtalk/methods/self_1/tests.lgt,tests)"
+  }, {
+    "name" : "package",
+    "value" : "::(tests/logtalk/methods/self_1/tests.lgt,tests)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/self_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "-(47,49)"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/8e6d60eb435571d358636b0fcfac00e5d66d4e9e/tests/logtalk/methods/self_1/tests.lgt#L47"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "1e49c6bf3e145a51.json",
+  "parameterValues" : [ "tests/logtalk/methods/self_1/tests.lgt", "-(47,49)", "https://github.com/LogtalkDotOrg/logtalk3/tree/8e6d60eb435571d358636b0fcfac00e5d66d4e9e/tests/logtalk/methods/self_1/tests.lgt#L47" ]
+}
