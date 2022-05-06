@@ -484,6 +484,8 @@ pl_status try_me(query *q, unsigned nbr_vars)
 		e->mark = false;
 	}
 
+	q->run_hook = false;
+	q->cycle_error = false;
 	q->check_unique = false;
 	q->has_vars = false;
 	q->no_tco = false;

@@ -188,7 +188,7 @@ length_checked(Xs0, N) :-
 	;  nonvar(Xs0), M == 0, integer(N), N > 0 -> throw(error(type_error(list,Xs0),length/2))
 	;  nonvar(N), '$skip_max_list'(_, Max, Xs, _), Max == -1 -> throw(error(type_error(list,Xs0),length/2))
 	;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
-	;  nonvar(N) -> R is N-M, length_rundown(Xs2, R), Xs2=Xs
+	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
 	;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
 	;  length_addendum(Xs, N, M)
 	).
@@ -198,9 +198,9 @@ length(Xs0, N) :-
    !,
    (  Xs == [] -> N = M
    ;  nonvar(Xs) -> var(N), Xs = [_|_], throw(error(resource_error(finite_memory),length/2))
-   ;  nonvar(N) -> R is N-M, length_rundown(Xs2, R), Xs2=Xs
+   ;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
    ;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
-   ;  length_addendum(Xs2, N, M), Xs = Xs2
+   ;  length_addendum(Xs, N, M)
    ).
 length(_, N) :-
    integer(N), !,
