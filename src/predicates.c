@@ -1754,6 +1754,9 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 		cell *tmp2 = get_tmp_heap(q, 0);
 		pl_idx_t nbr_cells = tmp_heap_used(q);
 
+		if (is_string(tmp2))
+			return throw_error(q, tmp2, q->st.curr_frame, "type_error", "atom");
+
 		if (is_cstring(tmp2)) {
 			share_cell(tmp2);
 			convert_to_literal(q->st.m, tmp2);
