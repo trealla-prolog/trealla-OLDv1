@@ -83,7 +83,7 @@ int check_interrupt(query *q)
 
 bool check_redo(query *q)
 {
-	if (q->do_dump_vars && q->cp) {
+	if (q->do_dump_vars && q->cp && !q->in_attvar_print) {
 		dump_vars(q, true);
 
 		if (!q->pl->did_dump_vars) {
