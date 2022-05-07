@@ -42,7 +42,7 @@ static int g_ctx_use_cnt = 0;
 static SSL_CTX *g_ctx = NULL;
 #endif
 
-int net_domain_connect(const char *name, int udp)
+int net_domain_connect(const char *name, bool udp)
 {
 #ifndef _WIN32
 	int fd = socket(AF_UNIX, udp?SOCK_DGRAM:SOCK_STREAM, 0);
@@ -66,7 +66,7 @@ int net_domain_connect(const char *name, int udp)
 #endif
 }
 
-int net_domain_server(const char *name, int udp)
+int net_domain_server(const char *name, bool udp)
 {
 #ifndef _WIN32
     struct sockaddr_un server_sockaddr;
@@ -96,7 +96,7 @@ int net_domain_server(const char *name, int udp)
 #endif
 }
 
-int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
+int net_connect(const char *hostname, unsigned port, bool udp, bool nodelay)
 {
 #ifndef _WIN32
 	struct addrinfo hints, *result, *rp;
@@ -148,7 +148,7 @@ int net_connect(const char *hostname, unsigned port, int udp, int nodelay)
 #endif
 }
 
-int net_server(const char *hostname, unsigned port, int udp, const char *keyfile, const char *certfile)
+int net_server(const char *hostname, unsigned port, bool udp, const char *keyfile, const char *certfile)
 {
 #ifndef _WIN32
 	(void) hostname;
@@ -261,7 +261,7 @@ void net_set_nonblocking(stream *str)
 #endif
 }
 
-void *net_enable_ssl(int fd, const char *hostname, int is_server, int level, const char *certfile)
+void *net_enable_ssl(int fd, const char *hostname, bool is_server, int level, const char *certfile)
 {
 #if USE_OPENSSL
 	if (!g_ctx_use_cnt++) {
