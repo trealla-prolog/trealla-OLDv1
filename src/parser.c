@@ -1618,11 +1618,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			|| (c->val_off == g_disjunction_s)
 			|| (c->val_off == g_if_then_s)
 			|| (c->val_off == g_soft_cut_s)
-			|| (c->val_off == g_neck_s)
-			|| !strcmp(GET_STR(p, c), "<=")
-			|| !strcmp(GET_STR(p, c), "=>")
-			)
-			{
+			|| (c->val_off == g_neck_s)) {
 			cell *lhs = c + 1;
 			bool norhs = false;
 
