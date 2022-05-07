@@ -2443,7 +2443,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 					dst = p->token + offset;
 				}
 
-				dst += put_char_bare_utf8(dst, ch);
+				dst += put_char_utf8(dst, ch);
 			}
 
 			*dst = '\0';
@@ -2504,7 +2504,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				dst = p->token + offset;
 			}
 
-			dst += put_char_bare_utf8(dst, ch);
+			dst += put_char_utf8(dst, ch);
 			ch = peek_char_utf8(src);
 		}
 

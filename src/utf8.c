@@ -97,7 +97,7 @@ int put_len_utf8(int _ch)
 	return len;
 }
 
-int put_char_bare_utf8(char *_dst, int _ch)
+static int put_char_bare_utf8(char *_dst, int _ch)
 {
 	unsigned int ch = (unsigned int)_ch;
 	unsigned char *dst = (unsigned char *)_dst;

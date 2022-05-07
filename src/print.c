@@ -216,7 +216,7 @@ size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq)
 			len += 2;
 		} else {
 			if (dstlen)
-				dst += put_char_bare_utf8(dst, ch);
+				dst += put_char_utf8(dst, ch);
 
 			len += lench;
 		}
