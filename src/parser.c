@@ -2375,10 +2375,11 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->string = true;
 
 		if (p->string && (*src == p->quote_char) && (*src == '"')) {
-			dst += put_char_bare_utf8(dst, '[');
-			dst += put_char_bare_utf8(dst, ']');
-			p->string = false;
+			*dst++ = '[';
+			*dst++ = ']';
+			*dst = '\0';
 			src++;
+			p->string = false;
 			p->srcptr = (char*)src;
 			p->toklen = dst - p->token;
 			return true;
