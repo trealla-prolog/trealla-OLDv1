@@ -124,8 +124,9 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, true);
 	may_heap_error(p0);
+	unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_heap_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;

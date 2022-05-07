@@ -210,11 +210,8 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			cell *h = LIST_HEAD(p1);
 			cell *c = h;
 			pl_idx_t c_ctx = p1_ctx;
-
-			if (is_variable(c)) {
-				c = deref(q, c, c_ctx);
-				c_ctx = q->latest_ctx;
-			}
+			c = deref(q, c, c_ctx);
+			c_ctx = q->latest_ctx;
 
 			if (is_in_ref_list2(c, c_ctx, list)) {
 				cell *tmp = alloc_on_tmp(q, 1);
@@ -224,7 +221,11 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				tmp->flags |= FLAG_VAR_FRESH;
 				//tmp->attrs = NULL;
 			} else {
-				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, list);
+				reflist nlist = {0};
+				nlist.next = list;
+				nlist.ptr = save_p1;
+				nlist.ctx = save_p1_ctx;
+				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, &nlist);
 				if (!rec) return rec;
 			}
 
@@ -232,7 +233,12 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 			p1 = deref(q, p1, p1_ctx);
 			p1_ctx = q->latest_ctx;
 
-			if (is_in_ref_list2(p1, p1_ctx, list)) {
+			reflist nlist = {0};
+			nlist.next = list;
+			nlist.ptr = save_p1;
+			nlist.ctx = save_p1_ctx;
+
+			if (is_in_ref_list2(p1, p1_ctx, &nlist)) {
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
 				tmp->tag = TAG_VAR;
@@ -267,12 +273,8 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		while (arity--) {
 			cell *c = p1;
 			pl_idx_t c_ctx = p1_ctx;
-
-			if (is_variable(c)) {
-				c = deref(q, c, c_ctx);
-				c_ctx = q->latest_ctx;
-			}
-
+			c = deref(q, c, c_ctx);
+			c_ctx = q->latest_ctx;
 			reflist nlist = {0};
 
 			if (is_in_ref_list2(c, c_ctx, list)) {
