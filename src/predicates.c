@@ -4992,7 +4992,7 @@ static USE_RESULT pl_status fn_atom_lower_2(query *q)
 	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towlower(ch);
-		dst += put_char_bare_utf8(dst, ch);
+		dst += put_char_utf8(dst, ch);
 	}
 
 	*dst = '\0';
@@ -5017,7 +5017,7 @@ static USE_RESULT pl_status fn_atom_upper_2(query *q)
 	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towupper(ch);
-		dst += put_char_bare_utf8(dst, ch);
+		dst += put_char_utf8(dst, ch);
 	}
 
 	*dst = '\0';
@@ -5043,7 +5043,7 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towlower(ch);
-		dst += put_char_bare_utf8(dst, ch);
+		dst += put_char_utf8(dst, ch);
 	}
 
 	*dst = '\0';
@@ -5068,7 +5068,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	while (len--) {
 		int ch = get_char_utf8(&src);
 		ch = towupper(ch);
-		dst += put_char_bare_utf8(dst, ch);
+		dst += put_char_utf8(dst, ch);
 	}
 
 	*dst = '\0';

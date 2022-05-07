@@ -151,7 +151,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 		if (ch != '~') {
             CHECK_BUF(MAX_BYTES_PER_CODEPOINT);
-			dst += put_char_bare_utf8(dst, ch);
+			dst += put_char_utf8(dst, ch);
 			start_of_line = ch == '\n';
 			continue;
 		}
