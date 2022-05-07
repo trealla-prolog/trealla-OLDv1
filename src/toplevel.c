@@ -83,7 +83,10 @@ int check_interrupt(query *q)
 
 bool check_redo(query *q)
 {
-	if (q->do_dump_vars && q->cp && !q->in_attvar_print) {
+	if (q->in_attvar_print)
+		return true;
+
+	if (q->do_dump_vars && q->cp) {
 		dump_vars(q, true);
 
 		if (!q->pl->did_dump_vars) {
@@ -362,12 +365,14 @@ void dump_vars(query *q, bool partial)
 		any = true;
 	}
 
-	if (any && any_attributed(q))
-		fprintf(stdout, ",\n");
+	bool any_atts = any_attributed(q);
+
+	if (any && any_atts)
+		fprintf(stdout, ", ");
 
 	// Print residual goals of attributed variables...
 
-	if (any_attributed(q) && !q->in_attvar_print) {
+	if (any_atts) {
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
 		cell p1;

@@ -712,13 +712,12 @@ portray_atts_(Term) :-
 	copy_term(Term, Copy, Gs),
 	Term = Copy,
 	Gs = [Gs0],
-	write('   '),
 	write_term(Gs0, [varnames(true)]).
 
 dump_attvars_([]) :- !.
 dump_attvars_([Var|Vars]) :-
 	portray_atts_(Var),
-	(Vars == [] -> write('') ; write(',\n')),
+	(Vars == [] -> write('') ; write(', ')),
 	dump_attvars_(Vars).
 
 dump_attvars :-
