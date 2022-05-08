@@ -2227,7 +2227,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	p->v.flags = 0;
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
-	p->string = p->is_quoted = p->is_variable = p->is_op = false;
+	p->was_string = p->string = p->is_quoted = p->is_variable = p->is_op = false;
 
 	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
 		src++;
@@ -2379,6 +2379,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			*dst++ = ']';
 			*dst = '\0';
 			src++;
+			p->was_string = true;
 			p->string = false;
 			p->srcptr = (char*)src;
 			p->toklen = dst - p->token;
@@ -3155,6 +3156,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		int func = is_literal(&p->v) && !specifier && (*p->srcptr == '(');
+
+		if ((p->was_string || p->string) && func) {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, near \"%s\", expected atom\n", p->token);
+
+			p->error_desc = "expected_atom";
+			p->error = true;
+			break;
+		}
 
 		if (func) {
 			is_func = true;

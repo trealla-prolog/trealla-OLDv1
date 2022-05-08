@@ -2444,9 +2444,6 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		return pl_success;
 	}
 
-	if ((p1->val_off == g_nil_s) && p1->arity)
-		return throw_error(q, p3, p3_ctx, "syntax_error", "atom_expected");
-
 	cell tmp = *p1;
 	tmp.nbr_cells = 1;
 	tmp.arity = 0;
