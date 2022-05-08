@@ -424,9 +424,6 @@ iso_dif(X, Y) :-
 :- meta_predicate(forall(0,0)).
 :- meta_predicate(catch(0,?,0)).
 
-numbervars(Term) :-
-	numbervars(Term, 0, _).
-
 numbervars(Term, N0, N) :-
    catch(numbervars_(Term, N0, N),
 	 error(E,Ctx),
