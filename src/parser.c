@@ -1649,7 +1649,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 		}
 	} else if (is_fx(c) || is_fy(c)) {
 		if ((c->val_off == g_negation_s)
-		|| (c->val_off == g_neck_s)) {
+			|| (c->val_off == g_neck_s)) {
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {
