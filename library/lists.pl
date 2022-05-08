@@ -7,8 +7,7 @@
 		last/2, flatten/2, same_length/2,
 		sum_list/2, prod_list/2, max_list/2, min_list/2,
 		toconjunction/2, numlist/3,
-		length/2, length_checked/2,
-		reverse/2
+		length/2, reverse/2
 	]).
 
 reverse(Xs, Ys) :-
@@ -177,19 +176,6 @@ numlist_(U, U, List) :-
 numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
-
-length_checked(Xs0, N) :-
-	'$skip_max_list'(M, N, Xs0, Xs),
-	(  Xs == [] -> N = M
-	;  var(Xs), Xs == N -> throw(error(resource_error(finite_memory),length/2))
-	;  Xs \= [_|_] -> throw(error(type_error(list,Xs0),length/2))
-	;  nonvar(Xs0), M == 0, integer(N), N > 0 -> throw(error(type_error(list,Xs0),length/2))
-	;  nonvar(N), '$skip_max_list'(_, Max, Xs, _), Max == -1 -> throw(error(type_error(list,Xs0),length/2))
-	;  nonvar(Xs) -> var(N), throw(error(resource_error(finite_memory),length/2))
-	;  nonvar(N) -> R is N-M, length_rundown(Xs, R)
-	;  N == Xs -> throw(error(resource_error(finite_memory),length/2))
-	;  length_addendum(Xs, N, M)
-	).
 
 length(Xs0, N) :-
    '$skip_max_list'(M, N, Xs0,Xs),
