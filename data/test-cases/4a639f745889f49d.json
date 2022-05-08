@@ -1,0 +1,55 @@
+{
+  "uid" : "4a639f745889f49d",
+  "name" : "random_select_3_01",
+  "fullName" : "random_select_3_01::tests(fast_random)",
+  "historyId" : "random_select_3_01::tests(fast_random)",
+  "time" : {
+    "duration" : 47
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/random/tests.lgt::tests(fast_random)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/random/tests.lgt::tests(fast_random)"
+  }, {
+    "name" : "package",
+    "value" : "library/random/tests.lgt::tests(fast_random)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/random/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "54-60"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ab8746a1650fdba192b3aac7aa66136dac8b2815/library/random/tests.lgt#L54"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4a639f745889f49d.json",
+  "parameterValues" : [ "library/random/tests.lgt", "54-60", "https://github.com/LogtalkDotOrg/logtalk3/tree/ab8746a1650fdba192b3aac7aa66136dac8b2815/library/random/tests.lgt#L54" ]
+}
