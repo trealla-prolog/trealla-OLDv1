@@ -1826,12 +1826,11 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
-	unsigned idx = 0;
 
 	if (cnt) {
-		unsigned done = 0;
+		unsigned idx = 0;
 
-		for (unsigned i = 0; i < cnt; i++) {
+		for (unsigned i = 0, done = 0; i < cnt; i++) {
 			make_literal(tmp+idx, g_dot_s);
 			tmp[idx].arity = 2;
 			tmp[idx].nbr_cells = ((cnt-done)*2)+1;
@@ -1851,7 +1850,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	} else
 		make_literal(tmp, g_nil_s);
 
-	return tmp;		// returns on tmp_heap
+	return tmp;
 }
 
 static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
@@ -1903,12 +1902,11 @@ static cell *do_term_singletons(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt2*2)+1);
 	ensure(tmp);
-	unsigned idx = 0;
 
 	if (cnt2) {
-		unsigned done = 0;
+		unsigned idx = 0;
 
-		for (unsigned i = 0; i < cnt; i++) {
+		for (unsigned i = 0, done = 0; i < cnt; i++) {
 			if (q->pl->tabs[i].cnt != 1)
 				continue;
 
