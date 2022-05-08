@@ -424,6 +424,25 @@ iso_dif(X, Y) :-
 :- meta_predicate(forall(0,0)).
 :- meta_predicate(catch(0,?,0)).
 
+numbervars(Term) :-
+	numbervars(Term, 0, _).
+
+numbervars(Term, N0, N) :-
+   catch(numbervars_(Term, N0, N),
+	 error(E,Ctx),
+	 ( ( var(Ctx) -> Ctx = numbervars/3 ; true ), throw(error(E,Ctx) ) ) ).
+
+numbervars_(Term, N0, N) :-
+   must_be(integer, N0),
+   can_be(integer, N),
+   term_variables(Term, Vars),
+   numberlist_(Vars, N0, N).
+
+numberlist_([], N, N).
+numberlist_(['$VAR'(N0)|Vars], N0, N) :-
+   N1 is N0+1,
+   numberlist_(Vars, N1, N).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %
@@ -755,3 +774,4 @@ succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	X is S - Y.
 succ(_,_) :-
 	throw(error(instantiation_error, succ/2)).
+

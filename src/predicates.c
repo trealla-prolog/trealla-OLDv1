@@ -5509,110 +5509,6 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	return pl_failure;
 }
 
-static unsigned do_numbervars(query *q, cell *p1, pl_idx_t p1_ctx, int *end, int depth)
-{
-	if (depth == MAX_DEPTH) {
-		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
-		return 0;
-	}
-
-	unsigned cnt = 0;
-
-	if (is_variable(p1)) {
-		cell *tmp = alloc_on_heap(q, 2);
-		make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
-		make_int(tmp+1, *end); *end = *end + 1;
-		tmp->flags |= FLAG_CSTR_QUOTED;
-		set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
-		cnt++;
-		return cnt;
-	}
-
-	if (!is_structure(p1))
-		return cnt;
-
-	if (is_iso_list(p1) && is_acyclic_term(q, p1, p1_ctx)) {
-		LIST_HANDLER(p1);
-
-		while (is_iso_list(p1)) {
-			CHECK_INTERRUPT();
-			cell *c = LIST_HEAD(p1);
-			c = deref(q, c, p1_ctx);
-			pl_idx_t c_ctx = q->latest_ctx;
-
-			if (is_variable(c)) {
-				if (!accum_var(q, c, c_ctx)) {
-					cell *tmp = alloc_on_heap(q, 2);
-					make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
-					make_int(tmp+1, *end); *end = *end + 1;
-					tmp->flags |= FLAG_CSTR_QUOTED;
-					set_var(q, c, c_ctx, tmp, q->st.curr_frame);
-					cnt++;
-				}
-			} else if (is_structure(c))
-				cnt += do_numbervars(q, c, c_ctx, end, depth+1);
-
-			p1 = LIST_TAIL(p1);
-			p1 = deref(q, p1, p1_ctx);
-			p1_ctx = q->latest_ctx;
-		}
-
-		cnt += do_numbervars(q, p1, p1_ctx, end, depth+1);
-		return cnt;
-	}
-
-	unsigned arity = p1->arity;
-	p1++;
-
-	for (; arity--; p1 += p1->nbr_cells) {
-		cell *c = deref(q, p1, p1_ctx);
-		pl_idx_t c_ctx = q->latest_ctx;
-
-		if (is_variable(c)) {
-			if (accum_var(q, c, c_ctx))
-				continue;
-
-			cell *tmp = alloc_on_heap(q, 2);
-			make_struct(tmp+0, g_sys_var_s, NULL, 1, 1);
-			make_int(tmp+1, *end); *end = *end + 1;
-			tmp->flags |= FLAG_CSTR_QUOTED;
-			set_var(q, c, c_ctx, tmp, q->st.curr_frame);
-			cnt++;
-		} else if (is_structure(c))
-			cnt += do_numbervars(q, c, c_ctx, end, depth+1);
-	}
-
-	return cnt;
-}
-
-static USE_RESULT pl_status fn_numbervars_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	int end = 0;
-	q->pl->tab_idx = 0;
-	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
-	m_allow_dups(q->pl->vars, false);
-	do_numbervars(q, p1, p1_ctx, &end, 0);
-	m_destroy(q->pl->vars);
-	return pl_success;
-}
-
-static USE_RESULT pl_status fn_numbervars_3(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,integer);
-	GET_NEXT_ARG(p3,integer_or_var);
-	int end = q->nv_start = get_int(p2);
-	q->pl->tab_idx = 0;
-	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
-	m_allow_dups(q->pl->vars, false);
-	unsigned cnt = do_numbervars(q, p1, p1_ctx, &end, 0);
-	m_destroy(q->pl->vars);
-	cell tmp;
-	make_int(&tmp, get_int(p2)+cnt);
-	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-}
-
 unsigned count_bits(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
@@ -6775,9 +6671,6 @@ static const struct builtins g_other_bifs[] =
 	{"hex_bytes", 2, fn_hex_bytes_2, "?string,?list", false},
 	{"hex_chars", 2, fn_hex_chars_2, "?integer,?string", false},
 	{"octal_chars", 2, fn_octal_chars_2, "?integer,?string", false},
-	{"numbervars", 1, fn_numbervars_1, "+term", false},
-	{"numbervars", 3, fn_numbervars_3, "+term,+start,?end", false},
-	{"numbervars", 4, fn_numbervars_3, "+term,+start,?end,+list", false},
 	{"var_number", 2, fn_var_number_2, "+term,?integer", false},
 	{"char_type", 2, fn_char_type_2, "+char,+term", false},
 	{"code_type", 2, fn_char_type_2, "+code,+term", false},
