@@ -2411,6 +2411,11 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->string = false;
 			p->srcptr = (char*)src;
 			p->toklen = dst - p->token;
+			int ch = peek_char_utf8(src);
+
+			if (!check_space_before_function(p, ch, src))
+				return false;
+
 			return true;
 		}
 
