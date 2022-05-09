@@ -319,6 +319,10 @@ static void find_key(query *q, predicate *pr, cell *key)
 		return;
 	}
 
+#if 0
+	sl_dump(pr->idx, dump_key, q);
+#endif
+
 	key = deep_clone_to_heap(q, key, q->st.curr_frame);
 
 	if (is_all_vars(key)) {
