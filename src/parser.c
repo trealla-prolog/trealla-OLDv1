@@ -2808,7 +2808,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 						p1 = LIST_TAIL(p1);
 					}
 
-					if (!is_nil(p1) && !process_term(p, p1))
+					if (/*!is_nil(p1) &&*/ !process_term(p, p1))
 						return false;
 
 					if (p->already_loaded)
@@ -3236,9 +3236,10 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_REAL) {
 			set_real(c, get_real(&p->v));
-		} else if ((!p->is_quoted || func || p->is_op || p->is_variable ||
-			(get_builtin(p->m->pl, p->token, 0, &found, NULL), found) ||
-			!strcmp(p->token, "[]")) && !p->string) {
+		} else if ((!p->is_quoted || func || p->is_op || p->is_variable
+			|| (get_builtin(p->m->pl, p->token, 0, &found, NULL), found)
+			//|| !strcmp(p->token, "[]")
+			) && !p->string) {
 
 			if (func && !strcmp(p->token, "."))
 				c->priority = 0;
