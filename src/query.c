@@ -285,7 +285,11 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.arg3_is_ground = false;
 	q->st.iter = NULL;
 
-	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
+	if (!pr->idx
+#if 0
+		|| !pr->is_dynamic		// FIXME
+#endif
+		|| (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
@@ -319,9 +323,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 		return;
 	}
 
-#if 0
-	sl_dump(pr->idx, dump_key, q);
-#endif
+	//sl_dump(pr->idx, dump_key, q);
 
 	key = deep_clone_to_heap(q, key, q->st.curr_frame);
 
@@ -333,8 +335,10 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.curr_clause = NULL;
 	miter *iter;
 
-	if (!(iter = m_find_key(pr->idx, key)))
+	if (!(iter = m_find_key(pr->idx, key))) {
+		//DUMP_TERM("*** not found, key = ", key, q->st.curr_frame);
 		return;
+	}
 
 	if (!m_next_key(iter, (void*)&q->st.curr_clause))
 		return;
