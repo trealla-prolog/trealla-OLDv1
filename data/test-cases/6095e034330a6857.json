@@ -1,0 +1,55 @@
+{
+  "uid" : "6095e034330a6857",
+  "name" : "coupling_cat_c",
+  "fullName" : "coupling_cat_c::coupling_metric_tests",
+  "historyId" : "coupling_cat_c::coupling_metric_tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/coupling_metric_tests.lgt::coupling_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/coupling_metric_tests.lgt::coupling_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/coupling_metric_tests.lgt::coupling_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/coupling_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "62-63"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/839a066fea77da3667b33048b0943f6a78fbbe3e/tools/code_metrics/coupling_metric_tests.lgt#L62"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "6095e034330a6857.json",
+  "parameterValues" : [ "tools/code_metrics/coupling_metric_tests.lgt", "62-63", "https://github.com/LogtalkDotOrg/logtalk3/tree/839a066fea77da3667b33048b0943f6a78fbbe3e/tools/code_metrics/coupling_metric_tests.lgt#L62" ]
+}
