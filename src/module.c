@@ -1163,7 +1163,7 @@ void xref_rule(module *m, clause *r, predicate *parent)
 
 void xref_db(module *m)
 {
-	for (predicate *pr = m->head; pr && g_tpl_interrupt; pr = pr->next) {
+	for (predicate *pr = m->head; pr && !g_tpl_interrupt; pr = pr->next) {
 		if (pr->is_processed)
 			continue;
 
