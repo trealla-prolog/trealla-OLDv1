@@ -1670,7 +1670,7 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 static USE_RESULT pl_status fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+	GET_NEXT_ARG(p2,list_or_nil_or_var);
 
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
