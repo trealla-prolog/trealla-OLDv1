@@ -2373,6 +2373,11 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		p->srcptr = (char*)src;
 		p->toklen = dst - p->token;
+		int ch = *src;
+
+		if (!check_space_before_function(p, ch, src))
+			return false;
+
 		return eat_comment(p);
 	}
 
