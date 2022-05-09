@@ -2808,7 +2808,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 						p1 = LIST_TAIL(p1);
 					}
 
-					if (/*!is_nil(p1) &&*/ !process_term(p, p1))
+					if (!process_term(p, p1))
 						return false;
 
 					if (p->already_loaded)
