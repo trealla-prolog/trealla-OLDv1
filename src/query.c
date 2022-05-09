@@ -286,7 +286,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.iter = NULL;
 
 	if (!pr->idx
-#if 0
+#if 1
 		|| !pr->is_dynamic		// FIXME
 #endif
 		|| (pr->cnt < q->st.m->indexing_threshold)) {
