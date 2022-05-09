@@ -2795,6 +2795,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 					cell *p1 = p->cl->cells;
 					LIST_HANDLER(p1);
+					bool tail = false;
 
 					while (is_list(p1) && !g_tpl_interrupt) {
 						cell *h = LIST_HEAD(p1);
@@ -2806,9 +2807,12 @@ unsigned tokenize(parser *p, bool args, bool consing)
 							return false;
 
 						p1 = LIST_TAIL(p1);
+
+						if (is_nil(p1))
+							tail = true;
 					}
 
-					if (!process_term(p, p1))
+					if (!tail && !process_term(p, p1))
 						return false;
 
 					if (p->already_loaded)
