@@ -1,0 +1,55 @@
+{
+  "uid" : "244e7050ad8ca4dd",
+  "name" : "set_intersect_2_03",
+  "fullName" : "set_intersect_2_03::tests(set(integer))",
+  "historyId" : "set_intersect_2_03::tests(set(integer))",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "testClass",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "package",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/sets/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "168-171"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2ba7af6eb73e4a223f02c83f1af92fafe7ad5c41/library/sets/tests.lgt#L168"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "244e7050ad8ca4dd.json",
+  "parameterValues" : [ "library/sets/tests.lgt", "168-171", "https://github.com/LogtalkDotOrg/logtalk3/tree/2ba7af6eb73e4a223f02c83f1af92fafe7ad5c41/library/sets/tests.lgt#L168" ]
+}
