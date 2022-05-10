@@ -2679,7 +2679,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		}
 
 		dst += put_char_utf8(dst, ch);
-		*dst = '\0';
 
 		if (((ch < 256) && strchr(g_solo, ch)) || iswspace(ch))
 			break;
@@ -2796,6 +2795,12 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					if (is_variable(p->cl->cells)) {
 						if (DUMP_ERRS || !p->do_read_term)
 							printf("Error: instantiation error, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+						p->error_desc = "instnatiation_error";
+						p->error = true;
+					} else if (is_number(p->cl->cells)) {
+						if (DUMP_ERRS || !p->do_read_term)
+							printf("Error: type error, callable, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
 
 						p->error_desc = "instnatiation_error";
 						p->error = true;
@@ -3182,13 +3187,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			) {
 				specifier = 0;
 				priority = 0;
-			} else if (((nextch == ';') || (nextch == '*') || (nextch == '-')) && strcmp(p->token, "+")) {
-				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
-
-				p->error_desc = "incomplete";
-				p->error = true;
-				break;
 			}
 		}
 
