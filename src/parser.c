@@ -2259,7 +2259,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	p->v.flags = 0;
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
-	p->was_string = p->string = p->is_quoted = p->is_variable = p->is_op = false;
+	p->was_string = p->string = p->is_quoted = p->is_variable = p->is_op = p->symbol = false;
 
 	if (p->dq_consing && (*src == '"') && (src[1] == '"')) {
 		src++;
@@ -2377,7 +2377,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		p->srcptr = (char*)src;
 		p->toklen = dst - p->token;
-		int ch = *src;
+		int ch = peek_char_utf8(src);
 
 		if (!check_space_before_function(p, ch, src))
 			return false;
@@ -2562,6 +2562,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		p->srcptr = (char*)src;
 		p->toklen = dst - p->token;
+		int ch = peek_char_utf8(src);
 
 		if (!check_space_before_function(p, ch, src))
 			return false;
@@ -2608,7 +2609,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->toklen = 2;
 			get_char_utf8(&src);
 			p->srcptr = (char*)src;
-			ch = peek_char_utf8(src);
+			int ch = peek_char_utf8(src);
 
 			if (!check_space_before_function(p, ch, src))
 				return false;
@@ -2627,6 +2628,8 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		next_ch = peek_char_utf8(src);
 
 	// Symbols...
+
+	p->symbol = true;
 
 	if (is_matching_pair(ch, next_ch, ')','(') ||
 		is_matching_pair(ch, next_ch, ']','(') ||
@@ -2647,8 +2650,21 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	if (was_space) {
 		dst += put_char_utf8(dst, ch);
 		p->toklen = dst - p->token;
-		p->is_op = search_op(p->m, p->token, NULL, false);
+		unsigned specifier;
+		p->is_op = search_op(p->m, p->token, &specifier, false);
+
+		if (IS_INFIX(specifier) && last_op)
+			p->is_op = false;
+
 		p->srcptr = (char*)src;
+
+		if (strcmp(p->token, "(") && strcmp(p->token, "-") && strcmp(p->token, "+")) {
+			int ch = peek_char_utf8(src);
+
+			if (!check_space_before_function(p, ch, src))
+				return false;
+		}
+
 		return true;
 	}
 
@@ -2736,7 +2752,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 #if 0
 		int ch = peek_char_utf8(p->token);
-		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, ch, p->line_nbr, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
+		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, symbol=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, ch, p->line_nbr, p->symbol, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
 #endif
 
 		if (!p->quote_char && !strcmp(p->token, ".")

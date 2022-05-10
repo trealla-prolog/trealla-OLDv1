@@ -671,6 +671,7 @@ struct parser_ {
 	bool last_close:1;
 	bool no_fp:1;
 	bool args:1;
+	bool symbol:1;
 };
 
 struct loaded_file {
