@@ -1084,8 +1084,10 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			continue;
 		}
 
-		if (!p->consulting && 0)
-			printf("*** OP1 start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+#if 0
+		if (!p->consulting)
+			printf("*** OP1 start=%u '%s' type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+#endif
 
 		if ((i == start_idx) && (i == end_idx)) {
 			c->priority = 0;
@@ -1123,8 +1125,10 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			continue;
 		}
 
-		if (!p->consulting && 0)
-			printf("*** OP2 last=%u/start=%u %s type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+#if 0
+		if (!p->consulting)
+			printf("*** OP2 last=%u/start=%u '%s' type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, GET_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
+#endif
 
 		c->tag = TAG_LITERAL;
 		c->arity = 1;
@@ -2761,7 +2765,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			}
 
 			if (analyze(p, 0, last_op)) {
-				if (p->cl->cells->nbr_cells < (p->cl->cidx-1)) {
+				if (p->cl->cells->nbr_cells <= (p->cl->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
 						printf("Error: syntax error, operator expected unfinished input '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
 
