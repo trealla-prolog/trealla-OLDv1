@@ -2793,6 +2793,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				term_to_body(p);
 
 				if (p->consulting && !p->skip) {
+					if (is_variable(p->cl->cells)) {
+						if (DUMP_ERRS || !p->do_read_term)
+							printf("Error: instantiation error, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+						p->error_desc = "instnatiation_error";
+						p->error = true;
+					}
+
 					xref_rule(p->m, p->cl, NULL);
 					term_expansion(p);
 					cell *p1 = p->cl->cells;
