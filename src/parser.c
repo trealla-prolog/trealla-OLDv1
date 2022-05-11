@@ -1140,7 +1140,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 			if (is_fx(rhs) && !rhs->arity && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
 				p->error_desc = "operator_clash";
 				p->error = true;
@@ -1152,7 +1152,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			if ((((pl_idx_t)(rhs - p->cl->cells)) < end_idx)
 				&& is_xf(rhs) && (rhs->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
 				p->error_desc = "operator_clash";
 				p->error = true;
@@ -1167,7 +1167,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
 
 				p->error_desc = "operand_missing";
 				p->error = true;
@@ -1184,7 +1184,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		if (is_xf(rhs) && (rhs->priority == c->priority)) {
 			if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
 			p->error_desc = "operator_clash";
 			p->error = true;
@@ -1212,7 +1212,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		if (nolhs || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
 
 			p->error_desc = "operand_missing";
 			p->error = true;
@@ -1239,7 +1239,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 				&& (is_xfx(next))
 				&& (next->priority == c->priority)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: operator clash, line %u\n", p->line_nbr);
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
 				p->error_desc = "operator_clash";
 				p->error = true;
@@ -2653,8 +2653,8 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		unsigned specifier;
 		p->is_op = search_op(p->m, p->token, &specifier, false);
 
-		if (IS_INFIX(specifier) && last_op)
-			p->is_op = false;
+		//if (IS_INFIX(specifier) && last_op)
+		//	p->is_op = false;
 
 		p->srcptr = (char*)src;
 
@@ -3180,9 +3180,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			int nextch = *s;
 
 			if ((nextch == ',')
-				|| (nextch == ')')
+			//	|| (nextch == ')')
 				|| (nextch == '|')
-				|| (nextch == ']')
+			//	|| (nextch == ']')
 				|| (nextch == '}')
 			) {
 				specifier = 0;
