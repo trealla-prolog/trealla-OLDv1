@@ -3826,7 +3826,7 @@ static void save_db(FILE *fp, query *q, int logging)
 				fprintf(fp, ",'%s')", tmpbuf);
 			}
 
-			if ((dbe->cl.cells->nbr_cells == 1) && is_op(dbe->cl.cells))
+			if ((dbe->cl.cells->nbr_cells == 1) && search_op(q->st.m, GET_STR(q->st.m, dbe->cl.cells), NULL, false))
 				fprintf(fp, " ");
 
 			fprintf(fp, ".\n");
