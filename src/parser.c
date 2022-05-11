@@ -3180,9 +3180,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			int nextch = *s;
 
 			if ((nextch == ',')
-			//	|| (nextch == ')')
+				|| (nextch == ')')
 				|| (nextch == '|')
-			//	|| (nextch == ']')
+				|| (nextch == ']')
 				|| (nextch == '}')
 			) {
 				specifier = 0;
