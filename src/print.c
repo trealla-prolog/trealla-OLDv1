@@ -1015,6 +1015,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			pl_idx_t arity = c->arity;
 			dst += snprintf(dst, dstlen, "%s", braces?"{":"(");
 			q->parens = true;
+
 #if 0
 			cell *save_c = c;
 			pl_idx_t save_ctx = c_ctx;
@@ -1221,17 +1222,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	space = false;
 
-#if 0
-	if ((strchr(src, '=') || strchr(src, '+') || strchr(src, '#')) &&
-		((*GET_STR(q, rhs) == '-')
-			|| (*GET_STR(q, rhs) == '*')
-			|| (*GET_STR(q, rhs) == '+')
-			|| (*GET_STR(q, rhs) == '~')
-			|| (*GET_STR(q, rhs) == '?') ||
-			(*GET_STR(q, rhs) == '#')))
-		space = true;
-#endif
-
 	if (!*src) space = false;
 	space += is_smallint(rhs) && is_negative(rhs);
 
@@ -1371,7 +1361,6 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
 	cell tmp = {0};
-	q->last_thing_was_symbol = false;
 
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
@@ -1382,11 +1371,13 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 		running = 0;
 	}
 
+	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 	q->did_quote = false;
 
 	char *buf = malloc(len+10);
 	ensure(buf);
+	q->last_thing_was_symbol = false;
 	len = print_term_to_buf(q, buf, len+1, c, c_ctx, running, false, 0);
 	return buf;
 }
@@ -1396,7 +1387,6 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
 	cell tmp = {0};
-	q->last_thing_was_symbol = false;
 
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
@@ -1407,11 +1397,13 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 		running = 0;
 	}
 
+	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
+	q->last_thing_was_symbol = false;
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
@@ -1437,7 +1429,6 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
 	cell tmp = {0};
-	q->last_thing_was_symbol = false;
 
 	if (running && is_iso_list(c)) {
 		cell *t = skip_max_list(q, c, &tmp_ctx, max, &skip, &tmp);
@@ -1448,11 +1439,13 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 		running = 0;
 	}
 
+	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
 	may_ptr_error(dst);
+	q->last_thing_was_symbol = false;
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
