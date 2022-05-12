@@ -780,7 +780,6 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-
 		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	}
