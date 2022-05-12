@@ -1192,7 +1192,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
 		const char *lhs_src = GET_STR(q, lhs);
-		if (!isalpha(*lhs_src) && !isdigit(*lhs_src)
+		if (!isalpha(*lhs_src) && !isdigit(*lhs_src) && (*lhs_src != '$')
 			&& strcmp(src, ",") && strcmp(src, ";")
 			&& strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
 			space = true;
