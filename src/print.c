@@ -1177,7 +1177,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
 		const char *lhs_src = GET_STR(q, lhs);
-		if (!isalpha(*lhs_src) && !isdigit(*lhs_src) && strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
+		if (!isalpha(*lhs_src) && !isdigit(*lhs_src)
+			&& strcmp(src, ",") && strcmp(src, ";")
+			&& strcmp(lhs_src, "[]") && strcmp(lhs_src, "{}"))
 			space = true;
 	}
 
@@ -1185,7 +1187,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	int ch = peek_char_utf8(src);
 	bool is_symbol = !needs_quoting(q->st.m, src, src_len)
-		&& !iswalpha(ch) && strcmp(src, ",") && strcmp(src, "[]") && strcmp(src, "{}") && !q->parens;
+		&& !iswalpha(ch) && strcmp(src, ",") && strcmp(src, ";")
+		&& strcmp(src, "[]") && strcmp(src, "{}") && !q->parens;
 
 	//if (dstlen) printf("*** op '%s',  was=%d, is=%d\n", src, q->was_last_thing_was_symbol, is_symbol);
 
