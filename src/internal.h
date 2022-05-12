@@ -592,6 +592,7 @@ struct query_ {
 	enum q_retry retry;
 	int8_t halt_code;
 	int8_t quoted;
+	bool last_thing_was_symbol:1;
 	bool in_attvar_print:1;
 	bool lists_ok:1;
 	bool autofail:1;
