@@ -1,0 +1,55 @@
+{
+  "uid" : "65c3504ab2a9eead",
+  "name" : "instvars_01",
+  "fullName" : "instvars_01::tests",
+  "historyId" : "instvars_01::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/instvars/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/instvars/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/instvars/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/instvars/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "37-38"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/examples/instvars/tests.lgt#L37"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "65c3504ab2a9eead.json",
+  "parameterValues" : [ "examples/instvars/tests.lgt", "37-38", "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/examples/instvars/tests.lgt#L37" ]
+}

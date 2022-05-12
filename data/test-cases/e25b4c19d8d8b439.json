@@ -1,0 +1,55 @@
+{
+  "uid" : "e25b4c19d8d8b439",
+  "name" : "predicate_lookups_instances_05",
+  "fullName" : "predicate_lookups_instances_05::tests",
+  "historyId" : "predicate_lookups_instances_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/predicate_lookups/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/predicate_lookups/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/predicate_lookups/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/predicate_lookups/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "68-69"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/examples/predicate_lookups/tests.lgt#L68"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "e25b4c19d8d8b439.json",
+  "parameterValues" : [ "examples/predicate_lookups/tests.lgt", "68-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/examples/predicate_lookups/tests.lgt#L68" ]
+}

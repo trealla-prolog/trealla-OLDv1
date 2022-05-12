@@ -1,0 +1,61 @@
+{
+  "uid" : "b7d6301c9b857ded",
+  "name" : "html_11",
+  "fullName" : "html_11::tests",
+  "historyId" : "html_11::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "assertion_failure(<code>[foo,bar,baz]</code>== <code >[foo,bar,baz] </cod)",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/html/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/html/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/html/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/html/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "79-83"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/library/html/tests.lgt#L79"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "b7d6301c9b857ded.json",
+  "parameterValues" : [ "library/html/tests.lgt", "79-83", "https://github.com/LogtalkDotOrg/logtalk3/tree/6db2701b39593a199cda173cdd034be716f1a3aa/library/html/tests.lgt#L79" ]
+}
