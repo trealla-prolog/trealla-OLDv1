@@ -593,7 +593,6 @@ struct query_ {
 	int8_t halt_code;
 	int8_t quoted;
 	bool parens:1;
-	bool was_last_thing_was_symbol:1;
 	bool last_thing_was_symbol:1;
 	bool in_attvar_print:1;
 	bool lists_ok:1;
