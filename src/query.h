@@ -57,7 +57,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
 pl_status make_cstringn(cell *d, const char *s, size_t n);
 pl_status make_stringn(cell *d, const char *s, size_t n);
-void make_literal(cell *tmp, pl_idx_t offset);
+void make_atom(cell *tmp, pl_idx_t offset);
 int get_stream(query *q, cell *p1);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);

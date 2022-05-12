@@ -627,7 +627,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		}
 
 		if (LEN_STR(q, head) == (size_t)(src-save_src)) {
-			make_literal(tmp, g_nil_s);
+			make_atom(tmp, g_nil_s);
 		} else if (src == save_src) {
 			tmp = head;
 		} else {
@@ -674,7 +674,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		if (is_string(fast)) {
 			cnt += LEN_STR_UTF8(fast);
 			*skip = cnt;
-			make_literal(tmp, g_nil_s);
+			make_atom(tmp, g_nil_s);
 			return tmp;
 		}
 
@@ -732,7 +732,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 	if (((q->undo_hi_tp - q->undo_lo_tp) == 0) ||
 		(q->undo_lo_tp > q->undo_hi_tp)) {
 		cell tmp;
-		make_literal(&tmp, g_nil_s);
+		make_atom(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}

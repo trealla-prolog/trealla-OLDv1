@@ -600,8 +600,8 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
-		make_literal(tmp+nbr_cells, index_from_pool(q->pl, expected));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
+		make_atom(tmp+nbr_cells, index_from_pool(q->pl, expected));
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
 		err_type = "uninstantiation_error";
 		//printf("error(%s(%s),(%s)/%u).\n", err_type, GET_STR(q, c), functor, goal->arity);
@@ -614,7 +614,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		nbr_cells += c->nbr_cells;
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, GET_STR(q, c), c->arity, functor, goal->arity);
@@ -623,7 +623,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
 		tmp[nbr_cells] = *c;
@@ -633,7 +633,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_int(tmp+nbr_cells++, c->arity);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_SLICE2(q, c, "/") && is_variable(c+1)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
@@ -644,7 +644,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
 
 		if (!extra)
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		else {
 			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
@@ -653,12 +653,12 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 			if (*ptr2) *ptr2++ = '\0';
 
 			while (ptr2) {
-				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 				ptr = ptr2;
 				ptr2 = strchr(ptr, ',');
 			}
 
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
@@ -670,7 +670,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_int(tmp+nbr_cells++, c->arity);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "permission_error") && is_builtin(c)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
@@ -681,7 +681,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
 
 		if (!extra)
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		else {
 			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
@@ -690,12 +690,12 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 			if (*ptr2) *ptr2++ = '\0';
 
 			while (ptr2) {
-				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 				ptr = ptr2;
 				ptr2 = strchr(ptr, ',');
 			}
 
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
@@ -707,7 +707,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_int(tmp+nbr_cells++, c->arity);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		//printf("error(%s,(%s)/%u).\n", err_type, functor, goal->arity);
@@ -715,10 +715,10 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
@@ -727,14 +727,14 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, GET_STR(q, c)));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, GET_STR(q, c)));
 		make_int(tmp+nbr_cells++, c->arity);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "representation_error")
 		|| !strcmp(err_type, "evaluation_error")
@@ -746,10 +746,10 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1);
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else {
 		//printf("error(%s(%s,(%s)),(%s)/%u).\n", err_type, expected, GET_STR(q, c), functor, goal->arity);
@@ -760,7 +760,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
 
 		if (!extra) {
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, expected));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		} else {
 			char tmpbuf[1024*8];
 			strcpy(tmpbuf, expected);
@@ -769,18 +769,18 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 			if (*ptr2) *ptr2++ = '\0';
 
 			while (ptr2) {
-				make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+				make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 				ptr = ptr2;
 				ptr2 = strchr(ptr, ',');
 			}
 
-			make_literal(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
+			make_atom(tmp+nbr_cells++, index_from_pool(q->pl, ptr));
 		}
 
 		nbr_cells += safe_copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_literal(tmp+nbr_cells++, index_from_pool(q->pl, functor));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	}
 

@@ -380,7 +380,7 @@ void dump_vars(query *q, bool partial)
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
 		cell p1;
-		make_literal(&p1, index_from_pool(q->pl, "dump_attvars"));
+		make_atom(&p1, index_from_pool(q->pl, "dump_attvars"));
 		cell *tmp = clone_to_heap(q, false, &p1, 1);
 		pl_idx_t nbr_cells = 0 + p1.nbr_cells;
 		make_end(tmp+nbr_cells);

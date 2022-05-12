@@ -296,7 +296,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 		if (!p2 || !is_list(p2)) {
 			cell tmp;
-			make_literal(&tmp, g_nil_s);
+			make_atom(&tmp, g_nil_s);
 			return throw_error(q, &tmp, q->st.curr_frame, "domain_error", "missing_args");
 		}
 
@@ -571,7 +571,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		if (strlen(tmpbuf))
 			may_error(make_stringn(&tmp, tmpbuf, len), free(tmpbuf));
 		else
-			make_literal(&tmp, g_nil_s);
+			make_atom(&tmp, g_nil_s);
 
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);

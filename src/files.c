@@ -309,7 +309,7 @@ static void add_stream_properties(query *q, int n)
 static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
-	make_literal(tmp+0, g_sys_stream_property_s);
+	make_atom(tmp+0, g_sys_stream_property_s);
 	make_int(tmp+1, n);
 	make_var(tmp+2, g_anon_s, create_vars(q, 1));
 	tmp->nbr_cells = 3;
@@ -420,13 +420,13 @@ static pl_status do_stream_property(query *q)
 		cell tmp;
 
 		if (str->eof_action == eof_action_eof_code)
-			make_literal(&tmp, index_from_pool(q->pl, "eof_code"));
+			make_atom(&tmp, index_from_pool(q->pl, "eof_code"));
 		else if (str->eof_action == eof_action_error)
-			make_literal(&tmp, index_from_pool(q->pl, "error"));
+			make_atom(&tmp, index_from_pool(q->pl, "error"));
 		else if (str->eof_action == eof_action_reset)
-			make_literal(&tmp, index_from_pool(q->pl, "reset"));
+			make_atom(&tmp, index_from_pool(q->pl, "reset"));
 		else
-			make_literal(&tmp, index_from_pool(q->pl, "none"));
+			make_atom(&tmp, index_from_pool(q->pl, "none"));
 
 		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
@@ -458,11 +458,11 @@ static pl_status do_stream_property(query *q)
 		cell tmp;
 
 		if (str->at_end_of_file)
-			make_literal(&tmp, index_from_pool(q->pl, "past"));
+			make_atom(&tmp, index_from_pool(q->pl, "past"));
 		else if (at_end_of_file)
-			make_literal(&tmp, index_from_pool(q->pl, "at"));
+			make_atom(&tmp, index_from_pool(q->pl, "at"));
 		else
-			make_literal(&tmp, index_from_pool(q->pl, "not"));
+			make_atom(&tmp, index_from_pool(q->pl, "not"));
 
 		return unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
@@ -485,7 +485,7 @@ static pl_status do_stream_property(query *q)
 static void clear_streams_properties(query *q)
 {
 	cell tmp;
-	make_literal(&tmp, g_sys_stream_property_s);
+	make_atom(&tmp, g_sys_stream_property_s);
 	tmp.nbr_cells = 1;
 	tmp.arity = 2;
 
@@ -1099,7 +1099,7 @@ static USE_RESULT pl_status fn_iso_read_1(query *q)
 	}
 
 	cell tmp;
-	make_literal(&tmp, g_nil_s);
+	make_atom(&tmp, g_nil_s);
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
@@ -1121,7 +1121,7 @@ static USE_RESULT pl_status fn_iso_read_2(query *q)
 	}
 
 	cell tmp;
-	make_literal(&tmp, g_nil_s);
+	make_atom(&tmp, g_nil_s);
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
@@ -1274,19 +1274,19 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 				if (vars) {
 					cell tmp;
-					make_literal(&tmp, g_nil_s);
+					make_atom(&tmp, g_nil_s);
 					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
 				}
 
 				if (varnames) {
 					cell tmp;
-					make_literal(&tmp, g_nil_s);
+					make_atom(&tmp, g_nil_s);
 					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
 				}
 
 				if (sings) {
 					cell tmp;
-					make_literal(&tmp, g_nil_s);
+					make_atom(&tmp, g_nil_s);
 					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 				}
 
@@ -1335,7 +1335,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				}
 
 				cell tmp;
-				make_literal(&tmp, g_eof_s);
+				make_atom(&tmp, g_eof_s);
 				return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 			}
 
@@ -1372,7 +1372,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		}
 
 		cell tmp;
-		make_literal(&tmp, g_nil_s);
+		make_atom(&tmp, g_nil_s);
 		p->do_read_term = false;
 		return throw_error(q, &tmp, q->st.curr_frame, "syntax_error", p->error_desc?p->error_desc:"read_term");
 	}
@@ -1425,7 +1425,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 	if (!p->cl->cidx) {
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -1452,7 +1452,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			unsigned done = 0;
 
 			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
-				make_literal(tmp+idx, g_dot_s);
+				make_atom(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
 				cell v;
@@ -1461,7 +1461,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				done++;
 			}
 
-			make_literal(tmp+idx++, g_nil_s);
+			make_atom(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
 
@@ -1473,7 +1473,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
-			make_literal(&tmp, g_nil_s);
+			make_atom(&tmp, g_nil_s);
 			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
 		}
 	}
@@ -1499,25 +1499,25 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				if (q->pl->tabs[i].is_anon)
 					continue;
 
-				make_literal(tmp+idx, g_dot_s);
+				make_atom(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, g_unify_s);
+				make_atom(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->pl->tabs[i].val_off);
+				make_atom(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
 				make_var(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
 
-			make_literal(tmp+idx++, g_nil_s);
+			make_atom(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
 
@@ -1529,7 +1529,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
-			make_literal(&tmp, g_nil_s);
+			make_atom(&tmp, g_nil_s);
 			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
 		}
 	}
@@ -1561,25 +1561,25 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				if (varnames && (q->pl->tabs[i].is_anon))
 					continue;
 
-				make_literal(tmp+idx, g_dot_s);
+				make_atom(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*4)+1;
 				cell v;
-				make_literal(&v, g_unify_s);
+				make_atom(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
 				v.arity = 2;
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
 				tmp[idx++] = v;
-				make_literal(&v, q->pl->tabs[i].val_off);
+				make_atom(&v, q->pl->tabs[i].val_off);
 				tmp[idx++] = v;
 				make_var(&v, q->pl->tabs[i].val_off, q->pl->tabs[i].var_nbr);
 				tmp[idx++] = v;
 				done++;
 			}
 
-			make_literal(tmp+idx++, g_nil_s);
+			make_atom(tmp+idx++, g_nil_s);
 			tmp[0].arity = 2;
 			tmp[0].nbr_cells = idx;
 
@@ -1591,7 +1591,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
-			make_literal(&tmp, g_nil_s);
+			make_atom(&tmp, g_nil_s);
 			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 		}
 	}
@@ -2290,7 +2290,7 @@ static USE_RESULT pl_status fn_iso_get_char_1(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -2363,7 +2363,7 @@ static USE_RESULT pl_status fn_iso_get_char_2(query *q)
 			clearerr(str->fp);
 
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -2690,7 +2690,7 @@ static USE_RESULT pl_status fn_iso_peek_char_1(query *q)
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -2744,7 +2744,7 @@ static USE_RESULT pl_status fn_iso_peek_char_2(query *q)
 		str->did_getc = false;
 		clearerr(str->fp);
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3091,7 +3091,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	if (is_atom(p_chars) && !is_string(p_chars)) {
 		if (!strcmp(GET_STR(q, p_chars), "[]")) {
 			cell tmp;
-			make_literal(&tmp, g_eof_s);
+			make_atom(&tmp, g_eof_s);
 			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 		} else
 			return throw_error(q, p_chars, p_chars_ctx, "type_error", "character");
@@ -3129,7 +3129,7 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	if (!src || !*src) {
 		free(save_src);
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3503,7 +3503,7 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 		}
 
 		cell tmp;
-		make_literal(&tmp, g_eof_s);
+		make_atom(&tmp, g_eof_s);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
@@ -3909,7 +3909,7 @@ static USE_RESULT pl_status fn_getfile_2(query *q)
 
 	if (!in_list) {
 		cell tmp;
-		make_literal(&tmp, g_nil_s);
+		make_atom(&tmp, g_nil_s);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
@@ -3958,7 +3958,7 @@ static USE_RESULT pl_status fn_getlines_1(query *q)
 
 	if (!in_list) {
 		cell tmp;
-		make_literal(&tmp, g_nil_s);
+		make_atom(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
@@ -4008,7 +4008,7 @@ static USE_RESULT pl_status fn_getlines_2(query *q)
 
 	if (!in_list) {
 		cell tmp;
-		make_literal(&tmp, g_nil_s);
+		make_atom(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
@@ -5219,7 +5219,7 @@ static USE_RESULT pl_status fn_bread_3(query *q)
 	if (str->data_len)
 		may_error(make_stringn(&tmp2, str->data, str->data_len), free(str->data));
 	else
-		make_literal(&tmp2, g_nil_s);
+		make_atom(&tmp2, g_nil_s);
 
 	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	unshare_cell(&tmp2);
