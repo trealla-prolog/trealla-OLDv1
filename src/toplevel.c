@@ -355,6 +355,7 @@ void dump_vars(query *q, bool partial)
 		q->variable_names_ctx = 0;
 		q->numbervars = true;
 		q->max_depth = 9;
+		q->parens = parens;
 
 		print_term(q, stdout, c, c_ctx, 1);
 
@@ -362,6 +363,7 @@ void dump_vars(query *q, bool partial)
 		if (q->did_quote) space = false;
 		q->quoted = saveq;
 		q->numbervars = false;
+		q->parens = false;
 		any = true;
 	}
 
