@@ -4173,11 +4173,9 @@ static USE_RESULT pl_status fn_forall_2(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
-
 	pl_idx_t off = heap_used(q);
 	may_ptr_error(clone_to_heap(q, true, p1, 0));
 	may_ptr_error(clone_to_heap(q, false, p2, 1));
-
 	cell *tmp = get_heap(q, off);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells + p2->nbr_cells;
 	make_struct(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
@@ -4572,7 +4570,6 @@ static USE_RESULT pl_status fn_task_n(query *q)
 {
 	pl_idx_t save_hp = q->st.hp;
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
-
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
 	may_ptr_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
@@ -5314,17 +5311,13 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	GET_FIRST_ARG(p1,atomic);
 	GET_NEXT_ARG(p2,atomic);
 	GET_NEXT_ARG(p3,any);
-
 	const char *src1, *src2;
 	size_t len1, len2;
 	char tmpbuf1[256], tmpbuf2[256];
-
 	len1 = print_term_to_buf(q, tmpbuf1, sizeof(tmpbuf1), p1, p1_ctx, 1, false, 0);
 	src1 = tmpbuf1;
-
 	len2 = print_term_to_buf(q, tmpbuf2, sizeof(tmpbuf2), p2, p2_ctx, 1, false, 0);
 	src2 = tmpbuf2;
-
 	ASTRING_alloc(pr, len1+len2);
 	ASTRING_strcatn(pr, src1, len1);
 	ASTRING_strcatn(pr, src2, len2);
@@ -5390,7 +5383,6 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	GET_NEXT_ARG(p2,atom);
 	GET_NEXT_ARG(p3,atom);
 	GET_NEXT_ARG(p4,variable);
-
 	size_t srclen = LEN_STR(q, p1);
 	size_t dstlen = srclen * LEN_STR(q, p3);
 	const char *src = GET_STR(q, p1);
@@ -5819,7 +5811,6 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
-
 	may_error(push_choice(q));
 	pl_idx_t before_hook_tp = q->st.tp;
 	bool save_hook = q->in_hook;
@@ -5914,7 +5905,6 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
-
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = NULL;
@@ -5925,7 +5915,6 @@ static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
-
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = p2;
@@ -5937,7 +5926,6 @@ static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
-
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 
