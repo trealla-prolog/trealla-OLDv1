@@ -409,7 +409,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 	c = get_tmp_heap_start(q);
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
-		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
+		if (is_variable(c) && is_fresh(c) && c->tmp_attrs && false) {
 			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->tmp_attrs;
 			e->c.attrs_ctx = c->tmp_ctx;
