@@ -126,13 +126,13 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	may_heap_error(p0);
-	GET_FIRST_RAW_ARG0(p1,callable,p0);
+	GET_FIRST_ARG0(p1,callable,p0);
 	may_heap_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
-		GET_NEXT_RAW_ARG(p2,any);
+		GET_NEXT_ARG(p2,any);
 		may_heap_error(clone2_to_tmp(q, p2));
 		arity++;
 	}

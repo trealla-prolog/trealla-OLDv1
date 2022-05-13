@@ -638,8 +638,7 @@ put_atts(Var, -Attr) :- !,
 	var(Var),
 	'$get_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	(	var(Value) ->
-		Functor = Value
+	(	var(Value) -> Functor = Value
 	; 	functor(Value, Functor, _)
 	),
 	dict:del(D, Module, D2),
@@ -695,8 +694,7 @@ attvar(Var) :-
 
 term_attvars_([], VsIn, VsIn) :- !.
 term_attvars_([H|T], VsIn, VsOut) :-
-	(	attvar(H) ->
-		term_attvars_(T, [H|VsIn], VsOut)
+	(	attvar(H) -> term_attvars_(T, [H|VsIn], VsOut)
 	;	term_attvars_(T, VsIn, VsOut)
 	).
 
@@ -708,7 +706,7 @@ collect_goals_(_, [], GsIn, GsIn) :- !.
 collect_goals_(V, [H|T], GsIn, GsOut) :-
 	H =.. [M, _],
 	catch(M:attribute_goals(V, Goal0, []), _, Goal0 = put_atts(V, +H)),
-	( Goal0 = [H2] -> Goal = H2 ; Goal = Goal0 ),
+	(Goal0 = [H2] -> Goal = H2 ; Goal = Goal0),
 	collect_goals_(V, T, [Goal|GsIn], GsOut).
 
 collect_goals_([], GsIn, GsIn) :- !.
