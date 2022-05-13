@@ -145,7 +145,7 @@ static bool is_in_ref_list2(cell *c, pl_idx_t c_ctx, reflist *rlist)
 
 // FIXME: rewrite this using efficient sweep/mark methodology...
 
-static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, reflist *list)
+static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, unsigned depth, reflist *list)
 {
 	if (depth >= MAX_DEPTH) {
 		printf("*** OOPS %s %d\n", __FILE__, __LINE__);
@@ -183,8 +183,11 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		tmp->var_nbr = var_nbr;
 		tmp->flags = FLAG_VAR_FRESH;
 		tmp->val_off = p1->val_off;
-		tmp->tmp_attrs = e->c.attrs;
-		tmp->tmp_ctx = e->c.attrs_ctx;
+
+		if (copy_attrs) {
+			tmp->tmp_attrs = e->c.attrs;
+			tmp->tmp_ctx = e->c.attrs_ctx;
+		}
 
 		if (is_anon(p1))
 			tmp->flags |= FLAG_VAR_ANON;
@@ -216,13 +219,13 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				*tmp = *h;
 				tmp->var_nbr = q->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
-				//tmp->attrs = NULL;
+				tmp->tmp_attrs = NULL;
 			} else {
 				reflist nlist = {0};
 				nlist.next = list;
 				nlist.ptr = save_p1;
 				nlist.ctx = save_p1_ctx;
-				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, &nlist);
+				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, copy_attrs, depth+1, &nlist);
 				if (!rec) return rec;
 			}
 
@@ -244,6 +247,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				tmp->val_off = g_anon_s;
 				tmp->var_nbr = q->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
+				tmp->tmp_attrs = NULL;
 				cyclic = true;
 				break;
 			}
@@ -256,7 +260,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 		}
 
 		if (!cyclic) {
-			cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, depth+1, list);
+			cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, copy_attrs, depth+1, list);
 			if (!rec) return rec;
 		}
 
@@ -280,13 +284,13 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned dep
 				*tmp = *p1;
 				tmp->var_nbr = q->tab0_varno;
 				tmp->flags |= FLAG_VAR_FRESH;
-				//tmp->attrs = NULL;
+				tmp->tmp_attrs = NULL;
 			} else {
 				nlist.next = list;
 				nlist.ptr = save_p1;
 				nlist.ctx = save_p1_ctx;
 
-				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, depth+1, !q->lists_ok ? &nlist : NULL);
+				cell *rec = deep_copy2_to_tmp(q, c, c_ctx, copy_attrs, depth+1, !q->lists_ok ? &nlist : NULL);
 				if (!rec) return rec;
 			}
 
@@ -313,7 +317,7 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	nlist.ptr = p1;
 	nlist.ctx = p1_ctx;
 	ensure(q->vars = m_create(NULL, NULL, NULL));
-	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, 0, &nlist);
+	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, false, 0, &nlist);
 	m_destroy(q->vars);
 	q->vars = NULL;
 	if (!rec) return rec;
@@ -382,7 +386,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 	reflist nlist = {0};
 	nlist.ptr = c;
 	nlist.ctx = c_ctx;
-	cell *rec = deep_copy2_to_tmp(q, c, c_ctx, 0, !q->lists_ok ? &nlist : NULL);
+	cell *rec = deep_copy2_to_tmp(q, c, c_ctx, copy_attrs, 0, !q->lists_ok ? &nlist : NULL);
 	q->lists_ok = false;
 	m_destroy(q->vars);
 	q->vars = NULL;
@@ -409,7 +413,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 	c = get_tmp_heap_start(q);
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
-		if (is_variable(c) && is_fresh(c) && c->tmp_attrs && false) {
+		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
 			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->tmp_attrs;
 			e->c.attrs_ctx = c->tmp_ctx;
