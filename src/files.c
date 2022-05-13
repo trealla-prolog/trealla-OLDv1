@@ -1436,13 +1436,13 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 			return throw_error(q, p1, p1_ctx, "resource_error", "stack");
 	}
 
-	q->pl->tab_idx = 0;
+	q->tab_idx = 0;
 
 	if (p->nbr_vars)
 		collect_vars(q, p->cl->cells, q->st.curr_frame);
 
 	if (vars) {
-		unsigned cnt = q->pl->tab_idx;
+		unsigned cnt = q->tab_idx;
 		may_ptr_error(init_tmp_heap(q));
 		cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 		may_ptr_error(tmp);
@@ -1451,7 +1451,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+			for (unsigned i = 0; i < q->tab_idx; i++) {
 				make_atom(tmp+idx, g_dot_s);
 				tmp[idx].arity = 2;
 				tmp[idx++].nbr_cells = ((cnt-done)*2)+1;
@@ -1485,7 +1485,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+		for (unsigned i = 0; i < q->tab_idx; i++) {
 			if (q->pl->tabs[i].is_anon)
 				continue;
 
@@ -1495,7 +1495,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+			for (unsigned i = 0; i < q->tab_idx; i++) {
 				if (q->pl->tabs[i].is_anon)
 					continue;
 
@@ -1541,7 +1541,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		may_ptr_error(tmp);
 		unsigned idx = 0;
 
-		for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+		for (unsigned i = 0; i < q->tab_idx; i++) {
 			if (q->pl->tabs[i].cnt != 1)
 				continue;
 
@@ -1554,7 +1554,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		if (cnt) {
 			unsigned done = 0;
 
-			for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+			for (unsigned i = 0; i < q->tab_idx; i++) {
 				if (q->pl->tabs[i].cnt != 1)
 					continue;
 

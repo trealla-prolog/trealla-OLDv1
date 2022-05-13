@@ -570,6 +570,7 @@ struct query_ {
 	slot *save_e;
 	db_entry *dirty_list;
 	cycle_info *info1, *info2;
+	map *vars;
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
@@ -577,8 +578,8 @@ struct query_ {
 	uint64_t step, qid;
 	uint64_t time_started, get_started;
 	uint64_t time_cpu_started, time_cpu_last_started;
-	unsigned max_depth;
 	uint64_t tmo_msecs;
+	unsigned max_depth, tab_idx, varno, tab0_varno;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;
@@ -721,11 +722,11 @@ struct prolog_ {
 	parser *p;
 	var_item *tabs;
 	struct { pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES]; };
-	map *symtab, *funtab, *keyval, *vars;
+	map *symtab, *funtab, *keyval;
 	char *pool;
 	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;
-	unsigned tab_idx, varno, next_mod_id, tab0_varno;
+	unsigned next_mod_id;
 	uint8_t current_input, current_output, current_error;
 	int8_t halt_code, opt;
 	bool is_redo:1;

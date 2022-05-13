@@ -627,12 +627,12 @@ static const char *varformat(unsigned long long nbr)
 
 static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 {
-	for (unsigned i = 0; i < q->pl->tab_idx; i++) {
+	for (unsigned i = 0; i < q->tab_idx; i++) {
 		if (q->pl->tab1[i] == slot_idx)
 			return varformat(q->pl->tab2[i]);
 	}
 
-	unsigned j, i = q->pl->tab_idx++;
+	unsigned j, i = q->tab_idx++;
 	q->pl->tab1[i] = slot_idx;
 
 	for (j = 0; j < MAX_IGNORES; j++) {

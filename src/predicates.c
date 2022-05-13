@@ -1836,9 +1836,9 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
-	q->pl->varno = f->nbr_vars;
+	q->varno = f->nbr_vars;
 	collect_vars(q, p1, p1_ctx);
-	const unsigned cnt = q->pl->tab_idx;
+	const unsigned cnt = q->tab_idx;
 	if (!init_tmp_heap(q)) return NULL;
 	cell *tmp = alloc_on_tmp(q, (cnt*2)+1);
 	ensure(tmp);
@@ -1901,9 +1901,9 @@ static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
 static cell *do_term_singletons(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	frame *f = GET_CURR_FRAME();
-	q->pl->varno = f->nbr_vars;
+	q->varno = f->nbr_vars;
 	collect_vars(q, p1, p1_ctx);
-	const unsigned cnt = q->pl->tab_idx;
+	const unsigned cnt = q->tab_idx;
 	unsigned cnt2 = 0;
 
 	if (cnt) {
@@ -1990,6 +1990,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 		if (e1->c.attrs) {
 			cell *tmp = deep_copy_to_heap_with_replacement(q, e1->c.attrs, e1->c.attrs_ctx, true, p1, p1_ctx, p2, p2_ctx);
+			may_heap_error(tmp);
 			e2->c.attrs = tmp;
 			e2->c.attrs_ctx = q->st.curr_frame;
 		}
@@ -2010,7 +2011,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
-		tmpv.var_nbr = q->st.m->pl->tab0_varno;
+		tmpv.var_nbr = q->tab0_varno;
 		unify(q, p2, p2_ctx, &tmpv, q->st.curr_frame);
 	}
 
@@ -2038,7 +2039,7 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	if (is_variable(p1_raw) && is_variable(p2)) {
 		cell tmpv;
 		tmpv = *p2;
-		tmpv.var_nbr = q->st.m->pl->tab0_varno;
+		tmpv.var_nbr = q->tab0_varno;
 		unify(q, p2, p2_ctx, &tmpv, q->st.curr_frame);
 	}
 

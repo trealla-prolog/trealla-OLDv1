@@ -252,7 +252,7 @@ void dump_vars(query *q, bool partial)
 	parser *p = q->p;
 	frame *f = GET_FIRST_FRAME();
 	q->is_dump_vars = true;
-	q->pl->tab_idx = 0;
+	q->tab_idx = 0;
 	bool any = false;
 
 	// Build the ignore list for variable name clashes....

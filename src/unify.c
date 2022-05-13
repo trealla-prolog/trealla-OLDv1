@@ -201,36 +201,36 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	return ok;
 }
 
-bool accum_var(const query *q, const cell *c, pl_idx_t c_ctx)
+bool accum_var(query *q, const cell *c, pl_idx_t c_ctx)
 {
 	const frame *f = GET_FRAME(c_ctx);
 	const slot *e = GET_SLOT(f, c->var_nbr);
 	const void *v;
 
-	if (m_get(q->pl->vars, e, &v)) {
+	if (m_get(q->vars, e, &v)) {
 		size_t idx = (size_t)v;
 		q->pl->tabs[idx].cnt++;
 		return true;
 	}
 
-	m_set(q->pl->vars, e, (void*)(size_t)q->pl->tab_idx);
+	m_set(q->vars, e, (void*)(size_t)q->tab_idx);
 
 	if (!q->pl->tabs) {
 		q->pl->tabs_size = 4000;
 		q->pl->tabs = malloc(sizeof(var_item)*q->pl->tabs_size);
 	}
 
-	if (q->pl->tab_idx == q->pl->tabs_size) {
+	if (q->tab_idx == q->pl->tabs_size) {
 		q->pl->tabs_size *= 2;
 		q->pl->tabs = realloc(q->pl->tabs, sizeof(var_item)*q->pl->tabs_size);
 	}
 
-	q->pl->tabs[q->pl->tab_idx].ctx = c_ctx;
-	q->pl->tabs[q->pl->tab_idx].var_nbr = c->var_nbr;
-	q->pl->tabs[q->pl->tab_idx].val_off = c->val_off;
-	q->pl->tabs[q->pl->tab_idx].is_anon = is_anon(c) ? true : false;
-	q->pl->tabs[q->pl->tab_idx].cnt = 1;
-	q->pl->tab_idx++;
+	q->pl->tabs[q->tab_idx].ctx = c_ctx;
+	q->pl->tabs[q->tab_idx].var_nbr = c->var_nbr;
+	q->pl->tabs[q->tab_idx].val_off = c->val_off;
+	q->pl->tabs[q->tab_idx].is_anon = is_anon(c) ? true : false;
+	q->pl->tabs[q->tab_idx].cnt = 1;
+	q->tab_idx++;
 	return false;
 }
 
@@ -329,11 +329,12 @@ static void collect_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx)
 void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	q->mgen++;
-	q->pl->tab_idx = 0;
-	ensure(q->pl->vars = m_create(NULL, NULL, NULL));
-	m_allow_dups(q->pl->vars, false);
+	q->tab_idx = 0;
+	ensure(q->vars = m_create(NULL, NULL, NULL));
+	m_allow_dups(q->vars, false);
 	collect_vars_internal(q, p1, p1_ctx);
-	m_destroy(q->pl->vars);
+	m_destroy(q->vars);
+	q->vars = NULL;
 }
 
 static bool has_vars_internal(query *q, cell *p1, pl_idx_t p1_ctx);
