@@ -309,6 +309,7 @@ static void add_stream_properties(query *q, int n)
 static void del_stream_properties(query *q, int n)
 {
 	cell *tmp = alloc_on_heap(q, 3);
+	ensure(tmp);
 	make_atom(tmp+0, g_sys_stream_property_s);
 	make_int(tmp+1, n);
 	make_var(tmp+2, g_anon_s, create_vars(q, 1));
@@ -1467,7 +1468,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
+			may_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
@@ -1523,7 +1524,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
+			may_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
@@ -1585,7 +1586,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 
 			cell *save = tmp;
 			tmp = alloc_on_heap(q, idx);
-			may_ptr_error(tmp);
+			may_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
 			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
@@ -1597,7 +1598,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	}
 
 	cell *tmp = alloc_on_heap(q, p->cl->cidx-1);
-	may_ptr_error(tmp);
+	may_heap_error(tmp);
 	safe_copy_cells(tmp, p->cl->cells, p->cl->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	clear_rule(p->cl);
