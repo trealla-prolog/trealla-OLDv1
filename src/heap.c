@@ -182,7 +182,6 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_at
 		q->varno++;
 		tmp->var_nbr = var_nbr;
 		tmp->flags = FLAG_VAR_FRESH;
-		tmp->val_off = p1->val_off;
 
 		if (copy_attrs) {
 			tmp->tmp_attrs = e->c.attrs;

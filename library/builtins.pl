@@ -716,15 +716,14 @@ collect_goals_([V|T], GsIn, GsOut) :-
 	collect_goals_(T, GsOut2, GsOut).
 
 copy_term(Term, Copy, Gs) :-
-	copy_term(Term, Copy),
-	term_attvars(Copy, CopyVs),
-	collect_goals_(CopyVs, [], Gs).
+	copy_term_nat(Term, Copy),
+	term_attvars(Term, Vs),
+	collect_goals_(Vs, [], Gs).
 
 % Debugging...
 
 portray_atts_(Term) :-
-	copy_term(Term, Copy, Gs),
-	Term = Copy,
+	copy_term(Term, _, Gs),
 	Gs = [Gs0],
 	(list(Gs0) -> toconjunction(Gs0,Gs1); Gs1 = Gs0),
 	write_term(Gs1, [varnames(true)]).
