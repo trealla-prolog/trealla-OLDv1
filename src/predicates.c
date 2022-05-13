@@ -1972,7 +1972,7 @@ static USE_RESULT pl_status fn_term_singletons_2(query *q)
 		return throw_error(q, p1, p1_ctx, "resource_error", "out_of_memory");
 
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
-	may_ptr_error(tmp2);
+	may_heap_error(tmp2);
 	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
 	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
@@ -2435,7 +2435,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
 		} else {
 			cell *tmp = alloc_on_heap(q, 1+arity);
-			may_ptr_error(tmp);
+			may_heap_error(tmp);
 			*tmp = (cell){0};
 			tmp[0].tag = TAG_LITERAL;
 			tmp[0].arity = arity;
@@ -2728,7 +2728,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_on_heap(q, 5);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		make_atom(&tmp[0], index_from_pool(q->pl, "trealla"));
 		make_int(&tmp[1], v1);
 		make_int(&tmp[2], v2);
@@ -2803,6 +2803,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.double_quote_chars = true;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2818,6 +2819,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2831,6 +2833,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2846,6 +2849,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.occurs_check = OCCURS_CHECK_ERROR;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2859,6 +2863,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2872,6 +2877,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.not_strict_iso = !false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
@@ -2889,6 +2895,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			q->st.m->flags.unknown = UNK_CHANGEABLE;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
+			may_heap_error(tmp);
 			make_struct(tmp, g_plus_s, fn_iso_add_2, 2, 2);
 			SET_OP(tmp, OP_YFX);
 			tmp[1] = *p1; tmp[1].nbr_cells = 1;
