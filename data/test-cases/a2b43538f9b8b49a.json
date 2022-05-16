@@ -1,0 +1,55 @@
+{
+  "uid" : "a2b43538f9b8b49a",
+  "name" : "findall_4_04",
+  "fullName" : "findall_4_04::tests",
+  "historyId" : "findall_4_04::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/findall_4/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/findall_4/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "45-46"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/1dd7f40f235356d412d17033b0ef60e69da386e8/tests/logtalk/methods/findall_4/tests.lgt#L45"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a2b43538f9b8b49a.json",
+  "parameterValues" : [ "tests/logtalk/methods/findall_4/tests.lgt", "45-46", "https://github.com/LogtalkDotOrg/logtalk3/tree/1dd7f40f235356d412d17033b0ef60e69da386e8/tests/logtalk/methods/findall_4/tests.lgt#L45" ]
+}
