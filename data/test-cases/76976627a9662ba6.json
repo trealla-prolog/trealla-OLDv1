@@ -1,0 +1,55 @@
+{
+  "uid" : "76976627a9662ba6",
+  "name" : "ip_ipv4_home",
+  "fullName" : "ip_ipv4_home::tests(chars)",
+  "historyId" : "ip_ipv4_home::tests(chars)",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/grammars/tests.lgt::tests(chars)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/grammars/tests.lgt::tests(chars)"
+  }, {
+    "name" : "package",
+    "value" : "library/grammars/tests.lgt::tests(chars)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/grammars/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "252-254"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e79a9a77a15d564ca1a19c94f3de772dc0c68444/library/grammars/tests.lgt#L252"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "76976627a9662ba6.json",
+  "parameterValues" : [ "library/grammars/tests.lgt", "252-254", "https://github.com/LogtalkDotOrg/logtalk3/tree/e79a9a77a15d564ca1a19c94f3de772dc0c68444/library/grammars/tests.lgt#L252" ]
+}
