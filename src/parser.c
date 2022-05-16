@@ -2330,6 +2330,17 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 	if (is_neg) {
 		p->srcptr = (char*)src;
+		int next_ch = peek_char_utf8(src);
+
+		if (next_ch == '/') {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, near line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+			p->error_desc = "incomplete_statement";
+			p->error = true;
+			return false;
+		}
+
 		src = eat_space(p);
 
 		if (!src || !*src) {
