@@ -2722,6 +2722,22 @@ static bool process_term(parser *p, cell *p1)
 	directives(p, p1);
 	cell *h = get_head(p1);
 
+	if (is_variable(h)) {
+		if (DUMP_ERRS || !p->do_read_term)
+			printf("Error: instantiation error, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+		p->error_desc = "instnatiation_error";
+		p->error = true;
+		return false;
+	} else if (is_number(h)) {
+		if (DUMP_ERRS || !p->do_read_term)
+			printf("Error: type error, callable, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+
+		p->error_desc = "instnatiation_error";
+		p->error = true;
+		return false;
+	}
+
 	if (is_cstring(h)) {
 		pl_idx_t off = index_from_pool(p->m->pl, GET_STR(p, h));
 		if (off == ERR_IDX) {
