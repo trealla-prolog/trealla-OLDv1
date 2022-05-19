@@ -432,6 +432,7 @@ struct predicate_ {
 	bool is_noindex:1;
 	bool is_check_directive:1;
 	bool is_processed:1;
+	bool is_var_in_first_arg:1;
 };
 
 struct builtins {

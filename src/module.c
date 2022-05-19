@@ -966,7 +966,6 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		return;
 
 	if (!pr->idx) {
-		//printf("*** index %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 		pr->idx = m_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);
@@ -993,8 +992,12 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	}
 
 	cell *c = get_head(dbe->cl.cells);
-	cell *arg2 = c + 1;
-	arg2 += arg2->nbr_cells;
+	cell *arg1 = c + 1;
+
+	if (is_variable(arg1))
+		pr->is_var_in_first_arg = true;
+
+	cell *arg2 = arg1 + arg1->nbr_cells;
 
 	if (!append) {
 		m_set(pr->idx, c, dbe);

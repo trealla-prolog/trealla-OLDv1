@@ -316,7 +316,8 @@ static void find_key(query *q, predicate *pr, cell *key)
 		return;
 	}
 #else
-	if (arg1 && is_variable(arg1) && pr->idx2) {
+	if ((arg1 && is_variable(arg1) && pr->idx2)
+	|| (pr->is_var_in_first_arg)) {
 		key = key + 1;
 		key += key->nbr_cells;
 		idx = pr->idx2;
