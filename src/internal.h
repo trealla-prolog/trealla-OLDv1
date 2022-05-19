@@ -417,7 +417,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	db_entry *head, *tail;
 	module *m;
-	map *idx, *idx_save;
+	map *idx, *idx2, *idx_save;
 	db_entry *dirty_list;
 	cell key;
 	uint64_t cnt, ref_cnt, db_id;
@@ -579,7 +579,7 @@ struct query_ {
 	uint64_t time_started, get_started;
 	uint64_t time_cpu_started, time_cpu_last_started;
 	uint64_t tmo_msecs;
-	unsigned max_depth, tab_idx, varno, tab0_varno;
+	unsigned max_depth, print_idx, tab_idx, varno, tab0_varno;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;

@@ -971,20 +971,42 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);
 
+		if (pr->key.arity > 1) {
+			pr->idx2 = m_create(index_cmpkey, NULL, m);
+			ensure(pr->idx2);
+			m_allow_dups(pr->idx2, true);
+		}
+
 		for (db_entry *cl2 = pr->head; cl2; cl2 = cl2->next) {
 			cell *c = get_head(cl2->cl.cells);
+			cell *arg2 = c + 1;
+			arg2 += arg2->nbr_cells;
 
-			if (!cl2->cl.ugen_erased)
+			if (!cl2->cl.ugen_erased) {
 				m_app(pr->idx, c, cl2);
+
+				if (arg2) {
+					m_app(pr->idx2, arg2, cl2);
+				}
+			}
 		}
 	}
 
 	cell *c = get_head(dbe->cl.cells);
+	cell *arg2 = c + 1;
+	arg2 += arg2->nbr_cells;
 
-	if (!append)
+	if (!append) {
 		m_set(pr->idx, c, dbe);
-	else
+
+		if (arg2)
+			m_set(pr->idx2, arg2, dbe);
+	} else {
 		m_app(pr->idx, c, dbe);
+
+		if (arg2)
+			m_app(pr->idx2, arg2, dbe);
+	}
 }
 
 static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
@@ -1001,6 +1023,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 				fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
 
 			m_destroy(pr->idx_save);
+			m_destroy(pr->idx2);
 			m_destroy(pr->idx);
 			pr->idx_save = pr->idx = NULL;
 			pr->head = pr->tail = NULL;
@@ -1244,6 +1267,7 @@ static bool unload_realfile(module *m, const char *filename)
 		}
 
 		m_destroy(pr->idx_save);
+		m_destroy(pr->idx2);
 		m_destroy(pr->idx);
 		pr->idx_save = pr->idx = NULL;
 

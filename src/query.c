@@ -308,16 +308,25 @@ static void find_key(query *q, predicate *pr, cell *key)
 
 	key = deep_clone_to_heap(q, key, q->st.curr_frame);
 	cell *arg1 = key + 1;
+	map *idx = pr->idx;
 
+#if 0
 	if (arg1 && is_variable(arg1)) {
 		q->st.curr_clause = pr->head;
 		return;
 	}
+#else
+	if (arg1 && is_variable(arg1) && pr->idx2) {
+		key = key + 1;
+		key += key->nbr_cells;
+		idx = pr->idx2;
+	}
+#endif
 
 	q->st.curr_clause = NULL;
 	miter *iter;
 
-	if (!(iter = m_find_key(pr->idx, key))) {
+	if (!(iter = m_find_key(idx, key))) {
 		//DUMP_TERM("*** not found, key = ", key, q->st.curr_frame);
 		return;
 	}
