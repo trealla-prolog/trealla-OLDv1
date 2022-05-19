@@ -1,5 +1,5 @@
 {
-  "total" : 479,
+  "total" : 480,
   "items" : [ {
     "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
     "name" : "tools/diagrams/tests.lgt::tests",
@@ -32,6 +32,17 @@
       "passed" : 52,
       "unknown" : 0,
       "total" : 65
+    }
+  }, {
+    "uid" : "989b09abb7fb900a0e7ed980a1e19859",
+    "name" : "tools/lgtdoc/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 12,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 12
     }
   }, {
     "uid" : "ca0b36cfcb9cdd10ff496c52b6096985",
@@ -98,17 +109,6 @@
       "passed" : 1,
       "unknown" : 0,
       "total" : 7
-    }
-  }, {
-    "uid" : "ac3efbb8eff82b3668361622fcaf20d6",
-    "name" : "tools/debugger/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 4,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 32,
-      "unknown" : 0,
-      "total" : 36
     }
   } ]
 }
