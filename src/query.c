@@ -250,21 +250,6 @@ static void next_key(query *q)
 		q->st.curr_clause = NULL;
 }
 
-static bool is_all_vars(cell *c)
-{
-	unsigned arity = c->arity;
-	c++;
-
-	while (arity--) {
-		if (!is_variable(c))
-			return false;
-
-		c += c->nbr_cells;
-	}
-
-	return true;
-}
-
 static bool is_ground(cell *c)
 {
 	pl_idx_t nbr_cells = c->nbr_cells;
@@ -285,11 +270,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.arg3_is_ground = false;
 	q->st.iter = NULL;
 
-	if (!pr->idx
-#if 1
-		|| !pr->is_dynamic		// FIXME
-#endif
-		|| (pr->cnt < q->st.m->indexing_threshold)) {
+	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
@@ -326,8 +307,9 @@ static void find_key(query *q, predicate *pr, cell *key)
 	//sl_dump(pr->idx, dump_key, q);
 
 	key = deep_clone_to_heap(q, key, q->st.curr_frame);
+	cell *arg1 = key + 1;
 
-	if (is_all_vars(key)) {
+	if (arg1 && is_variable(arg1)) {
 		q->st.curr_clause = pr->head;
 		return;
 	}
