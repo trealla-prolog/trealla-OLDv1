@@ -310,14 +310,12 @@ static void find_key(query *q, predicate *pr, cell *key)
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
 
-	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)
-		&& !pr->idx2) {
-		q->st.curr_clause = pr->head;
-		return;
-	}
+	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)) {
+		if (!pr->idx2) {
+			q->st.curr_clause = pr->head;
+			return;
+		}
 
-	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)
-		&& pr->idx2) {
 		key = arg1 + arg1->nbr_cells;
 		idx = pr->idx2;
 	}
