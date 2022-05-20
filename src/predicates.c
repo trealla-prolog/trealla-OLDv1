@@ -1989,6 +1989,11 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 		slot *e2 = GET_SLOT(f2, p2->var_nbr);
 
 		if (e1->c.attrs) {
+			may_heap_error(init_tmp_heap(q));
+			may_heap_error(q->vars = m_create(NULL, NULL, NULL));
+			frame *f = GET_CURR_FRAME();
+			q->varno = f->nbr_vars;
+			q->tab_idx = 0;
 			cell *tmp = deep_copy_to_heap_with_replacement(q, e1->c.attrs, e1->c.attrs_ctx, false, p1, p1_ctx, p2, p2_ctx);
 			may_heap_error(tmp);
 			e2->c.attrs = tmp;
@@ -2282,6 +2287,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	//if (is_cyclic_term(q, p1, p1_ctx))
 	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_heap_error(tmp);
 	cell *head = get_head(tmp);
@@ -2345,6 +2351,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	//if (is_cyclic_term(q, p1, p1_ctx))
 	//	return throw_error(q, p1, q->st.curr_frame, "syntax_error", "cyclic_term");
 
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_heap_error(tmp);
 	cell *head = get_head(tmp);
@@ -3310,6 +3317,7 @@ static USE_RESULT pl_status fn_sys_list_1(query *q)
 static USE_RESULT pl_status fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_raw_copy_to_tmp(q, p1, p1_ctx);
 	may_heap_error(tmp);
 	may_ptr_error(alloc_on_queuen(q, 0, tmp));
@@ -3320,6 +3328,7 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_raw_copy_to_tmp(q, p2, p2_ctx);
 	may_heap_error(tmp);
 	may_ptr_error(alloc_on_queuen(q, get_int(p1), tmp));
@@ -3389,6 +3398,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		may_error(try_me(q, MAX_ARITY));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
+			may_heap_error(init_tmp_heap(q));
 			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 			may_ptr_error(tmp);
 			may_ptr_error(alloc_on_queuen(q, q->st.qnbr, tmp));
@@ -3632,6 +3642,7 @@ static pl_status do_asserta_2(query *q)
 		return throw_error(q, tmp2, q->latest_ctx, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_heap_error(tmp);
 	pl_idx_t nbr_cells = tmp->nbr_cells;
@@ -3732,6 +3743,7 @@ static pl_status do_assertz_2(query *q)
 		return throw_error(q, tmp2, q->latest_ctx, "type_error", "callable");
 
 	GET_NEXT_ARG(p2,atom_or_var);
+	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 	may_heap_error(tmp);
 	pl_idx_t nbr_cells = tmp->nbr_cells;
@@ -4579,7 +4591,8 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	pl_idx_t save_hp = q->st.hp;
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	GET_FIRST_RAW_ARG0(p1,callable,p0);
-	may_ptr_error(clone_to_tmp(q, p1));
+	may_heap_error(init_tmp_heap(q));
+	may_heap_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
@@ -4621,6 +4634,7 @@ static USE_RESULT pl_status fn_send_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
+	may_heap_error(init_tmp_heap(q));
 	cell *c = deep_clone_to_tmp(q, p1, p1_ctx);
 	may_heap_error(c);
 

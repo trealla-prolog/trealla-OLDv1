@@ -1,2 +1,1 @@
-Error: syntax error, unterminated quoted atom, line 3, 'main :- write('foo
-'
+Error: syntax error, unterminated quoted atom, line 3

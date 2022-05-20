@@ -127,6 +127,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
 	may_heap_error(p0);
 	GET_FIRST_ARG0(p1,callable,p0);
+	may_heap_error(init_tmp_heap(q));
 	may_heap_error(clone_to_tmp(q, p1));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
@@ -472,6 +473,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
+		may_heap_error(init_tmp_heap(q));
 		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false);
 		may_ptr_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
@@ -531,6 +533,7 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 		//safe_copy_cells(e, p1, p1->nbr_cells);
 		copy_cells(e, p1, p1->nbr_cells);
 	} else {
+		may_heap_error(init_tmp_heap(q));
 		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
 		may_ptr_error(tmp);
 		e = malloc(sizeof(cell) * tmp->nbr_cells);

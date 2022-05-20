@@ -1167,7 +1167,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 			if (off > end_idx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u\n", GET_STR(p, c), p->line_nbr);
 
 				p->error_desc = "operand_missing";
 				p->error = true;
@@ -1212,7 +1212,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		if (nolhs || (off > end_idx)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u, '%s'\n", GET_STR(p, c), p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, missing operand to '%s', line %u\n", GET_STR(p, c), p->line_nbr);
 
 			p->error_desc = "operand_missing";
 			p->error = true;
@@ -1882,7 +1882,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	if ((*s == '.') && isdigit(s[1])) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 		p->error_desc = "number";
 		p->error = true;
@@ -1908,7 +1908,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 				if (*s != '\'') {
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 					p->error_desc = "number";
 					p->error = true;
@@ -1921,7 +1921,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 			if (!*s || iscntrl(*s)) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 				p->error_desc = "number";
 				p->error = true;
@@ -1935,7 +1935,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 #if 1
 		} else if ((*s == '\'') && !p->flags.not_strict_iso && search_op(p->m, "", NULL, false)) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 			p->error_desc = "number";
 			p->error = true;
@@ -1946,7 +1946,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		if (p->error) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 			p->error_desc = "number";
 			p->error = true;
@@ -2070,7 +2070,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	//if ((ch == '(') || iswalpha(ch)) {
 	if (ch == '(') {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, parsing number, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
 
 		p->error_desc = "number";
 		p->error = true;
@@ -2226,7 +2226,7 @@ static bool check_space_before_function(parser *p, int ch, const char *src)
 
 		if (!src || !*src) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, incomplete statement, line %d\n", p->line_nbr);
 
 			p->error_desc = "incomplete_statement";
 			p->error = true;
@@ -2235,7 +2235,7 @@ static bool check_space_before_function(parser *p, int ch, const char *src)
 
 		if (!p->is_op && (*src == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, operator expected before parens, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, operator expected before parens, line %d: %s\n", p->line_nbr, p->token);
 
 			p->error_desc = "operator_expected";
 			p->error = true;
@@ -2288,7 +2288,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 			if (p->error) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d '%s'\n", p->srcptr, p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d\n", p->srcptr, p->line_nbr);
 
 				p->error_desc = "illegal_character_escape";
 				p->error = true;
@@ -2334,7 +2334,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		if (next_ch == '/') {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, near line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, near line %d\n", p->line_nbr);
 
 			p->error_desc = "incomplete_statement";
 			p->error = true;
@@ -2345,7 +2345,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		if (!src || !*src) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, incomplete statement, line %d\n", p->line_nbr);
 
 			p->error_desc = "incomplete_statement";
 			p->error = true;
@@ -2377,7 +2377,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
 				if (!valid_float(p->token)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error, float, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: syntax error, float, line %u\n", p->line_nbr);
 
 					p->error_desc = "float";
 					p->error = true;
@@ -2443,7 +2443,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			for (int ch; (ch = get_char_utf8(&src));) {
 				if (ch == '\n') {
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d\n", p->line_nbr);
 
 					p->error_desc = "unterminated_quoted_atom";
 					p->error = true;
@@ -2479,7 +2479,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 						}
 					} else {
 						if (DUMP_ERRS || !p->do_read_term)
-							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d, '%s'\n", p->srcptr, p->line_nbr, p->save_line?p->save_line:"");
+							fprintf(stdout, "Error: syntax error, illegal character escape <<%s>>, line %d\n", p->srcptr, p->line_nbr);
 
 						p->error_desc = "illegal_character_escape";
 						p->error = true;
@@ -2507,7 +2507,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 					p->srcptr = "";
 
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: syntax error, unterminated quoted atom, line %d\n", p->line_nbr);
 
 					p->error_desc = "unterminated_quoted_atom";
 					p->error = true;
@@ -2650,7 +2650,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		is_matching_pair(ch, next_ch, '[',',') ||
 		is_matching_pair(ch, next_ch, ',',')')) {
 		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s, '%s'\n", p->line_nbr, p->token, p->save_line?p->save_line:"");
+			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s\n", p->line_nbr, p->token);
 
 		p->error_desc = "operator_expected";
 		p->error = true;
@@ -2724,16 +2724,16 @@ static bool process_term(parser *p, cell *p1)
 
 	if (is_variable(h)) {
 		if (DUMP_ERRS || !p->do_read_term)
-			printf("Error: instantiation error, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			printf("Error: instantiation error, line %u\n", p->line_nbr);
 
-		p->error_desc = "instnatiation_error";
+		p->error_desc = "instantiation_error";
 		p->error = true;
 		return false;
 	} else if (is_number(h)) {
 		if (DUMP_ERRS || !p->do_read_term)
-			printf("Error: type error, callable, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+			printf("Error: type error, callable, line %u\n", p->line_nbr);
 
-		p->error_desc = "instnatiation_error";
+		p->error_desc = "type_error";
 		p->error = true;
 		return false;
 	}
@@ -2752,11 +2752,10 @@ static bool process_term(parser *p, cell *p1)
 		h->arity = 0;
 	}
 
-	if (!p->error && !assertz_to_db(p->m, p->cl->nbr_vars, p->cl->nbr_temporaries, p1, 1)) {
-#if 0
+	if (!assertz_to_db(p->m, p->cl->nbr_vars, p->cl->nbr_temporaries, p1, 1)) {
 		if (DUMP_ERRS || !p->do_read_term)
 			printf("Error: '%s', line %u\n", p->token, p->line_nbr);
-#endif
+
 		p->error = true;
 		return false;
 	}
@@ -2790,7 +2789,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (p->nesting_parens || p->nesting_brackets || p->nesting_braces) {
 				if (DUMP_ERRS || !p->do_read_term)
-					printf("Error: syntax error, mismatched parens/brackets/braces, line %u '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					printf("Error: syntax error, mismatched parens/brackets/braces, line %u\n", p->line_nbr);
 
 				p->error_desc = "mismatched_parens_or_brackets_or_braces";
 				p->error = true;
@@ -2799,7 +2798,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!p->cl->cidx) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, incomplete statement, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, incomplete statement, line %u\n", p->line_nbr);
 
 				p->error_desc = "incomplete_statement";
 				p->error = true;
@@ -2809,7 +2808,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (analyze(p, 0, last_op)) {
 				if (p->cl->cells->nbr_cells <= (p->cl->cidx-1)) {
 					if (DUMP_ERRS || !p->do_read_term)
-						printf("Error: syntax error, operator expected unfinished input '%s', line %u, '%s'\n", p->token, p->line_nbr, p->save_line?p->save_line:"");
+						printf("Error: syntax error, operator expected unfinished input '%s', line %u\n", p->token, p->line_nbr);
 
 					p->error_desc = "operator_expected";
 					p->error = true;
@@ -2821,16 +2820,18 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				if (p->consulting && !p->skip) {
 					if (is_variable(p->cl->cells)) {
 						if (DUMP_ERRS || !p->do_read_term)
-							printf("Error: instantiation error, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+							printf("Error: instantiation error, line %u\n", p->line_nbr);
 
-						p->error_desc = "instnatiation_error";
+						p->error_desc = "instantiation_error";
 						p->error = true;
+						return 0;
 					} else if (is_number(p->cl->cells)) {
 						if (DUMP_ERRS || !p->do_read_term)
-							printf("Error: type error, callable, line %u, '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+							printf("Error: type error, callable, line %u\n", p->line_nbr);
 
-						p->error_desc = "instnatiation_error";
+						p->error_desc = "type_error";
 						p->error = true;
+						return 0;
 					}
 
 					xref_rule(p->m, p->cl, NULL);
@@ -3062,7 +3063,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 				if (arity > MAX_ARITY) {
 					if (DUMP_ERRS || !p->do_read_term)
-						fprintf(stdout, "Error: max arity reached, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+						fprintf(stdout, "Error: max arity reached, line %d\n", p->line_nbr);
 
 					p->error_desc = "max_arity";
 					p->error = true;
@@ -3110,7 +3111,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && p->start_term &&
 			(!strcmp(p->token, "]") || !strcmp(p->token, ")") || !strcmp(p->token, "}"))) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, start of rule expected, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, start of rule expected, line %u\n", p->line_nbr);
 
 			p->error_desc = "start_expected";
 			p->error = true;
@@ -3145,7 +3146,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (p->is_variable && (*p->srcptr == '(')) {
 			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, variable as functor, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+				fprintf(stdout, "Error: syntax error, variable as functor, line %u\n", p->line_nbr);
 
 			p->error_desc = "variable_cannot_be_functor";
 			p->error = true;
@@ -3160,7 +3161,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!s || !*s) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, incomplete, line %u\n", p->line_nbr);
 
 				p->error_desc = "incomplete";
 				p->error = true;
@@ -3172,7 +3173,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (noneg) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, incomplete, needs parenthesis, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, incomplete, needs parenthesis, line %u\n", p->line_nbr);
 
 				p->error_desc = "incomplete";
 				p->error = true;
@@ -3197,7 +3198,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			if (!s || !*s) {
 				if (DUMP_ERRS || !p->do_read_term)
-					fprintf(stdout, "Error: syntax error, incomplete, line %d '%s'\n", p->line_nbr, p->save_line?p->save_line:"");
+					fprintf(stdout, "Error: syntax error, incomplete, line %u\n", p->line_nbr);
 
 				p->error_desc = "error_incomplete";
 				p->error = true;

@@ -627,12 +627,13 @@ static const char *varformat(unsigned long long nbr)
 
 static const char *get_slot_name(query *q, pl_idx_t slot_idx)
 {
-	for (unsigned i = 0; i < q->tab_idx; i++) {
-		if (q->pl->tab1[i] == slot_idx)
+	for (unsigned i = 0; i < q->print_idx; i++) {
+		if (q->pl->tab1[i] == slot_idx) {
 			return varformat(q->pl->tab2[i]);
+		}
 	}
 
-	unsigned j, i = q->tab_idx++;
+	unsigned j, i = q->print_idx++;
 	q->pl->tab1[i] = slot_idx;
 
 	for (j = 0; j < MAX_IGNORES; j++) {
@@ -653,7 +654,7 @@ ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_c
 	slot *e = GET_SLOT(f, c->var_nbr);
 	pl_idx_t slot_idx = e - q->slots;
 
-	if (q->varnames /*&& !is_fresh(c)*/) {
+	if (q->varnames && !is_fresh(c) && !is_anon(c)) {
 		dst += snprintf(dst, dstlen, "%s", GET_STR(q, c));
 	} else if (q->is_dump_vars) {
 		dst += snprintf(dst, dstlen, "_%s", get_slot_name(q, slot_idx));

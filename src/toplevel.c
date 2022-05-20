@@ -225,14 +225,10 @@ static int varunformat(const char *s)
 
 static bool any_attributed(const query *q)
 {
-	const parser *p = q->p;
 	const frame *f = GET_FIRST_FRAME();
 	bool any = false;
 
-	for (unsigned i = 0; i < p->nbr_vars; i++) {
-		if (!strcmp(p->vartab.var_name[i], "_"))
-			continue;
-
+	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
 		if (!is_empty(&e->c) || !e->c.attrs)
@@ -264,6 +260,7 @@ void dump_vars(query *q, bool partial)
 		int j;
 
 		if ((p->vartab.var_name[i][0] == '_')
+			&& isalpha(p->vartab.var_name[i][1])
 			&& ((j = varunformat(p->vartab.var_name[i]+1)) != -1))
 			q->ignores[j] = true;
 	}
@@ -287,6 +284,7 @@ void dump_vars(query *q, bool partial)
 
 	cell *vlist = p->nbr_vars ? end_list(q) : NULL;
 	bool space = false;
+	q->print_idx = 0;
 
 	for (unsigned i = 0; i < p->nbr_vars; i++) {
 		if (!strcmp(p->vartab.var_name[i], "_"))
@@ -379,6 +377,7 @@ void dump_vars(query *q, bool partial)
 	if (any_atts) {
 		q->variable_names = vlist;
 		q->variable_names_ctx = 0;
+		q->tab_idx = 0;
 		cell p1;
 		make_atom(&p1, index_from_pool(q->pl, "dump_attvars"));
 		cell *tmp = clone_to_heap(q, false, &p1, 1);
