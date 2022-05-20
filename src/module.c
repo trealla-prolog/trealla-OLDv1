@@ -978,11 +978,12 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 
 		for (db_entry *cl2 = pr->head; cl2; cl2 = cl2->next) {
 			cell *c = get_head(cl2->cl.cells);
-			cell *arg2 = c + 1;
-			arg2 += arg2->nbr_cells;
 
 			if (!cl2->cl.ugen_erased) {
 				m_app(pr->idx, c, cl2);
+
+				cell *arg1 = c->arity ? c + 1 : NULL;
+				cell *arg2 = arg1 ? arg1 + arg1->nbr_cells : NULL;
 
 				if (arg2) {
 					m_app(pr->idx2, arg2, cl2);
@@ -992,12 +993,12 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	}
 
 	cell *c = get_head(dbe->cl.cells);
-	cell *arg1 = c + 1;
+	cell *arg1 = c->arity ? c + 1 : NULL;
+	cell *arg2 = arg1 ? arg1 + arg1->nbr_cells : NULL;
 
-	if (is_variable(arg1))
+	if (arg1 && is_variable(arg1))
 		pr->is_var_in_first_arg = true;
 
-	cell *arg2 = arg1 + arg1->nbr_cells;
 
 	if (!append) {
 		m_set(pr->idx, c, dbe);

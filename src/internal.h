@@ -104,6 +104,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_integer(c) ((c)->tag == TAG_INT)
 #define is_real(c) ((c)->tag == TAG_REAL)
 #define is_indirect(c) ((c)->tag == TAG_PTR)
+#define is_object(c) ((c)->tag == TAG_OBJECT)
 #define is_end(c) ((c)->tag == TAG_END)
 
 // Derived type...
@@ -174,6 +175,11 @@ typedef struct {
 	mpz_t ival;
 } bigint;
 
+typedef struct {
+	int64_t refcnt;
+	char *obj;
+} object;
+
 #define SET_STR(c,s,n,off) {									\
 	strbuf *strb = malloc(sizeof(strbuf) + (n) + 1);			\
 	may_ptr_error(strb);										\
@@ -226,7 +232,8 @@ enum {
 	TAG_INT=4,
 	TAG_REAL=5,
 	TAG_PTR=6,
-	TAG_END=7
+	TAG_OBJECT=6,
+	TAG_END=8
 };
 
 enum {
@@ -327,6 +334,10 @@ struct cell_ {
 
 		struct {
 			bigint *val_bigint;
+		};
+
+		struct {
+			object *val_obj;
 		};
 
 		struct {
@@ -759,6 +770,8 @@ inline static void share_cell_(const cell *c)
 		(c)->val_strb->refcnt++;
 	else if (is_bigint(c))
 		(c)->val_bigint->refcnt++;
+	else if (is_object(c))
+		(c)->val_obj->refcnt++;
 }
 
 inline static void unshare_cell_(const cell *c)
@@ -772,6 +785,10 @@ inline static void unshare_cell_(const cell *c)
 		if (--(c)->val_bigint->refcnt == 0)	{
 			mp_int_clear(&(c)->val_bigint->ival);
 			free((c)->val_bigint);
+		}
+	} else if (is_object(c)) {
+		if (--(c)->val_obj->refcnt == 0)	{
+			free((c)->val_obj);
 		}
 	}
 }

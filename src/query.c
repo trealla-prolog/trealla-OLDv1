@@ -307,22 +307,20 @@ static void find_key(query *q, predicate *pr, cell *key)
 	//sl_dump(pr->idx, dump_key, q);
 
 	key = deep_clone_to_heap(q, key, q->st.curr_frame);
-	cell *arg1 = key + 1;
+	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
 
-#if 0
-	if (arg1 && is_variable(arg1)) {
+	if (arg1 && is_variable(arg1) && !pr->idx2) {
 		q->st.curr_clause = pr->head;
 		return;
 	}
-#else
+
 	if ((arg1 && is_variable(arg1) && pr->idx2)
-	|| (pr->is_var_in_first_arg)) {
-		key = key + 1;
-		key += key->nbr_cells;
-		idx = pr->idx2;
+		|| pr->is_var_in_first_arg) {
+			key = key + 1;
+			key += key->nbr_cells;
+			idx = pr->idx2;
 	}
-#endif
 
 	q->st.curr_clause = NULL;
 	miter *iter;
