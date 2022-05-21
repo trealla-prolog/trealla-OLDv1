@@ -29,19 +29,47 @@ CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
 endif
 
-SRCOBJECTS = tpl.o src/history.o src/functions.o \
-	src/predicates.o src/streams.o src/contrib.o src/heap.c \
-	src/control.o src/library.o src/module.o src/parser.o \
-	src/print.o src/prolog.o src/query.o src/format.o src/unify.o \
-	src/skiplist.o src/base64.o src/network.o src/toplevel.o \
+SRCOBJECTS = tpl.o \
+	src/base64.o \
+	src/contrib.o \
+	src/control.o \
+	src/format.o \
+	src/functions.o \
+	src/heap.c \
+	src/history.o \
+	src/library.o \
+	src/module.o \
+	src/network.o \
+	src/parser.o \
+	src/predicates.o \
+	src/print.o \
+	src/prolog.o \
+	src/query.o \
+	src/skiplist.o \
+	src/streams.o \
+	src/toplevel.o \
+	src/unify.o \
 	src/utf8.o
 
-LIBOBJECTS +=  library/builtins.o library/lists.o library/apply.o \
-	library/http.o library/atts.o library/error.o library/dcgs.o \
-	library/format.o library/charsio.o library/freeze.o \
-	library/ordsets.o library/assoc.o library/dict.o library/dif.o \
-	library/pairs.o library/random.o \
-	library/lambda.o library/when.o
+LIBOBJECTS +=  \
+	library/apply.o \
+	library/assoc.o \
+	library/atts.o \
+	library/builtins.o \
+	library/charsio.o \
+	library/dcgs.o \
+	library/dict.o \
+	library/dif.o \
+	library/error.o \
+	library/format.o \
+	library/freeze.o \
+	library/http.o \
+	library/lambda.o \
+	library/lists.o \
+	library/ordsets.o \
+	library/pairs.o \
+	library/random.o \
+	library/when.o
 
 SRCOBJECTS += src/imath/imath.o
 
