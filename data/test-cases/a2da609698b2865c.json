@@ -1,0 +1,55 @@
+{
+  "uid" : "a2da609698b2865c",
+  "name" : "pegsol",
+  "fullName" : "pegsol::tests",
+  "historyId" : "pegsol::tests",
+  "time" : {
+    "duration" : 5744
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "contributions/pddl_parser/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "51-54"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2ced00d6242dae792f423e3bc2afba2ee12e7de8/contributions/pddl_parser/tests.lgt#L51"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a2da609698b2865c.json",
+  "parameterValues" : [ "contributions/pddl_parser/tests.lgt", "51-54", "https://github.com/LogtalkDotOrg/logtalk3/tree/2ced00d6242dae792f423e3bc2afba2ee12e7de8/contributions/pddl_parser/tests.lgt#L51" ]
+}
