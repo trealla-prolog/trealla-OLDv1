@@ -344,7 +344,6 @@ static void find_key(query *q, predicate *pr, cell *key)
 			tmp_list = m_create(NULL, NULL, NULL);
 			m_allow_dups(tmp_list, false);
 			m_set_tmp(tmp_list);
-			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
 		}
 
 		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
