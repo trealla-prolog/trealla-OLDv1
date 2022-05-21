@@ -338,6 +338,7 @@ static void find_key(query *q, predicate *pr, cell *key)
 
 	map *tmp_list = NULL;
 	db_entry *dbe;
+	unsigned cnt = 0;
 
 	while (m_next_key(iter, (void*)&dbe)) {
 		if (!tmp_list) {
@@ -347,14 +348,19 @@ static void find_key(query *q, predicate *pr, cell *key)
 			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
 		}
 
-		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
+		if (!dbe->cl.ugen_erased) {
+			m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
+			cnt++;
+		}
 	}
-
-	// FIXME: make sure a cut or backtrack calls m_done(q->st.iter)
 
 	if (tmp_list) {
 		q->st.iter = m_first(tmp_list);
 		m_next(q->st.iter, (void*)&q->st.curr_clause);
+
+		if (!cnt)
+			q->st.definite = true;
+
 		return;
 	}
 
