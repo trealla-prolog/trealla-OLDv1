@@ -985,7 +985,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 				cell *arg1 = c->arity ? c + 1 : NULL;
 				cell *arg2 = arg1 ? arg1 + arg1->nbr_cells : NULL;
 
-				if (arg2) {
+				if (pr->idx2 && arg2) {
 					m_app(pr->idx2, arg2, cl2);
 				}
 			}
@@ -1003,12 +1003,12 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (!append) {
 		m_set(pr->idx, c, dbe);
 
-		if (arg2)
+		if (pr->idx2 && arg2)
 			m_set(pr->idx2, arg2, dbe);
 	} else {
 		m_app(pr->idx, c, dbe);
 
-		if (arg2)
+		if (pr->idx2 && arg2)
 			m_app(pr->idx2, arg2, dbe);
 	}
 }

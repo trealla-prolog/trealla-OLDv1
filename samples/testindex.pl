@@ -3,7 +3,7 @@
 :- dynamic(f/1).
 
 main :-
-	test1a, test1b, test1c,
+	test1a, test1b, test1c, test1d,
 	test2a, test2b,
 	test3,
 	test4,
