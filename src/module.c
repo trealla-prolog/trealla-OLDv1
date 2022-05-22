@@ -1399,8 +1399,7 @@ module *load_file(module *m, const char *filename, bool including)
 		for (int i = 0; i < MAX_STREAMS; i++) {
 			stream *str = &m->pl->streams[i];
 			char tmpbuf[256];
-			static unsigned s_cnt = 1;
-			snprintf(tmpbuf, sizeof(tmpbuf), "user_%u\n", s_cnt++);
+			snprintf(tmpbuf, sizeof(tmpbuf), "user");
 			filename = set_loaded(m, tmpbuf);
 
 			if (strcmp(str->name, "user_input"))
