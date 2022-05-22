@@ -201,6 +201,9 @@ static bool can_view(const frame *f, const db_entry *dbe)
 
 static bool is_next_key(query *q, clause *r)
 {
+	if (q->st.definite)
+		return false;
+
 	const frame *f = GET_CURR_FRAME();
 
 	if (q->st.iter) {
@@ -217,7 +220,7 @@ static bool is_next_key(query *q, clause *r)
 		return false;
 	}
 
-	if (!q->st.curr_clause->next || q->st.definite)
+	if (!q->st.curr_clause->next)
 		return false;
 
 	if (q->st.arg1_is_ground && r->arg1_is_unique)
@@ -341,30 +344,24 @@ static void find_key(query *q, predicate *pr, cell *key)
 	unsigned cnt = 0;
 
 	while (m_next_key(iter, (void*)&dbe)) {
+		if (dbe->cl.ugen_erased)
+			continue;
+
 		if (!tmp_list) {
 			tmp_list = m_create(NULL, NULL, NULL);
 			m_allow_dups(tmp_list, false);
 			m_set_tmp(tmp_list);
-			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
 		}
 
-		if (!dbe->cl.ugen_erased) {
-			m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
-			cnt++;
-		}
+		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
+		cnt++;
 	}
 
-	if (tmp_list) {
+	if (tmp_list)
 		q->st.iter = m_first(tmp_list);
-		m_next(q->st.iter, (void*)&q->st.curr_clause);
 
-		if (!cnt)
-			q->st.definite = true;
-
-		return;
-	}
-
-	q->st.definite = true;
+	if (!cnt)
+		q->st.definite = true;
 }
 
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var, bool *is_partial)
