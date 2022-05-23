@@ -1318,12 +1318,12 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		len = v2;
 	}
 
-	if (len > (LEN_STR_UTF8(p1)-before)) {
+	if (len > (len_p1-before)) {
 		before++;
 		len = 0;
 	}
 
-	if (before > LEN_STR_UTF8(p1)) {
+	if (before > len_p1) {
 		drop_choice(q);
 		return pl_failure;
 	}
@@ -1334,7 +1334,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			set_params(q, i, j+1);
 			may_error(push_choice(q));
 			cell tmp;
-			make_int(&tmp, i);
+			size_t before = i;
+			make_int(&tmp, before);
 
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
 				undo_me(q);
@@ -1342,7 +1343,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			make_int(&tmp, j);
+			size_t len = j;
+			make_int(&tmp, len);
 
 			if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame)) {
 				undo_me(q);
@@ -1350,7 +1352,8 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			make_int(&tmp, len_p1-i-j);
+			size_t after = len_p1-i-j;
+			make_int(&tmp, after);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
 				undo_me(q);
