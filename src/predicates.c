@@ -1352,7 +1352,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t after = len_p1 - i - j;
+			size_t after = (len_p1 - before) - len;
 			make_int(&tmp, after);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
