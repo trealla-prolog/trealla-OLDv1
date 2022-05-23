@@ -1318,7 +1318,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 		len = v2;
 	}
 
-	if (len > (len_p1-before)) {
+	if (len > (len_p1 - before)) {
 		before++;
 		len = 0;
 	}
@@ -1329,9 +1329,9 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 	}
 
 	for (size_t i = before; i <= len_p1; i++) {
-		for (size_t j = len; j <= (len_p1-i); j++) {
+		for (size_t j = len; j <= (len_p1 - i); j++) {
 			CHECK_INTERRUPT();
-			set_params(q, i, j+1);
+			set_params(q, i, j + 1);
 			may_error(push_choice(q));
 			cell tmp;
 			size_t before = i;
@@ -1352,7 +1352,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				continue;
 			}
 
-			size_t after = len_p1-i-j;
+			size_t after = len_p1 - i - j;
 			make_int(&tmp, after);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
@@ -1362,9 +1362,9 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 			}
 
 			size_t ipos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i);
-			size_t jpos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i+j);
+			size_t jpos = offset_at_pos(GET_STR(q, p1), LEN_STR(q, p1), i + j);
 
-			may_error(make_slice(q, &tmp, p1, ipos, jpos-ipos));
+			may_error(make_slice(q, &tmp, p1, ipos, jpos - ipos));
 
 			if (is_atom(p5) && !CMP_SLICE(q, p5, GET_STR(q, &tmp), LEN_STR(q, &tmp))) {
 				unshare_cell(&tmp);
