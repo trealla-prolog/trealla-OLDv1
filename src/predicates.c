@@ -21,6 +21,8 @@
 #include "openssl/sha.h"
 #endif
 
+#define MAX_CODEPOINT 1114111
+
 #ifdef _WIN32
 #include <windows.h>
 #define unsetenv(p1)
@@ -500,6 +502,9 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	}
 
 	if (is_integer(p2) && is_negative(p2))
+		return throw_error(q, p2, p2_ctx, "representation_error", "character_code");
+
+	if (is_integer(p2) && (get_int(p2) > MAX_CODEPOINT))
 		return throw_error(q, p2, p2_ctx, "representation_error", "character_code");
 
 	if (is_variable(p1)) {
