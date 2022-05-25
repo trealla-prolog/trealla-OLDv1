@@ -2419,10 +2419,11 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 static USE_RESULT pl_status fn_iso_functor_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
-	GET_NEXT_ARG(p3,any);
 
 	if (is_variable(p1)) {
+		GET_NEXT_ARG(p2,any);
+		GET_NEXT_ARG(p3,any);
+
 		if (!is_atomic(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "atomic");
 
@@ -2487,9 +2488,12 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 		tmp.flags = 0;
 	}
 
+	GET_NEXT_ARG(p2,any);
+
 	if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) != pl_success)
 		return pl_failure;
 
+	GET_NEXT_ARG(p3,any);
 	make_int(&tmp, p1->arity);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
