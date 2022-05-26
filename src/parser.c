@@ -2709,7 +2709,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		ch = get_char_utf8(&src);
 	}
-	 while (*src);
+	 while (ch);
 
 	p->toklen = dst - p->token;
 	p->is_op = search_op(p->m, p->token, NULL, false);
