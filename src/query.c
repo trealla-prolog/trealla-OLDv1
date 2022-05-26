@@ -5,7 +5,6 @@
 #include <time.h>
 
 #include "internal.h"
-#include "history.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"

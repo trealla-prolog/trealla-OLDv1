@@ -7,15 +7,15 @@
 #include <sys/stat.h>
 
 #include "internal.h"
-#include "base64.h"
 #include "library.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
 #include "heap.h"
-#include "utf8.h"
 #include "history.h"
+#include "base64.h"
+#include "utf8.h"
 
 #if USE_OPENSSL
 #include "openssl/sha.h"

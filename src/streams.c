@@ -23,15 +23,12 @@
 
 #include "internal.h"
 #include "network.h"
-#include "base64.h"
-#include "library.h"
 #include "parser.h"
 #include "module.h"
 #include "prolog.h"
 #include "query.h"
 #include "heap.h"
 #include "utf8.h"
-#include "history.h"
 
 #ifdef _WIN32
 #include <windows.h>
