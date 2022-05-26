@@ -7,6 +7,7 @@
 #include <wctype.h>
 
 #define BOM_UTF8 0xFEFF
+#define MAX_CODEPOINT 1114111
 #define MAX_BYTES_PER_CODEPOINT 6 // Unicode says 4, but max possible is 6
 
 /*

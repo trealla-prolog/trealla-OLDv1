@@ -21,8 +21,6 @@
 #include "openssl/sha.h"
 #endif
 
-#define MAX_CODEPOINT 1114111
-
 #ifdef _WIN32
 #include <windows.h>
 #define unsetenv(p1)
