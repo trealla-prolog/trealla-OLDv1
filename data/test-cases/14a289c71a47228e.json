@@ -1,0 +1,55 @@
+{
+  "uid" : "14a289c71a47228e",
+  "name" : "parcprinter",
+  "fullName" : "parcprinter::tests",
+  "historyId" : "parcprinter::tests",
+  "time" : {
+    "duration" : 20256
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "contributions/pddl_parser/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "46-49"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9d17aba9a14615cf48137967b4ce41b3a7af36c9/contributions/pddl_parser/tests.lgt#L46"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "14a289c71a47228e.json",
+  "parameterValues" : [ "contributions/pddl_parser/tests.lgt", "46-49", "https://github.com/LogtalkDotOrg/logtalk3/tree/9d17aba9a14615cf48137967b4ce41b3a7af36c9/contributions/pddl_parser/tests.lgt#L46" ]
+}

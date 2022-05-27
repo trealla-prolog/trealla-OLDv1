@@ -1,0 +1,55 @@
+{
+  "uid" : "feeb1eb63964378a",
+  "name" : "extends_protocol_3_1",
+  "fullName" : "extends_protocol_3_1::tests",
+  "historyId" : "extends_protocol_3_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/predicates/extends_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/predicates/extends_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/predicates/extends_protocol_2_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/predicates/extends_protocol_2_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "44-46"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/9d17aba9a14615cf48137967b4ce41b3a7af36c9/tests/logtalk/predicates/extends_protocol_2_3/tests.lgt#L44"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "feeb1eb63964378a.json",
+  "parameterValues" : [ "tests/logtalk/predicates/extends_protocol_2_3/tests.lgt", "44-46", "https://github.com/LogtalkDotOrg/logtalk3/tree/9d17aba9a14615cf48137967b4ce41b3a7af36c9/tests/logtalk/predicates/extends_protocol_2_3/tests.lgt#L44" ]
+}
