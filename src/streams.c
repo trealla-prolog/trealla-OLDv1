@@ -1354,6 +1354,9 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	tokenize(p, false, false);
 	p->read_term = 0;
 
+	if (p->did_getline)
+		q->is_input = true;
+
 	if (p->error || !p->end_of_term) {
 		p->error = false;
 
@@ -1600,7 +1603,6 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 	safe_copy_cells(tmp, p->cl->cells, p->cl->cidx-1);
 	pl_status ok = unify(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	clear_rule(p->cl);
-	q->is_input = true;
 	return ok;
 }
 
