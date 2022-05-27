@@ -1348,14 +1348,14 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 		break;
 	}
 
+	if (p->did_getline)
+		q->is_input = true;
+
 	frame *f = GET_CURR_FRAME();
 	p->read_term = f->nbr_vars;
 	p->do_read_term = true;
 	tokenize(p, false, false);
 	p->read_term = 0;
-
-	if (p->did_getline)
-		q->is_input = true;
 
 	if (p->error || !p->end_of_term) {
 		p->error = false;
