@@ -308,7 +308,7 @@ void dump_vars(query *q, bool partial)
 
 		if (any)
 			fprintf(stdout, ", ");
-		else if (!q->is_redo)
+		else if (!q->is_redo || q->is_input)
 			fprintf(stdout, "   ");
 		else
 			fprintf(stdout, " ");
@@ -392,6 +392,7 @@ void dump_vars(query *q, bool partial)
 
 	g_tpl_interrupt = false;
 	q->is_dump_vars = false;
+	q->is_input = false;
 
 	if (any && !partial) {
 		if (space) fprintf(stdout, " ");
