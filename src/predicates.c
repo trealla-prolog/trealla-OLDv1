@@ -5352,7 +5352,7 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 {
 	GET_FIRST_ARG(p1,atomic);
 	GET_NEXT_ARG(p2,atomic);
-	GET_NEXT_ARG(p3,any);
+	GET_NEXT_ARG(p3,atom_or_var);
 	const char *src1, *src2;
 	size_t len1, len2;
 	char tmpbuf1[256], tmpbuf2[256];
