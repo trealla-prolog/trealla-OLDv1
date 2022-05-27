@@ -28,7 +28,8 @@ static const op_table g_ops[] =
 	//{"multifile", OP_FX, 1150},
 	//{"attribute", OP_FX, 1150},
 	//{"op", OP_FX, 1150},
-	//{"dynamic", OP_FX, 1150},
+	{"table", OP_FX, 1150},
+	{"dynamic", OP_FX, 1150},
 	//{"persist", OP_FX, 1150},
 	//{"initialization", OP_FX, 1150},
 	//{"set_prolog_flag", OP_FX, 1150},
@@ -418,6 +419,23 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 		m->error = true;
 }
 
+void set_table_in_db(module *m, const char *name, unsigned arity)
+{
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
+
+	if (pr) {
+		push_property(m, name, arity, "tabled");
+		pr->is_tabled = true;
+	} else
+		m->error = true;
+}
+
 void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
@@ -431,6 +449,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 	if (pr) {
 		push_property(m, name, arity, "dynamic");
 		pr->is_dynamic = true;
+		pr->is_static = false;
 	} else
 		m->error = true;
 }
@@ -475,6 +494,7 @@ void set_persist_in_db(module *m, const char *name, unsigned arity)
 		push_property(m, name, arity, "dynamic");
 		push_property(m, name, arity, "persist");
 		pr->is_dynamic = true;
+		pr->is_static = false;
 		pr->is_persist = true;
 		m->use_persist = true;
 	} else
@@ -915,6 +935,7 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 		if (!consulting) {
 			push_property(m, GET_STR(m, c), c->arity, "dynamic");
 			pr->is_dynamic = true;
+			pr->is_static = false;
 		} else {
 			if (m->prebuilt) {
 				push_property(m, GET_STR(m, c), c->arity, "built_in");
@@ -926,6 +947,11 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 		if (consulting && m->make_public) {
 			push_property(m, GET_STR(m, c), c->arity, "public");
 			pr->is_public = true;
+		}
+	} else {
+		if (pr->is_tabled && !pr->is_dynamic && !pr->is_static) {
+			push_property(m, GET_STR(m, c), c->arity, "static");
+			pr->is_static = true;
 		}
 	}
 

@@ -783,6 +783,9 @@ static void directives(parser *p, cell *d)
 				}
 
 				set_persist_in_db(p->m, GET_STR(p, c_name), arity);
+			} else if (!strcmp(dirname, "public")) {
+			} else if (!strcmp(dirname, "table") && false) {
+				set_table_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, GET_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
@@ -847,6 +850,10 @@ static void directives(parser *p, cell *d)
 				set_multifile_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(m, GET_STR(p, c_name), arity);
+			else if (!strcmp(dirname, "public"))
+				;
+			else if (!strcmp(dirname, "table") && false)
+				set_table_in_db(m, GET_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "dynamic")) {
 				predicate * pr = find_predicate(p->m, &tmp);
 
@@ -869,6 +876,9 @@ static void directives(parser *p, cell *d)
 				}
 
 				set_persist_in_db(m, GET_STR(p, c_name), arity);
+			} else {
+				if (((DUMP_ERRS || !p->do_read_term)) && !p->m->pl->quiet)
+					fprintf(stdout, "Warning: unknown directive: %s\n", dirname);
 			}
 
 			p1 += p1->nbr_cells;
@@ -1623,6 +1633,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 			|| (c->val_off == g_if_then_s)
 			|| (c->val_off == g_soft_cut_s)
 			|| (c->val_off == g_neck_s)) {
+			cell *save_c = c;
 			cell *lhs = c + 1;
 			bool norhs = false;
 
@@ -1654,6 +1665,7 @@ static cell *term_to_body_conversion(parser *p, cell *c)
 	} else if (is_fx(c) || is_fy(c)) {
 		if ((c->val_off == g_negation_s)
 			|| (c->val_off == g_neck_s)) {
+			cell *save_c = c;
 			cell *rhs = c + 1;
 
 			if (is_variable(rhs)) {

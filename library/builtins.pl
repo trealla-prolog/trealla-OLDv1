@@ -30,7 +30,7 @@ predicate_property(P, A) :-
 predicate_property(P, A) :-
 	'$load_properties',
 	(	var(A) -> true
-	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,persist,multifile,meta_predicate(_)],
+	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,tabled,persist,multifile,meta_predicate(_)],
 			memberchk(A, Controls)) -> true
 		;	throw(error(domain_error(predicate_property, A), P))
 		)
