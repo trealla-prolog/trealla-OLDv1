@@ -2079,7 +2079,6 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	*srcptr = s;
 	ch = peek_char_utf8(s);
 
-	//if ((ch == '(') || iswalpha(ch)) {
 	if (ch == '(') {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
@@ -2405,6 +2404,16 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		if (!check_space_before_function(p, ch, src))
 			return false;
 
+		ch = peek_char_utf8(src);
+
+		if (ch == '(') {
+			if (DUMP_ERRS || !p->do_read_term)
+				fprintf(stdout, "Error: syntax error, parsing number, line %u\n", p->line_nbr);
+
+			p->error_desc = "number";
+			p->error = true;
+			return false;
+		}
 		return eat_comment(p);
 	}
 
