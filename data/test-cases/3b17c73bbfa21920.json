@@ -1,0 +1,55 @@
+{
+  "uid" : "3b17c73bbfa21920",
+  "name" : "cascade_dcgs_01",
+  "fullName" : "cascade_dcgs_01::tests",
+  "historyId" : "cascade_dcgs_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/cascade/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/cascade/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/cascade/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/cascade/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "43-49"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d592b5618203f9ae16dbdf5f328189375da5052e/examples/cascade/tests.lgt#L43"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3b17c73bbfa21920.json",
+  "parameterValues" : [ "examples/cascade/tests.lgt", "43-49", "https://github.com/LogtalkDotOrg/logtalk3/tree/d592b5618203f9ae16dbdf5f328189375da5052e/examples/cascade/tests.lgt#L43" ]
+}
