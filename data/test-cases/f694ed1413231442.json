@@ -1,0 +1,55 @@
+{
+  "uid" : "f694ed1413231442",
+  "name" : "proxies_02",
+  "fullName" : "proxies_02::tests",
+  "historyId" : "proxies_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/proxies/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/proxies/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "42-43"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b5635e9dfcbfe25841eb6ec65f369509f5f4daf1/examples/proxies/tests.lgt#L42"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f694ed1413231442.json",
+  "parameterValues" : [ "examples/proxies/tests.lgt", "42-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/b5635e9dfcbfe25841eb6ec65f369509f5f4daf1/examples/proxies/tests.lgt#L42" ]
+}
