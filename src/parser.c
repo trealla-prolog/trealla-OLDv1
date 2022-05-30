@@ -2787,7 +2787,7 @@ static bool process_term(parser *p, cell *p1)
 unsigned tokenize(parser *p, bool args, bool consing)
 {
 	pl_idx_t arg_idx = p->cl->cidx, save_idx = 0;
-	bool last_op = true, is_func = false;
+	bool last_op = true, is_func = false, last_num = false;
 	bool last_bar = false, last_quoted = false, last_postfix = false;
 	unsigned arity = 1;
 	p->depth++;
@@ -2862,6 +2862,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 					if (!p1->arity && !strcmp(GET_STR(p, p1), "begin_of_file")) {
 						p->end_of_term = true;
 						last_op = true;
+						last_num = false;
 						p->cl->cidx = 0;
 						continue;
 					}
@@ -2910,6 +2911,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			if (p->one_shot)
 				break;
 
+			last_num = false;
 			continue;
 		}
 
@@ -2957,6 +2959,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c = p->cl->cells + save_idx;
 			c->nbr_cells = p->cl->cidx - save_idx;
 			fix_list(c);
+			last_num = false;
 			continue;
 		}
 
@@ -2977,6 +2980,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			c->nbr_cells = p->cl->cidx - save_idx;
 			p->start_term = p->last_close = false;
 			last_op = false;
+			last_num = false;
 			continue;
 		}
 
@@ -2996,6 +3000,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			}
 
 			is_func = last_op = false;
+			last_num = false;
 			p->start_term = p->last_close = false;
 			continue;
 		}
@@ -3059,6 +3064,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			cell *c = make_a_literal(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = last_op = true;
+			last_num = false;
 			p->last_close = false;
 			continue;
 		}
@@ -3099,6 +3105,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 			p->last_close = false;
 			last_op = true;
+			last_num = false;
 			continue;
 		}
 
@@ -3258,7 +3265,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->quote_char = 0;
 		}
 
-		int func = is_literal(&p->v) && !specifier && (*p->srcptr == '(');
+		int func = is_literal(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
 
 		if ((p->was_string || p->string) && func) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -3308,6 +3315,8 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		SET_OP(c,specifier);
 		c->priority = priority;
 		bool found = false;
+
+		last_num = is_number(c);
 
 		if (is_bigint(&p->v)) {
 			c->val_bigint = p->v.val_bigint;
