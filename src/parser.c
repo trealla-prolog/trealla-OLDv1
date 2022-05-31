@@ -3154,25 +3154,22 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
 			p->last_close = true;
-			last_op = false;
 			p->nesting_parens--;
-			analyze(p, arg_idx, last_op);
+			analyze(p, arg_idx, last_op=false);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
 			p->last_close = true;
-			last_op = false;
 			p->nesting_brackets--;
-			analyze(p, arg_idx, last_op);
+			analyze(p, arg_idx, last_op=false);
 			return arity;
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
 			p->last_close = true;
-			last_op = false;
 			p->nesting_braces--;
-			analyze(p, arg_idx, last_op);
+			analyze(p, arg_idx, last_op=false);
 			return arity;
 		}
 
