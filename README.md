@@ -146,6 +146,7 @@ where options can be:
 	-O0, --noopt       - no optimization
 	-f file            - load file (*~/.tplrc* not loaded)
 	-l file            - load file (*~/.tplrc* loaded)
+	file               - load file (*~/.tplrc* loaded)
 	-g goal            - query goal (only used once)
 	--library path     - alt to TPL_LIBRARY_PATH env variable
 	-t, --trace        - trace
@@ -170,6 +171,10 @@ The file *~/.tplrc* is consulted on startup unless the *-f* option is present.
 When consulting, reconsulting and deconsulting files the *.pl* version
 of the filename is always preferred (if not specified) when looking for a
 file.
+
+To run the Pereira benchmark suite:
+
+	tpl -g "bench_peirera,halt" -f samples/peirera.pl
 
 
 Acknowledgements
