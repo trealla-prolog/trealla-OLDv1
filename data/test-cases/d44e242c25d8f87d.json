@@ -1,0 +1,55 @@
+{
+  "uid" : "d44e242c25d8f87d",
+  "name" : "write_term_to_codes_3_07",
+  "fullName" : "write_term_to_codes_3_07::tests",
+  "historyId" : "write_term_to_codes_3_07::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/term_io/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/term_io/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/term_io/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/term_io/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "301-303"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/be5e1ef970f584accce8bed2986d1cadf4f55ded/library/term_io/tests.lgt#L301"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d44e242c25d8f87d.json",
+  "parameterValues" : [ "library/term_io/tests.lgt", "301-303", "https://github.com/LogtalkDotOrg/logtalk3/tree/be5e1ef970f584accce8bed2986d1cadf4f55ded/library/term_io/tests.lgt#L301" ]
+}

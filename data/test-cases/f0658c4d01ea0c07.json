@@ -1,0 +1,55 @@
+{
+  "uid" : "f0658c4d01ea0c07",
+  "name" : "classmethods_03",
+  "fullName" : "classmethods_03::tests",
+  "historyId" : "classmethods_03::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/classmethods/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/classmethods/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/classmethods/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/classmethods/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "44-46"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/be5e1ef970f584accce8bed2986d1cadf4f55ded/examples/classmethods/tests.lgt#L44"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f0658c4d01ea0c07.json",
+  "parameterValues" : [ "examples/classmethods/tests.lgt", "44-46", "https://github.com/LogtalkDotOrg/logtalk3/tree/be5e1ef970f584accce8bed2986d1cadf4f55ded/examples/classmethods/tests.lgt#L44" ]
+}
