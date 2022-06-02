@@ -179,10 +179,12 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
-	unsigned specifier;
+	if (arity <= 2) {
+		unsigned specifier;
 
-	if (search_op(q->st.m, functor, &specifier, false))
-		SET_OP(tmp2, specifier);
+		if (search_op(q->st.m, functor, &specifier, false))
+			SET_OP(tmp2, specifier);
+	}
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
