@@ -1,9 +1,3 @@
-:- module(bench_peirera,
-	  [ bench_peirera/0,
-	    bench_peirera/1,		% SpeedupOrName
-	    list_bench_results/2	% +File, +Id
-	  ]).
-
 :- meta_predicate(do_n(+, 0, -)).
 
 %%	bench_peirera is det.
@@ -42,7 +36,7 @@ list_bench_results(File, Id) :-
 %	Last update: SWI-Prolog 5.6.59 (gcc:  -O3;   pl:  -O)  on AMD X2
 %	5400+ (64-bits)
 
-:- dynamic saved_iterations/2.
+:- dynamic(saved_iterations/2).
 
 saved_iterations(tail_call_atom_atom, 145946).
 saved_iterations(binary_call_atom_atom, 94737).
@@ -167,8 +161,7 @@ bench_time(1).
 %   To get the old effect, do something like
 %   bench_mark(nrev, 50, nrev(L), dummy(L)) :- data(L).
 
-:- dynamic
-	bench_result/2.
+:- dynamic(bench_result/2).
 
 bench_mark(Name) :-
 	bench_mark(Name, 1).
@@ -178,14 +171,14 @@ bench_mark(Name, Speedup) :-
 	assert(bench_result(Name, NetTime)).
 
 bench_mark(Name, NetTime, Speedup) :-
-        bench_mark(Name, I0, Action, Control),
+	bench_mark(Name, I0, Action, Control),
 	iterations(I0, Name, Action, Control, Iterations0),
 	Iterations is round(Iterations0/Speedup),
 	do_n(Iterations, Action, TestTime),
 	do_n(Iterations, Control, OverHead),
 
 	NetTime is TestTime-OverHead,
-        Average  is 1000000*NetTime/Iterations,
+	Average  is 1000000*NetTime/Iterations,
 
 	format('~w~t~22| took ~2f-~2f=~2f/~d = ~t~1f~60| usec/iter.~n',
 	       [Name, TestTime, OverHead, NetTime, Iterations, Average]).
@@ -247,8 +240,7 @@ from(L, U) :- M is (L+U)>>1+1, from(M, U).
 
 % :- public benches/0, bench_mark/1.
 
-:- dynamic
-	total_time/1.
+:- dynamic(total_time/1).
 
 benches :-
 	benches(1).
