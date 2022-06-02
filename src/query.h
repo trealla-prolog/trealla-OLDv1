@@ -101,6 +101,7 @@ pl_status fn_if_3(query *q);
 pl_status fn_if_2(query *q);
 pl_status fn_iso_if_then_2(query *q);
 pl_status fn_iso_invoke_2(query *q);
+pl_status fn_iso_call_1(query *q);
 pl_status fn_iso_call_n(query *q);
 pl_status fn_iso_cut_0(query *q);
 pl_status fn_sys_inner_cut_0(query *q);

@@ -65,33 +65,6 @@ static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_call_0(query *q, cell *p1)
-{
-	if (q->retry)
-		return pl_failure;
-
-	p1 = deref(q, p1, q->st.curr_frame);
-	pl_idx_t p1_ctx = q->latest_ctx;
-
-	if (!is_callable(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "callable");
-
-	cell *tmp2;
-
-	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
-		return throw_error(q, p1, p1_ctx, "type_error", "callable");
-
-	cell *tmp = clone_to_heap(q, false, p1, 2);
-	may_heap_error(tmp);
-	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
-	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
-	q->st.curr_cell = tmp;
-	q->st.curr_frame = p1_ctx;
-	return pl_success;
-}
-
 // module:goal
 
 USE_RESULT pl_status fn_iso_invoke_2(query *q)
@@ -119,6 +92,56 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	return pl_success;
 }
 
+USE_RESULT pl_status fn_call_0(query *q, cell *p1)
+{
+	if (q->retry)
+		return pl_failure;
+
+	p1 = deref(q, p1, q->st.curr_frame);
+	pl_idx_t p1_ctx = q->latest_ctx;
+
+	if (!is_callable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
+
+	cell *tmp2;
+
+	if ((tmp2 = check_body_callable(q->st.m->p, p1)) != NULL)
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
+
+	cell *tmp = clone_to_heap(q, false, p1, 2);
+	may_heap_error(tmp);
+	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
+	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_return(q, tmp+nbr_cells);
+	may_error(push_call_barrier(q));
+	q->st.curr_cell = tmp;
+	q->st.curr_frame = p1_ctx;
+	return pl_success;
+}
+
+USE_RESULT pl_status fn_iso_call_1(query *q)
+{
+	if (q->retry)
+		return pl_failure;
+
+	may_heap_error(init_tmp_heap(q));
+	cell *p0 = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
+	may_heap_error(p0);
+	GET_FIRST_ARG0(p1,callable,p0);
+
+	if (check_body_callable(q->st.m->p, p1) != NULL)
+		return throw_error(q, p1, q->st.curr_frame, "type_error", "callable");
+
+	cell *tmp = clone_to_heap(q, true, p1, 2);
+	may_heap_error(tmp);
+	pl_idx_t nbr_cells = 1+p1->nbr_cells;
+	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_return(q, tmp+nbr_cells);
+	may_error(push_call_barrier(q));
+	q->st.curr_cell = tmp;
+	return pl_success;
+}
+
 USE_RESULT pl_status fn_iso_call_n(query *q)
 {
 	if (q->retry)
@@ -134,7 +157,7 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 
 	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_ARG(p2,any);
-		may_heap_error(clone2_to_tmp(q, p2));
+		may_heap_error(append_to_tmp(q, p2));
 		arity++;
 	}
 

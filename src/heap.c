@@ -584,7 +584,7 @@ cell *deep_clone_to_heap(query *q, cell *p1, pl_idx_t p1_ctx)
 	return tmp;
 }
 
-cell *clone2_to_tmp(query *q, cell *p1)
+cell *append_to_tmp(query *q, cell *p1)
 {
 	cell *tmp = alloc_on_tmp(q, p1->nbr_cells);
 	if (!tmp) return NULL;
@@ -605,7 +605,7 @@ cell *clone2_to_tmp(query *q, cell *p1)
 
 cell *clone_to_tmp(query *q, cell *p1)
 {
-	return clone2_to_tmp(q, p1);
+	return append_to_tmp(q, p1);
 }
 
 cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)

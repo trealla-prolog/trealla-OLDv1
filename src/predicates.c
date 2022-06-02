@@ -4618,7 +4618,7 @@ static USE_RESULT pl_status fn_task_n(query *q)
 
 	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_RAW_ARG(p2,any);
-		may_ptr_error(clone2_to_tmp(q, p2));
+		may_ptr_error(append_to_tmp(q, p2));
 		arity++;
 	}
 
@@ -6587,7 +6587,7 @@ static const struct builtins g_iso_bifs[] =
 	{"$catch", 3, fn_iso_catch_3, NULL, false},
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false},
 
-	{"call", 1, fn_iso_call_n, NULL, false},
+	{"call", 1, fn_iso_call_1, NULL, false},
 	{"call", 2, fn_iso_call_n, NULL, false},
 	{"call", 3, fn_iso_call_n, NULL, false},
 	{"call", 4, fn_iso_call_n, NULL, false},
