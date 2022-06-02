@@ -1501,7 +1501,7 @@ pl_status start(query *q)
 		q->run_hook = q->cycle_error = false;
 		q->before_hook_tp = q->st.tp;
 
-		if (q->st.curr_cell->flags & FLAG_BUILTIN	) {
+		if (is_builtin(q->st.curr_cell)) {
 			if (!q->st.curr_cell->fn) {					// NO-OP
 				q->tot_goals--;
 				q->st.curr_cell++;
