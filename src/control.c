@@ -124,17 +124,18 @@ USE_RESULT pl_status fn_iso_call_1(query *q)
 	if (q->retry)
 		return pl_failure;
 
+	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
-	cell *p0 = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
-	may_heap_error(p0);
-	GET_FIRST_ARG0(p1,callable,p0);
+	may_heap_error(deep_clone_to_tmp(q, p1, p1_ctx));
+	cell *tmp2 = get_tmp_heap(q, 0);
+	tmp2->nbr_cells = tmp_heap_used(q);
 
-	if (check_body_callable(q->st.m->p, p1) != NULL)
-		return throw_error(q, p1, q->st.curr_frame, "type_error", "callable");
+	if (check_body_callable(q->st.m->p, tmp2) != NULL)
+		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
 
-	cell *tmp = clone_to_heap(q, true, p1, 2);
+	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	may_heap_error(tmp);
-	pl_idx_t nbr_cells = 1+p1->nbr_cells;
+	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
@@ -147,17 +148,15 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	if (q->retry)
 		return pl_failure;
 
-	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
-	may_heap_error(p0);
-	GET_FIRST_ARG0(p1,callable,p0);
+	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
-	may_heap_error(clone_to_tmp(q, p1));
+	may_heap_error(deep_clone_to_tmp(q, p1, p1_ctx));
 	unsigned arity = p1->arity;
 	unsigned args = 1;
 
 	while (args++ < q->st.curr_cell->arity) {
 		GET_NEXT_ARG(p2,any);
-		may_heap_error(append_to_tmp(q, p2));
+		may_heap_error(deep_clone_to_tmp(q, p2, p2_ctx));
 		arity++;
 	}
 
@@ -173,11 +172,8 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	const char *functor = GET_STR(q, tmp2);
 	bool found = false;
 
-	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
-		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->pl, functor, tmp2->arity, &found, NULL)), found) {
+	if ((tmp2->fn = get_builtin(q->pl, functor, tmp2->arity, &found, NULL)), found)
 		tmp2->flags |= FLAG_BUILTIN;
-	}
 
 	if (arity <= 2) {
 		unsigned specifier;
