@@ -1606,7 +1606,7 @@ fa100(M, K, P) :- P is M + K.
 
 % 17. 100 calls to arg at position N
 
-bench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :-
+xbench_mark(arg(N), 2000, arg1(N, Term, R), dummy(N, Term, R)) :-
    args(N),
    complex_nary_term(100, N, Term).
 
