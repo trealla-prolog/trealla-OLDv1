@@ -187,6 +187,18 @@ bool more_data(const predicate *pr)
 	return (pr->cnt > 1) || (pr->ref_cnt > 1);
 }
 
+static bool is_ground(const cell *c)
+{
+	pl_idx_t nbr_cells = c->nbr_cells;
+
+	for (pl_idx_t i = 0; i < nbr_cells; i++, c++) {
+		if (is_variable(c))
+			return false;
+	}
+
+	return true;
+}
+
 static bool can_view(const frame *f, const db_entry *dbe)
 {
 	if (dbe->cl.ugen_created > f->ugen)
@@ -230,6 +242,19 @@ static bool is_next_key(query *q, clause *r)
 
 	db_entry *next = q->st.curr_clause->next;
 
+#if 1
+	// Attempt look-ahead of 1 on 1st arg...
+
+	r = &next->cl;
+
+	if (q->st.arg1_is_ground && !next->next
+		&& (q->st.key->arity == 1) && is_ground(r->cells+1)) {
+		if (compare(q, q->st.key, q->st.curr_frame, r->cells, q->st.curr_frame)) {
+			return false;
+		}
+	}
+#endif
+
 	while (next && !can_view(f, next))
 		next = next->next;
 
@@ -249,24 +274,13 @@ static void next_key(query *q)
 		q->st.curr_clause = NULL;
 }
 
-static bool is_ground(const cell *c)
-{
-	pl_idx_t nbr_cells = c->nbr_cells;
-
-	for (pl_idx_t i = 0; i < nbr_cells; i++, c++) {
-		if (is_variable(c))
-			return false;
-	}
-
-	return true;
-}
-
 static void find_key(query *q, predicate *pr, cell *key)
 {
 	q->st.definite = false;
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
 	q->st.arg3_is_ground = false;
+	q->st.key = key;
 	q->st.iter = NULL;
 
 	if (!pr->idx || (pr->cnt < q->st.m->indexing_threshold)) {

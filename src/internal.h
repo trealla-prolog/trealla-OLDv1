@@ -511,7 +511,7 @@ struct stream_ {
 };
 
 struct prolog_state_ {
-	cell *curr_cell;
+	cell *curr_cell, *key;
 	db_entry *curr_clause, *curr_clause2;
 	miter *f_iter;
 	predicate *pr, *pr2;
