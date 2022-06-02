@@ -28,7 +28,7 @@ pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type retract);
 pl_status try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);
-void stash_me(query *q, clause *t, bool last_match);
+void stash_me(query *q, const clause *r, bool last_match);
 void trim_trail(query *q);
 bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
 pl_status do_post_unification_hook(query *q, bool is_builtin);
@@ -47,7 +47,6 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
 char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len);
 
 unsigned create_vars(query *q, unsigned nbr);
-void share_predicate(predicate *pr);
 void unshare_predicate(query *q, predicate *pr);
 cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp);
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
@@ -114,6 +113,11 @@ pl_status fn_iso_unify_2(query *q);
 inline static pl_idx_t drop_choice(query *q)
 {
 	return --q->cp;
+}
+
+inline static void share_predicate(predicate *pr)
+{
+	pr->ref_cnt++;
 }
 
 struct reflist_ {

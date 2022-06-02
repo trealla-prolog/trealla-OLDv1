@@ -953,14 +953,13 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		h2 = deref(q, h2, p2_ctx);
 		pl_idx_t h2_ctx = q->latest_ctx;
 
-		if ((h1 == save_p1) && (h1_ctx == save_p1_ctx))
+		if ((h1 == save_p1) && (h1_ctx == save_p1_ctx)) {
 			p1 = NULL;
+			break;
+		}
 
-		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx))
+		if ((h2 == save_p2) && (h2_ctx == save_p2_ctx)) {
 			p2 = NULL;
-
-		if (!p1 || !p2) {
-			//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
 		}
 
@@ -974,14 +973,13 @@ static bool unify_lists(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t 
 		p2 = deref(q, p2, p2_ctx);
 		p2_ctx = q->latest_ctx;
 
-		if ((p1 == save_p1) && (p1_ctx == save_p1_ctx))
+		if ((p1 == save_p1) && (p1_ctx == save_p1_ctx)) {
 			p1 = NULL;
+			break;
+		}
 
-		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx))
+		if ((p2 == save_p2) && (p2_ctx == save_p2_ctx)) {
 			p2 = NULL;
-
-		if (!p1 || !p2) {
-			//printf("*** OOPS %s %d\n", __FILE__, __LINE__);
 			break;
 		}
 	}

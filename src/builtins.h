@@ -71,10 +71,12 @@ inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 	if (is_empty(&e->c))
 		return q->latest_ctx = c_ctx, c;
 
-	if (is_indirect(&e->c))
-		return q->latest_ctx = e->ctx, e->c.val_ptr;
+	q->latest_ctx = e->ctx;
 
-	return q->latest_ctx = e->ctx, &e->c;
+	if (is_indirect(&e->c))
+		return e->c.val_ptr;
+
+	return &e->c;
 }
 
 #define deref(q, c, c_ctx) is_variable(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = (c_ctx), (c))

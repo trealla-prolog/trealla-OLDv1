@@ -249,7 +249,7 @@ static void next_key(query *q)
 		q->st.curr_clause = NULL;
 }
 
-static bool is_ground(cell *c)
+static bool is_ground(const cell *c)
 {
 	pl_idx_t nbr_cells = c->nbr_cells;
 
@@ -638,7 +638,7 @@ void trim_trail(query *q)
 	}
 }
 
-static bool check_slots(const query *q, frame *f, clause *r)
+static bool check_slots(const query *q, const frame *f, const clause *r)
 {
 	if (r != NULL) {
 		if (f->nbr_vars != r->nbr_vars)
@@ -656,14 +656,6 @@ static bool check_slots(const query *q, frame *f, clause *r)
 	}
 
 	return true;
-}
-
-void share_predicate(predicate *pr)
-{
-	if (!pr)
-		return;
-
-	pr->ref_cnt++;
 }
 
 void unshare_predicate(query *q, predicate *pr)
@@ -755,7 +747,7 @@ static void commit_me(query *q, clause *r)
 	q->in_commit = false;
 }
 
-void stash_me(query *q, clause *r, bool last_match)
+void stash_me(query *q, const clause *r, bool last_match)
 {
 	pl_idx_t cgen = q->cgen;
 
@@ -782,7 +774,7 @@ void stash_me(query *q, clause *r, bool last_match)
 pl_status push_choice(query *q)
 {
 	may_error(check_choice(q));
-	frame *f = GET_CURR_FRAME();
+	const frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
 	memset(ch, 0, sizeof(choice));
@@ -914,7 +906,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 bool cut_if_det(query *q)
 {
-	frame *f = GET_CURR_FRAME();
+	const frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
 
 	if (ch->call_barrier && (ch->cgen == f->cgen)) {
@@ -1059,7 +1051,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
-	frame *f = GET_FRAME(c_ctx);
+	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
