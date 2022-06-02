@@ -520,14 +520,6 @@ static void trim_heap(query *q, const choice *ch)
 #endif
 }
 
-pl_idx_t drop_choice(query *q)
-{
-	if (!q->cp)
-		return q->cp;
-
-	return --q->cp;
-}
-
 bool retry_choice(query *q)
 {
 LOOP:
@@ -633,13 +625,8 @@ void trim_trail(query *q)
 		return;
 	}
 
-	pl_idx_t tp;
-
-	if (q->cp) {
-		const choice *ch = GET_CURR_CHOICE();
-		tp = ch->st.tp;
-	} else
-		tp = 0;
+	const choice *ch = GET_CURR_CHOICE();
+	pl_idx_t tp = ch->st.tp;
 
 	while (q->st.tp > tp) {
 		const trail *tr = q->trails + q->st.tp - 1;
@@ -928,10 +915,6 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 bool cut_if_det(query *q)
 {
 	frame *f = GET_CURR_FRAME();
-
-	if (!q->cp)				// redundant
-		return true;
-
 	choice *ch = GET_CURR_CHOICE();
 
 	if (ch->call_barrier && (ch->cgen == f->cgen)) {

@@ -21,7 +21,6 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 pl_status execute(query *q, cell *cells, unsigned nbr_vars);
 pl_status fn_call_0(query *q, cell *p1);
 void undo_me(query *q);
-pl_idx_t drop_choice(query *q);
 bool retry_choice(query *q);
 void term_assign_vars(parser *p, unsigned start, bool rebase);
 pl_status start(query *q);
@@ -111,6 +110,11 @@ pl_status fn_sys_undo_trail_1(query *q);
 pl_status fn_sys_redo_trail_0(query *q);
 pl_status fn_sys_soft_inner_cut_0(query *q);
 pl_status fn_iso_unify_2(query *q);
+
+inline static pl_idx_t drop_choice(query *q)
+{
+	return --q->cp;
+}
 
 struct reflist_ {
 	reflist *next;
