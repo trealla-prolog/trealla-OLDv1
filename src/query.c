@@ -242,25 +242,23 @@ static bool is_next_key(query *q, clause *r)
 
 	db_entry *next = q->st.curr_clause->next;
 
-	for (; next; next = next->next) {
-		if (!can_view(f, next))
-			continue;
-
 #if 1
-		// Experimental: attempt look-ahead on 1st arg...
+	// Attempt look-ahead of 1 on 1st arg. This is
+	// experimental at this point. Should it be in the
+	// can_view loop?
 
-		r = &next->cl;
+	r = &next->cl;
 
-		if (q->st.arg1_is_ground && (q->st.key->arity == 1)
-			&& is_ground(r->cells+1)) {
-			if (compare(q, q->st.key, q->st.curr_frame, r->cells, q->st.curr_frame)) {
-				continue;
-			}
+	if (q->st.arg1_is_ground && !next->next
+		&& (q->st.key->arity == 1) && is_ground(r->cells+1)) {
+		if (compare(q, q->st.key, q->st.curr_frame, r->cells, q->st.curr_frame)) {
+			return false;
 		}
+	}
 #endif
 
-		break;
-	}
+	while (next && !can_view(f, next))
+		next = next->next;
 
 	return next ? true : false;
 }
