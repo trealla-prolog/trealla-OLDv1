@@ -34,17 +34,6 @@
       "total" : 65
     }
   }, {
-    "uid" : "1476a5fe7a0cd10e9537d5b8d03f3c43",
-    "name" : "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 12,
-      "broken" : 0,
-      "skipped" : 3,
-      "passed" : 2,
-      "unknown" : 0,
-      "total" : 17
-    }
-  }, {
     "uid" : "989b09abb7fb900a0e7ed980a1e19859",
     "name" : "tools/lgtdoc/tests.lgt::tests",
     "statistic" : {
@@ -102,6 +91,17 @@
   }, {
     "uid" : "d944697bc54dd491703ec3072bfba616",
     "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
+    "statistic" : {
+      "failed" : 6,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 1,
+      "unknown" : 0,
+      "total" : 7
+    }
+  }, {
+    "uid" : "a17f506128c48415bd5f6275182f5e99",
+    "name" : "tools/code_metrics/code_metrics_tests.lgt::code_metrics_tests",
     "statistic" : {
       "failed" : 6,
       "broken" : 0,
