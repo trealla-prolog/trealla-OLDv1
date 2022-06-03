@@ -1,0 +1,55 @@
+{
+  "uid" : "8af23cac9817e944",
+  "name" : "settings_file_default_flag_values_override",
+  "fullName" : "settings_file_default_flag_values_override::tests",
+  "historyId" : "settings_file_default_flag_values_override::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/settings/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/settings/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/settings/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/settings/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "32-34"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tests/logtalk/settings/tests.lgt#L32"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8af23cac9817e944.json",
+  "parameterValues" : [ "tests/logtalk/settings/tests.lgt", "32-34", "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tests/logtalk/settings/tests.lgt#L32" ]
+}

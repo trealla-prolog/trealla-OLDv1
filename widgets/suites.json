@@ -1,5 +1,5 @@
 {
-  "total" : 477,
+  "total" : 478,
   "items" : [ {
     "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
     "name" : "tools/diagrams/tests.lgt::tests",
@@ -45,6 +45,17 @@
       "total" : 12
     }
   }, {
+    "uid" : "ac3efbb8eff82b3668361622fcaf20d6",
+    "name" : "tools/debugger/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 8,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 28,
+      "unknown" : 0,
+      "total" : 36
+    }
+  }, {
     "uid" : "ca0b36cfcb9cdd10ff496c52b6096985",
     "name" : "tests/logtalk/predicates/protocol_property_2/tests.lgt::tests",
     "statistic" : {
@@ -87,17 +98,6 @@
       "passed" : 18,
       "unknown" : 0,
       "total" : 27
-    }
-  }, {
-    "uid" : "d944697bc54dd491703ec3072bfba616",
-    "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
-    "statistic" : {
-      "failed" : 6,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 1,
-      "unknown" : 0,
-      "total" : 7
     }
   }, {
     "uid" : "a17f506128c48415bd5f6275182f5e99",
