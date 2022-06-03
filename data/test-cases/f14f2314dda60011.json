@@ -1,0 +1,60 @@
+{
+  "uid" : "f14f2314dda60011",
+  "name" : "logtalk_make_1_all_03",
+  "fullName" : "logtalk_make_1_all_03::tests",
+  "historyId" : "logtalk_make_1_all_03::tests",
+  "time" : {
+    "duration" : 2002
+  },
+  "status" : "failed",
+  "statusMessage" : "Failure instead of success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "66-73"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L66"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "f14f2314dda60011.json",
+  "parameterValues" : [ "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt", "66-73", "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L66" ]
+}
