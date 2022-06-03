@@ -242,6 +242,9 @@ static bool is_next_key(query *q, clause *r)
 
 	db_entry *next = q->st.curr_clause->next;
 
+	while (next && !can_view(f, next))
+		next = next->next;
+
 #if 1
 	// Attempt look-ahead on 1st arg...
 
@@ -254,6 +257,9 @@ static bool is_next_key(query *q, clause *r)
 		}
 	}
 #endif
+
+	while (next && !can_view(f, next))
+		next = next->next;
 
 	return next ? true : false;
 }
