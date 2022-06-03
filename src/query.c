@@ -243,9 +243,7 @@ static bool is_next_key(query *q, clause *r)
 	db_entry *next = q->st.curr_clause->next;
 
 #if 1
-	// Attempt look-ahead of 1 on 1st arg. This is
-	// experimental at this point. Should it be in the
-	// can_view loop?
+	// Attempt look-ahead on 1st arg...
 
 	r = &next->cl;
 
