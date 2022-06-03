@@ -3358,7 +3358,7 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	if (is_iso_list(xp3) && !check_list(q, xp3, xp3_ctx, &is_partial, NULL) && !is_partial)
 		return throw_error(q, xp3, xp3_ctx, "type_error", "list");
 
-	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
 	may_heap_error(p0);
 	GET_FIRST_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,callable);
@@ -3387,6 +3387,10 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
 		pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+
+		if (ok == pl_success)
+			unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
 		return ok;
 	}
 
@@ -3427,6 +3431,10 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
 	pl_status ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
+
+	if (ok == pl_success)
+		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
 	return ok;
 }
 
