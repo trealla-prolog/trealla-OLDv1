@@ -255,9 +255,6 @@ static bool is_next_key(query *q, clause *r)
 	}
 #endif
 
-	while (next && !can_view(f, next))
-		next = next->next;
-
 	return next ? true : false;
 }
 
