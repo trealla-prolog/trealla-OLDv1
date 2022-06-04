@@ -1,0 +1,55 @@
+{
+  "uid" : "30188bafa50335b9",
+  "name" : "upn_metric_01",
+  "fullName" : "upn_metric_01::upn_metric_tests",
+  "historyId" : "upn_metric_01::upn_metric_tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/upn_metric_tests.lgt::upn_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/upn_metric_tests.lgt::upn_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/upn_metric_tests.lgt::upn_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/upn_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "39-40"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tools/code_metrics/upn_metric_tests.lgt#L39"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "30188bafa50335b9.json",
+  "parameterValues" : [ "tools/code_metrics/upn_metric_tests.lgt", "39-40", "https://github.com/LogtalkDotOrg/logtalk3/tree/b8849f773a3b714e64f2927009f478007fdb513a/tools/code_metrics/upn_metric_tests.lgt#L39" ]
+}
