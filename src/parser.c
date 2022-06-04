@@ -3268,7 +3268,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->quote_char = 0;
 		}
 
-		int func = is_literal(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
+		int func = last_op && is_literal(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
 
 		if ((p->was_string || p->string) && func) {
 			if (DUMP_ERRS || !p->do_read_term)
