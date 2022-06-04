@@ -1,0 +1,55 @@
+{
+  "uid" : "621a20f1afd55f11",
+  "name" : "goal_expansion_2_01",
+  "fullName" : "goal_expansion_2_01::tests",
+  "historyId" : "goal_expansion_2_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/goal_expansion_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/goal_expansion_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/goal_expansion_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/goal_expansion_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "35-36"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/630037df05c0364adfcffd3efb60f07cd397a04d/tests/logtalk/methods/goal_expansion_2/tests.lgt#L35"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "621a20f1afd55f11.json",
+  "parameterValues" : [ "tests/logtalk/methods/goal_expansion_2/tests.lgt", "35-36", "https://github.com/LogtalkDotOrg/logtalk3/tree/630037df05c0364adfcffd3efb60f07cd397a04d/tests/logtalk/methods/goal_expansion_2/tests.lgt#L35" ]
+}
