@@ -294,19 +294,21 @@ static void find_key(query *q, predicate *pr, cell *key)
 
 		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
 
-		if (key->arity > 1)
+		if (key->arity > 1) {
 			arg2 = arg1 + arg1->nbr_cells;
 
-		if (key->arity > 2)
-			arg3 = arg2 + arg2->nbr_cells;
+			if (key->arity > 2)
+				arg3 = arg2 + arg2->nbr_cells;
+		}
 
 		arg1 = deref(q, arg1, q->st.curr_frame);
 
-		if (arg2)
+		if (arg2) {
 			arg2 = deref(q, arg2, q->st.curr_frame);
 
-		if (arg3)
-			arg3 = deref(q, arg3, q->st.curr_frame);
+			if (arg3)
+				arg3 = deref(q, arg3, q->st.curr_frame);
+		}
 
 		if (q->pl->opt && is_ground(arg1))
 			q->st.arg1_is_ground = true;
