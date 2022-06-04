@@ -194,8 +194,8 @@ predicate *create_predicate(module *m, cell *c)
 
 	//printf("*** create %s ==> %s/%u\n", m->filename, GET_STR(m, &pr->key), pr->key.arity);
 
-	if (GET_STR(m, c)[0] == '$')
-		pr->is_noindex = true;
+	//if (GET_STR(m, c)[0] == '$')
+	//	pr->is_noindex = true;
 
 	m_app(m->index, &pr->key, pr);
 	return pr;
