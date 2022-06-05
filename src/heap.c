@@ -28,7 +28,7 @@ size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max
 	do {
 		mem = realloc(*addr, elem_size * elements);
 		if (mem) break;
-		elements = min_elements + (elements-min_elements)/2;
+		elements = min_elements + (elements - min_elements) / 2;
 		//message("memory pressure reduce %lu to %lu", max_elements, elements);
 	}
 	 while (elements > min_elements);
