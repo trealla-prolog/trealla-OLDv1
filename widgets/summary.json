@@ -2,16 +2,16 @@
   "reportName" : "Logtalk distribution full tests",
   "testRuns" : [ ],
   "statistic" : {
-    "failed" : 208,
+    "failed" : 164,
     "broken" : 0,
-    "skipped" : 183,
-    "passed" : 7920,
+    "skipped" : 182,
+    "passed" : 7607,
     "unknown" : 0,
-    "total" : 8311
+    "total" : 7953
   },
   "time" : {
     "minDuration" : 0,
-    "maxDuration" : 21166,
-    "sumDuration" : 290111
+    "maxDuration" : 18032,
+    "sumDuration" : 168592
   }
 }
