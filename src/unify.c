@@ -830,6 +830,8 @@ pl_status do_post_unification_hook(query *q, bool is_builtin)
 	return pl_success;
 }
 
+static bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
+
 // This is for when one arg is a string & the other an iso-list...
 
 static bool unify_string_to_list(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
@@ -879,7 +881,7 @@ static bool unify_integers(query *q, cell *p1, cell *p2)
 	if (is_bigint(p1) && is_integer(p2))
 		return !mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
 
-	if (is_bigint(p2) && is_integer(p1))
+	if (is_bigint(p2))
 		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
 
 	if (is_integer(p2))
@@ -1079,7 +1081,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 	return true;
 }
 
-bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
+static bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)
 {
 	if ((p1 == p2) && (p1_ctx == p2_ctx))
 		return true;
