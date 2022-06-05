@@ -629,7 +629,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		ASTRING(pr);
+		ASTRING_alloc(pr,256);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -892,7 +892,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		ASTRING(pr);
+		ASTRING_alloc(pr,256);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1003,7 +1003,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
-		ASTRING(pr);
+		ASTRING_alloc(pr,256);
 		LIST_HANDLER(p2);
 
 		while (is_list(p2)) {
@@ -1472,7 +1472,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		if (!is_iso_atom(p2))
 			return throw_error(q, p2, p2_ctx, "type_error", "atom");
 
-		ASTRING(pr);
+		ASTRING_alloc(pr,256);
 		ASTRING_strcatn(pr, GET_STR(q, p1), LEN_STR(q, p1));
 		ASTRING_strcatn(pr, GET_STR(q, p2), LEN_STR(q, p2));
 		cell tmp;
@@ -5381,7 +5381,7 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 	GET_NEXT_ARG(p2,atomic);
 	GET_NEXT_ARG(p3,atom_or_var);
 	LIST_HANDLER(p1);
-	ASTRING(pr);
+	ASTRING_alloc(pr,256);
 
 	while (is_list(p1)) {
 		cell *h = LIST_HEAD(p1);

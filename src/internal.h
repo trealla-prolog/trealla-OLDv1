@@ -66,7 +66,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define IDX_MAX (ERR_IDX-1)
 #define ERR_CYCLE_CMP -2
 
-#define NBR_PTRS 3
+#define NBR_PTRS 2
 #define MAX_SMALL_STRING ((sizeof(void*)*NBR_PTRS)-1)
 #define MAX_VAR_POOL_SIZE 4000
 #define MAX_ARITY UCHAR_MAX
