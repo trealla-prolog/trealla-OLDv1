@@ -182,8 +182,12 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-bool more_data(const predicate *pr)
+bool more_data(query *q, const db_entry *dbe)
 {
+	if (!dbe->next)
+		return false;
+
+	predicate *pr = dbe->owner;
 	return (pr->cnt > 1) || (pr->ref_cnt > 1);
 }
 
