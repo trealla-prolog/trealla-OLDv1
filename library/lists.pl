@@ -51,7 +51,7 @@ intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
 nth1(N, List, Head) :-
     nonvar(N),
-    must_be(integer, N),
+    must_be(N, integer, nth1/3, _),
     (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
     nth1_(N, List, Head),
     !.
@@ -72,7 +72,7 @@ nth1_(N,[_|T],Item) :-
 
 nth0(N, List, Head) :-
     nonvar(N),
-    must_be(integer, N),
+    must_be(N, integer, nth0/3, _),
     (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
     nth0_(N, List, Head),
     !.
@@ -165,8 +165,8 @@ toconjunction_([H|T], In, Out) :-
 	toconjunction_(T, Out2, Out).
 
 numlist(L, U, Ns) :-
-	must_be(integer, L),
-	must_be(integer, U),
+	must_be(L, integer, numlist/3, _),
+	must_be(U, integer, numlist/3, _),
 	L =< U,
 	numlist_(L, U, Ns).
 

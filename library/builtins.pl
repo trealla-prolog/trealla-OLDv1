@@ -1,7 +1,7 @@
 :- pragma(builtins, [once]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% These are SICStus compatible...
+% These are meant to be SICStus compatible...
 
 must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
 must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
@@ -431,8 +431,8 @@ iso_dif(X, Y) :-
 :- meta_predicate(catch(0,?,0)).
 
 numbervars(Term, N0, N) :-
-   must_be(N0,integer,numbervars/3,_),
-   can_be(N,integer,numbervars/3,_),
+   must_be(N0, integer, numbervars/3, _),
+   can_be(N, integer, numbervars/3, _),
    term_variables(Term, Vars),
    numberlist_(Vars, N0, N).
 
