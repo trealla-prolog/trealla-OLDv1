@@ -17,6 +17,8 @@ must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (c
 must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list_or_partial_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
+can_be(Term, integer, Goal, _Arg) :- !, ((integer(Term); var(Term)) -> true ; throw(error(type_error(integer, Term), Goal))), !.
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -425,13 +427,8 @@ iso_dif(X, Y) :-
 :- meta_predicate(catch(0,?,0)).
 
 numbervars(Term, N0, N) :-
-   catch(numbervars_(Term, N0, N),
-	 error(E,Ctx),
-	 ( ( var(Ctx) -> Ctx = numbervars/3 ; true ), throw(error(E,Ctx) ) ) ).
-
-numbervars_(Term, N0, N) :-
-   must_be(integer, N0),
-   can_be(integer, N),
+   must_be(N0,integer,numbervars/3,_),
+   can_be(N,integer,numbervars/3,_),
    term_variables(Term, Vars),
    numberlist_(Vars, N0, N).
 
