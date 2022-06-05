@@ -105,7 +105,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_integer(c) ((c)->tag == TAG_INT)
 #define is_real(c) ((c)->tag == TAG_REAL)
 #define is_indirect(c) ((c)->tag == TAG_PTR)
-#define is_object(c) ((c)->tag == TAG_OBJECT)
+#define is_blob(c) ((c)->tag == TAG_BLOB)
 #define is_end(c) ((c)->tag == TAG_END)
 
 // Derived type...
@@ -150,10 +150,10 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_STRING))
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
-#define is_blob(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_BLOB))
+#define is_cstr_blob(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
-#define is_static(c) (is_blob(c) && ((c)->flags & FLAG_STATIC))
-#define is_strbuf(c) (is_blob(c) && !((c)->flags & FLAG_STATIC))
+#define is_static(c) (is_cstr_blob(c) && ((c)->flags & FLAG_STATIC))
+#define is_strbuf(c) (is_cstr_blob(c) && !((c)->flags & FLAG_STATIC))
 #define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG_CSTR_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG_VAR_FRESH)
@@ -178,8 +178,8 @@ typedef struct {
 
 typedef struct {
 	int64_t refcnt;
-	char *obj;
-} object;
+	char *ptr;
+} blob;
 
 #define SET_STR(c,s,n,off) {									\
 	strbuf *strb = malloc(sizeof(strbuf) + (n) + 1);			\
@@ -233,8 +233,8 @@ enum {
 	TAG_INT=4,
 	TAG_REAL=5,
 	TAG_PTR=6,
-	TAG_OBJECT=6,
-	TAG_END=8
+	TAG_BLOB=7,
+	TAG_END=9
 };
 
 enum {
@@ -330,7 +330,7 @@ struct cell_ {
 		void *val_dummy[NBR_PTRS];
 		pl_int_t val_int;
 		bigint *val_bigint;
-		object *val_obj;
+		blob *val_blob;
 		double val_real;
 		cell *val_ptr;
 
@@ -758,8 +758,8 @@ inline static void share_cell_(const cell *c)
 		(c)->val_strb->refcnt++;
 	else if (is_bigint(c))
 		(c)->val_bigint->refcnt++;
-	else if (is_object(c))
-		(c)->val_obj->refcnt++;
+	else if (is_blob(c))
+		(c)->val_blob->refcnt++;
 }
 
 inline static void unshare_cell_(const cell *c)
@@ -774,9 +774,9 @@ inline static void unshare_cell_(const cell *c)
 			mp_int_clear(&(c)->val_bigint->ival);
 			free((c)->val_bigint);
 		}
-	} else if (is_object(c)) {
-		if (--(c)->val_obj->refcnt == 0)	{
-			free((c)->val_obj);
+	} else if (is_blob(c)) {
+		if (--(c)->val_blob->refcnt == 0)	{
+			free((c)->val_blob);
 		}
 	}
 }
