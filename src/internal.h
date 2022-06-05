@@ -328,30 +328,15 @@ struct cell_ {
 	union {
 
 		void *val_dummy[NBR_PTRS];
-
-		struct {
-			pl_int_t val_int;
-		};
-
-		struct {
-			bigint *val_bigint;
-		};
-
-		struct {
-			object *val_obj;
-		};
-
-		struct {
-			double val_real;
-		};
-
-		struct {
-			cell *val_ptr;
-		};
+		pl_int_t val_int;
+		bigint *val_bigint;
+		object *val_obj;
+		double val_real;
+		cell *val_ptr;
 
 		struct {
 			cell *val_ret;
-			uint32_t cgen;				// choice generation
+			uint64_t cgen;				// choice generation
 			uint16_t mod_id;
 		};
 
@@ -379,8 +364,11 @@ struct cell_ {
 
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term
-					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-					pl_idx_t ref_ctx;	// used with TAG_VAR & refs
+
+					union {
+						pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
+						pl_idx_t ref_ctx;	// used with TAG_VAR & refs
+					};
 				};
 			};
 
@@ -391,7 +379,6 @@ struct cell_ {
 		struct {
 			cell *attrs;				// used with TAG_EMPTY in slot
 			pl_idx_t attrs_ctx;			// to set attributes on a var
-			uint32_t spare5;
 		};
 	};
 };
@@ -479,9 +466,9 @@ struct slot_ {
 struct frame_ {
 	cell *prev_cell;
 	module *m;
-	uint64_t ugen;
+	uint64_t ugen, cgen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
-	uint32_t nbr_slots, nbr_vars, cgen;
+	uint32_t nbr_slots, nbr_vars;
 	bool is_complex:1;
 	bool is_last:1;
 };
@@ -530,9 +517,9 @@ struct prolog_state_ {
 
 struct choice_ {
 	prolog_state st;
-	uint64_t ugen;
+	uint64_t ugen, cgen, frame_cgen;
 	pl_idx_t v1, v2, overflow;
-	uint32_t nbr_slots, nbr_vars, cgen, frame_cgen;
+	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;
 	bool catchme_retry:1;
 	bool catchme_exception:1;
@@ -590,10 +577,9 @@ struct query_ {
 	mpz_t tmp_ival;
 	prolog_state st;
 	uint64_t tot_goals, tot_backtracks, tot_retries, tot_matches, tot_tcos;
-	uint64_t step, qid;
+	uint64_t step, qid, tmo_msecs, cgen;
 	uint64_t time_started, get_started;
 	uint64_t time_cpu_started, time_cpu_last_started;
-	uint64_t tmo_msecs;
 	unsigned max_depth, print_idx, tab_idx, varno, tab0_varno;
 	int nv_start;
 	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
@@ -601,7 +587,6 @@ struct query_ {
 	pl_idx_t max_choices, max_frames, max_slots, max_trails, before_hook_tp;
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
-	uint32_t cgen;
 	uint16_t mgen;
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flags;
