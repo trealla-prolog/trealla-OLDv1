@@ -183,6 +183,8 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 	return 0;
 }
 
+// FIXME: rewrite this using efficient sweep/mark methodology...
+
 int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
 	q->cycle_error = false;
@@ -196,7 +198,6 @@ int compare(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
 	q->info2 = &info2;
-	q->info1 = q->info2 = NULL;
 	int ok = compare_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	q->info1 = q->info2 = NULL;
 	return ok;
@@ -1179,7 +1180,6 @@ bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 	cycle_info info1 = {0}, info2 = {0};
 	q->info1 = &info1;
 	q->info2 = &info2;
-	q->info1 = q->info2 = NULL;
 	bool ok = unify_internal(q, p1, p1_ctx, p2, p2_ctx, 0);
 	q->info1 = q->info2 = NULL;
 	q->lists_ok = false;
