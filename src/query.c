@@ -765,6 +765,7 @@ static void commit_me(query *q, clause *r)
 			m_done(q->st.iter);
 			q->st.iter = NULL;
 		}
+
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -938,7 +939,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 bool cut_if_det(query *q)
 {
 	const frame *f = GET_CURR_FRAME();
-	choice *ch = GET_CURR_CHOICE();
+	const choice *ch = GET_CURR_CHOICE();
 
 	if (ch->call_barrier && (ch->cgen == f->cgen)) {
 		drop_choice(q);
