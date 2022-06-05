@@ -520,7 +520,7 @@ pl_status try_me(query *q, unsigned nbr_vars)
 static void trim_heap(query *q, const choice *ch)
 {
 	for (page *a = q->pages; a;) {
-		if (a->nbr <= ch->st.curr_page)
+		if (a->nbr < ch->st.curr_page)
 			break;
 
 		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
@@ -688,7 +688,7 @@ static bool check_slots(const query *q, const frame *f, const clause *r)
 
 void unshare_predicate(query *q, predicate *pr)
 {
-	if (!pr)
+	if (!pr || !pr->ref_cnt)
 		return;
 
 	if (--pr->ref_cnt != 0)
@@ -760,8 +760,11 @@ static void commit_me(query *q, clause *r)
 		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
-		m_done(q->st.iter);
-		q->st.iter = NULL;
+
+		if (q->st.iter) {
+			m_done(q->st.iter);
+			q->st.iter = NULL;
+		}
 		drop_choice(q);
 		trim_trail(q);
 	} else {
