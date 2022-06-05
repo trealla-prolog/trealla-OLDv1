@@ -105,7 +105,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 
 static USE_RESULT pl_status check_trail(query *q)
 {
-	while (q->st.tp > q->max_trails) {
+	if (q->st.tp > q->max_trails) {
 		if (q->st.tp >= q->trails_size) {
 			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*4/3);
 			if (!new_trailssize) {
@@ -124,7 +124,7 @@ static USE_RESULT pl_status check_trail(query *q)
 
 static USE_RESULT pl_status check_choice(query *q)
 {
-	while (q->cp > q->max_choices) {
+	if (q->cp > q->max_choices) {
 		if (q->cp >= q->choices_size) {
 			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*4/3);
 			if (!new_choicessize) {
@@ -143,7 +143,7 @@ static USE_RESULT pl_status check_choice(query *q)
 
 static USE_RESULT pl_status check_frame(query *q)
 {
-	while (q->st.fp > q->max_frames) {
+	if (q->st.fp > q->max_frames) {
 		if (q->st.fp >= q->frames_size) {
 			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*4/3);
 			if (!new_framessize) {
@@ -164,8 +164,8 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 {
 	pl_idx_t nbr = q->st.sp + cnt;
 
-	while (nbr > q->max_slots) {
-		if (nbr >= q->slots_size) {
+	if (nbr > q->max_slots) {
+		while (nbr >= q->slots_size) {
 			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, (nbr*4/3));
 			if (!new_slotssize) {
 				q->is_oom = q->error = true;
