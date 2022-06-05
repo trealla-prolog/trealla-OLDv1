@@ -17,10 +17,14 @@ must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (c
 must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list_or_partial_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
-can_be(Term, integer, Goal, _Arg) :- !, ((integer(Term); var(Term)) -> true ; throw(error(type_error(integer, Term), Goal))), !.
-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+can_be(Term, integer, Goal, _Arg) :- !, ((integer(Term); var(Term)) -> true ; throw(error(type_error(integer, Term), Goal))), !.
+can_be(Term, float, Goal, _Arg) :- !, ((float(Term); var(Term)) -> true ; throw(error(type_error(float, Term), Goal))), !.
+can_be(Term, number, Goal, _Arg) :- !, ((number(Term); var(Term)) -> true ; throw(error(type_error(number, Term), Goal))), !.
+can_be(Term, atom, Goal, _Arg) :- !, ((atom(Term); var(Term)) -> true ; throw(error(type_error(atom, Term), Goal))), !.
+can_be(Term, atomic, Goal, _Arg) :- !, ((atomic(Term); var(Term)) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
