@@ -35,6 +35,9 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	int ch = peek_char_utf8(src);
 
+	if (!isalnum(ch) && strchr(src, '_'))
+		return true;
+
 	if (iswupper(ch) || isdigit(ch) || (ch == '_'))
 		return true;
 

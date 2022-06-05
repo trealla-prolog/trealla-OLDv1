@@ -3479,12 +3479,15 @@ static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 		return throw_error(q, p3, p3_ctx, "permission_error", "modify,operator");
 
 	unsigned tmp_optype = 0;
-	search_op(q->st.m, GET_STR(q, p3), &tmp_optype, false);
+	unsigned tmp_pri = search_op(q->st.m, GET_STR(q, p3), &tmp_optype, false);
 
 	if (IS_INFIX(specifier) && IS_POSTFIX(tmp_optype))
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
 
-	unsigned tmp_pri = find_op(q->st.m, GET_STR(q, p3), OP_FX);
+	if (!tmp_pri && !pri)
+		return pl_success;
+
+	tmp_pri = find_op(q->st.m, GET_STR(q, p3), OP_FX);
 
 	if (IS_POSTFIX(specifier) && (IS_INFIX(tmp_optype) || tmp_pri))
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
