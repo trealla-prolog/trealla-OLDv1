@@ -7,10 +7,6 @@
 
 #include "internal.h"
 
-#define GET_RAW_ARG(n,p) \
-	cell *p = get_raw_arg(q,n); \
-	pl_idx_t p##_ctx = q->latest_ctx
-
 #define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
@@ -53,8 +49,27 @@
 #define is_iso_list_or_var(c) (is_iso_list(c) || is_variable(c))
 #define is_iso_atom_or_var(c) (is_iso_atom(c) || is_variable(c))
 
-inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
+void make_int(cell *tmp, pl_int_t v);
+void make_real(cell *tmp, double v);
+void make_return(query *q, cell *tmp);
+void make_return2(query *q, cell *tmp, cell *ret);
+void make_end(cell *tmp);
+void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
+void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr);
+void make_var2(cell *tmp, pl_idx_t off);
+
+USE_RESULT pl_status fn_iso_add_2(query *q);
+USE_RESULT pl_status fn_local_cut_0(query *q);
+USE_RESULT pl_status fn_iso_float_1(query *q);
+USE_RESULT pl_status fn_iso_integer_1(query *q);
+
+inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
 {
+	if (!is_variable(c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
+
 	if (is_ref(c))
 		c_ctx = c->ref_ctx;
 
@@ -79,7 +94,9 @@ inline static cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
 	return &e->c;
 }
 
-#define deref(q, c, c_ctx) is_variable(c) ? deref_var(q, c, c_ctx) : (q->latest_ctx = (c_ctx), (c))
+#define GET_RAW_ARG(n,p) \
+	cell *p = get_raw_arg(q,n); \
+	pl_idx_t p##_ctx = q->latest_ctx
 
 #define GET_FIRST_ARG(p,vt) \
 	cell *p = get_first_arg(q); \
@@ -156,20 +173,6 @@ inline static cell *get_raw_arg(const query *q, int n)
 
 	return c;
 }
-
-void make_int(cell *tmp, pl_int_t v);
-void make_real(cell *tmp, double v);
-void make_return(query *q, cell *tmp);
-void make_return2(query *q, cell *tmp, cell *ret);
-void make_end(cell *tmp);
-void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
-void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr);
-void make_var2(cell *tmp, pl_idx_t off);
-
-USE_RESULT pl_status fn_iso_add_2(query *q);
-USE_RESULT pl_status fn_local_cut_0(query *q);
-USE_RESULT pl_status fn_iso_float_1(query *q);
-USE_RESULT pl_status fn_iso_integer_1(query *q);
 
 #define eval(q,c)														\
 	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
