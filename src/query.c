@@ -182,13 +182,29 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-bool more_data(query *q, const db_entry *dbe)
+static bool can_view(const frame *f, const db_entry *dbe)
+{
+	if (dbe->cl.ugen_created > f->ugen)
+		return false;
+
+	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
+		return false;
+
+	return true;
+}
+
+bool more_data(query *q, db_entry *dbe)
 {
 	if (!dbe->next)
 		return false;
 
-	predicate *pr = dbe->owner;
-	return (pr->cnt > 1) || (pr->ref_cnt > 1);
+	const frame *f = GET_CURR_FRAME();
+	db_entry *next = dbe->next;
+
+	while (next && !can_view(f, next))
+		next = next->next;
+
+	return next ? true : false;
 }
 
 static bool is_ground(const cell *c)
@@ -199,17 +215,6 @@ static bool is_ground(const cell *c)
 		if (is_variable(c))
 			return false;
 	}
-
-	return true;
-}
-
-static bool can_view(const frame *f, const db_entry *dbe)
-{
-	if (dbe->cl.ugen_created > f->ugen)
-		return false;
-
-	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
-		return false;
 
 	return true;
 }

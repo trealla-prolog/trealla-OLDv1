@@ -2064,6 +2064,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) {
 		if (q->did_throw) return pl_success;
+		CHECK_INTERRUPT();
 		clause *r = &q->st.curr_clause2->cl;
 		cell *body = get_body(r->cells);
 		pl_status ok;
@@ -2143,9 +2144,8 @@ static pl_status do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 	}
 
 	while (do_retract(q, p1, p1_ctx, DO_RETRACTALL)) {
-		if (q->did_throw)
-			return pl_success;
-
+		if (q->did_throw) return pl_success;
+		CHECK_INTERRUPT();
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
@@ -3572,6 +3572,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		return throw_error(q, p3, p3_ctx, "instantiation_error", "args_not_sufficiently_instantiated");
 
 	for (;;) {
+		CHECK_INTERRUPT();
 		clause *r;
 
 		if (!is_variable(p3)) {
@@ -3617,6 +3618,9 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 				db_entry *dbe = q->st.curr_clause2;
 				bool last_match = !more_data(q, dbe);
 				stash_me(q, r, last_match);
+			} else {
+				unshare_predicate(q, q->st.pr2);
+				drop_choice(q);
 			}
 
 			return pl_success;
