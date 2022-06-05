@@ -1400,7 +1400,7 @@ static bool any_outstanding_choices(query *q)
 	if (!q->cp)
 		return false;
 
-	choice *ch = GET_CURR_CHOICE();
+	const choice *ch = GET_CURR_CHOICE();
 
 	while (ch->barrier) {
 		drop_choice(q);
