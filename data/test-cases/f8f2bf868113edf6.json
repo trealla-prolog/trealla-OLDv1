@@ -1,0 +1,55 @@
+{
+  "uid" : "f8f2bf868113edf6",
+  "name" : "lgt_unicode_atom_writing_lower_case_start_quoted",
+  "fullName" : "lgt_unicode_atom_writing_lower_case_start_quoted::tests",
+  "historyId" : "lgt_unicode_atom_writing_lower_case_start_quoted::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/unicode/syntax/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/unicode/syntax/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "40-43"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/09276f815cdd4aa40838ba682558f73be088b1af/tests/prolog/unicode/syntax/tests.lgt#L40"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f8f2bf868113edf6.json",
+  "parameterValues" : [ "tests/prolog/unicode/syntax/tests.lgt", "40-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/09276f815cdd4aa40838ba682558f73be088b1af/tests/prolog/unicode/syntax/tests.lgt#L40" ]
+}
