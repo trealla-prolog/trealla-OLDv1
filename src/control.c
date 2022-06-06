@@ -130,6 +130,15 @@ USE_RESULT pl_status fn_iso_call_1(query *q)
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 
+	const char *functor = GET_STR(q, tmp2);
+	bool found = false;
+
+	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
+		tmp2->flags &= ~FLAG_BUILTIN;
+	} else if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+		tmp2->flags |= FLAG_BUILTIN;
+	}
+
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
 
@@ -172,8 +181,9 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	const char *functor = GET_STR(q, tmp2);
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->pl, functor, tmp2->arity, &found, NULL)), found)
+	if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
 		tmp2->flags |= FLAG_BUILTIN;
+	}
 
 	if (arity <= 2) {
 		unsigned specifier;
