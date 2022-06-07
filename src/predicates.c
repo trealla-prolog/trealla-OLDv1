@@ -4413,23 +4413,6 @@ static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_mustbe_list_or_var_1(query *q)
-{
-	GET_FIRST_ARG(p1,any);
-
-	if (is_variable(p1) || is_nil(p1))
-		return pl_success;
-
-	// This checks for a valid list (it allows for partial but acyclic lists)...
-
-	bool is_partial = false;
-
-	if (!is_iso_list(p1) || !check_list(q, p1, p1_ctx, &is_partial, NULL) || is_partial)
-		return throw_error(q, p1, p1_ctx, "type_error", "list");
-
-	return pl_success;
-}
-
 static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
@@ -6778,8 +6761,7 @@ static const struct builtins g_other_bifs[] =
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
 	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
-	{"$mustbe_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
-	{"$mustbe_list_or_var", 1, fn_sys_mustbe_list_or_var_1, "?list", false},
+	{"$must_be_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
 
 

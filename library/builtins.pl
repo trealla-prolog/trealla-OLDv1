@@ -1,30 +1,37 @@
 :- pragma(builtins, [once]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% These are meant to be SICStus compatible...
+%
 
 must_be(Term, var, Goal, _Arg) :- !, (var(Term) -> true ; throw(error(uninstantiation_error(Term), Goal))), !.
 must_be(Term, nonvar, Goal, _Arg) :- !, (nonvar(Term) -> true ; throw(error(instantiation_error(Term), Goal))), !.
 
-must_be(Term, callable, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
-must_be(Term, atom, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
-must_be(Term, atomic, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
-must_be(Term, integer, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (integer(Term) -> true ; throw(error(type_error(integer, Term), Goal))), !.
-must_be(Term, float, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (float(Term) -> true ; throw(error(type_error(float, Term), Goal))), !.
-must_be(Term, number, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
-must_be(Term, ground, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
-must_be(Term, compound, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
-must_be(Term, list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
-must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$mustbe_instantiated'(Term, Goal), (is_list_or_partial_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, callable, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (callable(Term) -> true ; throw(error(type_error(callable, Term), Goal))), !.
+must_be(Term, character, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (atom(Term), atom_length(Term, 1) -> true ; throw(error(type_error(character, Term), Goal))), !.
+must_be(Term, atom, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (atom(Term) -> true ; throw(error(type_error(atom, Term), Goal))), !.
+must_be(Term, atomic, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (atomic(Term) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
+must_be(Term, integer, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (integer(Term) -> true ; throw(error(type_error(integer, Term), Goal))), !.
+must_be(Term, float, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (float(Term) -> true ; throw(error(type_error(float, Term), Goal))), !.
+must_be(Term, number, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (number(Term) -> true ; throw(error(type_error(number, Term), Goal))), !.
+must_be(Term, ground, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (ground(Term) -> true ; throw(error(type_error(Term, ground), Goal))), !.
+must_be(Term, compound, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (compound(Term) -> true ; throw(error(type_error(compound, Term), Goal))), !.
+must_be(Term, list, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (is_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
+must_be(Term, list_or_partial_list, Goal, _Arg) :- !, '$must_be_instantiated'(Term, Goal), (is_list_or_partial_list(Term) -> true ; throw(error(type_error(list, Term), Goal))), !.
 
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+can_be(Term, callable, Goal, _Arg) :- !, ((callable(Term); var(Term)) -> true ; throw(error(type_error(callable, Term), Goal))), !.
+can_be(Term, character, Goal, _Arg) :- !, (((atom(Term), atom_length(Term, 1)) ; var(Term)) -> true ; throw(error(type_error(character, Term), Goal))), !.
+can_be(Term, atom, Goal, _Arg) :- !, ((atom(Term); var(Term)) -> true ; throw(error(type_error(atom, Term), Goal))), !.
+can_be(Term, atomic, Goal, _Arg) :- !, ((atomic(Term); var(Term)) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
 can_be(Term, integer, Goal, _Arg) :- !, ((integer(Term); var(Term)) -> true ; throw(error(type_error(integer, Term), Goal))), !.
 can_be(Term, float, Goal, _Arg) :- !, ((float(Term); var(Term)) -> true ; throw(error(type_error(float, Term), Goal))), !.
 can_be(Term, number, Goal, _Arg) :- !, ((number(Term); var(Term)) -> true ; throw(error(type_error(number, Term), Goal))), !.
-can_be(Term, atom, Goal, _Arg) :- !, ((atom(Term); var(Term)) -> true ; throw(error(type_error(atom, Term), Goal))), !.
-can_be(Term, atomic, Goal, _Arg) :- !, ((atomic(Term); var(Term)) -> true ; throw(error(type_error(atomic, Term), Goal))), !.
+can_be(Term, ground, Goal, _Arg) :- !, ((ground(Term); var(Term)) -> true ; throw(error(type_error(ground, Term), Goal))), !.
+can_be(Term, compound, Goal, _Arg) :- !, ((compound(Term); var(Term)) -> true ; throw(error(type_error(compound, Term), Goal))), !.
+can_be(Term, list, Goal, _Arg) :- !, ((is_list(Term); var(Term)) -> true ; throw(error(type_error(list, Term), Goal))), !.
+can_be(Term, list_or_partial_list, Goal, _Arg) :- !, ((is_list_or_partial_list(Term); var(Term)) -> true ; throw(error(type_error(list, Term), Goal))), !.
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -83,8 +90,8 @@ setup_call_cleanup(S, G, C) :-
 :- meta_predicate(setup_call_cleanup(0,0,0)).
 
 findall(T, G, B, Tail) :-
-	'$mustbe_list_or_var'(B),
-	'$mustbe_list_or_var'(Tail),
+	can_be(B, list, findall/4, _),
+	can_be(Tail, list, findall/4, _),
 	findall(T, G, B0),
 	append(B0, Tail, B), !.
 
@@ -433,6 +440,9 @@ iso_dif(X, Y) :-
 numbervars(Term, N0, N) :-
    must_be(N0, integer, numbervars/3, _),
    can_be(N, integer, numbervars/3, _),
+   numbervars_(Term, N0, N).
+
+numbervars_(Term, N0, N) :-
    term_variables(Term, Vars),
    numberlist_(Vars, N0, N).
 
