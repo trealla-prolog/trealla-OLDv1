@@ -63,7 +63,7 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (skip_)
 		*skip_ = skip;
 
-	if (!strcmp(GET_STR(q,c), "[]"))
+	if (!strcmp(GET_STR(q, c), "[]"))
 		return true;
 
 	if (is_variable(c))
@@ -138,7 +138,7 @@ void make_real(cell *tmp, double v)
 	*tmp = (cell){0};
 	tmp->tag = TAG_REAL;
 	tmp->nbr_cells = 1;
-	set_real(tmp, v);
+	set_float(tmp, v);
 }
 
 void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
@@ -4398,6 +4398,107 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 	return is_partial;
 }
 
+static USE_RESULT pl_status fn_must_be_4(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,callable);
+	GET_NEXT_ARG(p4,any);
+
+	const char *src = GET_STR(q, p2);
+
+	if (!strcmp(src, "var") && !is_variable(p1))
+		return throw_error2(q, p1, p1_ctx, "uninstantiation_error", "not_sufficiently_instantiated", p3);
+	else if (!strcmp(src, "nonvar") && is_variable(p1))
+		return throw_error2(q, p1, p1_ctx, "instantiation_error", "instantiated", p3);
+
+	if (is_variable(p1))
+		return throw_error2(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated", p3);
+
+	if (!strcmp(src, "callable") && !is_callable(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "callable", p3);
+	else if (!strcmp(src, "character") && !is_character(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "character", p3);
+	else if (!strcmp(src, "boolean") && !is_boolean(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "boolean", p3);
+	else if (!strcmp(src, "atom") && !is_atom(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "atom", p3);
+	else if (!strcmp(src, "atomic") && !is_atomic(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "atomic", p3);
+	else if (!strcmp(src, "integer") && !is_integer(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "integer", p3);
+	else if (!strcmp(src, "float") && !is_float(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "float", p3);
+	else if (!strcmp(src, "number") && !is_number(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "number", p3);
+	else if (!strcmp(src, "ground")) {
+		if (has_vars(q, p1, p1_ctx))
+			return throw_error2(q, p1, p1_ctx, "type_error", "ground", p3);
+	} else if (!strcmp(src, "compound") && !is_compound(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "compound", p3);
+	else if (!strcmp(src, "list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL))
+			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
+	} else if (!strcmp(src, "list_or_partial_list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
+			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
+	}
+
+	return pl_success;
+}
+
+static USE_RESULT pl_status fn_can_be_4(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,callable);
+	GET_NEXT_ARG(p4,any);
+
+	if (is_variable(p1))
+		return pl_success;
+
+	const char *src = GET_STR(q, p2);
+
+	if (!strcmp(src, "callable") && !is_callable(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "callable", p3);
+	else if (!strcmp(src, "character") && !is_character(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "character", p3);
+	else if (!strcmp(src, "boolean") && !is_boolean(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "boolean", p3);
+	else if (!strcmp(src, "atom") && !is_atom(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "atom", p3);
+	else if (!strcmp(src, "atomic") && !is_atomic(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "atomic", p3);
+	else if (!strcmp(src, "integer") && !is_integer(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "integer", p3);
+	else if (!strcmp(src, "float") && !is_float(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "float", p3);
+	else if (!strcmp(src, "number") && !is_number(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "number", p3);
+	else if (!strcmp(src, "ground")) {
+		if (has_vars(q, p1, p1_ctx))
+			return throw_error2(q, p1, p1_ctx, "type_error", "ground", p3);
+	} else if (!strcmp(src, "compound") && !is_compound(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "compound", p3);
+	else if (!strcmp(src, "list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL))
+			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
+	} else if (!strcmp(src, "list_or_partial_list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
+			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -6478,8 +6579,8 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 	if (is_bigint(p1))
 		return throw_error(q, p1, p1_ctx, "domain_error", "positive_integer");
 
-	if (is_real(p1))
-		time0 = get_real(p1) * 1000;
+	if (is_float(p1))
+		time0 = get_float(p1) * 1000;
 	else
 		time0 = get_smallint(p1);
 
@@ -6761,8 +6862,10 @@ static const struct builtins g_other_bifs[] =
 	{"$erase_attributes", 1, fn_sys_erase_attributes_1, "+variable", false},
 	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
-	{"$must_be_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
+	{"$must_be_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
+	{"must_be", 4, fn_must_be_4, "+term,+atom,+term,?any", false},
+	{"can_be", 4, fn_can_be_4, "+term,+atom,+term,?any", false},
 
 
 #if USE_OPENSSL

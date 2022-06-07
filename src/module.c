@@ -282,11 +282,11 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 			return mp_int_compare_value(&p1->val_bigint->ival, p2->val_int);
 		} else if (!is_variable(p2))
 			return -1;
-	} else if (is_real(p1)) {
-		if (is_real(p2)) {
-			if (get_real(p1) < get_real(p2))
+	} else if (is_float(p1)) {
+		if (is_float(p2)) {
+			if (get_float(p1) < get_float(p2))
 				return -1;
-			else if (get_real(p1) > get_real(p2))
+			else if (get_float(p1) > get_float(p2))
 				return 1;
 			else
 				return 0;

@@ -289,7 +289,8 @@ Non-standard predicates
 	when/2						# auto-loaded from library(when)
 	dif/2						# auto-loaded from library(dif)
 
-	must_be/4                   # must_be(+rule,+type,+rule,+arg)
+	must_be/4                   # must_be(+term,+type,+goal,?arg)
+	can_be/4                    # must_be(+term,+type,+goal,?arg)
 	expand_term/2               # expand_term(+rule,-Term)
 	memberchk/2                 # memberchk(+rule,+list).
 	nonmember/2                 # \+ memberchk(+rule,+list)

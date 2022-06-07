@@ -362,7 +362,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 		case 'e':
 		case 'E':
-			if (!is_real(c)) {
+			if (!is_float(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
@@ -372,21 +372,21 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 			if (argval) {
 				if (ch == 'e')
-					len = sprintf(dst, "%.*e", argval, get_real(c));
+					len = sprintf(dst, "%.*e", argval, get_float(c));
 				else
-					len = sprintf(dst, "%.*E", argval, get_real(c));
+					len = sprintf(dst, "%.*E", argval, get_float(c));
 			} else {
 				if (ch == 'e')
-					len = sprintf(dst, "%e", get_real(c));
+					len = sprintf(dst, "%e", get_float(c));
 				else
-					len = sprintf(dst, "%E", get_real(c));
+					len = sprintf(dst, "%E", get_float(c));
 			}
 
 			break;
 
 		case 'g':
 		case 'G':
-			if (!is_real(c)) {
+			if (!is_float(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
@@ -396,20 +396,20 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 
 			if (argval) {
 				if (ch == 'g')
-					len = sprintf(dst, "%.*g", argval, get_real(c));
+					len = sprintf(dst, "%.*g", argval, get_float(c));
 				else
-					len = sprintf(dst, "%.*G", argval, get_real(c));
+					len = sprintf(dst, "%.*G", argval, get_float(c));
 			} else {
 				if (ch == 'g')
-					len = sprintf(dst, "%g", get_real(c));
+					len = sprintf(dst, "%g", get_float(c));
 				else
-					len = sprintf(dst, "%G", get_real(c));
+					len = sprintf(dst, "%G", get_float(c));
 			}
 
 			break;
 
 		case 'f':
-			if (!is_real(c)) {
+			if (!is_float(c)) {
 				free(tmpbuf);
 				return throw_error(q, c, q->st.curr_frame, "type_error", "float");
 			}
@@ -418,9 +418,9 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 			CHECK_BUF(len);
 
 			if (argval)
-				len = sprintf(dst, "%.*f", argval, get_real(c));
+				len = sprintf(dst, "%.*f", argval, get_float(c));
 			else
-				len = sprintf(dst, "%f", get_real(c));
+				len = sprintf(dst, "%f", get_float(c));
 
 			break;
 

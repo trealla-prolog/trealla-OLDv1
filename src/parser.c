@@ -2051,8 +2051,8 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 	if (s && (*s == '.') && isdigit(s[1])) {
 		p->v.tag = TAG_REAL;
 		double v = strtod(tmpptr, &tmpptr);
-		set_real(&p->v, v);
-		if (neg) p->v.val_real = -p->v.val_real;
+		set_float(&p->v, v);
+		if (neg) p->v.val_float = -p->v.val_float;
 		*srcptr = tmpptr;
 		mp_int_clear(&v2);
 		return true;
@@ -3326,7 +3326,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		} else if (is_smallint(&p->v)) {
 			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_REAL) {
-			set_real(c, get_real(&p->v));
+			set_float(c, get_float(&p->v));
 		} else if ((!p->is_quoted || func || p->is_op || p->is_variable
 			|| (get_builtin(p->m->pl, p->token, 0, &found, NULL), found)
 			//|| !strcmp(p->token, "[]")

@@ -45,15 +45,15 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 			return p1->val_int < p2->val_int ? -1 : p1->val_int > p2->val_int ? 1 : 0;
 		}
 
-		if (is_real(p2))
+		if (is_float(p2))
 			return 1;
 
 		return -1;
 	}
 
-	if (is_real(p1)) {
-		if (is_real(p2))
-			return p1->val_real < p2->val_real ? -1 : p1->val_real > p2->val_real ? 1 : 0;
+	if (is_float(p1)) {
+		if (is_float(p2))
+			return p1->val_float < p2->val_float ? -1 : p1->val_float > p2->val_float ? 1 : 0;
 
 		return -1;
 	}
@@ -892,8 +892,8 @@ static bool unify_integers(query *q, cell *p1, cell *p2)
 
 static bool unify_reals(query *q, cell *p1, cell *p2)
 {
-	if (is_real(p2))
-		return get_real(p1) == get_real(p2);
+	if (is_float(p2))
+		return get_float(p1) == get_float(p2);
 
 	return false;
 }

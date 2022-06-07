@@ -102,7 +102,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_literal(c) ((c)->tag == TAG_LITERAL)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
 #define is_integer(c) ((c)->tag == TAG_INT)
-#define is_real(c) ((c)->tag == TAG_REAL)
+#define is_float(c) ((c)->tag == TAG_REAL)
 #define is_indirect(c) ((c)->tag == TAG_PTR)
 #define is_blob(c) ((c)->tag == TAG_BLOB)
 #define is_end(c) ((c)->tag == TAG_END)
@@ -112,30 +112,30 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
 #define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 
-#define get_real(c) (c)->val_real
-#define set_real(c,v) (c)->val_real = (v)
+#define get_float(c) (c)->val_float
+#define set_float(c,v) (c)->val_float = (v)
 #define get_smallint(c) (c)->val_int
 #define set_smallint(c,v) { (c)->val_int = (v); }
 #define get_int(c) (c)->val_int
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
-#define neg_real(c) (c)->val_real = -fabs((c)->val_real)
+#define neg_float(c) (c)->val_float = -fabs((c)->val_float)
 
 #define is_zero(c) (is_bigint(c) ?							\
 	mp_int_compare_zero(&(c)->val_bigint->ival) == 0 :		\
 	is_integer(c) ? get_smallint(c) == 0 :					\
-	is_real(c) ? get_real(c) == 0.0 : false)
+	is_float(c) ? get_float(c) == 0.0 : false)
 
 #define is_negative(c) (is_bigint(c) ?						\
 	(c)->val_bigint->ival.sign == MP_NEG :					\
 	is_integer(c) ? get_smallint(c) < 0 :					\
-	is_real(c) ? get_real(c) < 0.0 : false)
+	is_float(c) ? get_float(c) < 0.0 : false)
 
 #define is_positive(c) (is_bigint(c) ?						\
 	mp_int_compare_zero(&(c)->val_bigint->ival) > 0 :		\
 	is_integer(c) ? get_smallint(c) > 0 :					\
-	is_real(c) ? get_real(c) > 0.0 : false)
+	is_float(c) ? get_float(c) > 0.0 : false)
 
 #define is_gt(c,n) (get_smallint(c) > (n))
 #define is_ge(c,n) (get_smallint(c) >= (n))
@@ -146,6 +146,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 
 #define is_smallint(c) (is_integer(c) && !((c)->flags & FLAG_MANAGED))
 #define is_bigint(c) (is_integer(c) && ((c)->flags & FLAG_MANAGED))
+#define is_boolean(c) ((is_literal(c) && !(c)->arity) && (c->val_off != g_true_s) && (c->val_off != g_false_s))
 #define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_STRING))
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
@@ -329,7 +330,7 @@ struct cell_ {
 		pl_int_t val_int;
 		bigint *val_bigint;
 		blob *val_blob;
-		double val_real;
+		double val_float;
 		cell *val_ptr;
 
 		struct {
