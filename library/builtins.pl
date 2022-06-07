@@ -180,7 +180,7 @@ bagof_(Template, Generator, Bag) :-
 	!,
 	Key =.. [(.)|Vars],
 	functor(Key, (.), N),
-	findall(Key-Template,Generator,Recorded),
+	findall(Key-Template, Generator, Recorded),
 	replace_instance_(Recorded, Key, N, _, OmniumGatherum),
 	keysort_(OmniumGatherum, Gamut), !,
 	concordant_subset_(Gamut, Key, Answer),
