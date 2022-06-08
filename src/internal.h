@@ -115,7 +115,9 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define get_float(c) (c)->val_float
 #define set_float(c,v) (c)->val_float = (v)
 #define get_smallint(c) (c)->val_int
+#define get_smalluint(c) (c)->val_uint
 #define set_smallint(c,v) { (c)->val_int = (v); }
+#define set_smalluint(c,v) { (c)->val_uint = (v); }
 #define get_int(c) (c)->val_int
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
@@ -162,7 +164,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
-#define is_ref(c) ((c)->flags & FLAG_VAR_REF)
+#define is_ref(c) ((c)->flags & FLAG_REF)
 #define is_op(c) (c->flags & 0xE000)
 
 typedef struct {
@@ -242,6 +244,7 @@ enum {
 	FLAG_INT_OCTAL=1<<1,				// used with TAG_INT
 	FLAG_INT_BINARY=1<<2,				// used with TAG_INT
 	FLAG_INT_STREAM=1<<3,				// used with TAG_INT
+	FLAG_INT_HANDLE=1<<4,				// used with TAG_INT
 
 	FLAG_CSTR_BLOB=1<<0,				// used with TAG_CSTR
 	FLAG_CSTR_STRING=1<<1,				// used with TAG_CSTR
@@ -251,10 +254,9 @@ enum {
 	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
 	FLAG_VAR_TEMPORARY=1<<3,			// used with TAG_VAR
-	FLAG_VAR_REF=1<<4,					// used with TAG_VAR
 
 	FLAG_SPARE1=1<<6,
-	FLAG_SPARE2=1<<7,
+	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
 	FLAG_MANAGED=1<<10,					// any reflist-counted object
@@ -328,6 +330,7 @@ struct cell_ {
 	union {
 
 		pl_int_t val_int;
+		pl_uint_t val_uint;
 		bigint *val_bigint;
 		blob *val_blob;
 		double val_float;

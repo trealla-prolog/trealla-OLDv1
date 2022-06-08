@@ -415,6 +415,15 @@ numberlist_(['$VAR'(N0)|Vars], N0, N) :-
    N1 is N0+1,
    numberlist_(Vars, N1, N).
 
+instantiation_error(Context) :-
+    throw(error(instantiation_error, Context)).
+
+domain_error(Type, Term, Context) :-
+    throw(error(domain_error(Type, Term), Context)).
+
+type_error(Type, Term, Context) :-
+    throw(error(type_error(Type, Term), Context)).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWI compatible
 %

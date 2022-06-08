@@ -10,8 +10,6 @@ extern unsigned char library_http_pl[];
 extern unsigned int library_http_pl_len;
 extern unsigned char library_atts_pl[];
 extern unsigned int library_atts_pl_len;
-extern unsigned char library_error_pl[];
-extern unsigned int library_error_pl_len;
 extern unsigned char library_dcgs_pl[];
 extern unsigned int library_dcgs_pl_len;
 extern unsigned char library_format_pl[];
@@ -51,7 +49,6 @@ library g_libs[] = {
 	 {"dict", library_dict_pl, &library_dict_pl_len},
 	 {"http", library_http_pl, &library_http_pl_len},
 	 {"atts", library_atts_pl, &library_atts_pl_len},
-	 {"error", library_error_pl, &library_error_pl_len},
 	 {"dcgs", library_dcgs_pl, &library_dcgs_pl_len},
 	 {"format", library_format_pl, &library_format_pl_len},
 	 {"charsio", library_charsio_pl, &library_charsio_pl_len},

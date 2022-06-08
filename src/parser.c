@@ -612,7 +612,10 @@ static void directives(parser *p, cell *d)
 				return;
 			}
 
+			// These might be found in other Prologs...
+
 			if (!strcmp(name, "between")
+				|| !strcmp(name, "error")
 				|| !strcmp(name, "samsort")
 				|| !strcmp(name, "terms")
 				|| !strcmp(name, "types")

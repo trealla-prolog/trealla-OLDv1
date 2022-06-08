@@ -21,6 +21,10 @@
 #include "openssl/sha.h"
 #endif
 
+#if __linux
+#include <dlfcn.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #define unsetenv(p1)
@@ -102,7 +106,7 @@ void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
-	tmp->flags = FLAG_VAR_REF;
+	tmp->flags = FLAG_REF;
 	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
 	tmp->ref_ctx = ctx;
@@ -131,6 +135,22 @@ void make_int(cell *tmp, pl_int_t v)
 	tmp->tag = TAG_INT;
 	tmp->nbr_cells = 1;
 	set_smallint(tmp, v);
+}
+
+void make_uint(cell *tmp, pl_uint_t v)
+{
+	*tmp = (cell){0};
+	tmp->tag = TAG_INT;
+	tmp->nbr_cells = 1;
+	set_smalluint(tmp, v);
+}
+
+void make_ptr(cell *tmp, void *v)
+{
+	*tmp = (cell){0};
+	tmp->tag = TAG_INT;
+	tmp->nbr_cells = 1;
+	tmp->val_uint = (uint64_t)v;
 }
 
 void make_real(cell *tmp, double v)
@@ -4451,6 +4471,57 @@ static USE_RESULT pl_status fn_must_be_4(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_must_be_2(query *q)
+{
+	GET_FIRST_ARG(p2,atom);
+	GET_NEXT_ARG(p1,any);
+
+	const char *src = GET_STR(q, p2);
+
+	if (!strcmp(src, "var") && !is_variable(p1))
+		return throw_error(q, p1, p1_ctx, "uninstantiation_error", "not_sufficiently_instantiated");
+	else if (!strcmp(src, "nonvar") && is_variable(p1))
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "instantiated");
+
+	if (is_variable(p1))
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
+	if (!strcmp(src, "callable") && !is_callable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
+	else if (!strcmp(src, "character") && !is_character(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "character");
+	else if (!strcmp(src, "boolean") && !is_boolean(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "boolean");
+	else if (!strcmp(src, "atom") && !is_atom(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
+	else if (!strcmp(src, "atomic") && !is_atomic(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atomic");
+	else if (!strcmp(src, "integer") && !is_integer(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "integer");
+	else if (!strcmp(src, "float") && !is_float(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "float");
+	else if (!strcmp(src, "number") && !is_number(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "number");
+	else if (!strcmp(src, "ground")) {
+		if (has_vars(q, p1, p1_ctx))
+			return throw_error(q, p1, p1_ctx, "type_error", "ground");
+	} else if (!strcmp(src, "compound") && !is_compound(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "compound");
+	else if (!strcmp(src, "list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL))
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
+	} else if (!strcmp(src, "list_or_partial_list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
+	}
+
+	return pl_success;
+}
+
 static USE_RESULT pl_status fn_can_be_4(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -4499,16 +4570,47 @@ static USE_RESULT pl_status fn_can_be_4(query *q)
 	return pl_success;
 }
 
-static USE_RESULT pl_status fn_sys_instantiated_2(query *q)
+static USE_RESULT pl_status fn_can_be_2(query *q)
 {
-	GET_FIRST_ARG(p1,any);
-	GET_NEXT_ARG(p2,any);
+	GET_FIRST_ARG(p2,atom);
+	GET_NEXT_ARG(p1,any);
 
-	if (is_variable(p1)) {
-		char *buf = print_term_to_strbuf(q, p2, p2_ctx, 1);
-		pl_status ok = throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
-		free(buf);
-		return ok;
+	if (is_variable(p1))
+		return pl_success;
+
+	const char *src = GET_STR(q, p2);
+
+	if (!strcmp(src, "callable") && !is_callable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
+	else if (!strcmp(src, "character") && !is_character(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "character");
+	else if (!strcmp(src, "boolean") && !is_boolean(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "boolean");
+	else if (!strcmp(src, "atom") && !is_atom(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
+	else if (!strcmp(src, "atomic") && !is_atomic(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atomic");
+	else if (!strcmp(src, "integer") && !is_integer(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "integer");
+	else if (!strcmp(src, "float") && !is_float(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "float");
+	else if (!strcmp(src, "number") && !is_number(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "number");
+	else if (!strcmp(src, "ground")) {
+		if (has_vars(q, p1, p1_ctx))
+			return throw_error(q, p1, p1_ctx, "type_error", "ground");
+	} else if (!strcmp(src, "compound") && !is_compound(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "compound");
+	else if (!strcmp(src, "list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL))
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
+	} else if (!strcmp(src, "list_or_partial_list")) {
+		bool is_partial;
+
+		if (!check_list(q, p1, p1_ctx, &is_partial, NULL) && !is_partial)
+			return throw_error(q, p1, p1_ctx, "type_error", "list");
 	}
 
 	return pl_success;
@@ -4555,6 +4657,53 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	make_int(&tmp, skip);
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
+
+#ifndef _WIN32
+static USE_RESULT pl_status fn_sys_dlopen_3(query *q)
+{
+	GET_FIRST_ARG(p1,atom);
+	GET_NEXT_ARG(p2,integer);
+	GET_NEXT_ARG(p3,variable);
+	const char *filename = GET_STR(q, p1);
+	int flag = get_smallint(p2);
+	void *h = dlopen(filename, !flag ? RTLD_NOW : flag);
+	if (!h) return pl_failure;
+	cell tmp;
+	make_uint(&tmp, (uint64_t)h);
+	tmp.flags |= FLAG_INT_HANDLE | FLAG_INT_HEX;
+	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_sys_dlsym_3(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,variable);
+	uint64_t h = get_smalluint(p1);
+	const char *symbol = GET_STR(q, p2);
+
+	if (!(p1->flags & FLAG_INT_HANDLE))
+		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
+
+	void *ptr = dlsym((void*)h, symbol);
+	if (!ptr) return pl_failure;
+	cell tmp;
+	make_uint(&tmp, (uint64_t)ptr);
+	tmp.flags |= FLAG_INT_HANDLE | FLAG_INT_OCTAL;
+	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+}
+
+static USE_RESULT pl_status fn_sys_dlclose_1(query *q)
+{
+	GET_FIRST_ARG(p1,integer);
+	uint64_t h = get_smalluint(p1);
+
+	if (!(p1->flags & FLAG_INT_HANDLE))
+		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
+
+	return dlclose((void*)h) ? pl_failure : pl_success;
+}
+#endif
 
 static USE_RESULT pl_status fn_is_stream_1(query *q)
 {
@@ -6841,6 +6990,11 @@ static const struct builtins g_other_bifs[] =
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false},
 
+	{"must_be", 4, fn_must_be_4, "+term,+atom,+term,?any", false},
+	{"can_be", 4, fn_can_be_4, "+term,+atom,+term,?any", false},
+	{"must_be", 2, fn_must_be_2, "+atom,+term", false},
+	{"can_be", 2, fn_can_be_2, "+atom,+term,", false},
+
 	{"$register_cleanup", 1, fn_sys_register_cleanup_1, NULL, false},
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false},
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false},
@@ -6863,10 +7017,12 @@ static const struct builtins g_other_bifs[] =
 	{"$list_attributed", 1, fn_sys_list_attributed_1, "-list", false},
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false},
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false},
-	{"$must_be_instantiated", 2, fn_sys_instantiated_2, "+term,+term", false},
-	{"must_be", 4, fn_must_be_4, "+term,+atom,+term,?any", false},
-	{"can_be", 4, fn_can_be_4, "+term,+atom,+term,?any", false},
 
+#ifndef _WIN32
+	{"$dlopen", 3, fn_sys_dlopen_3, "+filename,+flag,-handle", false},
+	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-ptr", false},
+	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false},
+#endif
 
 #if USE_OPENSSL
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false},
