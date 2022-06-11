@@ -1517,9 +1517,11 @@ pl_status start(query *q)
 
 			pl_status status;
 
+#if USE_FFI
 			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi)
 				status = wrapper_function(q, q->st.curr_cell->fn_ptr);
 			else
+#endif
 				status = q->st.curr_cell->fn(q);
 
 			if ((status == pl_failure) && !q->is_oom) {
