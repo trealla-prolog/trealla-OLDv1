@@ -8,9 +8,7 @@
 #include "query.h"
 
 #if USE_FFI
-#if __linux
 #include <dlfcn.h>
-#endif
 #include <ffi.h>
 #endif
 
