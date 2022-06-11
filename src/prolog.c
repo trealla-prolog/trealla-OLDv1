@@ -169,7 +169,7 @@ void pl_destroy(prolog *pl)
 	while (pl->modules)
 		destroy_module(pl->modules);
 
-	m_destroy(pl->funtab);
+	m_destroy(pl->biftab);
 	m_destroy(pl->symtab);
 	m_destroy(pl->keyval);
 	free(pl->pool);
@@ -313,10 +313,10 @@ prolog *pl_create()
 
 	pl->streams[3].ignore = true;;
 
-	pl->funtab = m_create((void*)strcmp, NULL, NULL);
-	m_allow_dups(pl->funtab, false);
+	pl->biftab = m_create((void*)strcmp, NULL, NULL);
+	m_allow_dups(pl->biftab, false);
 
-	if (pl->funtab)
+	if (pl->biftab)
 		load_builtins(pl);
 
 	//printf("Library: %s\n", g_tpl_lib);

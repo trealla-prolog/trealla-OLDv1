@@ -2548,7 +2548,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 	return pl_success;
 }
 
-builtins g_functions_bifs[MAX_FUNCS] =
+const builtins g_functions_bifs[] =
 {
 	// Predicate...
 

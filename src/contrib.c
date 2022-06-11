@@ -11,7 +11,7 @@
 #include "internal.h"
 #include "query.h"
 
-const builtins g_contrib_bifs[] =
+builtins g_contrib_bifs[MAX_FFI] =
 {
 	{0}
 };

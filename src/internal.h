@@ -739,7 +739,7 @@ struct prolog_ {
 	parser *p;
 	var_item *tabs;
 	struct { pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES]; };
-	map *symtab, *funtab, *keyval;
+	map *symtab, *biftab, *keyval;
 	char *pool;
 	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;

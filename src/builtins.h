@@ -7,7 +7,7 @@
 
 #include "internal.h"
 
-#define MAX_FUNCS 1000
+#define MAX_FFI 1000
 
 #define CHECK_CALC()								\
 	clr_accum(&q->accum);							\
