@@ -16,7 +16,7 @@ endif
 
 ifndef NOFFI
 CFLAGS += -DUSE_FFI=1
-LDFLAGS += -lffi -ldl
+LDFLAGS += -lffi
 endif
 
 ifndef NOSSL
