@@ -1,0 +1,55 @@
+{
+  "uid" : "3fa2b7fd96a9e77b",
+  "name" : "dictionary_as_curly_bracketed_2_01",
+  "fullName" : "dictionary_as_curly_bracketed_2_01::tests(rbtree)",
+  "historyId" : "dictionary_as_curly_bracketed_2_01::tests(rbtree)",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "61-64"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/6ba62771a2d95129cf30188b7c240db6d7678d10/library/dictionaries/tests.lgt#L61"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3fa2b7fd96a9e77b.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "61-64", "https://github.com/LogtalkDotOrg/logtalk3/tree/6ba62771a2d95129cf30188b7c240db6d7678d10/library/dictionaries/tests.lgt#L61" ]
+}
