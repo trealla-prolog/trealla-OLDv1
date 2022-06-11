@@ -1519,7 +1519,7 @@ pl_status start(query *q)
 
 #if USE_FFI
 			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi)
-				status = wrapper_function(q, q->st.curr_cell->fn_ptr);
+				status = wrapper_for_ffi(q, q->st.curr_cell->fn_ptr);
 			else
 #endif
 				status = q->st.curr_cell->fn(q);

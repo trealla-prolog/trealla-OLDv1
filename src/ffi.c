@@ -332,7 +332,7 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 	return pl_success;
 }
 
-pl_status wrapper_function(query *q, builtins *ptr)
+pl_status wrapper_for_ffi(query *q, builtins *ptr)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1, any);
