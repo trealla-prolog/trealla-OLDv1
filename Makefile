@@ -16,7 +16,7 @@ endif
 
 ifndef NOFFI
 CFLAGS += -DUSE_FFI=1 -I/usr/local/OPT/LIBFFI/include
-LDFLAGS += -lffi
+LDFLAGS += -lffi -ldl
 endif
 
 ifndef NOSSL
