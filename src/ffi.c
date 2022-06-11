@@ -273,17 +273,63 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 	else
 		ret_type = 0;
 
-	register_function(q->pl, symbol, idx, (void*)func, arg_types, ret_type);
+	register_ffi(q->pl, symbol, idx, (void*)func, arg_types, ret_type, true);
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_ffi_register_predicate_3(query *q)
+USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,iso_list);
 	GET_NEXT_ARG(p4,atom);
-	GET_NEXT_ARG(p2,iso_list);
-	GET_NEXT_ARG(p3,atom);
-	return pl_failure;
+
+	if (!(p1->flags & FLAG_INT_HANDLE) && !(p1->flags & FLAG_HANDLE_DLL))
+		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
+
+	uint64_t handle = get_smalluint(p1);
+	const char *symbol = C_STR(q, p2);
+	void *func = dlsym((void*)handle, symbol);
+	if (!func) return pl_failure;
+
+	uint8_t arg_types[MAX_ARITY], ret_type = 0;
+	LIST_HANDLER(l);
+	cell *l = p3;
+	pl_idx_t l_ctx = p3_ctx;
+	int idx = 0;
+
+	while (is_iso_list(l) && (idx < MAX_ARITY)) {
+		cell *h = LIST_HEAD(l);
+		h = deref(q, h, l_ctx);
+		const char *src = C_STR(q, h);
+
+		if (!strcmp(src, "int64"))
+			arg_types[idx++] = TAG_INT;
+		else if (!strcmp(src, "fp64"))
+			arg_types[idx++] = TAG_FLOAT;
+		else if (!strcmp(src, "atom"))
+			arg_types[idx++] = TAG_CSTR;
+		else
+			arg_types[idx++] = 0;
+
+		l = LIST_TAIL(l);
+		l = deref(q, l, l_ctx);
+		l_ctx = q->latest_ctx;
+	}
+
+	const char *src = C_STR(q, p4);
+
+	if (!strcmp(src, "int64"))
+		ret_type = TAG_INT;
+	else if (!strcmp(src, "fp64"))
+		ret_type = TAG_FLOAT;
+	else if (!strcmp(src, "atom"))
+		ret_type = TAG_CSTR;
+	else
+		ret_type = 0;
+
+	register_ffi(q->pl, symbol, idx, (void*)func, arg_types, ret_type, false);
+	return pl_success;
 }
 
 pl_status wrapper_function(query *q, builtins *ptr)

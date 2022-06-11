@@ -6974,7 +6974,7 @@ static const builtins g_other_bifs[] =
 	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-function", false, BLAH},
 	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
 	{"$ffi_register_function", 4, fn_sys_ffi_register_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
-	{"$ffi_register_predicate", 3, fn_sys_ffi_register_predicate_3, "+handle, +symbol, +arglist", false, BLAH},
+	{"$ffi_register_predicate", 4, fn_sys_ffi_register_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
 	{"$ffi_call", 4, fn_sys_ffi_call_4, "+handle, +symbol, +arglist,-result", false, BLAH},
 	{"$ffi_call", 3, fn_sys_ffi_call_3, "+function, +arglist,-result", false, BLAH},
 #endif
@@ -7027,14 +7027,14 @@ extern const builtins g_contrib_bifs[];
 
 static int max_funcs_idx = 0;
 
-void register_function(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type)
+void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type, bool function)
 {
 	builtins *ptr = &g_functions_bifs[max_funcs_idx++];
 	ptr->name = name;
 	ptr->arity = arity;
 	ptr->fn = fn;
 	ptr->help = NULL;
-	ptr->function = true;
+	ptr->function = function;
 	ptr->ffi = true;
 
 	for (unsigned i = 0; i < arity; i++)
