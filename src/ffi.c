@@ -12,12 +12,10 @@
 #include "utf8.h"
 
 #if USE_FFI
-#ifndef _WIN32
 #if __linux
 #include <dlfcn.h>
 #endif
 #include <ffi.h>
-#endif
 #endif
 
 union result_ {
@@ -27,7 +25,6 @@ union result_ {
 };
 
 #if USE_FFI
-#ifndef _WIN32
 USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -294,8 +291,6 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_3(query *q)
 	GET_NEXT_ARG(p3,atom);
 	return pl_failure;
 }
-#endif
-#endif
 
 pl_status wrapper_function(query *q, builtins *ptr)
 {
@@ -383,3 +378,4 @@ pl_status wrapper_function(query *q, builtins *ptr)
 	return pl_success;
 }
 
+#endif

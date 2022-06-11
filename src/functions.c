@@ -175,9 +175,11 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 	q->st.curr_frame = c_ctx;
 	q->eval = true;
 
+#if USE_FFI
 	if (c->fn_ptr && c->fn_ptr->ffi)
 		wrapper_function(q, c->fn_ptr);
 	else
+#endif
 		c->fn(q);
 
 	q->eval = save_calc;

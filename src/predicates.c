@@ -6970,7 +6970,6 @@ static const builtins g_other_bifs[] =
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false, BLAH},
 
 #if USE_FFI
-#ifndef _WIN32
 	{"$dlopen", 3, fn_sys_dlopen_3, "+filename,+flag,-handle", false, BLAH},
 	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-function", false, BLAH},
 	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
@@ -6978,7 +6977,6 @@ static const builtins g_other_bifs[] =
 	{"$ffi_register_predicate", 3, fn_sys_ffi_register_predicate_3, "+handle, +symbol, +arglist", false, BLAH},
 	{"$ffi_call", 4, fn_sys_ffi_call_4, "+handle, +symbol, +arglist,-result", false, BLAH},
 	{"$ffi_call", 3, fn_sys_ffi_call_3, "+function, +arglist,-result", false, BLAH},
-#endif
 #endif
 
 #if USE_OPENSSL

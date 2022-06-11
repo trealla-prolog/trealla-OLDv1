@@ -24,8 +24,10 @@
 
 void clr_accum(cell *p);
 
+#if USE_FFI
 void register_function(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type);
 pl_status wrapper_function(query *q, builtins *fn_ptr);
+#endif
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
@@ -79,16 +81,14 @@ void make_return(query *q, cell *tmp);
 void make_return2(query *q, cell *tmp, cell *ret);
 void make_end(cell *tmp);
 
-#ifndef _WIN32
+#if USE_FFI
 USE_RESULT pl_status fn_sys_dlopen_3(query *q);
 USE_RESULT pl_status fn_sys_dlsym_3(query *q);
 USE_RESULT pl_status fn_sys_dlclose_1(query *q);
-#if USE_FFI
 USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q);
 USE_RESULT pl_status fn_sys_ffi_register_predicate_3(query *q);
 USE_RESULT pl_status fn_sys_ffi_call_4(query *q);
 USE_RESULT pl_status fn_sys_ffi_call_3(query *q);
-#endif
 #endif
 
 USE_RESULT pl_status fn_iso_add_2(query *q);
