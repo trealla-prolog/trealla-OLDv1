@@ -1199,7 +1199,7 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	// Other stuff...
 
 	cell *body = get_body(r->cells);
-	bool in_body = false;
+	//bool in_body = false;
 	c = r->cells;
 
 	if (c->val_off == g_sys_record_key_s)
@@ -1208,8 +1208,8 @@ void xref_rule(module *m, clause *r, predicate *parent)
 	for (pl_idx_t i = 0; i < r->cidx; i++) {
 		cell *c = r->cells + i;
 
-		if (c == body)
-			in_body = true;
+		//if (c == body)
+		//	in_body = true;
 
 		c->flags &= ~FLAG_TAIL_REC;
 
