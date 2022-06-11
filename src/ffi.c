@@ -225,22 +225,22 @@ USE_RESULT pl_status fn_sys_ffi_call_3(query *q)
 USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
+	GET_NEXT_ARG(p2,atom);
+	GET_NEXT_ARG(p3,iso_list);
 	GET_NEXT_ARG(p4,atom);
-	GET_NEXT_ARG(p2,iso_list);
-	GET_NEXT_ARG(p3,atom);
 
 	if (!(p1->flags & FLAG_INT_HANDLE) && !(p1->flags & FLAG_HANDLE_DLL))
 		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
 
 	uint64_t handle = get_smalluint(p1);
-	const char *symbol = C_STR(q, p4);
+	const char *symbol = C_STR(q, p2);
 	void *func = dlsym((void*)handle, symbol);
 	if (!func) return pl_failure;
 
 	uint8_t arg_types[MAX_ARITY], ret_type = 0;
 	LIST_HANDLER(l);
-	cell *l = p2;
-	pl_idx_t l_ctx = p2_ctx;
+	cell *l = p3;
+	pl_idx_t l_ctx = p3_ctx;
 	int idx = 0;
 
 	while (is_iso_list(l) && (idx < MAX_ARITY)) {
@@ -262,7 +262,7 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 		l_ctx = q->latest_ctx;
 	}
 
-	const char *src = C_STR(q, p3);
+	const char *src = C_STR(q, p4);
 
 	if (!strcmp(src, "int64"))
 		ret_type = TAG_INT;
