@@ -5,11 +5,7 @@
 #include <errno.h>
 
 #include "internal.h"
-#include "parser.h"
-#include "module.h"
-#include "prolog.h"
 #include "query.h"
-#include "utf8.h"
 
 #if USE_FFI
 #if __linux
