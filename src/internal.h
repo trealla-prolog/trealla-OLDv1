@@ -102,7 +102,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_literal(c) ((c)->tag == TAG_LITERAL)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
 #define is_integer(c) ((c)->tag == TAG_INT)
-#define is_float(c) ((c)->tag == TAG_REAL)
+#define is_float(c) ((c)->tag == TAG_FLOAT)
 #define is_indirect(c) ((c)->tag == TAG_PTR)
 #define is_blob(c) ((c)->tag == TAG_BLOB)
 #define is_end(c) ((c)->tag == TAG_END)
@@ -197,29 +197,31 @@ typedef struct {
 	(c)->flags |= FLAG_MANAGED | FLAG_CSTR_BLOB;				\
 	}
 
-#define _GET_STR(pl,c) 											\
+#define _C_STR(pl,c) 											\
 	( !is_cstring(c) ? ((pl)->pool + (c)->val_off)				\
 	: is_strbuf(c) ? ((c)->val_strb->cstr + (c)->strb_off)		\
 	: is_static(c) ? (c)->val_str								\
 	: (char*)(c)->val_chr										\
 	)
 
-#define _LEN_STR(pl,c) 											\
+#define _C_STRLEN(pl,c) 										\
 	( !is_cstring(c) ? strlen((pl)->pool + (c)->val_off)		\
 	: is_strbuf(c) ? (c)->strb_len								\
 	: is_static(c) ? (c)->str_len								\
 	: (c)->chr_len												\
 	)
 
-#define _CMP_SLICE(pl,c,str,len) slicecmp(_GET_STR(pl, c), _LEN_STR(pl, c), str, len)
-#define _CMP_SLICE2(pl,c,str) slicecmp2(_GET_STR(pl, c), _LEN_STR(pl, c), str)
-#define _CMP_SLICES(pl,c1,c2) slicecmp(_GET_STR(pl, c1), _LEN_STR(pl, c1), _GET_STR(pl, c2), _LEN_STR(pl, c2))
-#define _DUP_SLICE(pl,c) slicedup(_GET_STR(pl, c), _LEN_STR(pl, c))
+#define C_STR(x,c) _C_STR((x)->pl, c)
+#define C_STRLEN(x,c) _C_STRLEN((x)->pl, c)
+#define C_STRLEN_UTF8(c) substrlen_utf8(C_STR(q, c), C_STRLEN(q, c))
 
-#define LEN_STR_UTF8(c) substrlen_utf8(GET_STR(q, c), LEN_STR(q, c))
-#define GET_STR(x,c) _GET_STR((x)->pl, c)
-#define LEN_STR(x,c) _LEN_STR((x)->pl, c)
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
+
+#define _CMP_SLICE(pl,c,str,len) slicecmp(_C_STR(pl, c), _C_STRLEN(pl, c), str, len)
+#define _CMP_SLICE2(pl,c,str) slicecmp2(_C_STR(pl, c), _C_STRLEN(pl, c), str)
+#define _CMP_SLICES(pl,c1,c2) slicecmp(_C_STR(pl, c1), _C_STRLEN(pl, c1), _C_STR(pl, c2), _C_STRLEN(pl, c2))
+#define _DUP_SLICE(pl,c) slicedup(_C_STR(pl, c), _C_STRLEN(pl, c))
+
 #define CMP_SLICE(x,c,str,len) _CMP_SLICE((x)->pl, c, str, len)
 #define CMP_SLICE2(x,c,str) _CMP_SLICE2((x)->pl, c, str)
 #define CMP_SLICES(x,c1,c2) _CMP_SLICES((x)->pl, c1, c2)
@@ -233,7 +235,7 @@ enum {
 	TAG_LITERAL=2,
 	TAG_CSTR=3,
 	TAG_INT=4,
-	TAG_REAL=5,
+	TAG_FLOAT=5,
 	TAG_PTR=6,
 	TAG_BLOB=7,
 	TAG_END=9
@@ -254,6 +256,9 @@ enum {
 	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
 	FLAG_VAR_TEMPORARY=1<<3,			// used with TAG_VAR
+
+	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
+	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
 
 	FLAG_SPARE1=1<<6,
 	FLAG_REF=1<<7,
@@ -314,6 +319,7 @@ typedef struct prolog_state_ prolog_state;
 typedef struct prolog_flags_ prolog_flags;
 typedef struct cycle_info_ cycle_info;
 typedef struct reflist_ reflist;
+typedef struct builtins_ builtins;
 
 // Using a fixed-size cell allows having arrays of cells, which is
 // basically what a Term is. A compound is a variable length array of
@@ -344,7 +350,7 @@ struct cell_ {
 
 		struct {
 			uint8_t	chr_len;
-			char val_chr[];
+			char val_chr[MAX_SMALL_STRING];
 		};
 
 		struct {
@@ -360,7 +366,11 @@ struct cell_ {
 
 		struct {
 			union {
-				pl_status (*fn)(query*);
+				struct {
+					pl_status (*fn)(query*);
+					builtins *fn_ptr;
+				};
+
 				predicate *match;
 				uint16_t priority;		// used in parsing operators
 
@@ -438,12 +448,17 @@ struct predicate_ {
 	bool is_var_in_first_arg:1;
 };
 
-struct builtins {
+#define BLAH false, {0}, 0
+
+struct builtins_ {
 	const char *name;
 	unsigned arity;
 	pl_status (*fn)(query*);
 	const char *help;
 	bool function;
+	bool ffi;
+	uint8_t types[MAX_ARITY];
+	uint8_t ret_type;
 };
 
 typedef struct {
@@ -777,7 +792,7 @@ inline static void unshare_cell_(const cell *c)
 			free((c)->val_bigint);
 		}
 	} else if (is_blob(c)) {
-		if (--(c)->val_blob->refcnt == 0)	{
+		if (--(c)->val_blob->refcnt == 0) {
 			free((c)->val_blob);
 		}
 	}
@@ -805,14 +820,14 @@ inline static void chk_cells(const cell *src, pl_idx_t nbr_cells)
 	}
 }
 
-#define LIST_HANDLER(l) cell l##_h_tmp; cell l##_t_tmp
+#define LIST_HANDLER(l) cell l##_h_tmp, l##_t_tmp
 #define LIST_HEAD(l) list_head(l, &l##_h_tmp)
 #define LIST_TAIL(l) list_tail(l, &l##_t_tmp)
 
 cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
-enum clause_type {DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL};
+enum clause_type { DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL };
 
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 char *slicedup(const char *s, size_t n);

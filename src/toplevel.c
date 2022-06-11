@@ -327,18 +327,18 @@ void dump_vars(query *q, bool partial)
 		space = false;
 
 		if (is_structure(c)) {
-			unsigned pri = find_op(q->st.m, GET_STR(q, c), GET_OP(c));
+			unsigned pri = find_op(q->st.m, C_STR(q, c), GET_OP(c));
 
 			if (pri >= 700)
 				parens = true;
 		}
 
-		if (is_atom(c) && !is_string(c) && LEN_STR(q, c) && !is_nil(c)) {
-			if (search_op(q->st.m, GET_STR(q, c), NULL, false))
+		if (is_atom(c) && !is_string(c) && C_STRLEN(q, c) && !is_nil(c)) {
+			if (search_op(q->st.m, C_STR(q, c), NULL, false))
 				parens = true;
 
 			if (!parens) {
-				const char *src = GET_STR(q, c);
+				const char *src = C_STR(q, c);
 				int ch = peek_char_utf8(src);
 
 				if (!iswalpha(ch) && (ch != '_'))

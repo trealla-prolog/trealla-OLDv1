@@ -1,6 +1,6 @@
 #pragma once
 
-void *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function);
+builtins *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function);
 module *find_module(prolog *pl, const char *name);
 module *find_next_module(prolog *pl, module *m);
 pl_idx_t index_from_pool(prolog *pl, const char *name);

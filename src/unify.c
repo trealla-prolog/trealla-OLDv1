@@ -618,8 +618,8 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	// Keep string code separate for now...
 
 	if (is_string(head)) {
-		const char *src = GET_STR(q, head);
-		size_t len_src = LEN_STR(q, head);
+		const char *src = C_STR(q, head);
+		size_t len_src = C_STRLEN(q, head);
 		const char *save_src = src;
 
 		while ((max-- > 0) && (len_src > 0)) {
@@ -629,12 +629,12 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 			*skip += 1;
 		}
 
-		if (LEN_STR(q, head) == (size_t)(src-save_src)) {
+		if (C_STRLEN(q, head) == (size_t)(src-save_src)) {
 			make_atom(tmp, g_nil_s);
 		} else if (src == save_src) {
 			tmp = head;
 		} else {
-			make_stringn(tmp, src, LEN_STR(q, head) - (src-save_src));
+			make_stringn(tmp, src, C_STRLEN(q, head) - (src-save_src));
 			share_cell(tmp);
 		}
 
@@ -675,7 +675,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 
 	if (done) {
 		if (is_string(fast)) {
-			cnt += LEN_STR_UTF8(fast);
+			cnt += C_STRLEN_UTF8(fast);
 			*skip = cnt;
 			make_atom(tmp, g_nil_s);
 			return tmp;
@@ -903,19 +903,19 @@ static bool unify_literals(query *q, cell *p1, cell *p2)
 	if (is_literal(p2))
 		return p1->val_off == p2->val_off;
 
-	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
-		return !memcmp(GET_STR(q, p2), GET_POOL(q, p1->val_off), LEN_STR(q, p1));
+	if (is_cstring(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
+		return !memcmp(C_STR(q, p2), GET_POOL(q, p1->val_off), C_STRLEN(q, p1));
 
 	return false;
 }
 
 static bool unify_cstrings(query *q, cell *p1, cell *p2)
 {
-	if (is_cstring(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
-		return !memcmp(GET_STR(q, p1), GET_STR(q, p2), LEN_STR(q, p1));
+	if (is_cstring(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
+		return !memcmp(C_STR(q, p1), C_STR(q, p2), C_STRLEN(q, p1));
 
-	if (is_literal(p2) && (LEN_STR(q, p1) == LEN_STR(q, p2)))
-		return !memcmp(GET_STR(q, p1), GET_POOL(q, p2->val_off), LEN_STR(q, p1));
+	if (is_literal(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
+		return !memcmp(C_STR(q, p1), GET_POOL(q, p2->val_off), C_STRLEN(q, p1));
 
 	return false;
 }
@@ -932,7 +932,7 @@ static const struct dispatch g_disp[] =
 	{TAG_LITERAL, unify_literals},
 	{TAG_CSTR, unify_cstrings},
 	{TAG_INT, unify_integers},
-	{TAG_REAL, unify_reals},
+	{TAG_FLOAT, unify_reals},
 	{0}
 };
 

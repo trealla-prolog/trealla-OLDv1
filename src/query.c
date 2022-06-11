@@ -66,7 +66,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		box = q->retry?REDO:q->resume?NEXT:CALL;
 
 #if 1
-	const char *src = GET_STR(q, c);
+	const char *src = C_STR(q, c);
 
 	if (!strcmp(src, ",") || !strcmp(src, ";") || !strcmp(src, "->") || !strcmp(src, "*->"))
 		return;
@@ -424,10 +424,10 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 			size_t len = len_char_utf8(tmp);
 			is_chars_list += len;
 		} else {
-			const char *src = GET_STR(q, c);
+			const char *src = C_STR(q, c);
 			size_t len = len_char_utf8(src);
 
-			if (len != LEN_STR(q, c)) {
+			if (len != C_STRLEN(q, c)) {
 				is_chars_list = 0;
 				return 0;
 			}
@@ -564,7 +564,7 @@ LOOP:
 
 	trim_heap(q, ch);
 	q->st = ch->st;
-	q->save_m = NULL;		// maybe move q->save_m to q->st.save_m
+	q->save_m = NULL;
 
 	frame *f = GET_CURR_FRAME();
 	f->ugen = ch->ugen;
@@ -1151,7 +1151,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1165,7 +1165,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->pl, GET_STR(q, head), head->arity, &found, NULL), found)
+			if (get_builtin(q->pl, C_STR(q, head), head->arity, &found, NULL), found)
 				return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 			q->st.curr_clause2 = NULL;
@@ -1248,7 +1248,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 		if (!is_literal(c)) {
 			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, GET_STR(q, c));
+			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
 			c->tag = TAG_LITERAL;
@@ -1261,7 +1261,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		if (!pr) {
 			bool found = false;
 
-			if (get_builtin(q->pl, GET_STR(q, p1), p1->arity, &found, NULL), found) {
+			if (get_builtin(q->pl, C_STR(q, p1), p1->arity, &found, NULL), found) {
 				if (is_retract != DO_CLAUSE)
 					return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 				else
@@ -1339,7 +1339,7 @@ static USE_RESULT pl_status match_head(query *q)
 			q->save_m = q->st.m;
 
 			if (!pr) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(GET_STR(q, c), "initialization")))
+				if (!is_end(c) && !(is_literal(c) && !strcmp(C_STR(q, c), "initialization")))
 					if (q->st.m->flags.unknown == UNK_ERROR)
 						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
 					else
@@ -1515,7 +1515,14 @@ pl_status start(query *q)
 				continue;
 			}
 
-			if ((q->st.curr_cell->fn(q) == pl_failure) && !q->is_oom) {
+			pl_status status;
+
+			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi)
+				status = wrapper_function(q, q->st.curr_cell->fn_ptr);
+			else
+				status = q->st.curr_cell->fn(q);
+
+			if ((status == pl_failure) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)

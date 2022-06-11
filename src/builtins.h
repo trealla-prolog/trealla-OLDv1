@@ -7,6 +7,26 @@
 
 #include "internal.h"
 
+#define MAX_FUNCS 1000
+
+#define CHECK_CALC()								\
+	clr_accum(&q->accum);							\
+	errno = 0;										\
+													\
+	if (!q->eval) {									\
+		if (q->st.m->flags.unknown == 0)			\
+			return false;							\
+		else										\
+			return throw_error(q, q->st.curr_cell, 	\
+				q->st.curr_frame, 					\
+				"existence_error", "procedure");	\
+	}
+
+void clr_accum(cell *p);
+
+void register_function(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type);
+pl_status wrapper_function(query *q, builtins *fn_ptr);
+
 #define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
 #define is_structure(c) (is_literal(c) && (c)->arity)
@@ -23,7 +43,7 @@
 #define is_atom_or_int(c) (is_atom(c) || is_integer(c))
 #define is_atom_or_structure(c) (is_atom(c) || is_structure(c))
 #define is_number_or_var(c) (is_number(c) || is_variable(c))
-#define is_real_or_var(c) (is_float(c) || is_variable(c))
+#define is_float_or_var(c) (is_float(c) || is_variable(c))
 #define is_integer_or_var(c) (is_integer(c) || is_variable(c))
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_smallint_or_var(c) (is_smallint(c) || is_variable(c))
@@ -35,9 +55,9 @@
 #define is_list_or_atom(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list(c) (is_atom(c) || is_iso_list(c))
 #define is_atom_or_list_or_var(c) (is_atom(c) || is_iso_list(c) || is_variable(c))
-#define is_character(c) (is_atom(c) && ((strlen_utf8(GET_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
+#define is_character(c) (is_atom(c) && ((strlen_utf8(C_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
 #define is_character_or_var(c) (is_in_character(c) || is_variable(c))
-#define is_in_character(c) (is_atom(c) && ((strlen_utf8(GET_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
+#define is_in_character(c) (is_atom(c) && ((strlen_utf8(C_STR(q, c)) <= 1) || !CMP_SLICE2(q, c, "end_of_file")))
 #define is_in_character_or_var(c) (is_in_character(c) || is_variable(c))
 #define is_in_byte(c) (is_integer(c) && (get_smallint(c) >= -1) && (get_smallint(c) < 256))
 #define is_in_byte_or_var(c) (is_in_byte(c) || is_variable(c))
@@ -49,14 +69,27 @@
 #define is_iso_list_or_var(c) (is_iso_list(c) || is_variable(c))
 #define is_iso_atom_or_var(c) (is_iso_atom(c) || is_variable(c))
 
+void make_uint(cell *tmp, pl_uint_t v);
 void make_int(cell *tmp, pl_int_t v);
-void make_real(cell *tmp, double v);
-void make_return(query *q, cell *tmp);
-void make_return2(query *q, cell *tmp, cell *ret);
-void make_end(cell *tmp);
+void make_float(cell *tmp, double v);
 void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
 void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr);
 void make_var2(cell *tmp, pl_idx_t off);
+void make_return(query *q, cell *tmp);
+void make_return2(query *q, cell *tmp, cell *ret);
+void make_end(cell *tmp);
+
+#ifndef _WIN32
+USE_RESULT pl_status fn_sys_dlopen_3(query *q);
+USE_RESULT pl_status fn_sys_dlsym_3(query *q);
+USE_RESULT pl_status fn_sys_dlclose_1(query *q);
+#if USE_FFI
+USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q);
+USE_RESULT pl_status fn_sys_ffi_register_predicate_3(query *q);
+USE_RESULT pl_status fn_sys_ffi_call_4(query *q);
+USE_RESULT pl_status fn_sys_ffi_call_3(query *q);
+#endif
+#endif
 
 USE_RESULT pl_status fn_iso_add_2(query *q);
 USE_RESULT pl_status fn_local_cut_0(query *q);
@@ -175,12 +208,12 @@ inline static cell *get_raw_arg(const query *q, int n)
 }
 
 #define eval(q,c)														\
-	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) :				\
+	is_function(c) || is_builtin(c) ? (call_builtin(q,c,c##_ctx), q->accum) : \
 	is_callable(c) ? (call_userfun(q, c, c##_ctx), q->accum) : *c;		\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
 		return pl_success; 												\
-	if (is_variable(c))											\
+	if (is_variable(c))													\
 		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number"); \
 	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1)) \
 		return throw_error(q, c, q->st.curr_frame, "type_error", "evaluable");

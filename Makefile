@@ -14,6 +14,11 @@ else
 LDFLAGS += -lreadline
 endif
 
+ifndef NOFFI
+CFLAGS += -DUSE_FFI=1
+LDFLAGS += -lffi -ldl
+endif
+
 ifndef NOSSL
 CFLAGS += -DUSE_OPENSSL=1
 LDFLAGS += -L/usr/local/opt/openssl/lib -lssl -lcrypto
@@ -33,6 +38,7 @@ SRCOBJECTS = tpl.o \
 	src/base64.o \
 	src/contrib.o \
 	src/control.o \
+	src/ffi.o \
 	src/format.o \
 	src/functions.o \
 	src/heap.c \
@@ -102,8 +108,8 @@ test:
 
 clean:
 	rm -f tpl src/*.o src/imath/*.o src/isocline/src/*.o \
-		library/*.o library/*.c *.o gmon.* \
-		vgcore.* *.core core core.* *.exe
+		library/*.o library/*.c *.o samples/*.o samples/*.so \
+		vgcore.* *.core core core.* *.exe gmon.*
 	rm -f *.itf *.po samples/*.itf samples/*.po
 
 # from [gcc|clang] -MM src/*.c src/imath/*.c src/isocline/src/isocline.c
@@ -113,6 +119,9 @@ src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/imath/imath.h src/query.h \
   src/builtins.h
 src/control.o: src/control.c src/internal.h src/map.h src/skiplist.h \
+  src/trealla.h src/cdebug.h src/imath/imath.h src/parser.h src/module.h \
+  src/prolog.h src/query.h src/builtins.h src/heap.h
+src/ffi.o: src/ffi.c src/internal.h src/map.h src/skiplist.h \
   src/trealla.h src/cdebug.h src/imath/imath.h src/parser.h src/module.h \
   src/prolog.h src/query.h src/builtins.h src/heap.h
 src/format.o: src/format.c src/internal.h src/map.h src/skiplist.h \

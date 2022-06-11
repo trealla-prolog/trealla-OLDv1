@@ -72,10 +72,10 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
 
-	module *m = find_module(q->pl, GET_STR(q, p1));
+	module *m = find_module(q->pl, C_STR(q, p1));
 
 	if (!m)
-		m = create_module(q->pl, GET_STR(q, p1));
+		m = create_module(q->pl, C_STR(q, p1));
 
 	cell *tmp = clone_to_heap(q, true, p2, 1);
 	may_heap_error(tmp);
@@ -130,12 +130,13 @@ USE_RESULT pl_status fn_iso_call_1(query *q)
 	cell *tmp2 = get_tmp_heap(q, 0);
 	tmp2->nbr_cells = tmp_heap_used(q);
 
-	const char *functor = GET_STR(q, tmp2);
+	const char *functor = C_STR(q, tmp2);
 	bool found = false;
 
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
-	} else if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+	} else if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -178,10 +179,11 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 		convert_to_literal(q->st.m, tmp2);
 	}
 
-	const char *functor = GET_STR(q, tmp2);
+	const char *functor = C_STR(q, tmp2);
 	bool found = false;
 
-	if ((tmp2->fn = get_builtin(q->pl, GET_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+	if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
+		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -531,7 +533,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 	else
 		fprintf(stdout, "  ");
 
-	if (!is_literal(e) || strcmp(GET_STR(q, e), "error"))
+	if (!is_literal(e) || strcmp(C_STR(q, e), "error"))
 		fprintf(stdout, "throw(");
 
 	if (is_cyclic_term(q, e, e_ctx)) {
@@ -542,7 +544,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		print_term(q, stdout, e, e_ctx, 1);
 	}
 
-	if (!is_literal(e) || strcmp(GET_STR(q, e), "error"))
+	if (!is_literal(e) || strcmp(C_STR(q, e), "error"))
 		fprintf(stdout, ")");
 
 	fprintf(stdout, ".\n");
@@ -638,7 +640,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_atom(tmp+nbr_cells, index_from_pool(q->pl, expected));
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "variable")) {
 		err_type = "uninstantiation_error";
-		//printf("error(%s(%s),(%s)/%u).\n", err_type, GET_STR(q, c), functor, goal->arity);
+		//printf("error(%s(%s),(%s)/%u).\n", err_type, C_STR(q, c), functor, goal->arity);
 		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
@@ -651,7 +653,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
-		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, GET_STR(q, c), c->arity, functor, goal->arity);
+		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, C_STR(q, c), c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;
@@ -764,7 +766,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, expected));
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
-		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, GET_STR(q, c)));
+		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, C_STR(q, c)));
 		make_int(tmp+nbr_cells++, c->arity);
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;
@@ -786,7 +788,7 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, functor));
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	} else {
-		//printf("error(%s(%s,(%s)),(%s)/%u).\n", err_type, expected, GET_STR(q, c), functor, goal->arity);
+		//printf("error(%s(%s,(%s)),(%s)/%u).\n", err_type, expected, C_STR(q, c), functor, goal->arity);
 		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
 		may_ptr_error(tmp);
 		pl_idx_t nbr_cells = 0;

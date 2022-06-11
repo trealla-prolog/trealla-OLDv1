@@ -168,8 +168,8 @@ predicate *create_predicate(module *m, cell *c)
 	bool found, function;
 
 	if (strcmp(m->name, "format")) {
-		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
-			fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
+		if (get_builtin(m->pl, C_STR(m, c), c->arity, &found, &function), found && !function) {
+			fprintf(stdout, "Error: permission error modifying %s/%u\n", C_STR(m, c), c->arity);
 			return NULL;
 		}
 	}
@@ -192,9 +192,9 @@ predicate *create_predicate(module *m, cell *c)
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
-	//printf("*** create %s ==> %s/%u\n", m->filename, GET_STR(m, &pr->key), pr->key.arity);
+	//printf("*** create %s ==> %s/%u\n", m->filename, C_STR(m, &pr->key), pr->key.arity);
 
-	//if (GET_STR(m, c)[0] == '$')
+	//if (C_STR(m, c)[0] == '$')
 	//	pr->is_noindex = true;
 
 	m_app(m->index, &pr->key, pr);
@@ -299,16 +299,16 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 			if (p1->val_off == p2->val_off)
 				return 0;
 
-			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+			return strcmp(C_STR(m, p1), C_STR(m, p2));
 		} else if (is_atom(p2))
-			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+			return strcmp(C_STR(m, p1), C_STR(m, p2));
 		else if (is_number(p2))
 			return 1;
 		else if (!is_variable(p2))
 			return -1;
 	} else if (is_atom(p1)) {
 		if (is_atom(p2))
-			return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+			return strcmp(C_STR(m, p1), C_STR(m, p2));
 		else if (is_number(p2))
 			return 1;
 		else if (!is_variable(p2))
@@ -322,7 +322,7 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 				return 1;
 
 			if (p1->val_off != p2->val_off)
-				return strcmp(GET_STR(m, p1), GET_STR(m, p2));
+				return strcmp(C_STR(m, p1), C_STR(m, p2));
 
 			int arity = p1->arity;
 			p1++; p2++;
@@ -456,7 +456,7 @@ void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 
 void set_meta_predicate_in_db(module *m, cell *c)
 {
-	const char *name = GET_STR(m, c);
+	const char *name = C_STR(m, c);
 	unsigned arity = c->arity;
 	cell tmp = (cell){0};
 	tmp.tag = TAG_LITERAL;
@@ -529,7 +529,7 @@ predicate *find_predicate(module *m, cell *c)
 	tmp.nbr_cells = 1;
 
 	if (is_cstring(c)) {
-		tmp.val_off = index_from_pool(m->pl, GET_STR(m, c));
+		tmp.val_off = index_from_pool(m->pl, C_STR(m, c));
 	}
 
 	miter *iter = m_find_key(m->index, &tmp);
@@ -921,8 +921,8 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 	if (!pr) {
 		bool found = false, function = false;
 
-		if (get_builtin(m->pl, GET_STR(m, c), c->arity, &found, &function), found && !function) {
-			fprintf(stdout, "Error: permission error modifying %s/%u\n", GET_STR(m, c), c->arity);
+		if (get_builtin(m->pl, C_STR(m, c), c->arity, &found, &function), found && !function) {
+			fprintf(stdout, "Error: permission error modifying %s/%u\n", C_STR(m, c), c->arity);
 			return NULL;
 		}
 
@@ -933,24 +933,24 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 			pr->is_check_directive = true;
 
 		if (!consulting) {
-			push_property(m, GET_STR(m, c), c->arity, "dynamic");
+			push_property(m, C_STR(m, c), c->arity, "dynamic");
 			pr->is_dynamic = true;
 			pr->is_static = false;
 		} else {
 			if (m->prebuilt) {
-				push_property(m, GET_STR(m, c), c->arity, "built_in");
+				push_property(m, C_STR(m, c), c->arity, "built_in");
 			}
 
-			push_property(m, GET_STR(m, c), c->arity, "static");
+			push_property(m, C_STR(m, c), c->arity, "static");
 		}
 
 		if (consulting && m->make_public) {
-			push_property(m, GET_STR(m, c), c->arity, "public");
+			push_property(m, C_STR(m, c), c->arity, "public");
 			pr->is_public = true;
 		}
 	} else {
 		if (pr->is_tabled && !pr->is_dynamic && !pr->is_static) {
-			push_property(m, GET_STR(m, c), c->arity, "static");
+			push_property(m, C_STR(m, c), c->arity, "static");
 			pr->is_static = true;
 		}
 	}
@@ -1045,7 +1045,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 {
 	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (GET_STR(m, &pr->key)[0] != '$')) {
+		&& (C_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
 				add_to_dirty_list(m, dbe);
@@ -1053,7 +1053,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 			}
 
 			if (dbe->owner->cnt)
-				fprintf(stderr, "Warning: overwriting %s/%u\n", GET_STR(m, &pr->key), pr->key.arity);
+				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
 
 			m_destroy(pr->idx_save);
 			m_destroy(pr->idx2);
@@ -1135,7 +1135,7 @@ bool retract_from_db(module *m, db_entry *dbe)
 
 static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 {
-	const char *functor = GET_STR(m, c);
+	const char *functor = C_STR(m, c);
 	unsigned specifier;
 
 	if ((c->arity == 2)
@@ -1146,16 +1146,19 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 	}
 
 	bool found = false, function = false;
-	c->fn = get_builtin(m->pl, functor, c->arity, &found, &function);
+	c->fn_ptr = get_builtin(m->pl, functor, c->arity, &found, &function);
 
 	if (found) {
+		c->fn = c->fn_ptr->fn;
+
 		if (function)
 			c->flags |= FLAG_FUNCTION;
 		else
 			c->flags |= FLAG_BUILTIN;
 
 		return;
-	}
+	} else
+		c->fn = NULL;
 
 	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {

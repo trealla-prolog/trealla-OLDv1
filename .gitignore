@@ -4,6 +4,7 @@ tpl
 *.db
 *.a
 *.o
+*.so
 *.exe
 *.lib
 *.obj

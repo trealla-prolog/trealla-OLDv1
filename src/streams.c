@@ -548,7 +548,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 	if (match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE) != pl_success) {
 		clear_streams_properties(q);
 
-		if (is_callable(p1) && !strstr(s_properties, GET_STR(q, p1)))
+		if (is_callable(p1) && !strstr(s_properties, C_STR(q, p1)))
 			return throw_error(q, p1, p1_ctx, "domain_error", "stream_property");
 
 		return pl_failure;
@@ -626,7 +626,7 @@ static USE_RESULT pl_status fn_popen_4(query *q)
 			name = deref(q, name, q->latest_ctx);
 
 
-			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
+			if (get_named_stream(q->pl, C_STR(q, name), C_STRLEN(q, name)) >= 0)
 				return throw_error(q, c, q->latest_ctx, "permission_error", "open,source_sink");
 
 			if (!CMP_SLICE2(q, c, "alias")) {
@@ -765,7 +765,7 @@ static USE_RESULT pl_status fn_iso_open_4(query *q)
 			if (!is_atom(name))
 				return throw_error(q, c, c_ctx, "domain_error", "stream_option");
 
-			if (get_named_stream(q->pl, GET_STR(q, name), LEN_STR(q, name)) >= 0)
+			if (get_named_stream(q->pl, C_STR(q, name), C_STRLEN(q, name)) >= 0)
 				return throw_error(q, c, c_ctx, "permission_error", "open,source_sink");
 
 			free(str->name);
@@ -1508,6 +1508,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				make_atom(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
+				v.fn_ptr = NULL;
 				v.arity = 2;
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
@@ -1570,6 +1571,7 @@ pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p
 				make_atom(&v, g_unify_s);
 				v.flags |= FLAG_BUILTIN;
 				v.fn = fn_iso_unify_2;
+				v.fn_ptr = NULL;
 				v.arity = 2;
 				v.nbr_cells = 3;
 				SET_OP(&v,OP_XFX);
@@ -2086,7 +2088,7 @@ static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 	GET_FIRST_ARG(p1,character);
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
-	size_t len = len_char_utf8(GET_STR(q, p1));
+	size_t len = len_char_utf8(C_STR(q, p1));
 
 	if (str->binary) {
 		cell tmp;
@@ -2095,10 +2097,10 @@ static USE_RESULT pl_status fn_iso_put_char_1(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
-	if (len != LEN_STR(q, p1))
+	if (len != C_STRLEN(q, p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "character");
 
-	const char *src = GET_STR(q, p1);
+	const char *src = C_STR(q, p1);
 	int ch = get_char_utf8(&src);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
@@ -2112,7 +2114,7 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,character);
-	size_t len = len_char_utf8(GET_STR(q, p1));
+	size_t len = len_char_utf8(C_STR(q, p1));
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
@@ -2124,10 +2126,10 @@ static USE_RESULT pl_status fn_iso_put_char_2(query *q)
 		return throw_error(q, &tmp, q->st.curr_frame, "permission_error", "output,binary_stream");
 	}
 
-	if (len != LEN_STR(q, p1))
+	if (len != C_STRLEN(q, p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "character");
 
-	const char *src = GET_STR(q, p1);
+	const char *src = C_STR(q, p1);
 	int ch = get_char_utf8(&src);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
@@ -2977,7 +2979,7 @@ int new_stream(prolog *pl)
 int get_stream(query *q, cell *p1)
 {
 	if (is_atom(p1)) {
-		int n = get_named_stream(q->pl, GET_STR(q, p1), LEN_STR(q, p1));
+		int n = get_named_stream(q->pl, C_STR(q, p1), C_STRLEN(q, p1));
 
 		if (n < 0)
 			return -1;
@@ -3091,17 +3093,17 @@ static USE_RESULT pl_status fn_read_term_from_chars_3(query *q)
 	bool has_var, is_partial;
 
 	if (is_atom(p_chars) && !is_string(p_chars)) {
-		if (!strcmp(GET_STR(q, p_chars), "[]")) {
+		if (!strcmp(C_STR(q, p_chars), "[]")) {
 			cell tmp;
 			make_atom(&tmp, g_eof_s);
 			return unify(q, p_term, p_term_ctx, &tmp, q->st.curr_frame);
 		} else
 			return throw_error(q, p_chars, p_chars_ctx, "type_error", "character");
 	} else if (is_string(p_chars)) {
-		len = LEN_STR(q, p_chars);
+		len = C_STRLEN(q, p_chars);
 		src = malloc(len+1+1);		// +1 is to allow adding a '.'
 		may_ptr_error(src);
-		memcpy(src, GET_STR(q, p_chars), len);
+		memcpy(src, C_STR(q, p_chars), len);
 		src[len] = '\0';
 	} else if (!check_list(q, p_chars, p_chars_ctx, &is_partial, NULL)) {
 		return throw_error(q, p_chars, p_chars_ctx, "type_error", "list");
@@ -3168,10 +3170,10 @@ static USE_RESULT pl_status fn_read_term_from_atom_3(query *q)
 	size_t len;
 
 	if (is_cstring(p_chars)) {
-		len = LEN_STR(q, p_chars);
+		len = C_STRLEN(q, p_chars);
 		src = malloc(len+1+1);	// final +1 is for look-ahead
 		may_ptr_error(src);
-		memcpy(src, GET_STR(q, p_chars), len);
+		memcpy(src, C_STR(q, p_chars), len);
 		src[len] = '\0';
 	} else if ((len = scan_is_chars_list(q, p_chars, p_chars_ctx, false)) > 0) {
 		if (!len)
@@ -3663,8 +3665,8 @@ static pl_status do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!is_atom(mod) || !is_atom(file))
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
-	char *filename = GET_STR(q, file);
+	module *tmp_m = create_module(q->pl, C_STR(q, mod));
+	char *filename = C_STR(q, file);
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
 	convert_path(filename);
@@ -3704,8 +3706,8 @@ static pl_status do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!is_atom(mod) || !is_atom(file))
 		return throw_error(q, p1, p1_ctx, "type_error", "source_sink");
 
-	module *tmp_m = create_module(q->pl, GET_STR(q, mod));
-	char *filename = GET_STR(q, file);
+	module *tmp_m = create_module(q->pl, C_STR(q, mod));
+	char *filename = C_STR(q, file);
 	tmp_m->make_public = 1;
 	filename = relative_to(q->st.m->filename, filename);
 	convert_path(filename);
@@ -3783,7 +3785,7 @@ static USE_RESULT pl_status fn_savefile_2(query *q)
 	convert_path(filename);
 	FILE *fp = fopen(filename, "wb");
 	may_ptr_error(fp);
-	fwrite(GET_STR(q, p2), 1, LEN_STR(q, p2), fp);
+	fwrite(C_STR(q, p2), 1, C_STRLEN(q, p2), fp);
 	fclose(fp);
 	free(filename);
 	return pl_success;
@@ -4579,7 +4581,7 @@ static USE_RESULT pl_status fn_time_file_2(query *q)
 
 	free(filename);
 	cell tmp;
-	make_real(&tmp, st.st_mtime);
+	make_float(&tmp, st.st_mtime);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -4842,17 +4844,17 @@ static USE_RESULT pl_status fn_server_3(query *q)
 				c = c + 1;
 
 				if (is_atom(c))
-					keyfile = GET_STR(q, c);
+					keyfile = C_STR(q, c);
 			} else if (!CMP_SLICE2(q, c, "certfile")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					certfile = GET_STR(q, c);
+					certfile = C_STR(q, c);
 			} else if (!CMP_SLICE2(q, c, "hostname")) {
 				c = c + 1;
 
 				if (is_atom(c))
-					slicecpy(hostname, sizeof(hostname), GET_STR(q, c), LEN_STR(q, c));
+					slicecpy(hostname, sizeof(hostname), C_STR(q, c), C_STRLEN(q, c));
 			} else if (!CMP_SLICE2(q, c, "scheme")) {
 				c = c + 1;
 
@@ -4878,7 +4880,7 @@ static USE_RESULT pl_status fn_server_3(query *q)
 		p3_ctx = q->latest_ctx;
 	}
 
-	const char *url = GET_STR(q, p1);
+	const char *url = C_STR(q, p1);
 	parse_host(url, hostname, path, &port, &ssl, &domain);
 	nonblock = q->is_task;
 
@@ -5019,7 +5021,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 				c = c + 1;
 
 				if (is_atom(c))
-					certfile = GET_STR(q, c);
+					certfile = C_STR(q, c);
 			} else if (!CMP_SLICE2(q, c, "scheme")) {
 				c = c + 1;
 
@@ -5045,7 +5047,7 @@ static USE_RESULT pl_status fn_client_5(query *q)
 		p5_ctx = q->latest_ctx;
 	}
 
-	const char *url = GET_STR(q, p1);
+	const char *url = C_STR(q, p1);
 	parse_host(url, hostname, path, &port, &ssl, &domain);
 	nonblock = q->is_task;
 
@@ -5236,8 +5238,8 @@ static USE_RESULT pl_status fn_bwrite_2(query *q)
 	GET_NEXT_ARG(p1,atom);
 	int n = get_stream(q, pstr);
 	stream *str = &q->pl->streams[n];
-	const char *src = GET_STR(q, p1);
-	size_t len = LEN_STR(q, p1);
+	const char *src = C_STR(q, p1);
+	size_t len = C_STRLEN(q, p1);
 
 	while (len) {
 		CHECK_INTERRUPT();
@@ -5266,8 +5268,8 @@ static USE_RESULT pl_status fn_sys_put_chars_1(query *q)
 	size_t len;
 
 	if (is_cstring(p1)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
+		const char *src = C_STR(q, p1);
+		size_t len = C_STRLEN(q, p1);
 		net_write(src, len, str);
 	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
 		char *src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -5290,8 +5292,8 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 	size_t len;
 
 	if (is_cstring(p1)) {
-		const char *src = GET_STR(q, p1);
-		size_t len = LEN_STR(q, p1);
+		const char *src = C_STR(q, p1);
+		size_t len = C_STRLEN(q, p1);
 		net_write(src, len, str);
 	} else if ((len = scan_is_chars_list(q, p1, p1_ctx, true)) > 0) {
 		char *src = chars_list_to_string(q, p1, p1_ctx, len);
@@ -5305,111 +5307,111 @@ static USE_RESULT pl_status fn_sys_put_chars_2(query *q)
 	return !ferror(str->fp);
 }
 
-const struct builtins g_files_bifs[] =
+const builtins g_files_bifs[] =
 {
 	// ISO...
 
-	{"open", 4, fn_iso_open_4, NULL, false},
-	{"close", 1, fn_iso_close_1, NULL, false},
-	{"close", 2, fn_iso_close_2, NULL, false},
-	{"read_term", 2, fn_iso_read_term_2, NULL, false},
-	{"read_term", 3, fn_iso_read_term_3, NULL, false},
-	{"read", 1, fn_iso_read_1, NULL, false},
-	{"read", 2, fn_iso_read_2, NULL, false},
-	{"write_canonical", 1, fn_iso_write_canonical_1, NULL, false},
-	{"write_canonical", 2, fn_iso_write_canonical_2, NULL, false},
-	{"write_term", 2, fn_iso_write_term_2, NULL, false},
-	{"write_term", 3, fn_iso_write_term_3, NULL, false},
-	{"writeq", 1, fn_iso_writeq_1, NULL, false},
-	{"writeq", 2, fn_iso_writeq_2, NULL, false},
-	{"write", 1, fn_iso_write_1, NULL, false},
-	{"write", 2, fn_iso_write_2, NULL, false},
-	{"nl", 0, fn_iso_nl_0, NULL, false},
-	{"nl", 1, fn_iso_nl_1, NULL, false},
-	{"at_end_of_stream", 0, fn_iso_at_end_of_stream_0, NULL, false},
-	{"at_end_of_stream", 1, fn_iso_at_end_of_stream_1, NULL, false},
-	{"set_stream_position", 2, fn_iso_set_stream_position_2, NULL, false},
-	{"flush_output", 0, fn_iso_flush_output_0, NULL, false},
-	{"flush_output", 1, fn_iso_flush_output_1, NULL, false},
-	{"put_char", 1, fn_iso_put_char_1, NULL, false},
-	{"put_char", 2, fn_iso_put_char_2, NULL, false},
-	{"put_code", 1, fn_iso_put_code_1, NULL, false},
-	{"put_code", 2, fn_iso_put_code_2, NULL, false},
-	{"put_byte", 1, fn_iso_put_byte_1, NULL, false},
-	{"put_byte", 2, fn_iso_put_byte_2, NULL, false},
-	{"get_char", 1, fn_iso_get_char_1, NULL, false},
-	{"get_char", 2, fn_iso_get_char_2, NULL, false},
-	{"get_code", 1, fn_iso_get_code_1, NULL, false},
-	{"get_code", 2, fn_iso_get_code_2, NULL, false},
-	{"get_byte", 1, fn_iso_get_byte_1, NULL, false},
-	{"get_byte", 2, fn_iso_get_byte_2, NULL, false},
-	{"peek_char", 1, fn_iso_peek_char_1, NULL, false},
-	{"peek_char", 2, fn_iso_peek_char_2, NULL, false},
-	{"peek_code", 1, fn_iso_peek_code_1, NULL, false},
-	{"peek_code", 2, fn_iso_peek_code_2, NULL, false},
-	{"peek_byte", 1, fn_iso_peek_byte_1, NULL, false},
-	{"peek_byte", 2, fn_iso_peek_byte_2, NULL, false},
-	{"current_input", 1, fn_iso_current_input_1, NULL, false},
-	{"current_output", 1, fn_iso_current_output_1, NULL, false},
-	{"set_input", 1, fn_iso_set_input_1, NULL, false},
-	{"set_output", 1, fn_iso_set_output_1, NULL, false},
-	{"stream_property", 2, fn_iso_stream_property_2, NULL, false},
+	{"open", 4, fn_iso_open_4, NULL, false, BLAH},
+	{"close", 1, fn_iso_close_1, NULL, false, BLAH},
+	{"close", 2, fn_iso_close_2, NULL, false, BLAH},
+	{"read_term", 2, fn_iso_read_term_2, NULL, false, BLAH},
+	{"read_term", 3, fn_iso_read_term_3, NULL, false, BLAH},
+	{"read", 1, fn_iso_read_1, NULL, false, BLAH},
+	{"read", 2, fn_iso_read_2, NULL, false, BLAH},
+	{"write_canonical", 1, fn_iso_write_canonical_1, NULL, false, BLAH},
+	{"write_canonical", 2, fn_iso_write_canonical_2, NULL, false, BLAH},
+	{"write_term", 2, fn_iso_write_term_2, NULL, false, BLAH},
+	{"write_term", 3, fn_iso_write_term_3, NULL, false, BLAH},
+	{"writeq", 1, fn_iso_writeq_1, NULL, false, BLAH},
+	{"writeq", 2, fn_iso_writeq_2, NULL, false, BLAH},
+	{"write", 1, fn_iso_write_1, NULL, false, BLAH},
+	{"write", 2, fn_iso_write_2, NULL, false, BLAH},
+	{"nl", 0, fn_iso_nl_0, NULL, false, BLAH},
+	{"nl", 1, fn_iso_nl_1, NULL, false, BLAH},
+	{"at_end_of_stream", 0, fn_iso_at_end_of_stream_0, NULL, false, BLAH},
+	{"at_end_of_stream", 1, fn_iso_at_end_of_stream_1, NULL, false, BLAH},
+	{"set_stream_position", 2, fn_iso_set_stream_position_2, NULL, false, BLAH},
+	{"flush_output", 0, fn_iso_flush_output_0, NULL, false, BLAH},
+	{"flush_output", 1, fn_iso_flush_output_1, NULL, false, BLAH},
+	{"put_char", 1, fn_iso_put_char_1, NULL, false, BLAH},
+	{"put_char", 2, fn_iso_put_char_2, NULL, false, BLAH},
+	{"put_code", 1, fn_iso_put_code_1, NULL, false, BLAH},
+	{"put_code", 2, fn_iso_put_code_2, NULL, false, BLAH},
+	{"put_byte", 1, fn_iso_put_byte_1, NULL, false, BLAH},
+	{"put_byte", 2, fn_iso_put_byte_2, NULL, false, BLAH},
+	{"get_char", 1, fn_iso_get_char_1, NULL, false, BLAH},
+	{"get_char", 2, fn_iso_get_char_2, NULL, false, BLAH},
+	{"get_code", 1, fn_iso_get_code_1, NULL, false, BLAH},
+	{"get_code", 2, fn_iso_get_code_2, NULL, false, BLAH},
+	{"get_byte", 1, fn_iso_get_byte_1, NULL, false, BLAH},
+	{"get_byte", 2, fn_iso_get_byte_2, NULL, false, BLAH},
+	{"peek_char", 1, fn_iso_peek_char_1, NULL, false, BLAH},
+	{"peek_char", 2, fn_iso_peek_char_2, NULL, false, BLAH},
+	{"peek_code", 1, fn_iso_peek_code_1, NULL, false, BLAH},
+	{"peek_code", 2, fn_iso_peek_code_2, NULL, false, BLAH},
+	{"peek_byte", 1, fn_iso_peek_byte_1, NULL, false, BLAH},
+	{"peek_byte", 2, fn_iso_peek_byte_2, NULL, false, BLAH},
+	{"current_input", 1, fn_iso_current_input_1, NULL, false, BLAH},
+	{"current_output", 1, fn_iso_current_output_1, NULL, false, BLAH},
+	{"set_input", 1, fn_iso_set_input_1, NULL, false, BLAH},
+	{"set_output", 1, fn_iso_set_output_1, NULL, false, BLAH},
+	{"stream_property", 2, fn_iso_stream_property_2, NULL, false, BLAH},
 
 
 	// Edinburgh...
 
-	{"seeing", 1, fn_edin_seeing_1, "-name", false},
-	{"telling", 1, fn_edin_telling_1, "-name", false},
-	{"seen", 0, fn_edin_seen_0, NULL, false},
-	{"told", 0, fn_edin_told_0, NULL, false},
-	{"redo", 1, fn_edin_redo_1, "+integer", false},
-	{"redo", 2, fn_edin_redo_2, "+stream,+integer", false},
-	{"tab", 1, fn_edin_tab_1, "+integer", false},
-	{"tab", 2, fn_edin_tab_2, "+stream,+integer", false},
+	{"seeing", 1, fn_edin_seeing_1, "-name", false, BLAH},
+	{"telling", 1, fn_edin_telling_1, "-name", false, BLAH},
+	{"seen", 0, fn_edin_seen_0, NULL, false, BLAH},
+	{"told", 0, fn_edin_told_0, NULL, false, BLAH},
+	{"redo", 1, fn_edin_redo_1, "+integer", false, BLAH},
+	{"redo", 2, fn_edin_redo_2, "+stream,+integer", false, BLAH},
+	{"tab", 1, fn_edin_tab_1, "+integer", false, BLAH},
+	{"tab", 2, fn_edin_tab_2, "+stream,+integer", false, BLAH},
 
-	{"getline", 1, fn_getline_1, "-string", false},
-	{"getline", 2, fn_getline_2, "+stream,-string", false},
-	{"getlines", 1, fn_getlines_1, "-list", false},
-	{"getlines", 2, fn_getlines_2, "+stream,-list", false},
-	{"load_files", 2, fn_load_files_2, NULL, false},
-	{"unload_files", 1, fn_unload_files_1, NULL, false},
-	{"getfile", 2, fn_getfile_2, "+string,-list", false},
-	{"loadfile", 2, fn_loadfile_2, "+string,-string", false},
-	{"savefile", 2, fn_savefile_2, "+string,+string", false},
-	{"rename_file", 2, fn_rename_file_2, "+string,+string", false},
-	{"copy_file", 2, fn_copy_file_2, "+string,+string", false},
-	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false},
-	{"delete_file", 1, fn_delete_file_1, "+string", false},
-	{"exists_file", 1, fn_exists_file_1, "+string", false},
-	{"access_file", 2, fn_access_file_2, "+string,+mode", false},
-	{"time_file", 2, fn_time_file_2, "+string,-real", false},
-	{"size_file", 2, fn_size_file_2, "+string,-integer", false},
-	{"exists_directory", 1, fn_exists_directory_1, "+string", false},
-	{"make_directory", 1, fn_make_directory_1, "+string", false},
-	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false},
-	{"working_directory", 2, fn_working_directory_2, "-string,+string", false},
-	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false},
-	{"chdir", 1, fn_chdir_1, "+string", false},
-	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false},
-	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false},
-	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,?term,+list", false},
-	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,?term,+list", false},
-	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "?atom,?term,+list", false},
-	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "?atom,?term,+list", false},
-	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "?chars,?term,+list", false},
-	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,?term,+list", false},
-	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false},
-	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false},
+	{"getline", 1, fn_getline_1, "-string", false, BLAH},
+	{"getline", 2, fn_getline_2, "+stream,-string", false, BLAH},
+	{"getlines", 1, fn_getlines_1, "-list", false, BLAH},
+	{"getlines", 2, fn_getlines_2, "+stream,-list", false, BLAH},
+	{"load_files", 2, fn_load_files_2, NULL, false, BLAH},
+	{"unload_files", 1, fn_unload_files_1, NULL, false, BLAH},
+	{"getfile", 2, fn_getfile_2, "+string,-list", false, BLAH},
+	{"loadfile", 2, fn_loadfile_2, "+string,-string", false, BLAH},
+	{"savefile", 2, fn_savefile_2, "+string,+string", false, BLAH},
+	{"rename_file", 2, fn_rename_file_2, "+string,+string", false, BLAH},
+	{"copy_file", 2, fn_copy_file_2, "+string,+string", false, BLAH},
+	{"directory_files", 2, fn_directory_files_2, "+pathname,-list", false, BLAH},
+	{"delete_file", 1, fn_delete_file_1, "+string", false, BLAH},
+	{"exists_file", 1, fn_exists_file_1, "+string", false, BLAH},
+	{"access_file", 2, fn_access_file_2, "+string,+mode", false, BLAH},
+	{"time_file", 2, fn_time_file_2, "+string,-real", false, BLAH},
+	{"size_file", 2, fn_size_file_2, "+string,-integer", false, BLAH},
+	{"exists_directory", 1, fn_exists_directory_1, "+string", false, BLAH},
+	{"make_directory", 1, fn_make_directory_1, "+string", false, BLAH},
+	{"make_directory_path", 1, fn_make_directory_path_1, "+string", false, BLAH},
+	{"working_directory", 2, fn_working_directory_2, "-string,+string", false, BLAH},
+	{"absolute_file_name", 3, fn_absolute_file_name_3, NULL, false, BLAH},
+	{"chdir", 1, fn_chdir_1, "+string", false, BLAH},
+	{"$put_chars", 1, fn_sys_put_chars_1, "+chars", false, BLAH},
+	{"$put_chars", 2, fn_sys_put_chars_2, "+stream,+chars", false, BLAH},
+	{"read_term_from_atom", 3, fn_read_term_from_atom_3, "+atom,?term,+list", false, BLAH},
+	{"read_term_from_chars", 3, fn_read_term_from_chars_3, "+chars,?term,+list", false, BLAH},
+	{"write_term_to_atom", 3, fn_write_term_to_atom_3, "?atom,?term,+list", false, BLAH},
+	{"write_canonical_to_atom", 3, fn_write_canonical_to_chars_3, "?atom,?term,+list", false, BLAH},
+	{"write_term_to_chars", 3, fn_write_term_to_chars_3, "?chars,?term,+list", false, BLAH},
+	{"write_canonical_to_chars", 3, fn_write_canonical_to_chars_3, "?chars,?term,+list", false, BLAH},
+	{"read_line_to_string", 2, fn_read_line_to_string_2, "+stream,-string", false, BLAH},
+	{"read_file_to_string", 3, fn_read_file_to_string_3, "+string,-string,+options", false, BLAH},
 
-	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false},
-	{"server", 3, fn_server_3, "+string,-stream,+list", false},
-	{"accept", 2, fn_accept_2, "+stream,-stream", false},
-	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false},
-	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false},
+	{"client", 5, fn_client_5, "+string,-string,-string,-stream,+list", false, BLAH},
+	{"server", 3, fn_server_3, "+string,-stream,+list", false, BLAH},
+	{"accept", 2, fn_accept_2, "+stream,-stream", false, BLAH},
+	{"bread", 3, fn_bread_3, "+stream,+integer,-string", false, BLAH},
+	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false, BLAH},
 
 
 #ifndef _WIN32
-	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false},
+	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false, BLAH},
 #endif
 
 	{0}

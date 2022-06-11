@@ -69,6 +69,7 @@ Trealla accepts as a variable any atom beginning with Unicode uppercase...
 ?-
 ```
 
+
 Building
 ========
 
@@ -77,16 +78,19 @@ Written in plain-old C.
 	git clone https://github.com/infradig/trealla.git
 	cd trealla
 
-On Debian+ systems you may need to install GNU readline & xxd
+On Debian+ systems you may need to install GNU readline, xxd & libffi
 
-	sudo apt install libreadline-dev xxd
+	sudo apt install libreadline-dev xxd libffi-dev
 
 Then...
 
 	make
 
-Other systems may vary. There are no other dependencies except OpenSSL.
-On Debian+ systems you may need to install OpenSSL:
+To build without libffi:
+
+	make NOFFI=1
+
+Other systems may vary. On Debian+ systems you may need to install OpenSSL:
 
 	sudo apt install libssl-dev
 
@@ -94,7 +98,7 @@ To build without OpenSSL:
 
 	make NOSSL=1
 
-To build with ISOCLINE (default is to use GNU readline):
+To build with the included ISOCLINE sources (default is to use GNU readline):
 
 	make ISOCLINE=1
 
@@ -113,7 +117,8 @@ On *BSD* systems use *gmake* to build and do
 
 to get the *xxd* utility.
 
-For unbounded arithmetic uses a modified fork of the [imath](https://github.com/infradig/imath)
+For unbounded arithmetic Trealla uses a modified fork of the
+[imath](https://github.com/infradig/imath)
 library, which is partially included in the source. Note, unbounded
 integers (aka. bigints) are for arithmetic purposes only and will give a
 type_error when used inplaces not expected. The *imath* library has a bug
@@ -127,14 +132,13 @@ Cross-compile for Windows
 To cross-compile on Linux and produce a Windows executable...
 
 	sudo apt-get install mingw-w64
-	make CC=x86_64-w64-mingw32-gcc NOSSL=1 ISOCLINE=1
+	make CC=x86_64-w64-mingw32-gcc NOSSL=1 NOFFI=1 ISOCLINE=1
 
 ```console
 $ file tpl.exe
 tpl.exe: PE32+ executable (console) x86-64, for MS Windows
 $ wine tpl.exe -g test5,halt -f samples/sieve.pl
 ```
-
 
 Usage
 =====
@@ -527,7 +531,65 @@ many bytes, = 0 meaning return what is there (if non-blocking) or a variable
 meaning return all bytes until end end of file,
 
 
-Persistence					##EXPERIMENTAL##
+Foreign Function Interface		##EXPERIMENTAL##
+==========================
+
+Allows the loading of dynamic libraries and calling of foreign functions
+written in C from within Prolog...
+
+	'$dlopen'/3 			# '$dlopen(+name, +flag, -handle)
+	'$dlsym'/3				# '$dlsym'(+handle,+symbol,-func)
+	'$dlclose'/1			# '$dlclose'(+handle)
+
+	'$ffi_call'/4			# '$ffi_call'(+handle,+symbol,+args,+result)
+	'$ffi_call'/3			# '$ffi_call'(+func,+args,+result)
+
+These predicates register a foreign function as a builtin and use a
+wrapper to validate arg types at call/runtime...
+
+	'$ffi_register_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+type)
+	'$ffi_register_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+type)
+
+Assuming the following C-code in *samples/foo.c*:
+
+	double foo(double x, int64_t y)
+	{
+		return pow(x, (double)y);
+	}
+
+	$ gcc -fPIC -c foo.c
+	$ gcc -shared -o libfoo.so foo.o
+
+
+```prolog
+	?- '$dlopen'('samples/libfoo.so', 0, H),
+		'$dlsym'(H, foo, Foo),
+		'$ffi_call'(Foo, [4.0, 3], fp64(R1)), % call by function handle
+	   Arg1 = 4.0, Arg2 = 3,
+		'$ffi_call'(Foo, [fp64(Arg1)), int64(Arg2)], fp64(R2)). % type check args
+	   H = 94051868794416, R1 = 8.0, R2 = 8.0.
+
+	?- '$dlopen'('samples/libfoo.so', 0, H),
+		'$ffi_call'(H, foo, [4.0, 3], fp64(R)), % call directly by symbol
+	   H = 94051868794416, R = 8.0.
+```
+
+Register as a builtin function...
+
+```prolog
+	?- '$dlopen'('samples/libfoo.so', 0, H),
+		'$ffi_register_function'(H, foo, [fp64, int64], fp64).
+	   H = 94051868794416.
+	?- R is foo(2.0, 3).
+	   R = 8.0.
+	?- R is foo(abc,3).
+	   error(type_error(float,abc),foo/2).
+```
+
+*TODO*: register general predicates.
+
+
+Persistence						##EXPERIMENTAL##
 ===========
 
 Declaring something dynamic with the *persist* directive:
@@ -539,7 +601,7 @@ causes that clause to be saved to a per-module database on update
 *dynamic/2*?
 
 
-Concurrency					##EXPERIMENTAL##
+Concurrency						##EXPERIMENTAL##
 ===========
 
 Trealla is single-threaded internally but cooperative multitasking is

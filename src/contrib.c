@@ -11,7 +11,7 @@
 #include "internal.h"
 #include "query.h"
 
-const struct builtins g_contrib_bifs[] =
+const builtins g_contrib_bifs[] =
 {
 	{0}
 };

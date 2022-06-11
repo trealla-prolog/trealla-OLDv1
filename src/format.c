@@ -64,7 +64,7 @@ static int get_next_char(query *q, list_reader_t *fmt)
 	if (is_smallint(head))
 		ch = get_smallint(head);
 	else if (is_atom(head)) {
-		const char *s = GET_STR(q, head);
+		const char *s = C_STR(q, head);
 		ch = peek_char_utf8(s);
 	} else
 		return -1;
@@ -125,8 +125,8 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 	list_reader_t save_fmt1 = {0}, save_fmt2 = {0};
 	fmt1.p = p1;
 	fmt1.p_ctx = p1_ctx;
-	fmt1.srcbuf = is_atom(p1) ? GET_STR(q, p1) : NULL;
-	fmt1.srclen = is_atom(p1) ? LEN_STR(q, p1) : 0;
+	fmt1.srcbuf = is_atom(p1) ? C_STR(q, p1) : NULL;
+	fmt1.srclen = is_atom(p1) ? C_STRLEN(q, p1) : 0;
 	fmt1.src = fmt1.srcbuf;
 	fmt2.p = p2;
 	fmt2.p_ctx = p2_ctx;
@@ -320,9 +320,9 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 		switch(ch) {
 		case 's':
 			if (is_string(c)) {
-				len = MAX_OF(argval, (int)LEN_STR(q, c));
+				len = MAX_OF(argval, (int)C_STRLEN(q, c));
 				CHECK_BUF(len);
-				memcpy(dst, GET_STR(q, c), len);
+				memcpy(dst, C_STR(q, c), len);
 			} else {
 				list_reader_t fmt3 = {0};
 				fmt3.p = c;
