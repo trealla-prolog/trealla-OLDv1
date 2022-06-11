@@ -15,7 +15,7 @@ LDFLAGS += -lreadline
 endif
 
 ifndef NOFFI
-CFLAGS += -DUSE_FFI=1
+CFLAGS += -DUSE_FFI=1 -I/usr/local/OPT/LIBFFI/include
 LDFLAGS += -lffi
 endif
 
