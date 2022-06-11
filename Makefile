@@ -4,7 +4,7 @@ CFLAGS = -Isrc -I/usr/local/include -DVERSION='$(GIT_VERSION)' -O3 \
 	-funsigned-char $(OPT) -D_GNU_SOURCE -Wall -Wextra \
 	-Wno-deprecated-declarations \
 	-Wno-unused-function -Wno-unused-parameter \
-	-Wno-unused-but-set-variable -Wno-unused-variable
+	-Wno-unused-variable
 
 LDFLAGS = -L/usr/local/lib -lm
 
