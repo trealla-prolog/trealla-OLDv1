@@ -565,6 +565,7 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
 	} else if (ptr->ret_type == TAG_CSTR) {
 		may_error(make_cstring(&tmp, result.s));
+		free(result.s);
 		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
