@@ -26,7 +26,8 @@ void clr_accum(cell *p);
 
 #if USE_FFI
 void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type, bool function);
-pl_status wrapper_for_ffi(query *q, builtins *fn_ptr);
+pl_status wrapper_for_function(query *q, builtins *fn_ptr);
+pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
 #endif
 
 #define is_callable(c) (is_literal(c) || is_cstring(c))

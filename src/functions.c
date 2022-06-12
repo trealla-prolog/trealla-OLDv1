@@ -177,7 +177,7 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 
 #if USE_FFI
 	if (c->fn_ptr && c->fn_ptr->ffi)
-		wrapper_for_ffi(q, c->fn_ptr);
+		wrapper_for_function(q, c->fn_ptr);
 	else
 #endif
 		c->fn(q);

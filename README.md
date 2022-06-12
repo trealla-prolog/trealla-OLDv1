@@ -531,8 +531,8 @@ many bytes, = 0 meaning return what is there (if non-blocking) or a variable
 meaning return all bytes until end end of file,
 
 
-Foreign Function Interface		##EXPERIMENTAL##
-==========================
+Foreign Function Interface (FFI)		##EXPERIMENTAL##
+================================
 
 Allows the loading of dynamic libraries and calling of foreign functions
 written in C from within Prolog...
@@ -552,14 +552,23 @@ wrapper to validate arg types at call/runtime...
 
 Assuming the following C-code in *samples/foo.c*:
 
+```c
 	double foo(double x, int64_t y)
 	{
 		return pow(x, (double)y);
 	}
 
+	int bar(double x, int64_t y, double *result)
+	{
+		*result = pow(x, (double)y);
+		return 0;
+	}
+```
+
+```console
 	$ gcc -fPIC -c foo.c
 	$ gcc -shared -o libfoo.so foo.o
-
+```
 
 ```prolog
 	?- '$dlopen'('samples/libfoo.so', 0, H),
@@ -587,6 +596,16 @@ Register as a builtin function...
 ```
 
 *TODO*: register general predicates.
+
+Register as a builtin predicate...
+
+```prolog
+	?- '$dlopen'('samples/libfoo.so', 0, H),
+		'$ffi_register_predicate'(H, bar, [fp64, int64, -fp64], int64).
+	   H = 94051868794416.
+	?- bar(2.0, 3, R).
+	   R = 8.0.
+```
 
 
 Persistence						##EXPERIMENTAL##

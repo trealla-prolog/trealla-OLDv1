@@ -6,3 +6,9 @@ double foo(double x, int64_t y)
 {
 	return pow(x, (double)y);
 }
+
+int bar(double x, int64_t y, double *result)
+{
+	*result = pow(x, (double)y);
+	return 0;
+}

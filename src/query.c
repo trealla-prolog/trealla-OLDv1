@@ -1518,9 +1518,12 @@ pl_status start(query *q)
 			pl_status status;
 
 #if USE_FFI
-			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi)
-				status = wrapper_for_ffi(q, q->st.curr_cell->fn_ptr);
-			else
+			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi) {
+				if (q->st.curr_cell->fn_ptr->function)
+					status = wrapper_for_function(q, q->st.curr_cell->fn_ptr);
+				else
+					status = wrapper_for_predicate(q, q->st.curr_cell->fn_ptr);
+			} else
 #endif
 				status = q->st.curr_cell->fn(q);
 
