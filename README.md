@@ -13,7 +13,7 @@ A compact, efficient Prolog interpreter with
 	DCGs
 	REPL with history
 	MIT licensed
-
+	Foreign function interface (FFI) for calling out to C
 	Attributed variables with SICStus interface (*WIP*)
 	Rational trees aka. cyclic terms (*WIP*)
 	Logtalk compatible (*WIP*)
