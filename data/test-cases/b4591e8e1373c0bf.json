@@ -1,0 +1,55 @@
+{
+  "uid" : "b4591e8e1373c0bf",
+  "name" : "nor_prot_a",
+  "fullName" : "nor_prot_a::nor_metric_tests",
+  "historyId" : "nor_prot_a::nor_metric_tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/nor_metric_tests.lgt::nor_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/nor_metric_tests.lgt::nor_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/nor_metric_tests.lgt::nor_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/nor_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "69-70"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/d187f8681b7d0c187b63a5a279a8692930d24a7f/tools/code_metrics/nor_metric_tests.lgt#L69"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "b4591e8e1373c0bf.json",
+  "parameterValues" : [ "tools/code_metrics/nor_metric_tests.lgt", "69-70", "https://github.com/LogtalkDotOrg/logtalk3/tree/d187f8681b7d0c187b63a5a279a8692930d24a7f/tools/code_metrics/nor_metric_tests.lgt#L69" ]
+}
