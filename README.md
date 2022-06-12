@@ -538,11 +538,6 @@ Allows the loading of dynamic libraries and calling of foreign functions
 written in C from within Prolog...
 
 	'$dlopen'/3 			# '$dlopen(+name, +flag, -handle)
-	'$dlsym'/3				# '$dlsym'(+handle,+symbol,-func)
-	'$dlclose'/1			# '$dlclose'(+handle)
-
-	'$ffi_call'/4			# '$ffi_call'(+handle,+symbol,+args,+result)
-	'$ffi_call'/3			# '$ffi_call'(+func,+args,+result)
 
 These predicates register a foreign function as a builtin and use a
 wrapper to validate arg types at call/runtime...
@@ -576,19 +571,6 @@ Assuming the following C-code in *samples/foo.c*:
 ```console
 	$ gcc -fPIC -c foo.c
 	$ gcc -shared -o libfoo.so foo.o
-```
-
-```prolog
-	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$dlsym'(H, foo, Foo),
-		'$ffi_call'(Foo, [4.0, 3], fp64(R1)), % call by function handle
-	   Arg1 = 2.0, Arg2 = 3,
-		'$ffi_call'(Foo, [fp64(Arg1)), int64(Arg2)], fp64(R2)). % type check args
-	   H = 94051868794416, R1 = 8.0, R2 = 8.0.
-
-	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$ffi_call'(H, foo, [2.0, 3], fp64(R)), % call directly by symbol
-	   H = 94051868794416, R = 8.0.
 ```
 
 Register a builtin function...
