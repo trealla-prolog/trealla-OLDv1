@@ -316,6 +316,8 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 			arg_types[idx++] = MARK_TAG(TAG_FLOAT);
 		else if (!strcmp(src, "atom"))
 			arg_types[idx++] = TAG_CSTR;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "atom"))
+			arg_types[idx++] = MARK_TAG(TAG_CSTR);
 		else
 			arg_types[idx++] = 0;
 
@@ -326,14 +328,19 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 
 	const char *src = C_STR(q, p4);
 
-	if (!strcmp(src, "int64"))
+	if (!strcmp(src, "int64")) {
+		arg_types[idx++] = MARK_TAG(TAG_INT);
 		ret_type = TAG_INT;
-	else if (!strcmp(src, "fp64"))
+	} else if (!strcmp(src, "fp64")) {
+		arg_types[idx++] = MARK_TAG(TAG_FLOAT);
 		ret_type = TAG_FLOAT;
-	else if (!strcmp(src, "atom"))
+	} else if (!strcmp(src, "atom")) {
+		arg_types[idx++] = MARK_TAG(TAG_CSTR);
 		ret_type = TAG_CSTR;
-	else
+	} else {
+		arg_types[idx++] = 0;
 		ret_type = 0;
+	}
 
 	register_ffi(q->pl, symbol, idx, (void*)func, arg_types, ret_type, false);
 	return pl_success;

@@ -601,9 +601,12 @@ Register as a builtin predicate...
 	?- '$dlopen'('samples/libfoo.so', 0, H),
 		'$ffi_register_predicate'(H, bar, [fp64, int64, -fp64], int64).
 	   H = 94051868794416.
-	?- bar(2.0, 3, R).
-	   R = 8.0.
+	?- bar(2.0, 3, R, Status).
+	   R = 8.0, Status = 0.
 ```
+
+Note how the function return value is passed as an extra argument to
+the predicate call.
 
 
 Persistence						##EXPERIMENTAL##
