@@ -595,8 +595,6 @@ Register as a builtin function...
 	   error(type_error(float,abc),foo/2).
 ```
 
-*TODO*: register general predicates.
-
 Register as a builtin predicate...
 
 ```prolog
