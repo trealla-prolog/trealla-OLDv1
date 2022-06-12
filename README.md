@@ -547,8 +547,8 @@ written in C from within Prolog...
 These predicates register a foreign function as a builtin and use a
 wrapper to validate arg types at call/runtime...
 
-	'$ffi_register_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+type)
-	'$ffi_register_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+type)
+	'$ffi_register_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
+	'$ffi_register_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
 
 Assuming the following C-code in *samples/foo.c*:
 
@@ -582,12 +582,12 @@ Assuming the following C-code in *samples/foo.c*:
 	?- '$dlopen'('samples/libfoo.so', 0, H),
 		'$dlsym'(H, foo, Foo),
 		'$ffi_call'(Foo, [4.0, 3], fp64(R1)), % call by function handle
-	   Arg1 = 4.0, Arg2 = 3,
+	   Arg1 = 2.0, Arg2 = 3,
 		'$ffi_call'(Foo, [fp64(Arg1)), int64(Arg2)], fp64(R2)). % type check args
 	   H = 94051868794416, R1 = 8.0, R2 = 8.0.
 
 	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$ffi_call'(H, foo, [4.0, 3], fp64(R)), % call directly by symbol
+		'$ffi_call'(H, foo, [2.0, 3], fp64(R)), % call directly by symbol
 	   H = 94051868794416, R = 8.0.
 ```
 
@@ -616,8 +616,8 @@ Register a builtin predicate...
 	   Return = abc123.
 ```
 
-Note how the function return value is passed as an extra argument to
-the predicate call.
+Note: the foreign function return value is passed as an extra argument
+to the predicate call.
 
 
 Persistence						##EXPERIMENTAL##
