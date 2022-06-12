@@ -563,6 +563,14 @@ Assuming the following C-code in *samples/foo.c*:
 		*result = pow(x, (double)y);
 		return 0;
 	}
+
+	char *baz(const char *x, const char *y)
+	{
+		char *s = malloc(strlen(x) + strlen(y) + 1);
+		strcpy(s, x);
+		strcat(s, y);
+		return s;
+	}
 ```
 
 ```console
@@ -583,7 +591,7 @@ Assuming the following C-code in *samples/foo.c*:
 	   H = 94051868794416, R = 8.0.
 ```
 
-Register as a builtin function...
+Register a builtin function...
 
 ```prolog
 	?- '$dlopen'('samples/libfoo.so', 0, H),
@@ -595,14 +603,17 @@ Register as a builtin function...
 	   error(type_error(float,abc),foo/2).
 ```
 
-Register as a builtin predicate...
+Register a builtin predicate...
 
 ```prolog
 	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$ffi_register_predicate'(H, bar, [fp64, int64, -fp64], int64).
+		'$ffi_register_predicate'(H, bar, [fp64, int64, -fp64], int64),
+		'$ffi_register_predicate'(H, baz, [cstr, cstr], cstr),
 	   H = 94051868794416.
-	?- bar(2.0, 3, R, Status).
-	   R = 8.0, Status = 0.
+	?- bar(2.0, 3, X, Return).
+	   X = 8.0, Return = 0.
+	?- baz('abc', '123', Return).
+	   Return = abc123.
 ```
 
 Note how the function return value is passed as an extra argument to

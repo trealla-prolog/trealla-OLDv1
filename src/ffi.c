@@ -15,6 +15,7 @@
 union result_ {
 	double d;
 	int64_t i;
+	char *s;
 	void *p;
 };
 
@@ -86,7 +87,7 @@ static USE_RESULT pl_status do_ffi_call(query *q, void *func, cell *p2, pl_idx_t
 				arg_types[idx++] = &ffi_type_sint64;
 			else if (!strcmp(src, "fp64"))
 				arg_types[idx++] = &ffi_type_double;
-			else if (!strcmp(src, "atom"))
+			else if (!strcmp(src, "cstr"))
 				arg_types[idx++] = &ffi_type_pointer;
 			else
 				arg_types[idx++] = &ffi_type_void;
@@ -122,7 +123,7 @@ static USE_RESULT pl_status do_ffi_call(query *q, void *func, cell *p2, pl_idx_t
 				arg_values[idx++] = (void*)get_smallint(c);
 			else if (!strcmp(src, "fp64"))
 				arg_values[idx++] = (void*)(uint64_t)get_float(c);
-			else if (!strcmp(src, "atom"))
+			else if (!strcmp(src, "cstr"))
 				arg_values[idx++] = C_STR(q, c);
 			else
 				arg_values[idx++] = NULL;
@@ -158,7 +159,7 @@ static USE_RESULT pl_status do_ffi_call(query *q, void *func, cell *p2, pl_idx_t
 		ret_type = &ffi_type_sint64;
 	else if (!strcmp(type, "fp64"))
 		ret_type = &ffi_type_double;
-	else if (!strcmp(type, "atom"))
+	else if (!strcmp(type, "cstr"))
 		ret_type = &ffi_type_pointer;
 	else if (!strcmp(type, "string"))
 		ret_type = &ffi_type_pointer;
@@ -178,7 +179,7 @@ static USE_RESULT pl_status do_ffi_call(query *q, void *func, cell *p2, pl_idx_t
 		make_int(&tmp, result.i);
 	else if (!strcmp(type, "fp64"))
 		make_float(&tmp, result.d);
-	else if (!strcmp(type, "atom"))
+	else if (!strcmp(type, "cstr"))
 		make_cstring(&tmp, result.p);
 	else if (!strcmp(type, "string"))
 		make_string(&tmp, result.p);
@@ -252,7 +253,7 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 			arg_types[idx++] = TAG_INT;
 		else if (!strcmp(src, "fp64"))
 			arg_types[idx++] = TAG_FLOAT;
-		else if (!strcmp(src, "atom"))
+		else if (!strcmp(src, "cstr"))
 			arg_types[idx++] = TAG_CSTR;
 		else
 			arg_types[idx++] = 0;
@@ -268,7 +269,7 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 		ret_type = TAG_INT;
 	else if (!strcmp(src, "fp64"))
 		ret_type = TAG_FLOAT;
-	else if (!strcmp(src, "atom"))
+	else if (!strcmp(src, "cstr"))
 		ret_type = TAG_CSTR;
 	else
 		ret_type = 0;
@@ -314,9 +315,9 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 			arg_types[idx++] = TAG_FLOAT;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "fp64"))
 			arg_types[idx++] = MARK_TAG(TAG_FLOAT);
-		else if (!strcmp(src, "atom"))
+		else if (!strcmp(src, "cstr"))
 			arg_types[idx++] = TAG_CSTR;
-		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "atom"))
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "cstr"))
 			arg_types[idx++] = MARK_TAG(TAG_CSTR);
 		else
 			arg_types[idx++] = 0;
@@ -334,7 +335,7 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 	} else if (!strcmp(src, "fp64")) {
 		arg_types[idx++] = MARK_TAG(TAG_FLOAT);
 		ret_type = TAG_FLOAT;
-	} else if (!strcmp(src, "atom")) {
+	} else if (!strcmp(src, "cstr")) {
 		arg_types[idx++] = MARK_TAG(TAG_CSTR);
 		ret_type = TAG_CSTR;
 	} else {
@@ -446,9 +447,10 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	ffi_status status;
 	void *arg_values[MAX_ARITY];
 	void *s_args[MAX_ARITY];
+	cell cells[MAX_ARITY];
 	int idx = 0;
 
-	for (unsigned i = 0; i < ptr->arity; i++, idx++) {
+	for (unsigned i = 0; i < (ptr->arity-1); i++, idx++) {
 		//printf(" tag=%u ", c->tag);
 		//DUMP_TERM("arg=", c, c_ctx);
 
@@ -475,22 +477,32 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 			arg_types[idx] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_CSTR)
 			arg_types[idx] = &ffi_type_pointer;
+		else if (ptr->types[i] == MARK_TAG(TAG_CSTR))
+			arg_types[idx] = &ffi_type_pointer;
 		else
 			arg_types[idx] = &ffi_type_void;
 
+		cells[idx] = *c;
+
 		if (ptr->types[i] == TAG_INT)
-			arg_values[idx] = &c->val_int;
+			arg_values[idx] = &cells[idx].val_int;
 		else if (ptr->types[i] == MARK_TAG(TAG_INT)) {
-			s_args[idx] = &c->val_int;
-			arg_values[idx] = &c->val_int;
+			s_args[idx] = &cells[idx].val_int;
+			arg_values[idx] = &cells[idx].val_int;
 		} else if (ptr->types[i] == TAG_FLOAT)
-			arg_values[idx] = &c->val_float;
+			arg_values[idx] = &cells[idx].val_float;
 		else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
-			s_args[idx] = &c->val_float;
-			arg_values[idx] = &s_args[i];
-		} else if (ptr->types[i] == TAG_CSTR)
-			arg_values[idx] = C_STR(q, c);
-		else
+			s_args[idx] = &cells[idx].val_float;
+			arg_values[idx] = &s_args[idx];
+		} else if (ptr->types[i] == TAG_CSTR) {
+			cells[idx].val_str = C_STR(q, c);
+			s_args[idx] = &cells[idx].val_str;
+			arg_values[idx] = &cells[idx].val_str;
+		} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
+			cells[idx].val_str = C_STR(q, c);
+			s_args[idx] = &cells[idx].val_str;
+			arg_values[idx] = &s_args[idx];
+		} else
 			arg_values[idx] = NULL;
 
 		GET_NEXT_ARG(p2, any);
@@ -520,16 +532,20 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	GET_FIRST_ARG(p11, any);
 	c = p11;
 	c_ctx = p11_ctx;
+	idx = 0;
 
-	for (unsigned i = 0; i < ptr->arity; i++, idx++) {
+	for (unsigned i = 0; i < (ptr->arity-1); i++, idx++) {
 		if (is_variable(c)) {
 			cell tmp;
 
 			if (ptr->types[i] == MARK_TAG(TAG_INT)) {
-				make_int(&tmp, c->val_int);
+				make_int(&tmp, cells[idx].val_int);
 				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
 			} else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
-				make_float(&tmp, c->val_float);
+				make_float(&tmp, cells[idx].val_float);
+				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+			} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
+				may_error(make_cstring(&tmp, cells[idx].val_str));
 				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
 			}
 		}
@@ -537,6 +553,19 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 		GET_NEXT_ARG(p2, any);
 		c = p2;
 		c_ctx = p2_ctx;
+	}
+
+	cell tmp;
+
+	if (ptr->ret_type == TAG_INT) {
+		make_int(&tmp, result.i);
+		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+	} else if (ptr->ret_type == TAG_FLOAT) {
+		make_float(&tmp, result.d);
+		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+	} else if (ptr->ret_type == TAG_CSTR) {
+		may_error(make_cstring(&tmp, result.s));
+		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
 	}
 
 	return pl_success;
