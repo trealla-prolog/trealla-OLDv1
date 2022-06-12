@@ -354,18 +354,12 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	cell *c = p1;
 	pl_idx_t c_ctx = p1_ctx;
 
-	//printf("*** wrapper %s/%u arity=%u\n", ptr->name, ptr->arity, q->st.curr_cell->arity);
-
 	ffi_cif cif;
 	ffi_type *arg_types[MAX_ARITY];
 	ffi_status status;
 	void *arg_values[MAX_ARITY];
-	int idx = 0;
 
-	for (unsigned i = 0; i < ptr->arity; i++, idx++) {
-		//printf(" tag=%u ", c->tag);
-		//DUMP_TERM("arg=", c, c_ctx);
-
+	for (unsigned i = 0; i < ptr->arity; i++) {
 		if (ptr->types[i] != c->tag)
 			return throw_error(q, c, c_ctx, "type_error",
 			ptr->types[i] == TAG_INT ? "integer" :
@@ -378,22 +372,22 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 		const char *src = C_STR(q, c);
 
 		if (ptr->types[i] == TAG_INT)
-			arg_types[idx] = &ffi_type_sint64;
+			arg_types[i] = &ffi_type_sint64;
 		else if (ptr->types[i] == TAG_FLOAT)
-			arg_types[idx] = &ffi_type_double;
+			arg_types[i] = &ffi_type_double;
 		else if (ptr->types[i] == TAG_CSTR)
-			arg_types[idx] = &ffi_type_pointer;
+			arg_types[i] = &ffi_type_pointer;
 		else
-			arg_types[idx] = &ffi_type_void;
+			arg_types[i] = &ffi_type_void;
 
 		if (ptr->types[i] == TAG_INT)
-			arg_values[idx] = &c->val_int;
+			arg_values[i] = &c->val_int;
 		else if (ptr->types[i] == TAG_FLOAT)
-			arg_values[idx] = &c->val_float;
+			arg_values[i] = &c->val_float;
 		else if (ptr->types[i] == TAG_CSTR)
-			arg_values[idx] = C_STR(q, c);
+			arg_values[i] = C_STR(q, c);
 		else
-			arg_values[idx] = NULL;
+			arg_values[i] = NULL;
 
 		GET_NEXT_ARG(p2, any);
 		c = p2;
@@ -411,9 +405,7 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	else
 		return pl_failure;
 
-	//printf("*** wrapper ret tag=%u\n", ptr->ret_type);
-
-	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, idx, ret_type, arg_types) != FFI_OK)
+	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, ptr->arity, ret_type, arg_types) != FFI_OK)
 		return pl_failure;
 
 	union result_ result;
@@ -440,20 +432,14 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	cell *c = p1;
 	pl_idx_t c_ctx = p1_ctx;
 
-	//printf("*** wrapper %s/%u arity=%u\n", ptr->name, ptr->arity, q->st.curr_cell->arity);
-
 	ffi_cif cif;
 	ffi_type *arg_types[MAX_ARITY];
 	ffi_status status;
 	void *arg_values[MAX_ARITY];
 	void *s_args[MAX_ARITY];
 	cell cells[MAX_ARITY];
-	int idx = 0;
 
-	for (unsigned i = 0; i < (ptr->arity-1); i++, idx++) {
-		//printf(" tag=%u ", c->tag);
-		//DUMP_TERM("arg=", c, c_ctx);
-
+	for (unsigned i = 0; i < (ptr->arity-1); i++) {
 		if ((ptr->types[i] != c->tag) && !is_variable(c))
 			return throw_error(q, c, c_ctx, "type_error",
 			ptr->types[i] == TAG_INT ? "integer" :
@@ -465,45 +451,41 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 		const char *src = C_STR(q, c);
 
-		//printf("*** wrapper tag=%X\n", ptr->types[i]);
-
 		if (ptr->types[i] == TAG_INT)
-			arg_types[idx] = &ffi_type_sint64;
+			arg_types[i] = &ffi_type_sint64;
 		else if (ptr->types[i] == MARK_TAG(TAG_INT))
-			arg_types[idx] = &ffi_type_pointer;
+			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_FLOAT)
-			arg_types[idx] = &ffi_type_double;
+			arg_types[i] = &ffi_type_double;
 		else if (ptr->types[i] == MARK_TAG(TAG_FLOAT))
-			arg_types[idx] = &ffi_type_pointer;
+			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_CSTR)
-			arg_types[idx] = &ffi_type_pointer;
+			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == MARK_TAG(TAG_CSTR))
-			arg_types[idx] = &ffi_type_pointer;
+			arg_types[i] = &ffi_type_pointer;
 		else
-			arg_types[idx] = &ffi_type_void;
-
-		cells[idx] = *c;
+			arg_types[i] = &ffi_type_void;
 
 		if (ptr->types[i] == TAG_INT)
-			arg_values[idx] = &cells[idx].val_int;
+			arg_values[i] = &c->val_int;
 		else if (ptr->types[i] == MARK_TAG(TAG_INT)) {
-			s_args[idx] = &cells[idx].val_int;
-			arg_values[idx] = &cells[idx].val_int;
+			s_args[i] = &cells[i].val_int;
+			arg_values[i] = &cells[i].val_int;
 		} else if (ptr->types[i] == TAG_FLOAT)
-			arg_values[idx] = &cells[idx].val_float;
+			arg_values[i] = &c->val_float;
 		else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
-			s_args[idx] = &cells[idx].val_float;
-			arg_values[idx] = &s_args[idx];
+			s_args[i] = &cells[i].val_float;
+			arg_values[i] = &s_args[i];
 		} else if (ptr->types[i] == TAG_CSTR) {
-			cells[idx].val_str = C_STR(q, c);
-			s_args[idx] = &cells[idx].val_str;
-			arg_values[idx] = &cells[idx].val_str;
+			cells[i].val_str = C_STR(q, c);
+			s_args[i] = &cells[i].val_str;
+			arg_values[i] = &cells[i].val_str;
 		} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
-			cells[idx].val_str = C_STR(q, c);
-			s_args[idx] = &cells[idx].val_str;
-			arg_values[idx] = &s_args[idx];
+			cells[i].val_str = C_STR(q, c);
+			s_args[i] = &cells[i].val_str;
+			arg_values[i] = &s_args[i];
 		} else
-			arg_values[idx] = NULL;
+			arg_values[i] = NULL;
 
 		GET_NEXT_ARG(p2, any);
 		c = p2;
@@ -521,9 +503,7 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	else
 		return pl_failure;
 
-	//printf("*** wrapper ret tag=%X\n", ptr->ret_type);
-
-	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, idx, ret_type, arg_types) != FFI_OK)
+	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, ptr->arity-1, ret_type, arg_types) != FFI_OK)
 		return pl_failure;
 
 	union result_ result;
@@ -532,24 +512,23 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	GET_FIRST_ARG(p11, any);
 	c = p11;
 	c_ctx = p11_ctx;
-	idx = 0;
 
-	for (unsigned i = 0; i < (ptr->arity-1); i++, idx++) {
+	for (unsigned i = 0; i < (ptr->arity-1); i++) {
 		if (is_variable(c)) {
 			cell tmp;
 
 			if (ptr->types[i] == MARK_TAG(TAG_INT)) {
-				make_int(&tmp, cells[idx].val_int);
+				make_int(&tmp, cells[i].val_int);
 				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
 			} else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
-				make_float(&tmp, cells[idx].val_float);
+				make_float(&tmp, cells[i].val_float);
 				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
 			} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
-				may_error(make_cstring(&tmp, cells[idx].val_str));
+				may_error(make_cstring(&tmp, cells[i].val_str));
 				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
@@ -583,5 +562,4 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	return pl_success;
 }
-
 #endif
