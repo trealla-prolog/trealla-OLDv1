@@ -119,6 +119,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define set_smallint(c,v) { (c)->val_int = (v); }
 #define set_smalluint(c,v) { (c)->val_uint = (v); }
 #define get_int(c) (c)->val_int
+#define get_handle(c) (c)->val_ptr
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
