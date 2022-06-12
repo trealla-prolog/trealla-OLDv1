@@ -12,6 +12,8 @@
 #include <ffi.h>
 #endif
 
+#define MARK_OUT(t) (((unsigned)(t) << 4) | 1)
+
 union result_ {
 	double d;
 	int64_t i;
@@ -278,8 +280,6 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 	return pl_success;
 }
 
-#define MARK_TAG(t) (((unsigned)(t) << 4) | 1)
-
 USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -310,15 +310,15 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 		if (!strcmp(src, "int64"))
 			arg_types[idx++] = TAG_INT;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "int64"))
-			arg_types[idx++] = MARK_TAG(TAG_INT);
+			arg_types[idx++] = MARK_OUT(TAG_INT);
 		else if (!strcmp(src, "fp64"))
 			arg_types[idx++] = TAG_FLOAT;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "fp64"))
-			arg_types[idx++] = MARK_TAG(TAG_FLOAT);
+			arg_types[idx++] = MARK_OUT(TAG_FLOAT);
 		else if (!strcmp(src, "cstr"))
 			arg_types[idx++] = TAG_CSTR;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "cstr"))
-			arg_types[idx++] = MARK_TAG(TAG_CSTR);
+			arg_types[idx++] = MARK_OUT(TAG_CSTR);
 		else
 			arg_types[idx++] = 0;
 
@@ -330,13 +330,13 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 	const char *src = C_STR(q, p4);
 
 	if (!strcmp(src, "int64")) {
-		arg_types[idx++] = MARK_TAG(TAG_INT);
+		arg_types[idx++] = MARK_OUT(TAG_INT);
 		ret_type = TAG_INT;
 	} else if (!strcmp(src, "fp64")) {
-		arg_types[idx++] = MARK_TAG(TAG_FLOAT);
+		arg_types[idx++] = MARK_OUT(TAG_FLOAT);
 		ret_type = TAG_FLOAT;
 	} else if (!strcmp(src, "cstr")) {
-		arg_types[idx++] = MARK_TAG(TAG_CSTR);
+		arg_types[idx++] = MARK_OUT(TAG_CSTR);
 		ret_type = TAG_CSTR;
 	} else {
 		arg_types[idx++] = 0;
@@ -453,34 +453,34 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 		if (ptr->types[i] == TAG_INT)
 			arg_types[i] = &ffi_type_sint64;
-		else if (ptr->types[i] == MARK_TAG(TAG_INT))
+		else if (ptr->types[i] == MARK_OUT(TAG_INT))
 			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_FLOAT)
 			arg_types[i] = &ffi_type_double;
-		else if (ptr->types[i] == MARK_TAG(TAG_FLOAT))
+		else if (ptr->types[i] == MARK_OUT(TAG_FLOAT))
 			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_CSTR)
 			arg_types[i] = &ffi_type_pointer;
-		else if (ptr->types[i] == MARK_TAG(TAG_CSTR))
+		else if (ptr->types[i] == MARK_OUT(TAG_CSTR))
 			arg_types[i] = &ffi_type_pointer;
 		else
 			arg_types[i] = &ffi_type_void;
 
 		if (ptr->types[i] == TAG_INT)
 			arg_values[i] = &c->val_int;
-		else if (ptr->types[i] == MARK_TAG(TAG_INT)) {
+		else if (ptr->types[i] == MARK_OUT(TAG_INT)) {
 			s_args[i] = &cells[i].val_int;
 			arg_values[i] = &cells[i].val_int;
 		} else if (ptr->types[i] == TAG_FLOAT)
 			arg_values[i] = &c->val_float;
-		else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
+		else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
 			s_args[i] = &cells[i].val_float;
 			arg_values[i] = &s_args[i];
 		} else if (ptr->types[i] == TAG_CSTR) {
 			cells[i].val_str = C_STR(q, c);
 			s_args[i] = &cells[i].val_str;
 			arg_values[i] = &cells[i].val_str;
-		} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
+		} else if (ptr->types[i] == MARK_OUT(TAG_CSTR)) {
 			cells[i].val_str = C_STR(q, c);
 			s_args[i] = &cells[i].val_str;
 			arg_values[i] = &s_args[i];
@@ -517,17 +517,17 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 		if (is_variable(c)) {
 			cell tmp;
 
-			if (ptr->types[i] == MARK_TAG(TAG_INT)) {
+			if (ptr->types[i] == MARK_OUT(TAG_INT)) {
 				make_int(&tmp, cells[i].val_int);
 				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
-			} else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
+			} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
 				make_float(&tmp, cells[i].val_float);
 				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
-			} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
+			} else if (ptr->types[i] == MARK_OUT(TAG_CSTR)) {
 				may_error(make_cstring(&tmp, cells[i].val_str));
 				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
