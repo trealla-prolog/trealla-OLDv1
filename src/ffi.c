@@ -540,13 +540,16 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 			if (ptr->types[i] == MARK_TAG(TAG_INT)) {
 				make_int(&tmp, cells[idx].val_int);
-				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				if (ok != pl_success) return ok;
 			} else if (ptr->types[i] == MARK_TAG(TAG_FLOAT)) {
 				make_float(&tmp, cells[idx].val_float);
-				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				if (ok != pl_success) return ok;
 			} else if (ptr->types[i] == MARK_TAG(TAG_CSTR)) {
 				may_error(make_cstring(&tmp, cells[idx].val_str));
-				set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				if (ok != pl_success) return ok;
 			}
 		}
 
@@ -559,14 +562,17 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	if (ptr->ret_type == TAG_INT) {
 		make_int(&tmp, result.i);
-		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		if (ok != pl_success) return ok;
 	} else if (ptr->ret_type == TAG_FLOAT) {
 		make_float(&tmp, result.d);
-		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		if (ok != pl_success) return ok;
 	} else if (ptr->ret_type == TAG_CSTR) {
 		may_error(make_cstring(&tmp, result.s));
 		free(result.s);
-		set_var(q, c, c_ctx, &tmp, q->st.curr_frame);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		if (ok != pl_success) return ok;
 	}
 
 	return pl_success;
