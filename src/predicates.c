@@ -6016,11 +6016,11 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (!is_callable(p1))
-		return pl_failure;
-
 	if (is_integer(p2) && (is_zero(p2) || is_negative(p2)))
 		return pl_failure;
+
+	if (!is_callable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "callable");
 
 	if (is_variable(p2)) {
 		cell *tmp = clone_to_heap(q, true, p1, 4);
