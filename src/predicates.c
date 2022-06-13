@@ -6975,8 +6975,6 @@ static const builtins g_other_bifs[] =
 	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
 	{"$ffi_register_function", 4, fn_sys_ffi_register_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
 	{"$ffi_register_predicate", 4, fn_sys_ffi_register_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
-	{"$ffi_call", 4, fn_sys_ffi_call_4, "+handle, +symbol, +arglist,-result", false, BLAH},
-	{"$ffi_call", 3, fn_sys_ffi_call_3, "+function, +arglist,-result", false, BLAH},
 #endif
 
 #if USE_OPENSSL

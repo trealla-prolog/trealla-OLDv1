@@ -119,7 +119,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define set_smallint(c,v) { (c)->val_int = (v); }
 #define set_smalluint(c,v) { (c)->val_uint = (v); }
 #define get_int(c) (c)->val_int
-#define get_handle(c) (c)->val_ptr
+#define get_ptr(c) (c)->val_ptr
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
@@ -239,7 +239,13 @@ enum {
 	TAG_FLOAT=5,
 	TAG_PTR=6,
 	TAG_BLOB=7,
-	TAG_END=9
+
+	TAG_INT8=8,
+	TAG_INT16=9,
+	TAG_INT32=10,
+	TAG_FLOAT32=11,
+
+	TAG_END=16
 };
 
 enum {
@@ -336,11 +342,21 @@ struct cell_ {
 
 	union {
 
-		pl_int_t val_int;
+		int8_t val_int8;
+		int16_t val_int16;
+		int32_t val_int32;
+		int64_t val_int64;
+		uint8_t val_uint8;
+		uint16_t val_uint16;
+		uint32_t val_uint32;
+		uint32_t val_uint64;
+		float val_float32;
+
 		pl_uint_t val_uint;
+		pl_int_t val_int;
+		double val_float;
 		bigint *val_bigint;
 		blob *val_blob;
-		double val_float;
 		cell *val_ptr;
 
 		struct {

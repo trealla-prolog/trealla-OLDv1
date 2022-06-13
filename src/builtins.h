@@ -75,6 +75,7 @@ pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
 void make_uint(cell *tmp, pl_uint_t v);
 void make_int(cell *tmp, pl_int_t v);
 void make_float(cell *tmp, double v);
+void make_ptr(cell *tmp, void *v);
 void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells);
 void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr);
 void make_var2(cell *tmp, pl_idx_t off);
@@ -88,8 +89,6 @@ USE_RESULT pl_status fn_sys_dlsym_3(query *q);
 USE_RESULT pl_status fn_sys_dlclose_1(query *q);
 USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q);
 USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q);
-USE_RESULT pl_status fn_sys_ffi_call_4(query *q);
-USE_RESULT pl_status fn_sys_ffi_call_3(query *q);
 #endif
 
 USE_RESULT pl_status fn_iso_add_2(query *q);

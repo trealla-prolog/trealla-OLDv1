@@ -15,8 +15,12 @@
 #define MARK_OUT(t) (((unsigned)(t) << 4) | 1)
 
 union result_ {
-	double d;
-	int64_t i;
+	float f32;
+	double f64;
+	int8_t i8;
+	int16_t i16;
+	int32_t i32;
+	int64_t i64;
 	char *s;
 	void *p;
 };
@@ -67,164 +71,6 @@ USE_RESULT pl_status fn_sys_dlclose_1(query *q)
 	return dlclose((void*)handle) ? pl_failure : pl_success;
 }
 
-static USE_RESULT pl_status do_ffi_call(query *q, void *func, cell *p2, pl_idx_t p2_ctx, cell *p3, pl_idx_t p3_ctx)
-{
-	ffi_cif cif;
-	ffi_type *arg_types[MAX_ARITY];
-	ffi_status status;
-	void *arg_values[MAX_ARITY];
-	LIST_HANDLER(l);
-	cell *l = p2;
-	pl_idx_t l_ctx = p2_ctx;
-	int idx = 0;
-
-	while (is_iso_list(l) && (idx < MAX_ARITY)) {
-		cell *h = LIST_HEAD(l);
-		h = deref(q, h, l_ctx);
-
-		if (is_compound(h) && (h->arity == 1)) {
-			const char *src = C_STR(q, h);
-
-			if (!strcmp(src, "int64"))
-				arg_types[idx++] = &ffi_type_sint64;
-			else if (!strcmp(src, "fp64"))
-				arg_types[idx++] = &ffi_type_double;
-			else if (!strcmp(src, "cstr"))
-				arg_types[idx++] = &ffi_type_pointer;
-			else
-				arg_types[idx++] = &ffi_type_void;
-		} else {
-			if (is_smallint(h))
-				arg_types[idx++] = &ffi_type_sint64;
-			else if (is_float(h))
-				arg_types[idx++] = &ffi_type_double;
-			else if (is_atom(h))
-				arg_types[idx++] = &ffi_type_pointer;
-			else
-				arg_types[idx++] = &ffi_type_void;
-		}
-
-		l = LIST_TAIL(l);
-		l = deref(q, l, l_ctx);
-		l_ctx = q->latest_ctx;
-	}
-
-	l = p2;
-	l_ctx = p2_ctx;
-	idx = 0;
-
-	while (is_iso_list(l) && (idx < MAX_ARITY)) {
-		cell *h = LIST_HEAD(l);
-		h = deref(q, h, l_ctx);
-
-		if (is_compound(h) && (h->arity == 1)) {
-			const char *src = C_STR(q, h);
-			cell *c = h + 1;
-
-			if (!strcmp(src, "int64"))
-				arg_values[idx++] = (void*)get_smallint(c);
-			else if (!strcmp(src, "fp64"))
-				arg_values[idx++] = (void*)(uint64_t)get_float(c);
-			else if (!strcmp(src, "cstr"))
-				arg_values[idx++] = C_STR(q, c);
-			else
-				arg_values[idx++] = NULL;
-		} else {
-			if (is_smallint(h))
-				arg_values[idx++] = &h->val_int;
-			else if (is_float(h))
-				arg_values[idx++] = &h->val_float;
-			else if (is_atom(h))
-				arg_values[idx++] = C_STR(q, h);
-			else
-				arg_values[idx++] = NULL;
-		}
-
-		l = LIST_TAIL(l);
-		l = deref(q, l, l_ctx);
-		l_ctx = q->latest_ctx;
-	}
-
-	cell *h = p3;
-	pl_idx_t h_ctx = p3_ctx;
-
-	if (!is_structure(h) || (h->arity != 1))
-		return throw_error(q, p3, p3_ctx, "domain_error", "arg");
-
-	const char *type = C_STR(q, h);
-	cell *c = h + 1;
-	c = deref(q, c, h_ctx);
-	pl_idx_t c_ctx = q->latest_ctx;
-	ffi_type *ret_type = NULL;
-
-	if (!strcmp(type, "int64"))
-		ret_type = &ffi_type_sint64;
-	else if (!strcmp(type, "fp64"))
-		ret_type = &ffi_type_double;
-	else if (!strcmp(type, "cstr"))
-		ret_type = &ffi_type_pointer;
-	else if (!strcmp(type, "string"))
-		ret_type = &ffi_type_pointer;
-	else
-		return pl_failure;
-
-	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, idx, ret_type, arg_types) != FFI_OK)
-		return pl_failure;
-
-	union result_ result;
-
-	ffi_call(&cif, FFI_FN(func), &result, arg_values);
-
-	cell tmp;
-
-	if (!strcmp(type, "int64"))
-		make_int(&tmp, result.i);
-	else if (!strcmp(type, "fp64"))
-		make_float(&tmp, result.d);
-	else if (!strcmp(type, "cstr"))
-		make_cstring(&tmp, result.p);
-	else if (!strcmp(type, "string"))
-		make_string(&tmp, result.p);
-	else
-		return pl_failure;
-
-	pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
-	unshare_cell(&tmp);
-	return ok;
-}
-
-USE_RESULT pl_status fn_sys_ffi_call_4(query *q)
-{
-	GET_FIRST_ARG(p1,integer);
-	GET_NEXT_ARG(p4,atom);
-	GET_NEXT_ARG(p2,iso_list);
-	GET_NEXT_ARG(p3,compound);
-
-	if (!(p1->flags & FLAG_INT_HANDLE) && !(p1->flags & FLAG_HANDLE_DLL))
-		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
-
-	uint64_t handle = get_smalluint(p1);
-	const char *symbol = C_STR(q, p4);
-	void *func = dlsym((void*)handle, symbol);
-	if (!func) return pl_failure;
-
-	return do_ffi_call(q, func, p2, p2_ctx, p3, p3_ctx);
-}
-
-USE_RESULT pl_status fn_sys_ffi_call_3(query *q)
-{
-	GET_FIRST_ARG(p1,integer);
-	GET_NEXT_ARG(p2,iso_list);
-	GET_NEXT_ARG(p3,compound);
-
-	if (!(p1->flags & FLAG_INT_HANDLE) && !(p1->flags & FLAG_HANDLE_FUNC))
-		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
-
-	void *func = (void*)get_smalluint(p1);
-
-	return do_ffi_call(q, func, p2, p2_ctx, p3, p3_ctx);
-}
-
 USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -251,10 +97,20 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 		h = deref(q, h, l_ctx);
 		const char *src = C_STR(q, h);
 
-		if (!strcmp(src, "int64"))
+		if (!strcmp(src, "int8"))
+			arg_types[idx++] = TAG_INT8;
+		else if (!strcmp(src, "int16"))
+			arg_types[idx++] = TAG_INT16;
+		else if (!strcmp(src, "int32"))
+			arg_types[idx++] = TAG_INT32;
+		else if (!strcmp(src, "int64"))
 			arg_types[idx++] = TAG_INT;
+		else if (!strcmp(src, "fp32"))
+			arg_types[idx++] = TAG_FLOAT32;
 		else if (!strcmp(src, "fp64"))
 			arg_types[idx++] = TAG_FLOAT;
+		else if (!strcmp(src, "ptr"))
+			arg_types[idx++] = TAG_PTR;
 		else if (!strcmp(src, "cstr"))
 			arg_types[idx++] = TAG_CSTR;
 		else
@@ -267,10 +123,20 @@ USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q)
 
 	const char *src = C_STR(q, p4);
 
-	if (!strcmp(src, "int64"))
+	if (!strcmp(src, "int8"))
+		ret_type = TAG_INT8;
+	else if (!strcmp(src, "int16"))
+		ret_type = TAG_INT16;
+	else if (!strcmp(src, "int32"))
+		ret_type = TAG_INT32;
+	else if (!strcmp(src, "int64"))
 		ret_type = TAG_INT;
+	else if (!strcmp(src, "fp32"))
+		ret_type = TAG_FLOAT32;
 	else if (!strcmp(src, "fp64"))
 		ret_type = TAG_FLOAT;
+	else if (!strcmp(src, "ptr"))
+		ret_type = TAG_PTR;
 	else if (!strcmp(src, "cstr"))
 		ret_type = TAG_CSTR;
 	else
@@ -307,14 +173,34 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 		h = deref(q, h, l_ctx);
 		const char *src = C_STR(q, h);
 
-		if (!strcmp(src, "int64"))
+		if (!strcmp(src, "int8"))
+			arg_types[idx++] = TAG_INT8;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "int8"))
+			arg_types[idx++] = MARK_OUT(TAG_INT8);
+		else if (!strcmp(src, "int16"))
+			arg_types[idx++] = TAG_INT16;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "int16"))
+			arg_types[idx++] = MARK_OUT(TAG_INT16);
+		else if (!strcmp(src, "int32"))
+			arg_types[idx++] = TAG_INT32;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "int32"))
+			arg_types[idx++] = MARK_OUT(TAG_INT32);
+		else if (!strcmp(src, "int64"))
 			arg_types[idx++] = TAG_INT;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "int64"))
 			arg_types[idx++] = MARK_OUT(TAG_INT);
+		else if (!strcmp(src, "fp32"))
+			arg_types[idx++] = TAG_FLOAT32;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "fp32"))
+			arg_types[idx++] = MARK_OUT(TAG_FLOAT32);
 		else if (!strcmp(src, "fp64"))
 			arg_types[idx++] = TAG_FLOAT;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "fp64"))
 			arg_types[idx++] = MARK_OUT(TAG_FLOAT);
+		else if (!strcmp(src, "ptr"))
+			arg_types[idx++] = TAG_PTR;
+		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "ptr"))
+			arg_types[idx++] = MARK_OUT(TAG_PTR);
 		else if (!strcmp(src, "cstr"))
 			arg_types[idx++] = TAG_CSTR;
 		else if (!strcmp(src, "-") && !strcmp(C_STR(q, h+1), "cstr"))
@@ -329,11 +215,26 @@ USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q)
 
 	const char *src = C_STR(q, p4);
 
-	if (!strcmp(src, "int64")) {
+	if (!strcmp(src, "int8")) {
+		arg_types[idx++] = MARK_OUT(TAG_INT8);
+		ret_type = TAG_INT8;
+	} else if (!strcmp(src, "int16")) {
+		arg_types[idx++] = MARK_OUT(TAG_INT16);
+		ret_type = TAG_INT16;
+	} else if (!strcmp(src, "int32")) {
+		arg_types[idx++] = MARK_OUT(TAG_INT32);
+		ret_type = TAG_INT32;
+	} else if (!strcmp(src, "int64")) {
 		arg_types[idx++] = MARK_OUT(TAG_INT);
 		ret_type = TAG_INT;
+	} else if (!strcmp(src, "fp32")) {
+		arg_types[idx++] = MARK_OUT(TAG_FLOAT32);
+		ret_type = TAG_FLOAT32;
 	} else if (!strcmp(src, "fp64")) {
 		arg_types[idx++] = MARK_OUT(TAG_FLOAT);
+		ret_type = TAG_FLOAT;
+	} else if (!strcmp(src, "ptr")) {
+		arg_types[idx++] = MARK_OUT(TAG_PTR);
 		ret_type = TAG_FLOAT;
 	} else if (!strcmp(src, "cstr")) {
 		arg_types[idx++] = MARK_OUT(TAG_CSTR);
@@ -362,8 +263,13 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	for (unsigned i = 0; i < ptr->arity; i++) {
 		if (ptr->types[i] != c->tag)
 			return throw_error(q, c, c_ctx, "type_error",
+			ptr->types[i] == TAG_INT8 ? "integer" :
+			ptr->types[i] == TAG_INT16 ? "integer" :
+			ptr->types[i] == TAG_INT32 ? "integer" :
 			ptr->types[i] == TAG_INT ? "integer" :
+			ptr->types[i] == TAG_FLOAT32 ? "float" :
 			ptr->types[i] == TAG_FLOAT ? "float" :
+			ptr->types[i] == TAG_PTR ? "stream" :
 			ptr->types[i] == TAG_CSTR ? "atom" :
 			ptr->types[i] == TAG_VAR ? "variable" :
 			"invalid"
@@ -371,19 +277,39 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 
 		const char *src = C_STR(q, c);
 
-		if (ptr->types[i] == TAG_INT)
+		if (ptr->types[i] == TAG_INT8)
+			arg_types[i] = &ffi_type_sint8;
+		else if (ptr->types[i] == TAG_INT16)
+			arg_types[i] = &ffi_type_sint16;
+		else if (ptr->types[i] == TAG_INT32)
+			arg_types[i] = &ffi_type_sint32;
+		else if (ptr->types[i] == TAG_INT)
 			arg_types[i] = &ffi_type_sint64;
+		else if (ptr->types[i] == TAG_FLOAT32)
+			arg_types[i] = &ffi_type_float;
 		else if (ptr->types[i] == TAG_FLOAT)
 			arg_types[i] = &ffi_type_double;
+		else if (ptr->types[i] == TAG_PTR)
+			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_CSTR)
 			arg_types[i] = &ffi_type_pointer;
 		else
 			arg_types[i] = &ffi_type_void;
 
-		if (ptr->types[i] == TAG_INT)
-			arg_values[i] = &c->val_int;
+		if (ptr->types[i] == TAG_INT8)
+			arg_values[i] = &c->val_int8;
+		else if (ptr->types[i] == TAG_INT16)
+			arg_values[i] = &c->val_int16;
+		else if (ptr->types[i] == TAG_INT32)
+			arg_values[i] = &c->val_int32;
+		else if (ptr->types[i] == TAG_INT)
+			arg_values[i] = &c->val_int64;
+		else if (ptr->types[i] == TAG_FLOAT32)
+			arg_values[i] = &c->val_float32;
 		else if (ptr->types[i] == TAG_FLOAT)
 			arg_values[i] = &c->val_float;
+		else if (ptr->types[i] == TAG_PTR)
+			arg_values[i] = &c->val_ptr;
 		else if (ptr->types[i] == TAG_CSTR)
 			arg_values[i] = C_STR(q, c);
 		else
@@ -396,10 +322,20 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 
 	ffi_type *ret_type = NULL;
 
-	if (ptr->ret_type == TAG_INT)
+	if (ptr->ret_type == TAG_INT8)
+		ret_type = &ffi_type_sint8;
+	else if (ptr->ret_type == TAG_INT16)
+		ret_type = &ffi_type_sint16;
+	else if (ptr->ret_type == TAG_INT32)
+		ret_type = &ffi_type_sint32;
+	else if (ptr->ret_type == TAG_INT)
 		ret_type = &ffi_type_sint64;
+	else if (ptr->ret_type == TAG_FLOAT32)
+		ret_type = &ffi_type_float;
 	else if (ptr->ret_type == TAG_FLOAT)
 		ret_type = &ffi_type_double;
+	else if (ptr->ret_type == TAG_PTR)
+		ret_type = &ffi_type_pointer;
 	else if (ptr->ret_type == TAG_CSTR)
 		ret_type = &ffi_type_pointer;
 	else
@@ -413,10 +349,20 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 
 	cell tmp;
 
-	if (ptr->ret_type == TAG_INT)
-		make_int(&tmp, result.i);
+	if (ptr->ret_type == TAG_INT8)
+		make_int(&tmp, result.i8);
+	else if (ptr->ret_type == TAG_INT16)
+		make_int(&tmp, result.i16);
+	else if (ptr->ret_type == TAG_INT32)
+		make_int(&tmp, result.i32);
+	else if (ptr->ret_type == TAG_INT)
+		make_int(&tmp, result.i64);
+	else if (ptr->ret_type == TAG_FLOAT32)
+		make_float(&tmp, result.f32);
 	else if (ptr->ret_type == TAG_FLOAT)
-		make_float(&tmp, result.d);
+		make_float(&tmp, result.f64);
+	else if (ptr->ret_type == TAG_PTR)
+		make_cstring(&tmp, result.p);
 	else if (ptr->ret_type == TAG_CSTR)
 		make_cstring(&tmp, result.p);
 	else
@@ -442,22 +388,47 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	for (unsigned i = 0; i < (ptr->arity-1); i++) {
 		if ((ptr->types[i] != c->tag) && !is_variable(c))
 			return throw_error(q, c, c_ctx, "type_error",
+			ptr->types[i] == TAG_INT8 ? "integer" :
+			ptr->types[i] == TAG_INT16 ? "integer" :
+			ptr->types[i] == TAG_INT32 ? "integer" :
 			ptr->types[i] == TAG_INT ? "integer" :
+			ptr->types[i] == TAG_FLOAT32 ? "float" :
 			ptr->types[i] == TAG_FLOAT ? "float" :
 			ptr->types[i] == TAG_CSTR ? "atom" :
+			ptr->types[i] == TAG_PTR ? "stream" :
 			ptr->types[i] == TAG_VAR ? "variable" :
 			"invalid"
 			);
 
 		const char *src = C_STR(q, c);
 
-		if (ptr->types[i] == TAG_INT)
+		if (ptr->types[i] == TAG_INT8)
+			arg_types[i] = &ffi_type_sint8;
+		else if (ptr->types[i] == MARK_OUT(TAG_INT8))
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == TAG_INT16)
+			arg_types[i] = &ffi_type_sint16;
+		else if (ptr->types[i] == MARK_OUT(TAG_INT16))
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == TAG_INT32)
+			arg_types[i] = &ffi_type_sint32;
+		else if (ptr->types[i] == MARK_OUT(TAG_INT32))
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == TAG_INT)
 			arg_types[i] = &ffi_type_sint64;
 		else if (ptr->types[i] == MARK_OUT(TAG_INT))
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == TAG_FLOAT32)
+			arg_types[i] = &ffi_type_float;
+		else if (ptr->types[i] == MARK_OUT(TAG_FLOAT32))
 			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_FLOAT)
 			arg_types[i] = &ffi_type_double;
 		else if (ptr->types[i] == MARK_OUT(TAG_FLOAT))
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == TAG_PTR)
+			arg_types[i] = &ffi_type_pointer;
+		else if (ptr->types[i] == MARK_OUT(TAG_PTR))
 			arg_types[i] = &ffi_type_pointer;
 		else if (ptr->types[i] == TAG_CSTR)
 			arg_types[i] = &ffi_type_pointer;
@@ -466,15 +437,40 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 		else
 			arg_types[i] = &ffi_type_void;
 
-		if (ptr->types[i] == TAG_INT)
-			arg_values[i] = &c->val_int;
-		else if (ptr->types[i] == MARK_OUT(TAG_INT)) {
-			s_args[i] = &cells[i].val_int;
-			arg_values[i] = &cells[i].val_int;
-		} else if (ptr->types[i] == TAG_FLOAT)
+		if (ptr->types[i] == TAG_INT8) {
+			arg_values[i] = &c->val_int8;
+		} else if (ptr->types[i] == MARK_OUT(TAG_INT8)) {
+			s_args[i] = &cells[i].val_int8;
+			arg_values[i] = &cells[i].val_int8;
+		} else if (ptr->types[i] == TAG_INT16) {
+			arg_values[i] = &c->val_int16;
+		} else if (ptr->types[i] == MARK_OUT(TAG_INT16)) {
+			s_args[i] = &cells[i].val_int16;
+			arg_values[i] = &cells[i].val_int16;
+		} else if (ptr->types[i] == TAG_INT32) {
+			arg_values[i] = &c->val_int32;
+		} else if (ptr->types[i] == MARK_OUT(TAG_INT32)) {
+			s_args[i] = &cells[i].val_int32;
+			arg_values[i] = &cells[i].val_int32;
+		} else if (ptr->types[i] == TAG_INT) {
+			arg_values[i] = &c->val_int64;
+		} else if (ptr->types[i] == MARK_OUT(TAG_INT)) {
+			s_args[i] = &cells[i].val_int64;
+			arg_values[i] = &cells[i].val_int64;
+		} else if (ptr->types[i] == TAG_FLOAT32) {
+			arg_values[i] = &c->val_float32;
+		} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT32)) {
+			s_args[i] = &cells[i].val_float32;
+			arg_values[i] = &s_args[i];
+		} else if (ptr->types[i] == TAG_FLOAT) {
 			arg_values[i] = &c->val_float;
-		else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
+		} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
 			s_args[i] = &cells[i].val_float;
+			arg_values[i] = &s_args[i];
+		} else if (ptr->types[i] == TAG_PTR) {
+			arg_values[i] = &c->val_ptr;
+		} else if (ptr->types[i] == MARK_OUT(TAG_PTR)) {
+			s_args[i] = &cells[i].val_ptr;
 			arg_values[i] = &s_args[i];
 		} else if (ptr->types[i] == TAG_CSTR) {
 			cells[i].val_str = C_STR(q, c);
@@ -494,10 +490,20 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	ffi_type *ret_type = NULL;
 
-	if (ptr->ret_type == TAG_INT)
+	if (ptr->ret_type == TAG_INT8)
+		ret_type = &ffi_type_sint8;
+	else if (ptr->ret_type == TAG_INT16)
+		ret_type = &ffi_type_sint16;
+	else if (ptr->ret_type == TAG_INT32)
+		ret_type = &ffi_type_sint32;
+	else if (ptr->ret_type == TAG_INT)
 		ret_type = &ffi_type_sint64;
+	else if (ptr->ret_type == TAG_FLOAT32)
+		ret_type = &ffi_type_float;
 	else if (ptr->ret_type == TAG_FLOAT)
 		ret_type = &ffi_type_double;
+	else if (ptr->ret_type == TAG_PTR)
+		ret_type = &ffi_type_pointer;
 	else if (ptr->ret_type == TAG_CSTR)
 		ret_type = &ffi_type_pointer;
 	else
@@ -517,13 +523,38 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 		if (is_variable(c)) {
 			cell tmp;
 
-			if (ptr->types[i] == MARK_OUT(TAG_INT)) {
-				make_int(&tmp, cells[i].val_int);
+			if (ptr->types[i] == MARK_OUT(TAG_INT8)) {
+				make_int(&tmp, cells[i].val_int8);
 				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				unshare_cell(&tmp);
+				if (ok != pl_success) return ok;
+			} else if (ptr->types[i] == MARK_OUT(TAG_INT16)) {
+				make_int(&tmp, cells[i].val_int16);
+				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				unshare_cell(&tmp);
+				if (ok != pl_success) return ok;
+			} else if (ptr->types[i] == MARK_OUT(TAG_INT32)) {
+				make_int(&tmp, cells[i].val_int32);
+				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				unshare_cell(&tmp);
+				if (ok != pl_success) return ok;
+			} else if (ptr->types[i] == MARK_OUT(TAG_INT)) {
+				make_int(&tmp, cells[i].val_int64);
+				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				unshare_cell(&tmp);
+				if (ok != pl_success) return ok;
+			} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT32)) {
+				make_float(&tmp, cells[i].val_float32);
+				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
 				make_float(&tmp, cells[i].val_float);
+				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				unshare_cell(&tmp);
+				if (ok != pl_success) return ok;
+			} else if (ptr->types[i] == MARK_OUT(TAG_PTR)) {
+				make_ptr(&tmp, cells[i].val_ptr);
 				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != pl_success) return ok;
@@ -542,13 +573,38 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	cell tmp;
 
-	if (ptr->ret_type == TAG_INT) {
-		make_int(&tmp, result.i);
+	if (ptr->ret_type == TAG_INT8) {
+		make_int(&tmp, result.i8);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		if (ok != pl_success) return ok;
+	} else if (ptr->ret_type == TAG_INT16) {
+		make_int(&tmp, result.i16);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		if (ok != pl_success) return ok;
+	} else if (ptr->ret_type == TAG_INT32) {
+		make_int(&tmp, result.i32);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		if (ok != pl_success) return ok;
+	} else if (ptr->ret_type == TAG_INT) {
+		make_int(&tmp, result.i64);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		if (ok != pl_success) return ok;
+	} else if (ptr->ret_type == TAG_FLOAT32) {
+		make_float(&tmp, result.f32);
 		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		if (ok != pl_success) return ok;
 	} else if (ptr->ret_type == TAG_FLOAT) {
-		make_float(&tmp, result.d);
+		make_float(&tmp, result.f64);
+		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		if (ok != pl_success) return ok;
+	} else if (ptr->ret_type == TAG_PTR) {
+		make_ptr(&tmp, result.p);
 		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		if (ok != pl_success) return ok;
