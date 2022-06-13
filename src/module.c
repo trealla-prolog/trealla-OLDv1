@@ -922,7 +922,7 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 		bool found = false, function = false;
 
 		if (get_builtin(m->pl, C_STR(m, c), c->arity, &found, &function), found && !function) {
-			fprintf(stdout, "Error: permission error modifying %s/%u\n", C_STR(m, c), c->arity);
+			//fprintf(stdout, "Error: permission error modifying %s/%u\n", C_STR(m, c), c->arity);
 			return NULL;
 		}
 

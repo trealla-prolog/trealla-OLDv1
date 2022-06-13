@@ -425,6 +425,12 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	return pl_success;
 }
 
+
+static USE_RESULT pl_status fn_dcgs_2(query *q)
+{
+	return throw_error(q, q->st.curr_cell, q->st.curr_frame, "existence_error", "procedure");
+}
+
 static USE_RESULT pl_status fn_iso_repeat_0(query *q)
 {
 	may_error(push_choice(q));
@@ -6841,6 +6847,7 @@ static const builtins g_iso_bifs[] =
 
 	{"=", 2, fn_iso_unify_2, NULL, false, BLAH},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
+	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
 
 	{0}
 };
