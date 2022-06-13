@@ -375,6 +375,12 @@ prolog *pl_create()
 
 	pl->user_m->prebuilt = true;
 
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = index_from_pool(pl, "-->");
+	tmp.arity = 2;
+	create_predicate(pl->user_m, &tmp);
+
 	// Load some common libraries...
 
 	for (library *lib = g_libs; lib->name; lib++) {
