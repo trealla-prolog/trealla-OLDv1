@@ -815,3 +815,16 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	return pl_success;
 }
 #endif
+
+builtins g_ffi_bifs[MAX_FFI] =
+{
+#if USE_FFI
+	{"$dlopen", 3, fn_sys_dlopen_3, "+filename,+flag,-handle", false, BLAH},
+	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-function", false, BLAH},
+	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
+	{"$ffi_register_function", 4, fn_sys_ffi_register_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
+	{"$ffi_register_predicate", 4, fn_sys_ffi_register_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
+#endif
+
+	{0}
+};

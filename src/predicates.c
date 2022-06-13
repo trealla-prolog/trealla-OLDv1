@@ -6979,14 +6979,6 @@ static const builtins g_other_bifs[] =
 	{"$dump_keys", 1, fn_sys_dump_keys_1, "+pi", false, BLAH},
 	{"$skip_max_list", 4, fn_sys_skip_max_list_4, NULL, false, BLAH},
 
-#if USE_FFI
-	{"$dlopen", 3, fn_sys_dlopen_3, "+filename,+flag,-handle", false, BLAH},
-	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-function", false, BLAH},
-	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
-	{"$ffi_register_function", 4, fn_sys_ffi_register_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
-	{"$ffi_register_predicate", 4, fn_sys_ffi_register_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
-#endif
-
 #if USE_OPENSSL
 	{"crypto_data_hash", 3, fn_crypto_data_hash_3, "?string,?string,?list", false, BLAH},
 #endif
@@ -7029,6 +7021,7 @@ builtins *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found,
 	return NULL;
 }
 
+extern builtins g_ffi_bifs[];
 extern builtins g_contrib_bifs[];
 extern const builtins g_files_bifs[];
 extern const builtins g_functions_bifs[];
@@ -7037,7 +7030,7 @@ static int max_ffi_idx = 0;
 
 void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type, bool function)
 {
-	builtins *ptr = &g_contrib_bifs[max_ffi_idx++];
+	builtins *ptr = &g_ffi_bifs[max_ffi_idx++];
 	ptr->name = name;
 	ptr->arity = arity;
 	ptr->fn = fn;
@@ -7068,6 +7061,10 @@ void load_builtins(prolog *pl)
 	}
 
 	for (const builtins *ptr = g_files_bifs; ptr->name; ptr++) {
+		m_app(pl->biftab, ptr->name, ptr);
+	}
+
+	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
 		m_app(pl->biftab, ptr->name, ptr);
 	}
 
@@ -7194,6 +7191,15 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_other_bifs; ptr->name; ptr++) {
+		m_app(m->pl->biftab, ptr->name, ptr);
+		if (ptr->name[0] == '$') continue;
+		if (ptr->function) continue;
+		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
+		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "static"); ASTRING_strcat(pr, tmpbuf);
+		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "native_code"); ASTRING_strcat(pr, tmpbuf);
+	}
+
+	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
 		m_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
