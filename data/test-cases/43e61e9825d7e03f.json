@@ -1,0 +1,55 @@
+{
+  "uid" : "43e61e9825d7e03f",
+  "name" : "before_3_1",
+  "fullName" : "before_3_1::tests",
+  "historyId" : "before_3_1::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/before_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/before_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/before_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/before_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "45-48"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tests/logtalk/methods/before_3/tests.lgt#L45"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "43e61e9825d7e03f.json",
+  "parameterValues" : [ "tests/logtalk/methods/before_3/tests.lgt", "45-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tests/logtalk/methods/before_3/tests.lgt#L45" ]
+}

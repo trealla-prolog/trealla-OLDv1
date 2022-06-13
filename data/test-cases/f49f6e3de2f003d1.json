@@ -1,0 +1,55 @@
+{
+  "uid" : "f49f6e3de2f003d1",
+  "name" : "lgt_double_quoted_term_13",
+  "fullName" : "lgt_double_quoted_term_13::tests",
+  "historyId" : "lgt_double_quoted_term_13::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/syntax/double_quoted_terms/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/syntax/double_quoted_terms/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/syntax/double_quoted_terms/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/syntax/double_quoted_terms/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "102-104"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tests/prolog/syntax/double_quoted_terms/tests.lgt#L102"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f49f6e3de2f003d1.json",
+  "parameterValues" : [ "tests/prolog/syntax/double_quoted_terms/tests.lgt", "102-104", "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tests/prolog/syntax/double_quoted_terms/tests.lgt#L102" ]
+}

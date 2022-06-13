@@ -1,0 +1,60 @@
+{
+  "uid" : "4d521275e1ccb7e1",
+  "name" : "lgtdoc_library_2_01",
+  "fullName" : "lgtdoc_library_2_01::tests",
+  "historyId" : "lgtdoc_library_2_01::tests",
+  "time" : {
+    "duration" : 329
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/lgtdoc/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/lgtdoc/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "74-75"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tools/lgtdoc/tests.lgt#L74"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "4d521275e1ccb7e1.json",
+  "parameterValues" : [ "tools/lgtdoc/tests.lgt", "74-75", "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/tools/lgtdoc/tests.lgt#L74" ]
+}
