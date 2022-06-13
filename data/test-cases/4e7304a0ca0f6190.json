@@ -1,0 +1,55 @@
+{
+  "uid" : "4e7304a0ca0f6190",
+  "name" : "meta_compiler_map_3_02",
+  "fullName" : "meta_compiler_map_3_02::tests",
+  "historyId" : "meta_compiler_map_3_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/meta_compiler/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/meta_compiler/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/meta_compiler/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/meta_compiler/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "169-170"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/library/meta_compiler/tests.lgt#L169"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4e7304a0ca0f6190.json",
+  "parameterValues" : [ "library/meta_compiler/tests.lgt", "169-170", "https://github.com/LogtalkDotOrg/logtalk3/tree/5ff26cff12a7cb9627a4d27a1e3583befacea8ac/library/meta_compiler/tests.lgt#L169" ]
+}
