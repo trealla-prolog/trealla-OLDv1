@@ -542,8 +542,8 @@ written in C from within Prolog...
 These predicates register a foreign function as a builtin and use a
 wrapper to validate arg types at call/runtime...
 
-	'$ffi_register_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
-	'$ffi_register_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
+	'$register_foreign_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
+	'$register_foreign_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
 
 The allowed types are *int8*, *int16*, *int32*, *int64*, *uint8*,
 *uint16*, *uint32*, *uint64*, *fp32*, *fp64*, *cstr*, *const_cstr*
@@ -581,7 +581,7 @@ Register a builtin function...
 
 ```prolog
 	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$ffi_register_function'(H, foo, [fp64, int64], fp64).
+		'$register_foreign_function'(H, foo, [fp64, int64], fp64).
 	   H = 94051868794416.
 	?- R is foo(2.0, 3).
 	   R = 8.0.
@@ -593,8 +593,8 @@ Register a builtin predicate...
 
 ```prolog
 	?- '$dlopen'('samples/libfoo.so', 0, H),
-		'$ffi_register_predicate'(H, bar, [fp64, int64, -fp64], int64),
-		'$ffi_register_predicate'(H, baz, [cstr, cstr], cstr),
+		'$register_foreign_predicate'(H, bar, [fp64, int64, -fp64], int64),
+		'$register_foreign_predicate'(H, baz, [cstr, cstr], cstr),
 	   H = 94051868794416.
 	?- bar(2.0, 3, X, Return).
 	   X = 8.0, Return = 0.
