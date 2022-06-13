@@ -90,7 +90,7 @@ USE_RESULT pl_status fn_sys_dlclose_1(query *q)
 	return dlclose((void*)handle) ? pl_failure : pl_success;
 }
 
-USE_RESULT pl_status fn_sys_register_foreign_function_4(query *q)
+USE_RESULT pl_status fn_sys_register_function_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -185,7 +185,7 @@ USE_RESULT pl_status fn_sys_register_foreign_function_4(query *q)
 	return pl_success;
 }
 
-USE_RESULT pl_status fn_sys_register_foreign_predicate_4(query *q)
+USE_RESULT pl_status fn_sys_register_predicate_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -822,8 +822,8 @@ builtins g_ffi_bifs[MAX_FFI] =
 	{"$dlopen", 3, fn_sys_dlopen_3, "+filename,+flag,-handle", false, BLAH},
 	{"$dlsym", 3, fn_sys_dlsym_3, "+handle,+symbol,-function", false, BLAH},
 	{"$dlclose", 1, fn_sys_dlclose_1, "+handle", false, BLAH},
-	{"$register_foreign_function", 4, fn_sys_register_foreign_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
-	{"$register_foreign_predicate", 4, fn_sys_register_foreign_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
+	{"$register_function", 4, fn_sys_register_function_4, "+handle, +symbol, +arglist,+result", false, BLAH},
+	{"$register_predicate", 4, fn_sys_register_predicate_4, "+handle, +symbol, +arglist,+result", false, BLAH},
 #endif
 
 	{0}
