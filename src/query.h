@@ -111,7 +111,7 @@ pl_status fn_iso_unify_2(query *q);
 
 inline static pl_idx_t drop_choice(query *q)
 {
-	return --q->cp;
+	return q->cp ? --q->cp : 0;
 }
 
 inline static void share_predicate(predicate *pr)
