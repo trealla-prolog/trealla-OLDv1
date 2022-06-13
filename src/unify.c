@@ -931,7 +931,7 @@ static const struct dispatch g_disp[] =
 	{TAG_VAR, NULL},
 	{TAG_LITERAL, unify_literals},
 	{TAG_CSTR, unify_cstrings},
-	{TAG_INT, unify_integers},
+	{TAG_INTEGER, unify_integers},
 	{TAG_FLOAT, unify_reals},
 	{0}
 };

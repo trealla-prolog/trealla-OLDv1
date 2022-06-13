@@ -101,7 +101,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_variable(c) ((c)->tag == TAG_VAR)
 #define is_literal(c) ((c)->tag == TAG_LITERAL)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
-#define is_integer(c) ((c)->tag == TAG_INT)
+#define is_integer(c) ((c)->tag == TAG_INTEGER)
 #define is_float(c) ((c)->tag == TAG_FLOAT)
 #define is_indirect(c) ((c)->tag == TAG_PTR)
 #define is_blob(c) ((c)->tag == TAG_BLOB)
@@ -235,25 +235,19 @@ enum {
 	TAG_VAR=1,
 	TAG_LITERAL=2,
 	TAG_CSTR=3,
-	TAG_INT=4,
+	TAG_INTEGER=4,
 	TAG_FLOAT=5,
 	TAG_PTR=6,
 	TAG_BLOB=7,
-
-	TAG_INT8=8,
-	TAG_INT16=9,
-	TAG_INT32=10,
-	TAG_FLOAT32=11,
-
-	TAG_END=16
+	TAG_END=8
 };
 
 enum {
-	FLAG_INT_HEX=1<<0,					// used with TAG_INT
-	FLAG_INT_OCTAL=1<<1,				// used with TAG_INT
-	FLAG_INT_BINARY=1<<2,				// used with TAG_INT
-	FLAG_INT_STREAM=1<<3,				// used with TAG_INT
-	FLAG_INT_HANDLE=1<<4,				// used with TAG_INT
+	FLAG_INT_HEX=1<<0,					// used with TAG_INTEGER
+	FLAG_INT_OCTAL=1<<1,				// used with TAG_INTEGER
+	FLAG_INT_BINARY=1<<2,				// used with TAG_INTEGER
+	FLAG_INT_STREAM=1<<3,				// used with TAG_INTEGER
+	FLAG_INT_HANDLE=1<<4,				// used with TAG_INTEGER
 
 	FLAG_CSTR_BLOB=1<<0,				// used with TAG_CSTR
 	FLAG_CSTR_STRING=1<<1,				// used with TAG_CSTR
@@ -342,6 +336,8 @@ struct cell_ {
 
 	union {
 
+		// These are pseudo types used in FFI...
+
 		int8_t val_int8;
 		int16_t val_int16;
 		int32_t val_int32;
@@ -351,6 +347,8 @@ struct cell_ {
 		uint32_t val_uint32;
 		uint32_t val_uint64;
 		float val_float32;
+
+		// Proper types...
 
 		pl_uint_t val_uint;
 		pl_int_t val_int;

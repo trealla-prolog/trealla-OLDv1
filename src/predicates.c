@@ -136,7 +136,7 @@ void make_float(cell *tmp, double v)
 void make_int(cell *tmp, pl_int_t v)
 {
 	*tmp = (cell){0};
-	tmp->tag = TAG_INT;
+	tmp->tag = TAG_INTEGER;
 	tmp->nbr_cells = 1;
 	set_smallint(tmp, v);
 }
@@ -144,7 +144,7 @@ void make_int(cell *tmp, pl_int_t v)
 void make_uint(cell *tmp, pl_uint_t v)
 {
 	*tmp = (cell){0};
-	tmp->tag = TAG_INT;
+	tmp->tag = TAG_INTEGER;
 	tmp->nbr_cells = 1;
 	set_smalluint(tmp, v);
 }
@@ -152,7 +152,7 @@ void make_uint(cell *tmp, pl_uint_t v)
 void make_ptr(cell *tmp, void *v)
 {
 	*tmp = (cell){0};
-	tmp->tag = TAG_INT;
+	tmp->tag = TAG_INTEGER;
 	tmp->nbr_cells = 1;
 	tmp->val_uint = (uint64_t)v;
 }
@@ -4145,7 +4145,7 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 static USE_RESULT pl_status fn_now_0(query *q)
 {
 	pl_int_t secs = get_time_in_usec() / 1000 / 1000;
-	q->accum.tag = TAG_INT;
+	q->accum.tag = TAG_INTEGER;
 	set_smallint(&q->accum, secs);
 	return pl_success;
 }
@@ -5406,7 +5406,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	cell tmp = {0};
 
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-		tmp.tag = TAG_INT;
+		tmp.tag = TAG_INTEGER;
 		tmp.val_bigint = malloc(sizeof(bigint));
 		tmp.val_bigint->refcnt = 1;
 		mp_int_init_copy(&tmp.val_bigint->ival, &v2);
@@ -5459,7 +5459,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	cell tmp = {0};
 
 	if (mp_int_to_int(&v2, &val) == MP_RANGE) {
-		tmp.tag = TAG_INT;
+		tmp.tag = TAG_INTEGER;
 		tmp.val_bigint = malloc(sizeof(bigint));
 		tmp.val_bigint->refcnt = 1;
 		mp_int_init_copy(&tmp.val_bigint->ival, &v2);

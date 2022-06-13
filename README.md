@@ -545,6 +545,10 @@ wrapper to validate arg types at call/runtime...
 	'$ffi_register_function'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
 	'$ffi_register_predicate'/4		# '$ffi_reg'(+handle,+symbol,+types,+ret_type)
 
+The allowed types are *int8*, *int16*, *int32*, *int64*, *uint8*,
+*uint16*, *uint32*, *uint64*, *fp32*, *fp64*, *cstr* and *ptr* (for
+arbitrary pointers/handles).
+
 Assuming the following C-code in *samples/foo.c*:
 
 ```c

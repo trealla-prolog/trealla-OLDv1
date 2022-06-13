@@ -1969,7 +1969,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			return false;
 		}
 
-		p->v.tag = TAG_INT;
+		p->v.tag = TAG_INTEGER;
 		set_smallint(&p->v, v);
 		if (neg) set_smallint(&p->v, -get_int(&p->v));
 		*srcptr = s;
@@ -1998,7 +1998,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
-		p->v.tag = TAG_INT;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_INT_BINARY;
 		*srcptr = s;
 		return true;
@@ -2021,7 +2021,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
-		p->v.tag = TAG_INT;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_INT_OCTAL;
 		*srcptr = s;
 		return true;
@@ -2044,7 +2044,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 			mp_int_clear(&v2);
 		}
 
-		p->v.tag = TAG_INT;
+		p->v.tag = TAG_INTEGER;
 		p->v.flags |= FLAG_INT_HEX;
 		*srcptr = s;
 		return true;
@@ -2075,7 +2075,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 	mp_int_clear(&v2);
 	int ch;
-	p->v.tag = TAG_INT;
+	p->v.tag = TAG_INTEGER;
 
 	if ((s[-1] == '.') || isspace(s[-1]))
 		s--;
@@ -2315,7 +2315,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		*dst = '\0';
 		p->srcptr = (char*)src;
 		set_smallint(&p->v, ch);
-		p->v.tag = TAG_INT;
+		p->v.tag = TAG_INTEGER;
 		p->dq_consing = -1;
 		p->toklen = dst - p->token;
 		return true;
