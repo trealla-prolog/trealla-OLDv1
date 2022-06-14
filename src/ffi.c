@@ -52,7 +52,7 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 	GET_NEXT_ARG(p3,variable);
 	const char *filename = C_STR(q, p1);
 	int flag = get_smallint(p2);
-	void *handle = dlopen(filename, !flag ? RTLD_NOW : flag);
+	void *handle = dlopen(filename, !flag ? RTLD_LAZY | RTLD_GLOBAL : flag);
 	if (!handle) return pl_failure;
 	cell tmp;
 	make_uint(&tmp, (uint64_t)handle);
