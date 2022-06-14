@@ -1,4 +1,4 @@
-:- module(sqlite,
+:- module(sqlite3,
 	sqlite3_open/3,
 	sqlite3_close/2,
 	sqlite3_exec/6
