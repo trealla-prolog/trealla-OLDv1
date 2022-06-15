@@ -51,12 +51,31 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,variable);
 	const char *filename = C_STR(q, p1);
+
+#if __APPLE__ || __Darwin__
+	char *filename2 = malloc((strlen(filename)-2)+5+1);
+	const char *ptr = strstr(filename, ".so");
+
+	if (ptr) {
+		const char *src = filename;
+		char *dst = filename2;
+
+		while (src != ptr)
+			*dst++ = *src++;
+
+		strcpy(dst, ".dylib");
+	}
+#else
+	char *filename2 = strdup(filename);
+#endif
+
 	int flag = get_smallint(p2);
-	void *handle = dlopen(filename, !flag ? RTLD_LAZY | RTLD_GLOBAL : flag);
+	void *handle = dlopen(filename2, !flag ? RTLD_LAZY | RTLD_GLOBAL : flag);
 	if (!handle) return pl_failure;
 	cell tmp;
 	make_uint(&tmp, (uint64_t)handle);
 	tmp.flags |= FLAG_INT_HANDLE | FLAG_HANDLE_DLL;
+	free(filename2);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
