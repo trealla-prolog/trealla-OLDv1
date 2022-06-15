@@ -5,7 +5,6 @@ run :-
 
 test(Database, Query) :-
 	flag('SQLITE_OK', SQLITE_OK),
-	true,
 	sqlite3_open(Database, Connection, Ret), Ret is SQLITE_OK,
 	sqlite3_query(Connection, Query, Cols, Names),
 		writeq([Cols, Names]), nl,
