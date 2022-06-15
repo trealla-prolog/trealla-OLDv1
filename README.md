@@ -613,6 +613,8 @@ on your system, for example...
 	$ sudo apt install sqlite3
 ```
 
+Then, given the code...
+
 ```prolog
 	:- use_module(library(sqlite3)).
 
@@ -625,6 +627,8 @@ on your system, for example...
 		bagof(Row, sqlite3_query(Connection, Query, Row, _), Results),
 		writeq(Results), nl.
 ```
+
+Run...
 
 ```console
 	$ tpl -g run,halt samples/sqlite3.pl
