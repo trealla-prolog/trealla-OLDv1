@@ -4,7 +4,7 @@
 % MacOS systems Trealla will automatically replace '.so' with '.dylib'
 
 :- initialization(
-	('$dlopen'('libsqlite3.so.0', 0, H),
+	('$dlopen'('libsqlite3.so', 0, H),
 	'$register_predicate'(H, sqlite3_open, [cstr, -ptr], int64),
 	'$register_predicate'(H, sqlite3_close, [ptr], int64),
 	'$register_predicate'(H, sqlite3_exec, [ptr,cstr,ptr,ptr,-ptr], int64),
