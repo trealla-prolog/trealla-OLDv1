@@ -1,8 +1,5 @@
 :- module(sqlite3, [
-	sqlite3_open/3,
-	sqlite3_query/4,
-	sqlite3_close/2,
-	flag/1
+	sqlite3_query/4
 	]).
 
 :- use_module(library(sqlite3_register)).
