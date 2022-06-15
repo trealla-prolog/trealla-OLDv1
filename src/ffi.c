@@ -52,7 +52,7 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 	GET_NEXT_ARG(p3,variable);
 	const char *filename = C_STR(q, p1);
 
-#if __APPLE__ || __Darwin__
+#if __APPLE__
 	char *filename2 = malloc((strlen(filename)-2)+5+1);
 	const char *ptr = strstr(filename, ".so");
 
@@ -64,6 +64,11 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 			*dst++ = *src++;
 
 		strcpy(dst, ".dylib");
+		dst += strlen(".dylib");
+		src += strlen(".so");
+
+		while (*src)
+			*dst++ = *src++;
 	}
 #else
 	char *filename2 = strdup(filename);
