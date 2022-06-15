@@ -613,8 +613,9 @@ on your system, for example...
 	$ sudo apt install sqlite3
 ```
 
-```prolog
-	tpl -g run,halt samples/sqlite3.pl
+```console
+	$ tpl -g run,halt samples/sqlite3.pl
+[[1,'Paul',32,'California',20000.0],[2,'Allen',25,'Texas',15000.0],[3,'Teddy',23,'Norway',20000.0],[4,'Mark',25,'Rich-Mond ',65000.0],[5,'David',27,'Texas',85000.0],[6,'Kim',22,'South-Hall',45000.0]]
 ```
 
 
