@@ -75,6 +75,7 @@ LIBOBJECTS +=  \
 	library/pairs.o \
 	library/random.o \
 	library/sqlite3.o \
+	library/sqlite3_register.o \
 	library/when.o
 
 SRCOBJECTS += src/imath/imath.o

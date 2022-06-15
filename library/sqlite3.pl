@@ -39,20 +39,3 @@ get_col(Statement, Count, Col, Cols, Name, Names) :-
 get_row(Statement, Cols, Names) :-
 	sqlite3_column_count(Statement, Count),
 	get_col(Statement, Count, [], Cols, [], Names).
-
-flag('SQLITE_OK', 0).
-flag('SQLITE_ERROR', 1).
-flag('SQLITE_ABORT', 4).
-flag('SQLITE_BUSY', 5).
-flag('SQLITE_LOCKED', 6).
-flag('SQLITE_READONLY', 8).
-flag('SQLITE_FULL', 13).
-flag('SQLITE_ROW', 100).
-flag('SQLITE_DONE', 101).
-
-flag('SQLITE_INTEGER', 1).
-flag('SQLITE_FLOAT', 2).
-flag('SQLITE_TEXT', 3).
-flag('SQLITE_BLOB', 4).
-flag('SQLITE_NULL', 5).
-

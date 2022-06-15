@@ -36,6 +36,8 @@ extern unsigned char library_lambda_pl[];
 extern unsigned int library_lambda_pl_len;
 extern unsigned char library_sqlite3_pl[];
 extern unsigned int library_sqlite3_pl_len;
+extern unsigned char library_sqlite3_register_pl[];
+extern unsigned int library_sqlite3_register_pl_len;
 
 //extern unsigned char library_clpb_pl[];
 //extern unsigned int library_clpb_pl_len;
@@ -61,6 +63,7 @@ library g_libs[] = {
 	 {"random", library_random_pl, &library_random_pl_len},
 	 {"lambda", library_lambda_pl, &library_lambda_pl_len},
 	 {"sqlite3", library_sqlite3_pl, &library_sqlite3_pl_len},
+	 {"sqlite3_register", library_sqlite3_register_pl, &library_sqlite3_register_pl_len},
 
 	 //{"clpb", library_clpb_pl, &library_clpb_pl_len},
 	 //{"clpz", library_clpz_pl, &library_clpz_pl_len},
