@@ -14,7 +14,7 @@ A compact, efficient Prolog interpreter with
 	REPL with history
 	MIT licensed
 	Foreign function interface (FFI) for calling out user C routines
-	Access SQLITE databases using builtin module (use FFI)
+	Access SQLITE databases using builtin module (uses FFI)
 	Attributed variables with SICStus interface (*WIP*)
 	Rational trees aka. cyclic terms (*WIP*)
 	Logtalk compatible (*WIP*)
@@ -107,7 +107,7 @@ Then...
 
 	make test
 
-A 'make debug' build compiles in <1s with *tcc* and about 5-6s with
+A 'make debug' build compiles in <0.5s with *tcc* and about 5s with
 *clang* and *gcc*. Should build on any Unix-like system with a C99
 compiler. Has been tested on macOS, Linux, FreeBSD and Raspbian (32 &
 64-bit) systems.
@@ -122,7 +122,7 @@ For unbounded arithmetic Trealla uses a modified fork of the
 [imath](https://github.com/infradig/imath)
 library, which is partially included in the source. Note, unbounded
 integers (aka. bigints) are for arithmetic purposes only and will give a
-type_error when used inplaces not expected. The *imath* library has a bug
+type_error when used in places not expected. The *imath* library has a bug
 whereby printing large numbers becomes exponentially slower (100K+ digits)
 and will require a switch to *libtomath* at some point to remedy.
 
