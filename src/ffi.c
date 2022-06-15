@@ -337,6 +337,8 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	for (unsigned i = 0; i < ptr->arity; i++) {
 		if ((ptr->types[i] == TAG_INT64) && is_smallint(c))
 			;
+		else if ((ptr->types[i] == TAG_PTR) && is_smallint(c))
+			;
 		else if (ptr->types[i] != c->tag)
 			return throw_error(q, c, c_ctx, "type_error",
 			ptr->types[i] == TAG_UINT8 ? "integer" :
@@ -508,6 +510,8 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	for (unsigned i = 0; i < (ptr->arity-1); i++) {
 		if ((ptr->types[i] == TAG_INT64) && is_smallint(c))
+			;
+		else if ((ptr->types[i] == TAG_PTR) && is_smallint(c))
 			;
 		else if ((ptr->types[i] != c->tag) && !is_variable(c))
 			return throw_error(q, c, c_ctx, "type_error",

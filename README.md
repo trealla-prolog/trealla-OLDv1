@@ -605,6 +605,12 @@ Register a builtin predicate...
 Note: the foreign function return value is passed as an extra argument
 to the predicate call.
 
+There is an example using SQLITE...
+
+```prolog
+	tpl -g run,halt samples/sqlite3.pl
+```
+
 
 Persistence						##EXPERIMENTAL##
 ===========
