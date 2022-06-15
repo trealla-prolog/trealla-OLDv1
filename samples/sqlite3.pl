@@ -6,8 +6,6 @@ run :-
 test(Database, Query) :-
 	flag('SQLITE_OK', SQLITE_OK),
 	sqlite3_open(Database, Connection, Ret), Ret is SQLITE_OK,
-	sqlite3_query(Connection, Query, Cols, Names),
-		writeq([Cols, Names]), nl,
-		fail.
-test(_, _).
+	bagof(Row, sqlite3_query(Connection, Query, Row, _), Results),
+	writeq(Results), nl.
 
