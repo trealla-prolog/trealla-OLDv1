@@ -1413,7 +1413,7 @@ static bool any_outstanding_choices(query *q)
 static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
 	if (is_string(l)) {
-		char *s = DUP_SLICE(q, l);
+		char *s = DUP_STR(q, l);
 
 		if (!load_file(q->p->m, s, false)) {
 			free(s);
@@ -1436,7 +1436,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 			if (consultall(q, h, h_ctx) != pl_success)
 				return pl_failure;
 		} else {
-			char *s = DUP_SLICE(q, h);
+			char *s = DUP_STR(q, h);
 
 			if (!load_file(q->p->m, s, false)) {
 				free(s);

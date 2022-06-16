@@ -511,7 +511,7 @@ static bool is_check_directive(const cell *c)
 
 void convert_to_literal(module *m, cell *c)
 {
-	char *src = DUP_SLICE(m, c);
+	char *src = DUP_STR(m, c);
 	pl_idx_t off = index_from_pool(m->pl, src);
 	unshare_cell(c);
 	c->tag = TAG_LITERAL;
