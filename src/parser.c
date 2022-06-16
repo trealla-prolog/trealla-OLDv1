@@ -277,7 +277,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 	}
 
 	unsigned specifier;
-	char *spec = DUP_SLICE(p, p2);
+	char *spec = DUP_STR(p, p2);
 
 	if (!strcmp(spec, "fx"))
 		specifier = OP_FX;
@@ -307,7 +307,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 		cell *h = LIST_HEAD(p3);
 
 		if (is_atom(h)) {
-			char *name = DUP_SLICE(p, h);
+			char *name = DUP_STR(p, h);
 
 			if (!set_op(p->m, name, specifier, get_int(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
@@ -334,7 +334,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 	}
 
 	if (is_atom(p3) && !is_nil(p3)) {
-		char *name = DUP_SLICE(p, p3);
+		char *name = DUP_STR(p, p3);
 
 		if (!set_op(p->m, name, specifier, get_int(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
