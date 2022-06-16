@@ -107,10 +107,10 @@ Then...
 
 	make test
 
-A 'make debug' build compiles in <0.5s with *tcc* and about 5s with
-*clang* and *gcc*. Should build on any Unix-like system with a C99
-compiler. Has been tested on macOS, Linux, FreeBSD and Raspbian (32 &
-64-bit) systems.
+A 'make debug CC=tcc' compiles in <0.5s with the *tcc* compiler,
+and about 5s with 'make debug' for *clang* and/or *gcc*. Trealla should
+build on any Unix-like system with a C99 compiler. Has been tested on
+macOS, Linux, FreeBSD and Raspbian (32 & 64-bit) systems.
 
 On *BSD* systems use *gmake* to build and do
 
