@@ -4,6 +4,7 @@ Trealla Prolog
 A compact, efficient Prolog interpreter with
 [ISO compliant](https://trealla-prolog.github.io/trealla/) aspirations.
 
+	MIT licensed
 	Integers are unbounded
 	Atoms are UTF-8 of unlimited length
 	The default double-quoted representation is *chars* list
@@ -12,12 +13,14 @@ A compact, efficient Prolog interpreter with
 	Uses 1st & 2nd arg indexing
 	DCGs
 	REPL with history
-	MIT licensed
-	Foreign function interface (FFI) for calling out user C routines
+	Compiles in <1s with *tcc*, or ~5s with *gcc* and *clang*
+	Runs on Linux, FreeBSD and macOS
+	Foreign function interface (FFI) for calling out to user C code
 	Access SQLITE databases using builtin module (uses FFI)
 	Attributed variables with SICStus interface (*WIP*)
 	Rational trees aka. cyclic terms (*WIP*)
 	Logtalk compatible (*WIP*)
+
 
 Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding. Source is compiled to an AST that is interpreted at
@@ -106,11 +109,6 @@ To build with the included ISOCLINE sources (default is to use GNU readline):
 Then...
 
 	make test
-
-A 'make debug CC=tcc' compiles in <0.5s with the *tcc* compiler,
-and about 5s with 'make debug' for *clang* and/or *gcc*. Trealla should
-build on any Unix-like system with a C99 compiler. Has been tested on
-macOS, Linux, FreeBSD and Raspbian (32 & 64-bit) systems.
 
 On *BSD* systems use *gmake* to build and do
 
