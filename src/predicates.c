@@ -1826,7 +1826,11 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 				tmp->flags &= ~FLAG_BUILTIN;
 			} else if ((tmp->fn_ptr = get_builtin(q->pl, C_STR(q, tmp), tmp->arity, &found, NULL)), found) {
 				tmp->fn = tmp->fn_ptr->fn;
-				tmp->flags |= FLAG_BUILTIN;
+
+				if (tmp->fn_ptr->function)
+					tmp->flags |= FLAG_FUNCTION;
+				else
+					tmp->flags |= FLAG_BUILTIN;
 			}
 		}
 
