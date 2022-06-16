@@ -1,0 +1,55 @@
+{
+  "uid" : "29c5979f4184fe9f",
+  "name" : "bb_get_2_01",
+  "fullName" : "bb_get_2_01::tests",
+  "historyId" : "bb_get_2_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/blackboard_primitives/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/blackboard_primitives/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/blackboard_primitives/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/blackboard_primitives/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "46-48"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e66ec78c44fceafbc8bcd096de400a50ac845319/tests/logtalk/methods/blackboard_primitives/tests.lgt#L46"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "29c5979f4184fe9f.json",
+  "parameterValues" : [ "tests/logtalk/methods/blackboard_primitives/tests.lgt", "46-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/e66ec78c44fceafbc8bcd096de400a50ac845319/tests/logtalk/methods/blackboard_primitives/tests.lgt#L46" ]
+}

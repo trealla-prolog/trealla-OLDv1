@@ -1,0 +1,61 @@
+{
+  "uid" : "30de1fec9a95e62b",
+  "name" : "asserta_2_05",
+  "fullName" : "asserta_2_05::tests",
+  "historyId" : "asserta_2_05::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 1,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/methods/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/methods/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/methods/clause_references/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/methods/clause_references/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "47-49"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e66ec78c44fceafbc8bcd096de400a50ac845319/tests/logtalk/methods/clause_references/tests.lgt#L47"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "34a90ed1bc705477",
+      "status" : "passed",
+      "time" : {
+        "duration" : 0
+      }
+    } ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "30de1fec9a95e62b.json",
+  "parameterValues" : [ "tests/logtalk/methods/clause_references/tests.lgt", "47-49", "https://github.com/LogtalkDotOrg/logtalk3/tree/e66ec78c44fceafbc8bcd096de400a50ac845319/tests/logtalk/methods/clause_references/tests.lgt#L47" ]
+}
