@@ -59,10 +59,10 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 	}
 
 	if (is_iso_atom(p1) && is_iso_atom(p2))
-		return CMP_STR(q, p1, p2);
+		return CMP_SLICES(q, p1, p2);
 
 	if (is_string(p1) && is_string(p2))
-		return CMP_STR(q, p1, p2);
+		return CMP_SLICES(q, p1, p2);
 
 	if (is_iso_atom(p1)) {
 		if (is_number(p2))
@@ -78,7 +78,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		return 1;
 
 	if (is_string(p1) && is_string(p2))
-		return CMP_STR(q, p1, p2);
+		return CMP_SLICES(q, p1, p2);
 
 	if ((is_string(p1) && is_iso_list(p2))
 		|| (is_string(p2) && is_iso_list(p1))) {
@@ -114,7 +114,7 @@ static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_id
 		return compare_internal(q, p1, p1_ctx, p2, p2_ctx, depth+1);
 	}
 
-	int val = CMP_STR(q, p1, p2);
+	int val = CMP_SLICES(q, p1, p2);
 	if (val) return val>0?1:-1;
 
 	int arity = p1->arity;

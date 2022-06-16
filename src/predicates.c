@@ -1391,7 +1391,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 			may_error(make_slice(q, &tmp, p1, ipos, jpos - ipos));
 
-			if (is_atom(p5) && !CMP_STR_CSTRN(q, p5, C_STR(q, &tmp), C_STRLEN(q, &tmp))) {
+			if (is_atom(p5) && !CMP_SLICE(q, p5, C_STR(q, &tmp), C_STRLEN(q, &tmp))) {
 				unshare_cell(&tmp);
 
 				if (fixed) {
@@ -2224,7 +2224,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	if (p1->arity != 2)
 		return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
 
-	if (CMP_STR_CSTR(q, p1, "/") && CMP_STR_CSTR(q, p1, "//"))
+	if (CMP_SLICE2(q, p1, "/") && CMP_SLICE2(q, p1, "//"))
 		return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
 
 	cell *p1_name = p1 + 1;
@@ -2236,7 +2236,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	cell *p1_arity = p1 + 2;
 	p1_arity = deref(q, p1_arity, p1_ctx);
 
-	if (!CMP_STR_CSTR(q, p1, "//"))
+	if (!CMP_SLICE2(q, p1, "//"))
 		p1_arity += 2;
 
 	if (!is_integer(p1_arity))
@@ -2528,9 +2528,9 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	GET_FIRST_ARG(p1,structure);
 	int add_two = 0;
 
-	if (!CMP_STR_CSTR(q, p1, "/"))
+	if (!CMP_SLICE2(q, p1, "/"))
 		;
-	else if (!CMP_STR_CSTR(q, p1, "//"))
+	else if (!CMP_SLICE2(q, p1, "//"))
 		add_two = 2;
 	else
 		return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
@@ -2619,7 +2619,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	if (p_pi->arity != 2)
 		return throw_error(q, p_pi, p_pi_ctx, "type_error", "predicate_indicator");
 
-	if (CMP_STR_CSTR(q, p_pi, "/"))
+	if (CMP_SLICE2(q, p_pi, "/"))
 		return throw_error(q, p_pi, p_pi_ctx, "type_error", "predicate_indicator");
 
 	p1 = p_pi + 1;
@@ -2664,7 +2664,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
 
-	if (!CMP_STR_CSTR(q, p1, "double_quotes")) {
+	if (!CMP_SLICE2(q, p1, "double_quotes")) {
 		cell tmp;
 
 		if (q->st.m->flags.double_quote_atom)
@@ -2675,7 +2675,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, index_from_pool(q->pl, "chars"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "char_conversion")) {
+	} else if (!CMP_SLICE2(q, p1, "char_conversion")) {
 		cell tmp;
 
 		if (q->st.m->flags.char_conversion)
@@ -2684,19 +2684,19 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "unix")) {
+	} else if (!CMP_SLICE2(q, p1, "unix")) {
 		cell tmp;
 		make_atom(&tmp, g_true_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "dos")) {
+	} else if (!CMP_SLICE2(q, p1, "dos")) {
 		cell tmp;
 		make_atom(&tmp, g_false_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "windows")) {
+	} else if (!CMP_SLICE2(q, p1, "windows")) {
 		cell tmp;
 		make_atom(&tmp, g_false_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "occurs_check")) {
+	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
 		cell tmp;
 
 		if (q->st.m->flags.occurs_check == OCCURS_CHECK_TRUE)
@@ -2707,11 +2707,11 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, index_from_pool(q->pl, "error"));
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "encoding")) {
+	} else if (!CMP_SLICE2(q, p1, "encoding")) {
 		cell tmp;
 		make_atom(&tmp, index_from_pool(q->pl, "UTF-8"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "strict_iso")) {
+	} else if (!CMP_SLICE2(q, p1, "strict_iso")) {
 		cell tmp;
 
 		if (!q->st.m->flags.not_strict_iso)
@@ -2720,7 +2720,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "debug")) {
+	} else if (!CMP_SLICE2(q, p1, "debug")) {
 		cell tmp;
 
 		if (q->st.m->flags.debug)
@@ -2729,7 +2729,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, g_off_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "character_escapes")) {
+	} else if (!CMP_SLICE2(q, p1, "character_escapes")) {
 		cell tmp;
 
 		if (q->st.m->flags.character_escapes)
@@ -2738,37 +2738,37 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			make_atom(&tmp, g_false_s);
 
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "dialect")) {
+	} else if (!CMP_SLICE2(q, p1, "dialect")) {
 		cell tmp;
 		make_atom(&tmp, index_from_pool(q->pl, "trealla"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "integer_rounding_function")) {
+	} else if (!CMP_SLICE2(q, p1, "integer_rounding_function")) {
 		cell tmp;
 		make_atom(&tmp, index_from_pool(q->pl, "toward_zero"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "bounded")) {
+	} else if (!CMP_SLICE2(q, p1, "bounded")) {
 		cell tmp;
 		make_atom(&tmp, g_false_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "max_arity")) {
+	} else if (!CMP_SLICE2(q, p1, "max_arity")) {
 		cell tmp;
 		make_int(&tmp, MAX_ARITY);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "max_integer")) {
+	} else if (!CMP_SLICE2(q, p1, "max_integer")) {
 		return false;
-	} else if (!CMP_STR_CSTR(q, p1, "min_integer")) {
+	} else if (!CMP_SLICE2(q, p1, "min_integer")) {
 		return false;
-	} else if (!CMP_STR_CSTR(q, p1, "cpu_count")) {
+	} else if (!CMP_SLICE2(q, p1, "cpu_count")) {
 		cell tmp;
 		make_int(&tmp, g_cpu_count);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "version")) {
+	} else if (!CMP_SLICE2(q, p1, "version")) {
 		unsigned v1 = 0;
 		sscanf(VERSION, "v%u", &v1);
 		cell tmp;
 		make_int(&tmp, v1);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "version_data")) {
+	} else if (!CMP_SLICE2(q, p1, "version_data")) {
 		unsigned v1 = 0, v2 = 0, v3 = 0;
 		sscanf(VERSION, "v%u.%u.%u", &v1, &v2, &v3);
 		cell *tmp = alloc_on_heap(q, 5);
@@ -2781,11 +2781,11 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		tmp[0].arity = 4;
 		tmp[0].nbr_cells = 5;
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "version_git")) {
+	} else if (!CMP_SLICE2(q, p1, "version_git")) {
 		cell tmp;
 		make_atom(&tmp, index_from_pool(q->pl, VERSION));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "argv")) {
+	} else if (!CMP_SLICE2(q, p1, "argv")) {
 		if (g_avc >= g_ac) {
 			cell tmp;
 			make_atom(&tmp, g_nil_s);
@@ -2805,7 +2805,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 		cell *l = end_list(q);
 		may_ptr_error(l);
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "unknown")) {
+	} else if (!CMP_SLICE2(q, p1, "unknown")) {
 		cell tmp;
 		make_atom(&tmp,
 			q->st.m->flags.unknown == UNK_ERROR ? index_from_pool(q->pl, "error") :
@@ -2813,7 +2813,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 			q->st.m->flags.unknown == UNK_CHANGEABLE ? index_from_pool(q->pl, "changeable") :
 			index_from_pool(q->pl, "fail"));
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	} else if (!CMP_STR_CSTR(q, p1, "generate_debug_info")) {
+	} else if (!CMP_SLICE2(q, p1, "generate_debug_info")) {
 	}
 
 	return throw_error(q, p1, p1_ctx, "domain_error", "prolog_flag");
@@ -2827,7 +2827,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	if (!is_atom(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
-	if (!CMP_STR_CSTR(q, p1, "cpu_count") && is_integer(p2)) {
+	if (!CMP_SLICE2(q, p1, "cpu_count") && is_integer(p2)) {
 		g_cpu_count = get_int(p2);
 		return pl_success;
 	}
@@ -2835,14 +2835,14 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	if (!is_atom(p2) && !is_integer(p2))
 		return throw_error(q, p2, p2_ctx, "type_error", "atom");
 
-	if (!CMP_STR_CSTR(q, p1, "double_quotes")) {
-		if (!CMP_STR_CSTR(q, p2, "atom")) {
+	if (!CMP_SLICE2(q, p1, "double_quotes")) {
+		if (!CMP_SLICE2(q, p2, "atom")) {
 			q->st.m->flags.double_quote_chars = q->st.m->flags.double_quote_codes = false;
 			q->st.m->flags.double_quote_atom = true;
-		} else if (!CMP_STR_CSTR(q, p2, "codes")) {
+		} else if (!CMP_SLICE2(q, p2, "codes")) {
 			q->st.m->flags.double_quote_chars = q->st.m->flags.double_quote_atom = false;
 			q->st.m->flags.double_quote_codes = true;
-		} else if (!CMP_STR_CSTR(q, p2, "chars")) {
+		} else if (!CMP_SLICE2(q, p2, "chars")) {
 			q->st.m->flags.double_quote_atom = q->st.m->flags.double_quote_codes = false;
 			q->st.m->flags.double_quote_chars = true;
 		} else {
@@ -2856,10 +2856,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 		}
 
 		q->st.m->p->flags = q->st.m->flags;
-	} else if (!CMP_STR_CSTR(q, p1, "character_escapes")) {
-		if (!CMP_STR_CSTR(q, p2, "true") || !CMP_STR_CSTR(q, p2, "on"))
+	} else if (!CMP_SLICE2(q, p1, "character_escapes")) {
+		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
 			q->st.m->flags.character_escapes = true;
-		else if (!CMP_STR_CSTR(q, p2, "false") || !CMP_STR_CSTR(q, p2, "off"))
+		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
 			q->st.m->flags.character_escapes = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2870,10 +2870,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "char_conversion")) {
-		if (!CMP_STR_CSTR(q, p2, "true") || !CMP_STR_CSTR(q, p2, "on"))
+	} else if (!CMP_SLICE2(q, p1, "char_conversion")) {
+		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
 			q->st.m->flags.char_conversion = true;
-		else if (!CMP_STR_CSTR(q, p2, "false") || !CMP_STR_CSTR(q, p2, "off"))
+		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
 			q->st.m->flags.char_conversion = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2884,12 +2884,12 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "occurs_check")) {
-		if (!CMP_STR_CSTR(q, p2, "true") || !CMP_STR_CSTR(q, p2, "on"))
+	} else if (!CMP_SLICE2(q, p1, "occurs_check")) {
+		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
 			q->st.m->flags.occurs_check = OCCURS_CHECK_TRUE;
-		else if (!CMP_STR_CSTR(q, p2, "false") || !CMP_STR_CSTR(q, p2, "off"))
+		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
 			q->st.m->flags.occurs_check = OCCURS_CHECK_FALSE;
-		else if (!CMP_STR_CSTR(q, p2, "error"))
+		else if (!CMP_SLICE2(q, p2, "error"))
 			q->st.m->flags.occurs_check = OCCURS_CHECK_ERROR;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2900,10 +2900,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "debug")) {
-		if (!CMP_STR_CSTR(q, p2, "true") || !CMP_STR_CSTR(q, p2, "on"))
+	} else if (!CMP_SLICE2(q, p1, "debug")) {
+		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
 			q->st.m->flags.debug = true;
-		else if (!CMP_STR_CSTR(q, p2, "false") || !CMP_STR_CSTR(q, p2, "off"))
+		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
 			q->st.m->flags.debug = false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2914,10 +2914,10 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "strict_iso")) {
-		if (!CMP_STR_CSTR(q, p2, "true") || !CMP_STR_CSTR(q, p2, "on"))
+	} else if (!CMP_SLICE2(q, p1, "strict_iso")) {
+		if (!CMP_SLICE2(q, p2, "true") || !CMP_SLICE2(q, p2, "on"))
 			q->st.m->flags.not_strict_iso = !true;
-		else if (!CMP_STR_CSTR(q, p2, "false") || !CMP_STR_CSTR(q, p2, "off"))
+		else if (!CMP_SLICE2(q, p2, "false") || !CMP_SLICE2(q, p2, "off"))
 			q->st.m->flags.not_strict_iso = !false;
 		else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2928,14 +2928,14 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "unknown")) {
-		if (!CMP_STR_CSTR(q, p2, "fail")) {
+	} else if (!CMP_SLICE2(q, p1, "unknown")) {
+		if (!CMP_SLICE2(q, p2, "fail")) {
 			q->st.m->flags.unknown = UNK_FAIL;
-		} else if (!CMP_STR_CSTR(q, p2, "error")) {
+		} else if (!CMP_SLICE2(q, p2, "error")) {
 			q->st.m->flags.unknown = UNK_ERROR;
-		} else if (!CMP_STR_CSTR(q, p2, "warning")) {
+		} else if (!CMP_SLICE2(q, p2, "warning")) {
 			q->st.m->flags.unknown = UNK_WARNING;
-		} else if (!CMP_STR_CSTR(q, p2, "changeable")) {
+		} else if (!CMP_SLICE2(q, p2, "changeable")) {
 			q->st.m->flags.unknown = UNK_CHANGEABLE;
 		} else {
 			cell *tmp = alloc_on_heap(q, 3);
@@ -2946,20 +2946,20 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 			tmp[2] = *p2; tmp[2].nbr_cells = 1;
 			return throw_error(q, tmp, q->st.curr_frame, "domain_error", "flag_value");
 		}
-	} else if (!CMP_STR_CSTR(q, p1, "bounded")
-		|| !CMP_STR_CSTR(q, p1, "max_arity")
-		|| !CMP_STR_CSTR(q, p1, "max_integer")
-		|| !CMP_STR_CSTR(q, p1, "min_integer")
-		|| !CMP_STR_CSTR(q, p1, "version")
-		|| !CMP_STR_CSTR(q, p1, "version_data")
-		|| !CMP_STR_CSTR(q, p1, "version_git")
-		|| !CMP_STR_CSTR(q, p1, "encoding")
-		|| !CMP_STR_CSTR(q, p1, "unix")
-		|| !CMP_STR_CSTR(q, p1, "integer_rounding_function")
-		|| !CMP_STR_CSTR(q, p1, "dialect")
+	} else if (!CMP_SLICE2(q, p1, "bounded")
+		|| !CMP_SLICE2(q, p1, "max_arity")
+		|| !CMP_SLICE2(q, p1, "max_integer")
+		|| !CMP_SLICE2(q, p1, "min_integer")
+		|| !CMP_SLICE2(q, p1, "version")
+		|| !CMP_SLICE2(q, p1, "version_data")
+		|| !CMP_SLICE2(q, p1, "version_git")
+		|| !CMP_SLICE2(q, p1, "encoding")
+		|| !CMP_SLICE2(q, p1, "unix")
+		|| !CMP_SLICE2(q, p1, "integer_rounding_function")
+		|| !CMP_SLICE2(q, p1, "dialect")
 		) {
 		return throw_error(q, p1, p1_ctx, "permission_error", "modify,flag");
-	} else if (!CMP_STR_CSTR(q, p1, "generate_debug_info")) {
+	} else if (!CMP_SLICE2(q, p1, "generate_debug_info")) {
 	} else {
 		return throw_error(q, p1, p1_ctx, "domain_error", "prolog_flag");
 	}
@@ -3476,33 +3476,33 @@ static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 	unsigned specifier;
 	unsigned pri = get_int(p1);
 
-	if (!CMP_STR_CSTR(q, p2, "fx"))
+	if (!CMP_SLICE2(q, p2, "fx"))
 		specifier = OP_FX;
-	else if (!CMP_STR_CSTR(q, p2, "fy"))
+	else if (!CMP_SLICE2(q, p2, "fy"))
 		specifier = OP_FY;
-	else if (!CMP_STR_CSTR(q, p2, "xf"))
+	else if (!CMP_SLICE2(q, p2, "xf"))
 		specifier = OP_XF;
-	else if (!CMP_STR_CSTR(q, p2, "xfx"))
+	else if (!CMP_SLICE2(q, p2, "xfx"))
 		specifier = OP_XFX;
-	else if (!CMP_STR_CSTR(q, p2, "xfy"))
+	else if (!CMP_SLICE2(q, p2, "xfy"))
 		specifier = OP_XFY;
-	else if (!CMP_STR_CSTR(q, p2, "yf"))
+	else if (!CMP_SLICE2(q, p2, "yf"))
 		specifier = OP_YF;
-	else if (!CMP_STR_CSTR(q, p2, "yfx"))
+	else if (!CMP_SLICE2(q, p2, "yfx"))
 		specifier = OP_YFX;
 	else
 		return throw_error(q, p2, p2_ctx, "domain_error", "operator_specifier");
 
-	if (pri && !CMP_STR_CSTR(q, p3, "|") && (!IS_INFIX(specifier) || (pri < 1001)))
+	if (pri && !CMP_SLICE2(q, p3, "|") && (!IS_INFIX(specifier) || (pri < 1001)))
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
 
-	if (!CMP_STR_CSTR(q, p3, "[]"))
+	if (!CMP_SLICE2(q, p3, "[]"))
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
 
-	if (!CMP_STR_CSTR(q, p3, "{}"))
+	if (!CMP_SLICE2(q, p3, "{}"))
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
 
-	if (!CMP_STR_CSTR(q, p3, ","))
+	if (!CMP_SLICE2(q, p3, ","))
 		return throw_error(q, p3, p3_ctx, "permission_error", "modify,operator");
 
 	unsigned tmp_optype = 0;
@@ -3947,7 +3947,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	unsigned arity = -1;
 
 	if (p1->arity) {
-		if (CMP_STR_CSTR(q, p1, "/") && CMP_STR_CSTR(q, p1, "//"))
+		if (CMP_SLICE2(q, p1, "/") && CMP_SLICE2(q, p1, "//"))
 			return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
 
 		cell *p2 = p1 + 1;
@@ -3963,7 +3963,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 		name = index_from_pool(q->pl, C_STR(q, p2));
 		arity = get_int(p3);
 
-		if (!CMP_STR_CSTR(q, p1, "//"))
+		if (!CMP_SLICE2(q, p1, "//"))
 			arity += 2;
 	}
 
@@ -3987,7 +3987,7 @@ static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
 	unsigned arity = -1;
 
 	if (p1->arity) {
-		if (CMP_STR_CSTR(q, p1, "/") && CMP_STR_CSTR(q, p1, "//"))
+		if (CMP_SLICE2(q, p1, "/") && CMP_SLICE2(q, p1, "//"))
 			return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
 
 		cell *p2 = p1 + 1;
@@ -4003,7 +4003,7 @@ static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
 		name = C_STR(q, p2);
 		arity = get_int(p3);
 
-		if (!CMP_STR_CSTR(q, p1, "//"))
+		if (!CMP_SLICE2(q, p1, "//"))
 			arity += 2;
 	}
 
@@ -4066,7 +4066,7 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
 
-	if (!CMP_STR_CSTR(q, p1, "cputime") && is_variable(p2)) {
+	if (!CMP_SLICE2(q, p1, "cputime") && is_variable(p2)) {
 		uint64_t now = cpu_time_in_usec();
 		double elapsed = now - q->time_cpu_started;
 		cell tmp;
@@ -4075,14 +4075,14 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 		return pl_success;
 	}
 
-	if (!CMP_STR_CSTR(q, p1, "gctime") && is_variable(p2)) {
+	if (!CMP_SLICE2(q, p1, "gctime") && is_variable(p2)) {
 		cell tmp;
 		make_float(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		return pl_success;
 	}
 
-	if (!CMP_STR_CSTR(q, p1, "runtime")) {
+	if (!CMP_SLICE2(q, p1, "runtime")) {
 		uint64_t now = cpu_time_in_usec();
 		double elapsed = now - q->time_cpu_started;
 		cell tmp;
@@ -5023,20 +5023,20 @@ static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
 			arg = deref(q, arg, h_ctx);
 			pl_idx_t arg_ctx = q->latest_ctx;
 
-			if (!CMP_STR_CSTR(q, h, "algorithm")) {
+			if (!CMP_SLICE2(q, h, "algorithm")) {
 				if (is_variable(arg)) {
 					cell tmp;
 					make_atom(&tmp, index_from_pool(q->pl, "sha256"));
 					set_var(q, arg, arg_ctx, &tmp, q->st.curr_frame);
 					is_sha384 = is_sha512 = false;
 					is_sha256 = true;
-				} else if (!CMP_STR_CSTR(q, arg, "sha256")) {
+				} else if (!CMP_SLICE2(q, arg, "sha256")) {
 					is_sha384 = is_sha512 = false;
 					is_sha256 = true;
-				} else if (!CMP_STR_CSTR(q, arg, "sha384")) {
+				} else if (!CMP_SLICE2(q, arg, "sha384")) {
 					is_sha256 = is_sha512 = false;
 					is_sha384 = true;
-				} else if (!CMP_STR_CSTR(q, arg, "sha512")) {
+				} else if (!CMP_SLICE2(q, arg, "sha512")) {
 					is_sha384 = is_sha256 = false;
 					is_sha512 = true;
 				} else
@@ -5406,7 +5406,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 		return pl_success;
 	}
 
-	char *src = DUP_STR(q, p2);
+	char *src = DUP_SLICE(q, p2);
 	const char *s = src;
 	mpz_t v2;
 	mp_int_init(&v2);
@@ -5459,7 +5459,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 		return pl_success;
 	}
 
-	char *src = DUP_STR(q, p2);
+	char *src = DUP_SLICE(q, p2);
 	const char *s = src;
 	mpz_t v2;
 	mp_int_init(&v2);
@@ -5807,39 +5807,39 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	} else
 		ch = get_int(p1);
 
-	if (!CMP_STR_CSTR(q, p2, "alpha"))
+	if (!CMP_SLICE2(q, p2, "alpha"))
 		return iswalpha(ch);
-	else if (!CMP_STR_CSTR(q, p2, "digit"))
+	else if (!CMP_SLICE2(q, p2, "digit"))
 		return iswdigit(ch);
-	else if (!CMP_STR_CSTR(q, p2, "xdigit"))
+	else if (!CMP_SLICE2(q, p2, "xdigit"))
 		return iswxdigit(ch);
-	else if (!CMP_STR_CSTR(q, p2, "whitespace"))
+	else if (!CMP_SLICE2(q, p2, "whitespace"))
 		return iswblank(ch) || iswspace(ch);
-	else if (!CMP_STR_CSTR(q, p2, "white"))
+	else if (!CMP_SLICE2(q, p2, "white"))
 		return iswblank(ch);
-	else if (!CMP_STR_CSTR(q, p2, "space"))
+	else if (!CMP_SLICE2(q, p2, "space"))
 		return iswspace(ch);
-	else if (!CMP_STR_CSTR(q, p2, "lower"))
+	else if (!CMP_SLICE2(q, p2, "lower"))
 		return iswlower(ch);
-	else if (!CMP_STR_CSTR(q, p2, "upper"))
+	else if (!CMP_SLICE2(q, p2, "upper"))
 		return iswupper(ch);
-	else if (!CMP_STR_CSTR(q, p2, "punct"))
+	else if (!CMP_SLICE2(q, p2, "punct"))
 		return iswpunct(ch);
-	else if (!CMP_STR_CSTR(q, p2, "cntrl"))
+	else if (!CMP_SLICE2(q, p2, "cntrl"))
 		return iswcntrl(ch);
-	else if (!CMP_STR_CSTR(q, p2, "graph"))
+	else if (!CMP_SLICE2(q, p2, "graph"))
 		return iswgraph(ch);
-	else if (!CMP_STR_CSTR(q, p2, "ascii"))
+	else if (!CMP_SLICE2(q, p2, "ascii"))
 		return ch < 128;
-	else if (!CMP_STR_CSTR(q, p2, "newline"))
+	else if (!CMP_SLICE2(q, p2, "newline"))
 		return ch == 10;
-	else if (!CMP_STR_CSTR(q, p2, "end_of_line"))
+	else if (!CMP_SLICE2(q, p2, "end_of_line"))
 		return (ch >= 10) && (ch <= 13);
-	else if (!CMP_STR_CSTR(q, p2, "end_of_file"))
+	else if (!CMP_SLICE2(q, p2, "end_of_file"))
 		return ch == -1;
-	else if (!CMP_STR_CSTR(q, p2, "quote"))
+	else if (!CMP_SLICE2(q, p2, "quote"))
 		return (ch == '\'') || (ch == '"') || (ch == '`');
-	else if (!CMP_STR_CSTR(q, p2, "period"))
+	else if (!CMP_SLICE2(q, p2, "period"))
 		return (ch == '.') || (ch == '!') || (ch == '?');
 
 	return pl_failure;
@@ -6332,14 +6332,14 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 		if (is_structure(h) && (h->arity == 1)) {
 			cell *n = h + 0;
-			if (!CMP_STR_CSTR(q, n, "create")) {
+			if (!CMP_SLICE2(q, n, "create")) {
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
 				if (is_variable(v))
 					return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
-				if (is_atom(v) && !CMP_STR_CSTR(q, v, "true"))
+				if (is_atom(v) && !CMP_SLICE2(q, v, "true"))
 					do_create = true;
 			}
 		}
@@ -6356,7 +6356,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p1));
 		key = strdup(tmpbuf);
 	} else if (is_atom(p1))
-		key = DUP_STR(q, p1);
+		key = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
 
@@ -6376,7 +6376,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p2));
 		val = strdup(tmpbuf);
 	} else if (is_atom(p2))
-		val = DUP_STR(q, p2);
+		val = DUP_SLICE(q, p2);
 	else {
 		free(key);
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
@@ -6405,14 +6405,14 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 
 		if (is_structure(h) && (h->arity == 1)) {
 			cell *n = h + 0;
-			if (!CMP_STR_CSTR(q, n, "delete")) {
+			if (!CMP_SLICE2(q, n, "delete")) {
 				cell *v = n + 1;
 				v = deref(q, v, q->latest_ctx);
 
 				if (is_variable(v))
 					return throw_error(q, p3, p3_ctx, "instantiation_error", "read_option");
 
-				if (is_atom(v) && !CMP_STR_CSTR(q, v, "true"))
+				if (is_atom(v) && !CMP_SLICE2(q, v, "true"))
 					do_delete = true;
 			}
 		}
@@ -6429,7 +6429,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
 		key = tmpbuf;
 	} else if (is_atom(p1))
-		key = DUP_STR(q, p1);
+		key = DUP_SLICE(q, p1);
 	else
 		return throw_error(q, p2, p2_ctx, "type_error", "integer");
 
@@ -6762,9 +6762,9 @@ static USE_RESULT pl_status fn_iso_compare_3(query *q)
 	GET_NEXT_ARG(p3,any);
 
 	if (is_atom(p1)) {
-		if (CMP_STR_CSTR(q, p1, "<")
-			&& CMP_STR_CSTR(q, p1, ">")
-			&& CMP_STR_CSTR(q, p1, "="))
+		if (CMP_SLICE2(q, p1, "<")
+			&& CMP_SLICE2(q, p1, ">")
+			&& CMP_SLICE2(q, p1, "="))
 			return throw_error(q, p1, p1_ctx, "domain_error", "order");
 	}
 

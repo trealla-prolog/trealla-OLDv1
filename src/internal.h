@@ -218,15 +218,15 @@ typedef struct {
 
 #define GET_POOL(x,off) ((x)->pl->pool + (off))
 
-#define _CMP_SLICE(pl,c,s,len) slicecmp(_C_STR(pl, c), _C_STRLEN(pl, c), s, len)
-#define _CMP_SLICE2(pl,c,s) slicecmp2(_C_STR(pl, c), _C_STRLEN(pl, c), s)
+#define _CMP_SLICE(pl,c,str,len) slicecmp(_C_STR(pl, c), _C_STRLEN(pl, c), str, len)
+#define _CMP_SLICE2(pl,c,str) slicecmp2(_C_STR(pl, c), _C_STRLEN(pl, c), str)
 #define _CMP_SLICES(pl,c1,c2) slicecmp(_C_STR(pl, c1), _C_STRLEN(pl, c1), _C_STR(pl, c2), _C_STRLEN(pl, c2))
 #define _DUP_SLICE(pl,c) slicedup(_C_STR(pl, c), _C_STRLEN(pl, c))
 
-#define CMP_STR_CSTRN(x,c,s,len) _CMP_SLICE((x)->pl, c, s, len)
-#define CMP_STR_CSTR(x,c,s) _CMP_SLICE2((x)->pl, c, s)
-#define CMP_STR(x,c1,c2) _CMP_SLICES((x)->pl, c1, c2)
-#define DUP_STR(x,c) _DUP_SLICE((x)->pl, c)
+#define CMP_SLICE(x,c,str,len) _CMP_SLICE((x)->pl, c, str, len)
+#define CMP_SLICE2(x,c,str) _CMP_SLICE2((x)->pl, c, str)
+#define CMP_SLICES(x,c1,c2) _CMP_SLICES((x)->pl, c1, c2)
+#define DUP_SLICE(x,c) _DUP_SLICE((x)->pl, c)
 
 // If changing the order of these: see unify.c dispatch table
 

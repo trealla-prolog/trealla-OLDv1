@@ -27,7 +27,7 @@ enum {
 	TAG_CCSTR
 };
 
-#define MARK_OUT(t) (((unsigned)(t) << 1) | 1)
+#define MARK_OUT(t) (((unsigned)(t) << 2) | 1)
 
 union result_ {
 	float f32;
