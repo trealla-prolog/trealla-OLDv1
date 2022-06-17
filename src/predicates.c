@@ -2209,7 +2209,7 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	} else {
 		pr->idx = m_create(index_cmpkey, NULL, q->st.m);
 		ensure(pr->idx);
-		m_allow_dups(pr->idx, false);
+		m_allow_dups(pr->idx, true);
 	}
 
 	pr->head = pr->tail = NULL;
