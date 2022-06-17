@@ -1033,7 +1033,6 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (arg1 && is_variable(arg1))
 		pr->is_var_in_first_arg = true;
 
-
 	if (!append) {
 		m_set(pr->idx, c, dbe);
 

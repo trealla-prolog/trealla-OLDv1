@@ -3511,6 +3511,8 @@ static USE_RESULT pl_status fn_read_line_to_string_2(query *q)
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	}
 
+	len = strlen(line);
+
 	if (len && (line[len-1] == '\n')) {
 		line[len-1] = '\0';
 		len--;
@@ -4256,6 +4258,8 @@ static USE_RESULT pl_status fn_getline_2(query *q)
 
 		return pl_failure;
 	}
+
+	len = strlen(line);
 
 	if (line[strlen(line)-1] == '\n')
 		line[strlen(line)-1] = '\0';

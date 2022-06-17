@@ -415,6 +415,10 @@ numberlist_(['$VAR'(N0)|Vars], N0, N) :-
    N1 is N0+1,
    numberlist_(Vars, N1, N).
 
+read_line_to_codes(Stream, Codes) :-
+	read_line_to_string(Stream, String),
+	string_codes(String, Codes).
+
 instantiation_error(Context) :-
     throw(error(instantiation_error, Context)).
 

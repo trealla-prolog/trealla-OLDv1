@@ -973,6 +973,126 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
+static USE_RESULT pl_status fn_string_codes_2(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
+
+	if (is_variable(p1) && is_variable(p2))
+		return throw_error(q, p1, p1_ctx, "instantiation_error", "not_sufficiently_instantiated");
+
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(p2) && !check_list(q, p2, p2_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+	if (!is_atom(p1) && !is_variable(p1))
+		return throw_error(q, p1, p1_ctx, "type_error", "atom");
+
+	if (!is_variable(p2) && is_nil(p2)) {
+		cell tmp;
+		make_atom(&tmp, g_empty_s);
+		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	}
+
+	if (is_variable(p2) && !C_STRLEN(q, p1)) {
+		cell tmp;
+		make_atom(&tmp, g_nil_s);
+		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	}
+
+	// Verify the list
+
+	if (!is_variable(p2)) {
+		cell *save_p2 = p2;
+		pl_idx_t save_p2_ctx = p2_ctx;
+		LIST_HANDLER(p2);
+
+		while (is_list(p2)) {
+			CHECK_INTERRUPT();
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			if (!is_integer(head) && is_variable(p1))
+				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
+
+			if (!is_integer(head) && !is_variable(head))
+				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
+
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+		}
+
+		if (!is_nil(p2) && !is_variable(p2))
+			return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+		p2 = save_p2;
+		p2_ctx = save_p2_ctx;
+	}
+
+	if (!is_variable(p2) && is_variable(p1)) {
+		ASTRING_alloc(pr,256);
+		LIST_HANDLER(p2);
+
+		while (is_list(p2)) {
+			CHECK_INTERRUPT();
+			cell *head = LIST_HEAD(p2);
+			head = deref(q, head, p2_ctx);
+
+			pl_int_t val = get_int(head);
+
+			if (val < 0)
+				return throw_error(q, head, q->latest_ctx, "representation_error", "character_code");
+
+			char ch[10];
+			int len;
+
+			if (!val) {
+				ch[0] = 0;
+				len = 1;
+			} else
+				len = put_char_utf8(ch, val);
+
+			ASTRING_strcatn(pr, ch, len);
+			cell *tail = LIST_TAIL(p2);
+			p2 = deref(q, tail, p2_ctx);
+			p2_ctx = q->latest_ctx;
+
+		}
+
+		if (!is_nil(p2))
+			return throw_error(q, p2, p2_ctx, "type_error", "list");
+
+		cell tmp;
+		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+		ASTRING_free(pr);
+		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unshare_cell(&tmp);
+		return ok;
+	}
+
+	const char *tmpbuf = C_STR(q, p1);
+	size_t len = C_STRLEN(q, p1);
+	const char *src = tmpbuf;
+	cell tmp;
+	len -= len_char_utf8(src);
+	make_int(&tmp, get_char_utf8(&src));
+	allocate_list(q, &tmp);
+
+	while (len) {
+		len -= len_char_utf8(src);
+		make_int(&tmp, get_char_utf8(&src));
+		append_list(q, &tmp);
+	}
+
+	cell *l = end_list(q);
+	may_ptr_error(l);
+	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
@@ -2207,9 +2327,9 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (hard) {
 		pr->is_abolished = true;
 	} else {
-		pr->idx = m_create(index_cmpkey, NULL, q->st.m);
-		ensure(pr->idx);
-		m_allow_dups(pr->idx, true);
+		//pr->idx = m_create(index_cmpkey, NULL, q->st.m);
+		//ensure(pr->idx);
+		//m_allow_dups(pr->idx, true);
 	}
 
 	pr->head = pr->tail = NULL;
@@ -6892,6 +7012,7 @@ static const builtins g_other_bifs[] =
 
 	{"sort", 4, fn_sort_4, NULL, false, BLAH},
 
+	{"string_codes", 2, fn_string_codes_2, NULL, false, BLAH},
 	{"term_singletons", 2, fn_term_singletons_2, NULL, false, BLAH},
 	{"pid", 1, fn_pid_1, "-integer", false, BLAH},
 	{"get_unbuffered_code", 1, fn_get_unbuffered_code_1, "?code", false, BLAH},
