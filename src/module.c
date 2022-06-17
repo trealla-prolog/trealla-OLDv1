@@ -995,6 +995,11 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		return;
 
 	if (!pr->idx) {
+		const char *src = C_STR(m, &pr->key);
+
+		if (*src == '$')
+			return;
+
 		pr->idx = m_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);

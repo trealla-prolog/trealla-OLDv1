@@ -1034,7 +1034,7 @@ void make_indirect(cell *tmp, cell *c)
 	tmp->val_ptr = c;
 }
 
-#define MAX_VARS (1L<<26)
+#define MAX_VARS (1L<<30)
 
 unsigned create_vars(query *q, unsigned cnt)
 {
