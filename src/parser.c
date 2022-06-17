@@ -620,7 +620,9 @@ static void directives(parser *p, cell *d)
 				|| !strcmp(name, "terms")
 				|| !strcmp(name, "types")
 				|| !strcmp(name, "iso_ext")
-				|| !strcmp(name, "files"))
+				|| !strcmp(name, "files")
+				|| !strcmp(name, "read_util")
+				)
 				return;
 
 			for (library *lib = g_libs; lib->name; lib++) {
