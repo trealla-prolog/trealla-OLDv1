@@ -791,6 +791,8 @@ static void directives(parser *p, cell *d)
 			} else if (!strcmp(dirname, "public")) {
 			} else if (!strcmp(dirname, "table") && false) {
 				set_table_in_db(p->m, C_STR(p, c_name), arity);
+			} else if (!strcmp(dirname, "unique")) {
+				set_unique_in_db(p->m, C_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, C_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
@@ -853,6 +855,8 @@ static void directives(parser *p, cell *d)
 
 			if (!strcmp(dirname, "multifile"))
 				set_multifile_in_db(m, C_STR(p, c_name), arity);
+			else if (!strcmp(dirname, "unique"))
+				set_unique_in_db(m, C_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(m, C_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "public"))

@@ -419,6 +419,22 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 		m->error = true;
 }
 
+void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
+{
+	cell tmp = (cell){0};
+	tmp.tag = TAG_LITERAL;
+	tmp.val_off = index_from_pool(m->pl, name);
+	ensure(tmp.val_off != ERR_IDX);
+	tmp.arity = arity;
+	predicate *pr = find_predicate(m, &tmp);
+	if (!pr) pr = create_predicate(m, &tmp);
+
+	if (pr) {
+		pr->is_unique = true;
+	} else
+		m->error = true;
+}
+
 void set_table_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
@@ -991,8 +1007,10 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && (pr->is_multifile || (pr->cnt < m->indexing_threshold)))
-	//if (!pr->idx && (pr->cnt < m->indexing_threshold))
+	if (!pr->idx && pr->is_multifile && pr->is_dynamic)
+		return;
+
+	if (!pr->idx && (pr->cnt < m->indexing_threshold))
 		return;
 
 	if (!pr->idx) {

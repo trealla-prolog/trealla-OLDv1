@@ -34,6 +34,8 @@ extern unsigned char library_random_pl[];
 extern unsigned int library_random_pl_len;
 extern unsigned char library_lambda_pl[];
 extern unsigned int library_lambda_pl_len;
+extern unsigned char library_ugraphs_pl[];
+extern unsigned int library_ugraphs_pl_len;
 extern unsigned char library_sqlite3_pl[];
 extern unsigned int library_sqlite3_pl_len;
 extern unsigned char library_sqlite3_register_pl[];
@@ -62,6 +64,7 @@ library g_libs[] = {
 	 {"pairs", library_pairs_pl, &library_pairs_pl_len},
 	 {"random", library_random_pl, &library_random_pl_len},
 	 {"lambda", library_lambda_pl, &library_lambda_pl_len},
+	 {"ugraphs", library_ugraphs_pl, &library_ugraphs_pl_len},
 	 {"sqlite3", library_sqlite3_pl, &library_sqlite3_pl_len},
 	 {"sqlite3_register", library_sqlite3_register_pl, &library_sqlite3_register_pl_len},
 

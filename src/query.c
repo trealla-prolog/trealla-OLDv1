@@ -295,6 +295,9 @@ static void find_key(query *q, predicate *pr, cell *key)
 	q->st.key = key;
 	q->st.iter = NULL;
 
+	if (pr->is_unique)
+		q->st.definite = true;
+
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
@@ -359,6 +362,12 @@ static void find_key(query *q, predicate *pr, cell *key)
 
 	if (!m_next_key(iter, (void*)&q->st.curr_clause))
 		return;
+
+	if (pr->is_unique) {
+		q->st.definite = true;
+		m_done(iter);
+		return;
+	}
 
 	// If the index search has found just one (definite) solution
 	// then we can use it with no problems. If more than one then
