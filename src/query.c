@@ -337,6 +337,8 @@ static void find_key(query *q, predicate *pr, cell *key)
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
 
+	//DUMP_TERM("*** search, key = ", key, q->st.curr_frame);
+
 	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)) {
 		if (!pr->idx2) {
 			q->st.curr_clause = pr->head;
@@ -775,7 +777,6 @@ static void commit_me(query *q, clause *r)
 	}
 
 	q->st.curr_cell = get_body(r->cells);
-	//memset(q->nv_mask, 0, MAX_ARITY);
 	q->in_commit = false;
 }
 
@@ -809,7 +810,7 @@ pl_status push_choice(query *q)
 	const frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
-	memset(ch, 0, sizeof(choice));
+	*ch = (choice){0};
 	ch->st = q->st;
 	ch->ugen = f->ugen;
 	ch->frame_cgen = ch->cgen = f->cgen;
