@@ -347,7 +347,6 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 			return pl_success;
 		}
 
-		arg1 = key + 1;
 		cell *arg2 = arg1 + arg1->nbr_cells;
 		q->st.key = key = arg2;
 		idx = pr->idx2;
@@ -361,7 +360,9 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	miter *iter;
 
 	if (!(iter = m_find_key(idx, key))) {
-		//DUMP_TERM("*** not found, key = ", key, q->st.curr_frame);
+#if 0
+		DUMP_TERM("   *** not found, key = ", key, q->st.curr_frame);
+#endif
 		return pl_failure;
 	}
 
@@ -402,14 +403,18 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		extras++;
 	}
 
+	if (!tmp_list) {
 #if 0
-	printf("   *** extras = %d\n", extras);
+		printf("   *** definite\n");
 #endif
 
-	if (!tmp_list) {
 		q->st.definite = true;
 		return pl_success;
 	}
+
+#if 0
+	printf("   *** extras = %d\n", extras);
+#endif
 
 	q->st.iter = m_first(tmp_list);
 	m_next(q->st.iter, (void*)&q->st.curr_clause);

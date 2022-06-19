@@ -265,7 +265,7 @@ enum {
 	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
-	FLAG_MANAGED=1<<10,					// any reflist-counted object
+	FLAG_MANAGED=1<<10,					// any ref-counted object
 	FLAG_TAIL_REC=1<<11,
 	FLAG_FUNCTION=1<<12,
 
