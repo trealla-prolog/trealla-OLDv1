@@ -286,7 +286,7 @@ static void next_key(query *q)
 		q->st.curr_clause = NULL;
 }
 
-static void find_key(query *q, predicate *pr, cell *key)
+static pl_status find_key(query *q, predicate *pr, cell *key)
 {
 	q->st.definite = false;
 	q->st.arg1_is_ground = false;
@@ -301,8 +301,8 @@ static void find_key(query *q, predicate *pr, cell *key)
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity /*|| pr->is_multifile*/ || pr->is_dynamic)
-			return;
+		if (!key->arity || pr->is_multifile || pr->is_dynamic)
+			return pl_success;
 
 		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
 
@@ -331,42 +331,47 @@ static void find_key(query *q, predicate *pr, cell *key)
 		if (q->pl->opt && arg3 && is_ground(arg3))
 			q->st.arg3_is_ground = true;
 
-		return;
+		return pl_success;
 	}
 
 	//sl_dump(pr->idx, dump_key, q);
 
-	key = deep_clone_to_heap(q, key, q->st.curr_frame);
+	may_error(init_tmp_heap(q));
+	q->st.key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
-
-	//DUMP_TERM("*** search, key = ", key, q->st.curr_frame);
 
 	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)) {
 		if (!pr->idx2) {
 			q->st.curr_clause = pr->head;
-			return;
+			return pl_success;
 		}
 
-		key = arg1 + arg1->nbr_cells;
+		arg1 = key + 1;
+		cell *arg2 = arg1 + arg1->nbr_cells;
+		q->st.key = key = arg2;
 		idx = pr->idx2;
 	}
+
+#if 0
+	DUMP_TERM("*** search, key1 = ", key, q->st.curr_frame);
+#endif
 
 	q->st.curr_clause = NULL;
 	miter *iter;
 
 	if (!(iter = m_find_key(idx, key))) {
 		//DUMP_TERM("*** not found, key = ", key, q->st.curr_frame);
-		return;
+		return pl_failure;
 	}
 
 	if (!m_next_key(iter, (void*)&q->st.curr_clause))
-		return;
+		return pl_failure;
 
 	if (pr->is_unique) {
 		q->st.definite = true;
 		m_done(iter);
-		return;
+		return pl_success;
 	}
 
 	// If the index search has found just one (definite) solution
@@ -376,10 +381,15 @@ static void find_key(query *q, predicate *pr, cell *key)
 
 	map *tmp_list = NULL;
 	db_entry *dbe;
+	int extras = 0;
 
 	while (m_next_key(iter, (void*)&dbe)) {
 		if (dbe->cl.ugen_erased)
 			continue;
+
+#if 0
+		DUMP_TERM("   *** fetch, key2 = ", dbe->cl.cells, q->st.curr_frame);
+#endif
 
 		if (!tmp_list) {
 			tmp_list = m_create(NULL, NULL, NULL);
@@ -389,15 +399,21 @@ static void find_key(query *q, predicate *pr, cell *key)
 		}
 
 		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
+		extras++;
 	}
 
-	if (tmp_list) {
-		q->st.iter = m_first(tmp_list);
-		m_next(q->st.iter, (void*)&q->st.curr_clause);
-		return;
+#if 0
+	printf("   *** extras = %d\n", extras);
+#endif
+
+	if (!tmp_list) {
+		q->st.definite = true;
+		return pl_success;
 	}
 
-	q->st.definite = true;
+	q->st.iter = m_first(tmp_list);
+	m_next(q->st.iter, (void*)&q->st.curr_clause);
+	return pl_success;
 }
 
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var, bool *is_partial)

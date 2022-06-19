@@ -266,7 +266,7 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 	if (is_smallint(p1)) {
 		if (is_bigint(p2)) {
 			return -mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
-		} if (is_smallint(p2)) {
+		} else if (is_smallint(p2)) {
 			if (get_smallint(p1) < get_smallint(p2))
 				return -1;
 			else if (get_smallint(p1) > get_smallint(p2))
@@ -1007,18 +1007,13 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && pr->is_multifile && pr->is_dynamic)
-		return;
+	//if (!pr->idx && pr->is_multifile && pr->is_dynamic)
+	//	return;
 
 	if (!pr->idx && (pr->cnt < m->indexing_threshold))
 		return;
 
 	if (!pr->idx) {
-		const char *src = C_STR(m, &pr->key);
-
-		if (*src == '$')
-			return;
-
 		pr->idx = m_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		m_allow_dups(pr->idx, true);
