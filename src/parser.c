@@ -106,22 +106,6 @@ cell *list_tail(cell *l, cell *tmp)
 	return tmp;
 }
 
-bool check_if_rule(const cell *c)
-{
-	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 2))
-		return true;
-
-	return false;
-}
-
-cell *get_head(cell *c)
-{
-	if (check_if_rule(c))
-		return c + 1;
-
-	return c;
-}
-
 cell *get_body(cell *c)
 {
 	if (check_if_rule(c)) {

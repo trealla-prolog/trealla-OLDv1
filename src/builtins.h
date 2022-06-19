@@ -30,12 +30,7 @@ pl_status wrapper_for_function(query *q, builtins *fn_ptr);
 pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
 #endif
 
-#define is_callable(c) (is_literal(c) || is_cstring(c))
 #define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
-#define is_structure(c) (is_literal(c) && (c)->arity)
-#define is_compound(c) (is_structure(c) || is_string(c))
-#define is_number(c) (is_integer(c) || is_float(c))
-#define is_atomic(c) (is_atom(c) || is_number(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_atom_or_var(c) (is_list(c) || is_atom(c) || is_variable(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
@@ -51,7 +46,6 @@ pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
 #define is_integer_or_atom(c) (is_integer(c) || is_atom(c))
 #define is_smallint_or_var(c) (is_smallint(c) || is_variable(c))
 #define is_smallint_or_atom(c) (is_smallint(c) || is_atom(c))
-#define is_nonvar(c) !is_variable(c)
 #define is_stream(c) (get_stream(q,c) >= 0)
 #define is_stream_or_var(c) (is_stream(c) || is_variable(c))
 #define is_stream_or_structure(c) (is_stream(c) || is_structure(c))

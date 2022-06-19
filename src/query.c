@@ -182,17 +182,6 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 	return pl_success;
 }
 
-static bool can_view(const frame *f, const db_entry *dbe)
-{
-	if (dbe->cl.ugen_created > f->ugen)
-		return false;
-
-	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
-		return false;
-
-	return true;
-}
-
 bool more_data(query *q, db_entry *dbe)
 {
 	if (!dbe->next)
@@ -388,19 +377,23 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		if (dbe->cl.ugen_erased)
 			continue;
 
-#if 0
-		q->st.m->ignore_vars = true;
-		cell *head = get_head(dbe->cl.cells);
+#if 1
+		if (idx != pr->idx2) {
+			q->st.m->ignore_vars = true;
+			cell *head = get_head(dbe->cl.cells);
 
-		//int ok = index_cmpkey(head, key, q->st.m);
-		//printf("*** ok = %d\n", ok);
-		//DUMP_TERM("   *** fetch, head = ", head, q->st.curr_frame);
-		//DUMP_TERM("   *** fetch, key = ", key, q->st.curr_frame);
+			//int ok = index_cmpkey(head, key, q->st.m);
+			//printf("*** ok = %d\n", ok);
+			//DUMP_TERM("   *** fetch, head = ", head, q->st.curr_frame);
+			//DUMP_TERM("   *** fetch, key = ", key, q->st.curr_frame);
 
-		if (index_cmpkey(head, key, q->st.m) != 0)
-			continue;
+			if (index_cmpkey(head, key, q->st.m) != 0) {
+				q->st.m->ignore_vars = false;
+				continue;
+			}
 
-		q->st.m->ignore_vars = false;
+			q->st.m->ignore_vars = false;
+		}
 #endif
 
 #if 0

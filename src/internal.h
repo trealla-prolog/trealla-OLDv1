@@ -167,6 +167,12 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
 #define is_ref(c) ((c)->flags & FLAG_REF)
 #define is_op(c) (c->flags & 0xE000)
+#define is_callable(c) (is_literal(c) || is_cstring(c))
+#define is_structure(c) (is_literal(c) && (c)->arity)
+#define is_compound(c) (is_structure(c) || is_string(c))
+#define is_number(c) (is_integer(c) || is_float(c))
+#define is_atomic(c) (is_atom(c) || is_number(c))
+#define is_nonvar(c) !is_variable(c)
 
 typedef struct {
 	int64_t refcnt;

@@ -2290,12 +2290,17 @@ static pl_status do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 		return pl_success;
 	}
 
+	unsigned cnt = 0;
+
 	while (do_retract(q, p1, p1_ctx, DO_RETRACTALL)) {
 		if (q->did_throw) return pl_success;
 		CHECK_INTERRUPT();
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
+		cnt++;
 	}
+
+	//printf("*** purge %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
 	return pl_success;
 }
@@ -2378,6 +2383,49 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	tmp.arity = get_int(p1_arity);
 	CLR_OP(&tmp);
 	return do_abolish(q, p1, &tmp, true);
+}
+
+static USE_RESULT pl_status fn_soft_abolish_1(query *q)
+{
+	GET_FIRST_ARG(p1,callable);
+
+	if (p1->arity != 2)
+		return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
+
+	if (CMP_STR_CSTR(q, p1, "/") && CMP_STR_CSTR(q, p1, "//"))
+		return throw_error(q, p1, p1_ctx, "type_error", "predicate_indicator");
+
+	cell *p1_name = p1 + 1;
+	p1_name = deref(q, p1_name, p1_ctx);
+
+	if (!is_atom(p1_name))
+		return throw_error(q, p1_name, p1_ctx, "type_error", "atom");
+
+	cell *p1_arity = p1 + 2;
+	p1_arity = deref(q, p1_arity, p1_ctx);
+
+	if (!CMP_STR_CSTR(q, p1, "//"))
+		p1_arity += 2;
+
+	if (!is_integer(p1_arity))
+		return throw_error(q, p1_arity, p1_ctx, "type_error", "integer");
+
+	if (is_negative(p1_arity))
+		return throw_error(q, p1_arity, p1_ctx, "domain_error", "not_less_than_zero");
+
+	if (get_int(p1_arity) > MAX_ARITY)
+		return throw_error(q, p1_arity, p1_ctx, "representation_error", "max_arity");
+
+	bool found = false;
+
+	if (get_builtin(q->pl, C_STR(q, p1_name), get_int(p1_arity), &found, NULL), found)
+		return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
+
+	cell tmp;
+	tmp = *p1_name;
+	tmp.arity = get_int(p1_arity);
+	CLR_OP(&tmp);
+	return do_abolish(q, p1, &tmp, false);
 }
 
 static unsigned count_non_anons(uint8_t *mask, unsigned bit)
@@ -7012,6 +7060,7 @@ static const builtins g_other_bifs[] =
 
 	{"sort", 4, fn_sort_4, NULL, false, BLAH},
 
+	{"soft_abolish", 1, fn_soft_abolish_1, NULL, false, BLAH},
 	{"string_codes", 2, fn_string_codes_2, NULL, false, BLAH},
 	{"term_singletons", 2, fn_term_singletons_2, NULL, false, BLAH},
 	{"pid", 1, fn_pid_1, "-integer", false, BLAH},

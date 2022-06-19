@@ -17,9 +17,23 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 
 void clear_rule(clause *t);
 void do_reduce(cell *n);
-bool check_if_rule(const cell *c);
-cell *get_head(cell *c);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
+
+inline static bool check_if_rule(const cell *c)
+{
+	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 2))
+		return true;
+
+	return false;
+}
+
+inline static cell *get_head(cell *c)
+{
+	if (check_if_rule(c))
+		return c + 1;
+
+	return c;
+}
 
 extern const char *g_solo;

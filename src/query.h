@@ -119,6 +119,17 @@ inline static void share_predicate(predicate *pr)
 	pr->ref_cnt++;
 }
 
+inline static bool can_view(const frame *f, const db_entry *dbe)
+{
+	if (dbe->cl.ugen_created > f->ugen)
+		return false;
+
+	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
+		return false;
+
+	return true;
+}
+
 struct reflist_ {
 	reflist *next;
 	pl_idx_t ctx;
