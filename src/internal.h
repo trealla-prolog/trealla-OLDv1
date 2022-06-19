@@ -739,6 +739,7 @@ struct module_ {
 	bool loaded_ops:1;
 	bool loading:1;
 	bool error:1;
+	bool ignore_vars:1;
 };
 
 typedef struct {

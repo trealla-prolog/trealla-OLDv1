@@ -333,8 +333,10 @@ int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, int dep
 				if (i != 0)
 					return i;
 
-				if (is_variable(p1) || is_variable(p2))
-					break;
+				if (is_variable(p1) || is_variable(p2)) {
+					if (!m->ignore_vars)
+						break;
+				}
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;

@@ -389,6 +389,21 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 			continue;
 
 #if 0
+		q->st.m->ignore_vars = true;
+		cell *head = get_head(dbe->cl.cells);
+
+		//int ok = index_cmpkey(head, key, q->st.m);
+		//printf("*** ok = %d\n", ok);
+		//DUMP_TERM("   *** fetch, head = ", head, q->st.curr_frame);
+		//DUMP_TERM("   *** fetch, key = ", key, q->st.curr_frame);
+
+		if (index_cmpkey(head, key, q->st.m) != 0)
+			continue;
+
+		q->st.m->ignore_vars = false;
+#endif
+
+#if 0
 		DUMP_TERM("   *** fetch, key2 = ", dbe->cl.cells, q->st.curr_frame);
 #endif
 
