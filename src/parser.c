@@ -1862,8 +1862,14 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 			dst = p->tmpbuf + offset;
 		}
 
-		while (isblank(*src) || (*src == '_')) {
-			src++;
+		int last_ch = *src;
+
+		while (isblank(*src) || (*src == '_'))
+			last_ch = *src++;
+
+		if (last_ch == '_') {
+			p->srcptr = (char*)src;
+			src = eat_space(p);
 		}
 	}
 
