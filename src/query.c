@@ -353,48 +353,16 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	if (!(iter = map_find_key(idx, key)))
 		return pl_failure;
 
-	if (pr->is_unique) {
-		if (!map_next_key(iter, (void*)&q->st.curr_clause))
-			return pl_failure;
+	if (!map_next_key(iter, (void*)&q->st.curr_clause))
+		return pl_failure;
 
+	if (pr->is_unique) {
 		q->st.definite = true;
 		map_done(iter);
 		return pl_success;
 	}
 
-#if 0
-	// If the index search has found just one (definite) solution
-	// then we can use it with no problems. If more than one then
-	// results must be returned in database order, so prefetch all
-	// the results and return them sorted as an iterator...
-
-	map *tmp_list = NULL;
-	db_entry *dbe;
-
-	while (map_next_key(iter, (void*)&dbe)) {
-#if DEBUGIDX
-		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
-#endif
-
-		if (!tmp_list) {
-			tmp_list = map_create(NULL, NULL, NULL);
-			map_allow_dups(tmp_list, false);
-			map_set_tmp(tmp_list);
-		}
-
-		map_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
-	}
-
-	if (!tmp_list)
-		return pl_failure;
-
-	q->st.iter = map_first(tmp_list);
-	map_next(q->st.iter, (void*)&q->st.curr_clause);
-#else
 	q->st.iter = iter;
-	map_next(q->st.iter, (void*)&q->st.curr_clause);
-#endif
-
 	return pl_success;
 }
 
