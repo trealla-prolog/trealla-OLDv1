@@ -350,20 +350,12 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	q->st.curr_clause = NULL;
 	miter *iter;
 
-	if (!(iter = map_find_key(idx, key))) {
-#if DEBUGIDX
-		printf("      NOT FOUND\n");
-#endif
+	if (!(iter = map_find_key(idx, key)))
 		return pl_failure;
-	}
 
 	if (pr->is_unique) {
-		if (!map_next_key(iter, (void*)&q->st.curr_clause)) {
-#if DEBUGIDX
-			printf("      NOT FOUND2\n");
-#endif
+		if (!map_next_key(iter, (void*)&q->st.curr_clause))
 			return pl_failure;
-		}
 
 		q->st.definite = true;
 		map_done(iter);
