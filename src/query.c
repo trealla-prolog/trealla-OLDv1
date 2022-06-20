@@ -371,6 +371,19 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
+		if (idx != pr->idx2) {
+			q->st.m->ignore_vars = true;
+			cell *head = get_head(dbe->cl.cells);
+			bool vars = false;
+
+			if (index_cmpkey(head, key, q->st.m, &vars) != 0) {
+				q->st.m->ignore_vars = false;
+				continue;
+			}
+
+			q->st.m->ignore_vars = false;
+		}
+
 #if DEBUGIDX
 		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif

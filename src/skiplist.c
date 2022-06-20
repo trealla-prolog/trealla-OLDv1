@@ -33,7 +33,7 @@ struct sliter_ {
 
 struct skiplist_ {
 	slnode_t *header;
-	int (*cmpkey)(const void*, const void*, const void*, bool*, bool);
+	int (*cmpkey)(const void*, const void*, const void*, bool*);
 	void (*delkey)(void*, void*, const void*);
 	const void *p;
 	sliter *iters;
@@ -51,14 +51,14 @@ inline static slnode_t *new_node_of_level(unsigned x)
 	return malloc(sizeof(slnode_t) + ((x+1) * sizeof(slnode_t*)));
 }
 
-static int default_cmpkey(const void *p1, const void *p2, __attribute__((unused)) const void *p, bool *vars, bool find)
+static int default_cmpkey(const void *p1, const void *p2, __attribute__((unused)) const void *p, bool *vars)
 {
 	int64_t i1 = (int64_t)p1;
 	int64_t i2 = (int64_t)p2;
 	return i1 < i2 ? -1 : i1 > i2 ? 1 : 0;
 }
 
-skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void*, bool*, bool), void(*delkey)(void*, void*, const void*), const void *p)
+skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void*, bool*), void(*delkey)(void*, void*, const void*), const void *p)
 {
 	skiplist *l = (skiplist*)calloc(1, sizeof(struct skiplist_));
 	if (!l) return NULL;
@@ -128,14 +128,14 @@ size_t sl_count(const skiplist *l) { return l ? l->count : 0; }
 
 // Modified binary search: return position where it is or ought to be
 
-static int binary_search2(const skiplist *l, const keyval_t n[], const void *key, int imax, bool find)
+static int binary_search2(const skiplist *l, const keyval_t n[], const void *key, int imax)
 {
 	int imin = 0, imid = 0;
 	bool vars = false;
 
 	while (imax >= imin) {
 		imid = (imax + imin) / 2;
-		int ok = l->cmpkey(n[imid].key, key, l->p, &vars, find);
+		int ok = l->cmpkey(n[imid].key, key, l->p, &vars);
 
 		if (ok <= 0)
 			imin = imid + 1;
@@ -144,7 +144,7 @@ static int binary_search2(const skiplist *l, const keyval_t n[], const void *key
 	}
 
 	vars = false;
-	int ok = l->cmpkey(n[imid].key, key, l->p, &vars, find);
+	int ok = l->cmpkey(n[imid].key, key, l->p, &vars);
 
 	if (ok <= 0)
 		imid++;
@@ -177,14 +177,14 @@ bool sl_set(skiplist *l, const void *key, const void *val)
 	bool vars = false;
 
 	for (int k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, &vars, false) < 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, &vars) < 0))
 			p = q;
 
 		update[k] = p;
 	}
 
 	if (p != l->header) {
-		int imid = binary_search2(l, p->bkt, key, p->nbr - 1, false);
+		int imid = binary_search2(l, p->bkt, key, p->nbr - 1);
 
 		if (p->nbr < BUCKET_SIZE) {
 			int j;
@@ -202,7 +202,7 @@ bool sl_set(skiplist *l, const void *key, const void *val)
 		// Don't drop this unless you are 100% sure:
 
 #if 1
-		while ((imid < p->nbr) && (l->cmpkey(p->bkt[imid].key, key, l->p, &vars, false) == 0))
+		while ((imid < p->nbr) && (l->cmpkey(p->bkt[imid].key, key, l->p, &vars) == 0))
 			imid++;
 
 		if (imid <= BUCKET_SIZE) {
@@ -255,14 +255,14 @@ bool sl_app(skiplist *l, const void *key, const void *val)
 	bool vars = false;
 
 	for (int k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, &vars, false) <= 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, &vars) <= 0))
 			p = q;
 
 		update[k] = p;
 	}
 
 	if (p != l->header) {
-		int imid = binary_search2(l, p->bkt, key, p->nbr - 1, false);
+		int imid = binary_search2(l, p->bkt, key, p->nbr - 1);
 
 		if (p->nbr < BUCKET_SIZE) {
 			int j;
@@ -280,7 +280,7 @@ bool sl_app(skiplist *l, const void *key, const void *val)
 		// Don't drop this unless you are 100% sure:
 
 #if 1
-		while ((imid < p->nbr) && (l->cmpkey(p->bkt[imid].key, key, l->p, &vars, false) == 0))
+		while ((imid < p->nbr) && (l->cmpkey(p->bkt[imid].key, key, l->p, &vars) == 0))
 			imid++;
 
 		if (imid <= BUCKET_SIZE) {
@@ -330,7 +330,7 @@ bool sl_get(const skiplist *l, const void *key, const void **val)
 	bool vars = false;
 
 	for (k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars, true) < 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars) < 0))
 			p = q;
 	}
 
@@ -340,7 +340,7 @@ bool sl_get(const skiplist *l, const void *key, const void **val)
 	int imid;
 
 	for (imid = 0; imid < q->nbr; imid++) {
-		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars, true) == 0)
+		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars) == 0)
 			break;
 	}
 
@@ -362,7 +362,7 @@ bool sl_del(skiplist *l, const void *key)
 	bool vars = false;
 
 	for (k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars, false) < 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars) < 0))
 			p = q;
 
 		update[k] = p;
@@ -374,7 +374,7 @@ bool sl_del(skiplist *l, const void *key)
 	int imid;
 
 	for (imid = 0; imid < q->nbr; imid++) {
-		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars, false) == 0)
+		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars) == 0)
 			break;
 	}
 
@@ -438,14 +438,14 @@ void sl_find(const skiplist *l, const void *key, int (*f)(const void*, const voi
 	bool vars = false;
 
 	for (int k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars, true) < 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars) < 0))
 			p = q;
 	}
 
 	if (!(q = p->forward[0]))
 		return;
 
-	int imid = binary_search2(l, q->bkt, key, q->nbr - 1, true);
+	int imid = binary_search2(l, q->bkt, key, q->nbr - 1);
 	p = q;
 
 	for (int j = imid; j < p->nbr; j++) {
@@ -535,7 +535,7 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	bool vars = false;
 
 	for (int k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars, true) < 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, &vars) < 0))
 			p = q;
 	}
 
@@ -545,7 +545,7 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	int imid;
 
 	for (imid = 0; imid < q->nbr; imid++) {
-		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars, true) == 0)
+		if (l->cmpkey(q->bkt[imid].key, key, l->p, &vars) == 0)
 			break;
 	}
 
@@ -579,13 +579,8 @@ bool sl_is_next_key(sliter *iter)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, &vars, false);
-
-			if (ok == 0)
+			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, &vars) == 0)
 				return true;
-
-			if (ok > 0)
-				return false;
 
 			iter->idx++;
 		}
@@ -606,16 +601,9 @@ bool sl_next_key(sliter *iter, void **val)
 	bool vars = false;
 
 	while (iter->p) {
-		while (iter->idx < iter->p->nbr) {
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, &vars, false);
-
-			if (ok < 0) {
-				iter->idx++;
-				continue;
-			}
-
-			if (ok > 0)
-				return false;
+		if (iter->idx < iter->p->nbr) {
+			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, &vars) != 0)
+				break;
 
 			if (val)
 				*val = iter->p->bkt[iter->idx].val;
