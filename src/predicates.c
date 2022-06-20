@@ -6226,6 +6226,25 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	return pl_success;
 }
 
+static USE_RESULT pl_status fn_sys_lengthchk_2(query *q)
+{
+	GET_FIRST_ARG(p1,iso_list_or_nil);
+	GET_NEXT_ARG(p2,integer_or_var);
+	LIST_HANDLER(p1);
+	pl_int_t n = 0;
+
+	while (is_iso_list(p1)) {
+		p1 = LIST_TAIL(p1);
+		p1 = deref(q, p1, p1_ctx);
+		p1_ctx = q->latest_ctx;
+		n++;
+	}
+
+	cell tmp;
+	make_int(&tmp, n);
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+}
+
 static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
@@ -7134,6 +7153,7 @@ static const builtins g_other_bifs[] =
 	{"$register_term", 1, fn_sys_register_term_1, NULL, false, BLAH},
 	{"$get_level", 1, fn_sys_get_level_1, "-var", false, BLAH},
 	{"$is_partial_string", 1, fn_sys_is_partial_string_1, "+string", false, BLAH},
+	{"$lengthchk", 2, fn_sys_lengthchk_2, NULL, false, BLAH},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false, BLAH},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false, BLAH},
 	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false, BLAH},

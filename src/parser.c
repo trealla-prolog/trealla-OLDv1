@@ -2385,7 +2385,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		dst[src-tmpptr] = '\0';
 
 		if ((dst[0] != '0') && (dst[1] != 'x')) {
-			if ((strchr(dst, '.') || strchr(dst, 'e') || strchr(dst, 'E')) && !strchr(dst, '\'')) {
+			if ((strchr(p->tmpbuf, '.') || strchr(p->tmpbuf, 'e') || strchr(dst, 'E')) && !strchr(p->tmpbuf, '\'')) {
 				if (!valid_float(p->token)) {
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: syntax error, float, line %u\n", p->line_nbr);
