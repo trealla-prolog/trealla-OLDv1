@@ -1,0 +1,55 @@
+{
+  "uid" : "ed1eed0d42b59dbd",
+  "name" : "call_with_timeout_3_02",
+  "fullName" : "call_with_timeout_3_02::tests",
+  "historyId" : "call_with_timeout_3_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/timeout/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/timeout/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/timeout/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/timeout/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "69-70"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/ff0815b8dc229920b499edcc11d7addda62f89d6/library/timeout/tests.lgt#L69"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "ed1eed0d42b59dbd.json",
+  "parameterValues" : [ "library/timeout/tests.lgt", "69-70", "https://github.com/LogtalkDotOrg/logtalk3/tree/ff0815b8dc229920b499edcc11d7addda62f89d6/library/timeout/tests.lgt#L69" ]
+}

@@ -1,17 +1,6 @@
 {
-  "total" : 479,
+  "total" : 472,
   "items" : [ {
-    "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
-    "name" : "tools/diagrams/tests.lgt::tests",
-    "statistic" : {
-      "failed" : 93,
-      "broken" : 0,
-      "skipped" : 0,
-      "passed" : 93,
-      "unknown" : 0,
-      "total" : 186
-    }
-  }, {
     "uid" : "e389e2092b99591b4c1fa293c7557931",
     "name" : "tests/logtalk/predicates/object_property_2/tests.lgt::tests",
     "statistic" : {
@@ -89,26 +78,37 @@
       "total" : 27
     }
   }, {
-    "uid" : "d944697bc54dd491703ec3072bfba616",
-    "name" : "tools/code_metrics/size_metric_tests.lgt::size_metric_tests",
+    "uid" : "ac3efbb8eff82b3668361622fcaf20d6",
+    "name" : "tools/debugger/tests.lgt::tests",
     "statistic" : {
-      "failed" : 6,
+      "failed" : 4,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 1,
+      "passed" : 32,
       "unknown" : 0,
-      "total" : 7
+      "total" : 36
     }
   }, {
-    "uid" : "a17f506128c48415bd5f6275182f5e99",
-    "name" : "tools/code_metrics/code_metrics_tests.lgt::code_metrics_tests",
+    "uid" : "211108ee09d578e3f717599bb52e10eb",
+    "name" : "tests/logtalk/methods/predicate_property_2/tests.lgt::tests",
     "statistic" : {
-      "failed" : 6,
+      "failed" : 4,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 1,
+      "passed" : 30,
       "unknown" : 0,
-      "total" : 7
+      "total" : 34
+    }
+  }, {
+    "uid" : "56c149e6dacde902b1d1b825e3cabae5",
+    "name" : "examples/figures/tests.lgt::tests",
+    "statistic" : {
+      "failed" : 4,
+      "broken" : 0,
+      "skipped" : 0,
+      "passed" : 0,
+      "unknown" : 0,
+      "total" : 4
     }
   } ]
 }
