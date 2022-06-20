@@ -2143,7 +2143,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 
 		if (e1->c.attrs) {
 			may_heap_error(init_tmp_heap(q));
-			may_heap_error(q->vars = m_create(NULL, NULL, NULL));
+			may_heap_error(q->vars = map_create(NULL, NULL, NULL));
 			frame *f = GET_CURR_FRAME();
 			q->varno = f->nbr_vars;
 			q->tab_idx = 0;
@@ -2326,15 +2326,15 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(q->st.m, dbe);
 	}
 
-	m_destroy(pr->idx);
+	map_destroy(pr->idx);
 	pr->idx = NULL;
 
 	if (hard) {
 		pr->is_abolished = true;
 	} else {
-		//pr->idx = m_create(index_cmpkey, NULL, q->st.m);
+		//pr->idx = map_create(index_cmpkey, NULL, q->st.m);
 		//ensure(pr->idx);
-		//m_allow_dups(pr->idx, true);
+		//map_allow_dups(pr->idx, true);
 	}
 
 	pr->head = pr->tail = NULL;
@@ -2748,12 +2748,12 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
 	if (!q->retry)
-		q->st.f_iter = m_first(q->st.m->index);
+		q->st.f_iter = map_first(q->st.m->index);
 
 	DISCARD_RESULT push_choice(q);
 	predicate *pr = NULL;
 
-	while (m_next(q->st.f_iter, (void*)&pr)) {
+	while (map_next(q->st.f_iter, (void*)&pr)) {
 		CHECK_INTERRUPT();
 
 		if (pr->is_abolished)
@@ -6531,7 +6531,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	may_ptr_error(key);
 
 	if (do_create) {
-		if (m_get(q->pl->keyval, key, NULL)) {
+		if (map_get(q->pl->keyval, key, NULL)) {
 			free(key);
 			return pl_failure;
 		}
@@ -6551,7 +6551,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	}
 
 	may_ptr_error(val);
-	m_set(q->pl->keyval, key, val);
+	map_set(q->pl->keyval, key, val);
 	return pl_success;
 }
 
@@ -6604,7 +6604,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 	may_ptr_error(key);
 	char *val = NULL;
 
-	if (!m_get(q->pl->keyval, key, (void*)&val)) {
+	if (!map_get(q->pl->keyval, key, (void*)&val)) {
 		if (key != tmpbuf) free(key);
 		return pl_failure;
 	}
@@ -6629,7 +6629,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		may_error(make_cstring(&tmp, val));
 
 	if (do_delete)
-		m_del(q->pl->keyval, key);
+		map_del(q->pl->keyval, key);
 
 	if (key != tmpbuf) free(key);
 	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -7178,12 +7178,12 @@ static const builtins g_other_bifs[] =
 
 builtins *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found, bool *function)
 {
-	miter *iter = m_find_key(pl->biftab, name);
+	miter *iter = map_find_key(pl->biftab, name);
 	builtins *ptr;
 
-	while (m_next_key(iter, (void**)&ptr)) {
+	while (map_next_key(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
-			m_done(iter);
+			map_done(iter);
 			if (found) *found = true;
 			if (function) *function = ptr->function;
 			return ptr;
@@ -7216,34 +7216,34 @@ void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_
 		ptr->types[i] = types[i];
 
 	ptr->ret_type = ret_type;
-	m_app(pl->biftab, ptr->name, ptr);
+	map_app(pl->biftab, ptr->name, ptr);
 }
 
 void load_builtins(prolog *pl)
 {
 	for (const builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 		max_ffi_idx++;
 	}
 
 	for (const builtins *ptr = g_other_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_files_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
-		m_app(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 }
 
@@ -7347,7 +7347,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
-		m_app(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7356,7 +7356,7 @@ static void load_properties(module *m)
  	}
 
 	for (const builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
-		m_app(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7365,7 +7365,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_other_bifs; ptr->name; ptr++) {
-		m_app(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7374,7 +7374,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
-		m_app(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7383,7 +7383,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
-		m_app(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7448,10 +7448,10 @@ static void load_ops(query *q)
 
 	q->st.m->loaded_ops = true;
 	ASTRING_alloc(pr, 1024*8);
-	miter *iter = m_first(q->st.m->ops);
+	miter *iter = map_first(q->st.m->ops);
 	op_table *ptr;
 
-	while (m_next(iter, (void**)&ptr)) {
+	while (map_next(iter, (void**)&ptr)) {
 		char specifier[80], name[256];
 
 		if (!ptr->specifier)
@@ -7489,9 +7489,9 @@ static void load_ops(query *q)
 		ASTRING_strcat(pr, tmpbuf);
 	}
 
-	iter = m_first(q->st.m->defops);
+	iter = map_first(q->st.m->defops);
 
-	while (m_next(iter, (void**)&ptr)) {
+	while (map_next(iter, (void**)&ptr)) {
 		char specifier[80], name[256];
 
 		if (!ptr->specifier)

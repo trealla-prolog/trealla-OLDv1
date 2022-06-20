@@ -65,7 +65,7 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 	memcpy(pl->pool + offset, name, len+1);
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
-	m_set(pl->symtab, key, (void*)(size_t)offset);
+	map_set(pl->symtab, key, (void*)(size_t)offset);
 	g_literal_cnt++;
 	return (pl_idx_t)offset;
 }
@@ -74,7 +74,7 @@ pl_idx_t index_from_pool(prolog *pl, const char *name)
 {
 	const void *val;
 
-	if (m_get(pl->symtab, name, &val))
+	if (map_get(pl->symtab, name, &val))
 		return (pl_idx_t)(size_t)val;
 
 	return add_to_pool(pl, name);
@@ -169,9 +169,9 @@ void pl_destroy(prolog *pl)
 	while (pl->modules)
 		destroy_module(pl->modules);
 
-	m_destroy(pl->biftab);
-	m_destroy(pl->symtab);
-	m_destroy(pl->keyval);
+	map_destroy(pl->biftab);
+	map_destroy(pl->symtab);
+	map_destroy(pl->keyval);
 	free(pl->pool);
 	free(pl->tabs);
 	pl->pool_offset = 0;
@@ -230,10 +230,10 @@ prolog *pl_create()
 	if (!pl->pool) return NULL;
 	bool error = false;
 
-	CHECK_SENTINEL(pl->symtab = m_create((void*)strcmp, (void*)free, NULL), NULL);
-	CHECK_SENTINEL(pl->keyval = m_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
-	m_allow_dups(pl->symtab, false);
-	m_allow_dups(pl->keyval, false);
+	CHECK_SENTINEL(pl->symtab = map_create((void*)strcmp, (void*)free, NULL), NULL);
+	CHECK_SENTINEL(pl->keyval = map_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
+	map_allow_dups(pl->symtab, false);
+	map_allow_dups(pl->keyval, false);
 
 	if (error) {
 		free(pl->pool);
@@ -313,8 +313,8 @@ prolog *pl_create()
 
 	pl->streams[3].ignore = true;;
 
-	pl->biftab = m_create((void*)strcmp, NULL, NULL);
-	m_allow_dups(pl->biftab, false);
+	pl->biftab = map_create((void*)strcmp, NULL, NULL);
+	map_allow_dups(pl->biftab, false);
 
 	if (pl->biftab)
 		load_builtins(pl);

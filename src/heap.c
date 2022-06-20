@@ -12,10 +12,10 @@ static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
 {
 	const void *v;
 
-	if (m_get(q->vars, (void*)(size_t)slot_nbr, &v))
+	if (map_get(q->vars, (void*)(size_t)slot_nbr, &v))
 		return (unsigned)(size_t)v;
 
-	m_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
+	map_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
 	return -1;
 }
 
@@ -317,12 +317,12 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	reflist nlist = {0};
 	nlist.ptr = p1;
 	nlist.ctx = p1_ctx;
-	q->vars = m_create(NULL, NULL, NULL);
+	q->vars = map_create(NULL, NULL, NULL);
 	if (!q->vars) return NULL;
 	q->varno = f->nbr_vars;
 	q->tab_idx = 0;
 	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, false, NULL, 0, NULL, 0, 0, &nlist);
-	m_destroy(q->vars);
+	map_destroy(q->vars);
 	q->vars = NULL;
 	if (!rec) return rec;
 	return q->tmp_heap;
@@ -358,7 +358,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 			q->tab_idx++;
 		}
 
-		m_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)q->varno);
+		map_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)q->varno);
 		q->varno++;
 	}
 
@@ -409,13 +409,13 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 
 cell *deep_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs)
 {
-	q->vars = m_create(NULL, NULL, NULL);
+	q->vars = map_create(NULL, NULL, NULL);
 	if (!q->vars) return NULL;
 	frame *f = GET_CURR_FRAME();
 	q->varno = f->nbr_vars;
 	q->tab_idx = 0;
 	cell *tmp = deep_copy_to_tmp_with_replacement(q, p1, p1_ctx, copy_attrs, NULL, 0, NULL, 0);
-	m_destroy(q->vars);
+	map_destroy(q->vars);
 	q->vars = NULL;
 	return tmp;
 }

@@ -215,11 +215,11 @@ static bool is_next_key(query *q, clause *r)
 	if (q->st.iter) {
 		db_entry *next;
 
-		while (m_is_next(q->st.iter, (void*)&next)) {
+		while (map_is_next(q->st.iter, (void*)&next)) {
 			if (can_view(f, next))
 				return true;
 
-			m_next(q->st.iter, (void*)&next);
+			map_next(q->st.iter, (void*)&next);
 		}
 
 		q->st.iter = NULL;
@@ -265,7 +265,7 @@ static bool is_next_key(query *q, clause *r)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!m_next(q->st.iter, (void*)&q->st.curr_clause)) {
+		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
@@ -341,26 +341,32 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		idx = pr->idx2;
 	}
 
-#if 0
-	DUMP_TERM("*** search, key1 = ", key, q->st.curr_frame);
+#define DEBUGIDX 0
+
+#if DEBUGIDX
+	DUMP_TERM("search, term = ", key, q->st.curr_frame);
 #endif
 
 	q->st.curr_clause = NULL;
 	miter *iter;
 
-	if (!(iter = m_find_key(idx, key))) {
-#if 0
-		DUMP_TERM("   *** not found, key = ", key, q->st.curr_frame);
+	if (!(iter = map_find_key(idx, key))) {
+#if DEBUGIDX
+		printf("      NOT FOUND\n");
 #endif
 		return pl_failure;
 	}
 
-	if (!m_next_key(iter, (void*)&q->st.curr_clause))
-		return pl_failure;
-
 	if (pr->is_unique) {
+		if (!map_next_key(iter, (void*)&q->st.curr_clause)) {
+#if DEBUGIDX
+			printf("      NOT FOUND2\n");
+#endif
+			return pl_failure;
+		}
+
 		q->st.definite = true;
-		m_done(iter);
+		map_done(iter);
 		return pl_success;
 	}
 
@@ -371,21 +377,11 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 
 	map *tmp_list = NULL;
 	db_entry *dbe;
-	int extras = 0;
 
-	while (m_next_key(iter, (void*)&dbe)) {
-		if (dbe->cl.ugen_erased)
-			continue;
-
-#if 1
+	while (map_next_key(iter, (void*)&dbe)) {
 		if (idx != pr->idx2) {
 			q->st.m->ignore_vars = true;
 			cell *head = get_head(dbe->cl.cells);
-
-			//int ok = index_cmpkey(head, key, q->st.m);
-			//printf("*** ok = %d\n", ok);
-			//DUMP_TERM("   *** fetch, head = ", head, q->st.curr_frame);
-			//DUMP_TERM("   *** fetch, key = ", key, q->st.curr_frame);
 
 			if (index_cmpkey(head, key, q->st.m) != 0) {
 				q->st.m->ignore_vars = false;
@@ -394,38 +390,25 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 
 			q->st.m->ignore_vars = false;
 		}
-#endif
 
-#if 0
-		DUMP_TERM("   *** fetch, key2 = ", dbe->cl.cells, q->st.curr_frame);
+#if DEBUGIDX
+		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif
 
 		if (!tmp_list) {
-			tmp_list = m_create(NULL, NULL, NULL);
-			m_allow_dups(tmp_list, false);
-			m_set_tmp(tmp_list);
-			m_app(tmp_list, (void*)q->st.curr_clause->db_id, q->st.curr_clause);
+			tmp_list = map_create(NULL, NULL, NULL);
+			map_allow_dups(tmp_list, false);
+			map_set_tmp(tmp_list);
 		}
 
-		m_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
-		extras++;
+		map_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
 	}
 
-	if (!tmp_list) {
-#if 0
-		printf("   *** definite\n");
-#endif
+	if (!tmp_list)
+		return pl_failure;
 
-		q->st.definite = true;
-		return pl_success;
-	}
-
-#if 0
-	printf("   *** extras = %d\n", extras);
-#endif
-
-	q->st.iter = m_first(tmp_list);
-	m_next(q->st.iter, (void*)&q->st.curr_clause);
+	q->st.iter = map_first(tmp_list);
+	map_next(q->st.iter, (void*)&q->st.curr_clause);
 	return pl_success;
 }
 
@@ -614,7 +597,7 @@ LOOP:
 	f->overflow = ch->overflow;
 
 	if (q->st.iter) {
-		m_done(q->st.iter);
+		map_done(q->st.iter);
 		q->st.iter = NULL;
 	}
 
@@ -802,7 +785,7 @@ static void commit_me(query *q, clause *r)
 		unshare_predicate(q, q->st.pr);
 
 		if (q->st.iter) {
-			m_done(q->st.iter);
+			map_done(q->st.iter);
 			q->st.iter = NULL;
 		}
 
@@ -936,7 +919,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		}
 
 		if (ch->st.iter)
-			m_done(ch->st.iter);
+			map_done(ch->st.iter);
 
 		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);

@@ -13,22 +13,22 @@
 #define map skiplist
 #define miter sliter
 
-#define m_create sl_create
-#define m_allow_dups sl_allow_dups
-#define m_set_tmp sl_set_tmp
-#define m_set sl_set
-#define m_app sl_app
-#define m_get sl_get
-#define m_del sl_del
-#define m_count sl_count
-#define m_find sl_find
-#define m_is_next sl_is_next
-#define m_next sl_next
-#define m_find_key sl_find_key
-#define m_is_next_key sl_is_next_key
-#define m_next_key sl_next_key
-#define m_first sl_first
-#define m_done sl_done
-#define m_destroy sl_destroy
+#define map_create sl_create
+#define map_allow_dups sl_allow_dups
+#define map_set_tmp sl_set_tmp
+#define map_set sl_set
+#define map_app sl_app
+#define map_get sl_get
+#define map_del sl_del
+#define map_count sl_count
+#define map_find sl_find
+#define map_is_next sl_is_next
+#define map_next sl_next
+#define map_find_key sl_find_key
+#define map_is_next_key sl_is_next_key
+#define map_next_key sl_next_key
+#define map_first sl_first
+#define map_done sl_done
+#define map_destroy sl_destroy
 
 #endif
