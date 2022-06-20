@@ -7,7 +7,7 @@ typedef struct skiplist_ skiplist;
 typedef struct sliter_ sliter;
 
 extern skiplist *sl_create(
-	int (*cmpkey)(const void *k1, const void *k2, const void* p),
+	int (*cmpkey)(const void *k1, const void *k2, const void *p, bool *vars),
 	void (*delkey)(void *k, void *v, const void* p),
 	const void *p
 	);

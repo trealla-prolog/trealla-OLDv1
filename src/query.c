@@ -374,8 +374,9 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		if (idx != pr->idx2) {
 			q->st.m->ignore_vars = true;
 			cell *head = get_head(dbe->cl.cells);
+			bool vars = false;
 
-			if (index_cmpkey(head, key, q->st.m) != 0) {
+			if (index_cmpkey(head, key, q->st.m, &vars) != 0) {
 				q->st.m->ignore_vars = false;
 				continue;
 			}
