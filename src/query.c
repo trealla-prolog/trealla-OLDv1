@@ -371,6 +371,11 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
+
+		// This pre-check is faster than going through
+		// unification, and gets rid of spurious clauses
+		// that variables in the search key turn up...
+
 		if (idx != pr->idx2) {
 			q->st.m->ignore_vars = true;
 			cell *head = get_head(dbe->cl.cells);
