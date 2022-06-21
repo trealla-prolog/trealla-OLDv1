@@ -3633,6 +3633,216 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	return ok;
 }
 
+static int collect_local_vars(cell *p1, pl_idx_t nbr_cells, cell **slots)
+{
+	int cnt = 0;
+
+	for (unsigned i = 0; i < nbr_cells; i++, p1++) {
+		if (is_variable(p1)) {
+			assert(p1->var_nbr < MAX_ARITY);
+
+			if (!slots[p1->var_nbr]) {
+				slots[p1->var_nbr] = p1;
+				cnt++;
+			}
+		}
+	}
+
+	return cnt;
+}
+
+static uint64_t get_vars(cell *p)
+{
+	cell *slots[MAX_ARITY] = {0};
+	int cnt = collect_local_vars(p, p->nbr_cells, slots);
+	uint64_t mask = 0;
+
+	if (!cnt)
+		return 0;
+
+	for (unsigned i = 0; i < MAX_ARITY; i++) {
+		if (slots[i])
+			mask |= 1ULL << i;
+	}
+
+	return mask;
+}
+
+static cell *redo_existentials(query *q, cell *p2, uint64_t *xs)
+{
+	while (is_structure(p2) && !slicecmp2(C_STR(q, p2), C_STRLEN(q, p2), "^") && !g_tpl_interrupt) {
+		cell *c = ++p2;
+
+		if (!is_variable(c)) {
+			for (pl_idx_t i = 0; i < c->nbr_cells; i++) {
+				if (is_variable(c+i)) {
+					assert((c+i)->var_nbr < 64);
+					*xs |= 1ULL << (c+i)->var_nbr;
+				}
+			}
+		}
+
+		assert(c->var_nbr < 64);
+
+		if (is_variable(c))
+			*xs |= 1ULL << c->var_nbr;
+
+		p2 += c->nbr_cells;
+	}
+
+	return p2;
+}
+
+static void pin_vars(query *q, uint64_t mask)
+{
+	choice *ch = GET_CURR_CHOICE();
+	ch->pins = mask;
+}
+
+static void unpin_vars(query *q)
+{
+	choice *ch = GET_CURR_CHOICE();
+	frame *g = GET_CURR_FRAME();
+	uint64_t mask = 1;
+
+	for (unsigned i = 0; i < g->nbr_vars; i++, mask <<= 1) {
+		if (!(ch->pins & mask))
+			continue;
+
+		slot *e = GET_SLOT(g, i);
+		e->c.tag = TAG_EMPTY;
+		e->c.attrs = NULL;
+	}
+
+	ch->pins = 0;
+}
+
+static USE_RESULT pl_status fn_sys_bagof_3(query *q)
+{
+	GET_FIRST_ARG(p1,any);
+	GET_NEXT_ARG(p2,callable);
+	GET_NEXT_ARG(p3,list_or_nil_or_var);
+
+	//if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
+	//	return throw_error(q, p3, "type_error", "list");
+
+	uint64_t xs_vars = 0;
+	p2 = redo_existentials(q, p2, &xs_vars);
+	cell *tvars_tmp = do_term_variables(q, p2, p2_ctx);
+	may_ptr_error(tvars_tmp);
+	cell *tvars = malloc(sizeof(cell)*tvars_tmp->nbr_cells);
+	may_ptr_error(tvars);
+	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
+
+	// First time thru generate all solutions
+
+	if (!q->retry) {
+		q->st.qnbr++;
+		assert(q->st.qnbr < MAX_QUEUES);
+		cell *tmp = clone_to_heap(q, true, p2, 2+tvars->nbr_cells+1);
+		may_ptr_error(tmp);
+		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
+		make_struct(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+tvars->nbr_cells);
+		make_int(tmp+nbr_cells++, q->st.qnbr);
+		nbr_cells += safe_copy_cells(tmp+nbr_cells, tvars, tvars->nbr_cells);
+		make_struct(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
+
+		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		may_error(push_barrier(q));
+		q->st.curr_cell = tmp;
+		free(tvars);
+		return pl_success;
+	}
+
+	if (!queuen_used(q) && !q->tmpq[q->st.qnbr]) {
+		free(tvars);
+		return pl_failure;
+	}
+
+	// First retry takes a copy
+
+	if (!q->tmpq[q->st.qnbr]) {
+		pl_idx_t nbr_cells = queuen_used(q);
+		q->tmpq[q->st.qnbr] = malloc(sizeof(cell)*nbr_cells);
+		may_ptr_error(q->tmpq[q->st.qnbr]);
+		copy_cells(q->tmpq[q->st.qnbr], get_queuen(q), nbr_cells);
+		q->tmpq_size[q->st.qnbr] = nbr_cells;
+	}
+
+	// Now grab matching solutions
+
+	init_queuen(q);
+	may_error(push_choice(q));
+	uint64_t p1_vars = get_vars(p1);
+	uint64_t p2_vars = get_vars(p2);
+	uint64_t mask = p1_vars ^ p2_vars ^ xs_vars;
+	pin_vars(q, mask);
+	pl_idx_t nbr_cells = q->tmpq_size[q->st.qnbr];
+	bool unmatched = false;
+	frame *g = GET_CURR_FRAME();
+
+	for (cell *c = q->tmpq[q->st.qnbr]; nbr_cells;
+		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
+
+#if 0
+		fprintf(stdout, "*** ");
+		print_term(q, stdout, c, p2_ctx, 1);
+		fprintf(stdout, "\n");
+#endif
+
+		if (c->flags & FLAG_PROCESSED)
+			continue;
+
+		try_me(q, g->nbr_vars*2);
+
+		// FIXME: if no variables copied & any>0 redo
+		// FIXME: if no variables copied & any=0 break after queueing it
+
+		if (unify(q, tvars, p2_ctx, c, q->st.fp)) {
+			may_heap_error(init_tmp_heap(q));
+			cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, true);
+			may_ptr_error(tmp);
+			may_heap_error(alloc_on_queuen(q, q->st.qnbr, tmp));
+			c->flags |= FLAG_PROCESSED;
+		} else
+			unmatched = true;
+
+		undo_me(q);
+	}
+
+	// No solution?
+
+	if (!queuen_used(q)) {
+		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		drop_choice(q);
+		free(tvars);
+		return pl_failure;
+	}
+
+	// Return matching solutions
+
+	cell *tmp = deep_clone_to_heap(q, tvars, p2_ctx);
+	may_ptr_error(tmp);
+	unpin_vars(q);
+	unify(q, tvars, p2_ctx, tmp, q->st.curr_frame);
+	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
+
+	if (!unmatched) {
+		init_queuen(q);
+		free(q->tmpq[q->st.qnbr]);
+		q->tmpq[q->st.qnbr] = NULL;
+		drop_choice(q);
+		q->st.qnbr--;
+	}
+
+	free(tvars);
+	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
+}
+
 static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 {
 	GET_FIRST_ARG(p1,integer);
@@ -7039,6 +7249,8 @@ static const builtins g_iso_bifs[] =
 	{"=", 2, fn_iso_unify_2, NULL, false, BLAH},
 	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
 	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
+
+	{"$bagof", 3, fn_sys_bagof_3, NULL, false, BLAH},
 
 	{0}
 };

@@ -268,6 +268,8 @@ enum {
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
 
 	FLAG_SPARE1=1<<6,
+
+	FLAG_PROCESSED=FLAG_SPARE1,			// used by bagof
 	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
@@ -556,7 +558,7 @@ struct prolog_state_ {
 
 struct choice_ {
 	prolog_state st;
-	uint64_t ugen, cgen, frame_cgen;
+	uint64_t ugen, cgen, frame_cgen, pins;
 	pl_idx_t v1, v2, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;
