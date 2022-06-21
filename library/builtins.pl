@@ -123,6 +123,10 @@ keysort_(_, _, Sorted, _) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 
+'$setof'(Template, Generator, Set) :-
+	'$bagof'(Template, Generator, Bag),
+	sort(Bag, Set).
+
 setof(Template, Generator, Set) :-
     ( 	var(Set) -> true
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
