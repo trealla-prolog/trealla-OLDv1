@@ -239,7 +239,7 @@ static void destroy_predicate(module *m, predicate *pr)
 	free(pr);
 }
 
-static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param, bool *vars)
+static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -257,7 +257,7 @@ static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *para
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, bool *vars)
+static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -325,20 +325,20 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 				return strcmp(C_STR(m, p1), C_STR(m, p2));
 
 			int arity = p1->arity;
+			bool vars = false;
 			p1++; p2++;
 
 			while (arity--) {
-				int i = index_cmpkey_(p1, p2, param, vars);
+				int i = index_cmpkey_(p1, p2, param);
 
 				if (i != 0)
-					return vars && *vars ? -1 : i;
+					return vars ? -1 : i;
 
 				if (is_variable(p1) || is_variable(p2)) {
 					if (!m->ignore_vars)
 						break;
 
-					if (vars)
-						*vars = true;
+					vars = true;
 				}
 
 				p1 += p1->nbr_cells;
@@ -353,9 +353,9 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 	return 0;
 }
 
-int index_cmpkey(const void *ptr1, const void *ptr2, const void *param, bool *vars)
+int index_cmpkey(const void *ptr1, const void *ptr2, const void *param)
 {
-	return index_cmpkey_(ptr1, ptr2, param, vars);
+	return index_cmpkey_(ptr1, ptr2, param);
 }
 
 db_entry *find_in_db(module *m, uuid *ref)
@@ -891,20 +891,20 @@ static void check_rule(module *m, db_entry *dbe)
 		if (pr->key.arity > 2)
 			h23 = h22 + h22->nbr_cells;
 
-		if (!index_cmpkey(p1, h21, m, NULL))
+		if (!index_cmpkey(p1, h21, m))
 			p1_matched = true;
 
 		if (pr->key.arity > 1) {
-			if (!index_cmpkey(p2, h22, m, NULL))
+			if (!index_cmpkey(p2, h22, m))
 				p2_matched = true;
 		}
 
 		if (pr->key.arity > 2) {
-			if (!index_cmpkey(p3, h23, m, NULL))
+			if (!index_cmpkey(p3, h23, m))
 				p3_matched = true;
 		}
 
-		if (!index_cmpkey(head, head2, m, NULL)) {
+		if (!index_cmpkey(head, head2, m)) {
 			matched = true;
 			//break;
 		}

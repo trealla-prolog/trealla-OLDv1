@@ -18,7 +18,7 @@ predicate *find_functor(module *m, const char *name, unsigned arity);
 predicate *find_predicate(module *m, cell *c);
 predicate *search_predicate(module *m, cell *c);
 predicate *create_predicate(module *m, cell *c);
-int index_cmpkey(const void *ptr1, const void *ptr2, const void *param, bool *vars);
+int index_cmpkey(const void *ptr1, const void *ptr2, const void *param);
 bool needs_quoting(module *m, const char *src, int srclen);
 void do_db_load(module *m);
 bool unload_file(module *m, const char *filename);
