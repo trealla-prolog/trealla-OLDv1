@@ -3719,12 +3719,22 @@ static void unpin_vars(query *q)
 
 static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 {
-	GET_FIRST_ARG(p1,any);
+	GET_FIRST_ARG(xp1,any);
+	GET_NEXT_ARG(xp2,callable);
+	GET_NEXT_ARG(xp3,list_or_nil_or_var);
+
+	// This checks for a valid list (it allows for partial but acyclic lists)...
+
+	bool is_partial = false;
+
+	if (is_iso_list(xp3) && !check_list(q, xp3, xp3_ctx, &is_partial, NULL) && !is_partial)
+		return throw_error(q, xp3, xp3_ctx, "type_error", "list");
+
+	cell *p0 = deep_copy_to_heap(q, q->st.curr_cell, q->st.curr_frame, false);
+	may_heap_error(p0);
+	GET_FIRST_ARG0(p1,any,p0);
 	GET_NEXT_ARG(p2,callable);
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
-
-	//if (is_list(p3) && !is_valid_list(q, p3, p3_ctx, true))
-	//	return throw_error(q, p3, "type_error", "list");
 
 	uint64_t xs_vars = 0;
 	p2 = redo_existentials(q, p2, &xs_vars);
@@ -3840,7 +3850,13 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	}
 
 	free(tvars);
-	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
+
+	pl_status ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
+
+	if (ok == pl_success)
+		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
+
+	return ok;
 }
 
 static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)

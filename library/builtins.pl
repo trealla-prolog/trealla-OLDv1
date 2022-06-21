@@ -124,13 +124,8 @@ keysort_(_, _, Sorted, _) :-
 % Derived from code by R.A. O'Keefe
 
 mysetof(Template, Generator, Set) :-
-	mybagof(Template, Generator, Bag),
+	'$bagof'(Template, Generator, Bag),
 	sort(Bag, Set).
-
-mybagof(T, G, B) :-
-	copy_term('$bagof'(T,G,B), G0),
-	call(G0),
-	'$bagof'(T,G,B)=G0.
 
 setof(Template, Generator, Set) :-
     ( 	var(Set) -> true
