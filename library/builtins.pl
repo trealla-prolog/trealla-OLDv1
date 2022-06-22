@@ -120,12 +120,14 @@ keysort_(_, _, Sorted, _) :-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Derived from code by R.A. O'Keefe
-
-mysetof(Template, Generator, Set) :-
+'$setof'(Template, Generator, Set) :-
 	'$bagof'(Template, Generator, Bag),
 	sort(Bag, Set).
+
+:- meta_predicate('$setof'(?,^,-)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Derived from code by R.A. O'Keefe
 
 setof(Template, Generator, Set) :-
     ( 	var(Set) -> true
@@ -134,7 +136,7 @@ setof(Template, Generator, Set) :-
 	bagof_(Template, Generator, Bag),
 	sort(Bag, Set).
 
-:- meta_predicate(setof(-,0,?)).
+:- meta_predicate(setof(-,^,?)).
 
 bagof(Template, Generator, Bag) :-
     (	var(Bag) ->	true

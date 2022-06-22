@@ -3744,6 +3744,9 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 	may_ptr_error(tvars);
 	copy_cells(tvars, tvars_tmp, tvars_tmp->nbr_cells);
 
+	if (!is_callable(p2))
+		return throw_error(q, p2, p2_ctx, "type_error", "callable");
+
 	// First time thru generate all solutions
 
 	if (!q->retry) {
@@ -3754,7 +3757,8 @@ static USE_RESULT pl_status fn_sys_bagof_3(query *q)
 		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_struct(tmp+nbr_cells++, g_sys_queue_s, fn_sys_queuen_2, 2, 1+tvars->nbr_cells);
 		make_int(tmp+nbr_cells++, q->st.qnbr);
-		nbr_cells += safe_copy_cells(tmp+nbr_cells, tvars, tvars->nbr_cells);
+		copy_cells(tmp+nbr_cells, tvars, tvars->nbr_cells);
+		nbr_cells += tvars->nbr_cells;
 		make_struct(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 
 		init_queuen(q);
@@ -7545,6 +7549,9 @@ static void load_properties(module *m)
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+
+	format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "meta_predicate('$bagof'(?,^,-))"); ASTRING_strcat(pr, tmpbuf);
 
 	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
