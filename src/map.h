@@ -28,6 +28,7 @@
 #define map_is_next_key sl_is_next_key
 #define map_next_key sl_next_key
 #define map_first sl_first
+#define map_get_map sl_get_map
 #define map_done sl_done
 #define map_destroy sl_destroy
 
