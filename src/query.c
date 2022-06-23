@@ -211,7 +211,7 @@ static bool is_ground(const cell *c)
 static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
-		if (map_is_next(q->st.iter, NULL))
+		if (map_is_next_key(q->st.iter))
 			return true;
 
 		q->st.iter = NULL;
@@ -235,7 +235,6 @@ static bool is_next_key(query *q, clause *r)
 	if (!next)
 		return false;
 
-#if 1
 	// Attempt look-ahead on 1st arg...
 
 	r = &next->cl;
@@ -246,7 +245,6 @@ static bool is_next_key(query *q, clause *r)
 			return false;
 		}
 	}
-#endif
 
 	return true;
 }
@@ -254,7 +252,7 @@ static bool is_next_key(query *q, clause *r)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
+		if (!map_next_key(q->st.iter, (void*)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
@@ -262,6 +260,15 @@ static void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 	else
 		q->st.curr_clause = NULL;
+}
+
+const char *dump_id(const void *k, const void *v, const void *p)
+{
+	query *q = (query*)p;
+	uint64_t id = (uint64_t)k;
+	static char tmpbuf[1024];
+	sprintf(tmpbuf, "%llu", (unsigned long long)id);
+	return tmpbuf;
 }
 
 static pl_status find_key(query *q, predicate *pr, cell *key)
@@ -351,12 +358,22 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		return pl_success;
 	}
 
+#define TESTINGIDX 0
+
+#if TESTINGIDX
+	if (!map_next_key(iter, (void*)&q->st.curr_clause))
+		return pl_failure;
+
+	q->st.iter = iter;
+	return pl_success;
+#endif
+
 	// If the index search has found just one (definite) solution
 	// then we can use it with no problems. If more than one then
 	// results must be returned in database order, so prefetch all
 	// the results and return them sorted as an iterator...
 
-	map *tmp_list = NULL;
+	map *tmp_idx = NULL;
 	db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
@@ -364,19 +381,21 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif
 
-		if (!tmp_list) {
-			tmp_list = map_create(NULL, NULL, NULL);
-			map_allow_dups(tmp_list, false);
-			map_set_tmp(tmp_list);
+		if (!tmp_idx) {
+			tmp_idx = map_create(NULL, NULL, NULL);
+			map_allow_dups(tmp_idx, false);
+			map_set_tmp(tmp_idx);
 		}
 
-		map_app(tmp_list, (void*)dbe->db_id, (void*)dbe);
+		map_app(tmp_idx, (void*)dbe->db_id, (void*)dbe);
 	}
 
-	if (!tmp_list)
+	if (!tmp_idx)
 		return pl_failure;
 
-	iter = map_first(tmp_list);
+	//sl_dump(tmp_idx, dump_id, q);
+
+	iter = map_first(tmp_idx);
 
 	if (!map_next(iter, (void*)&q->st.curr_clause))
 		return pl_failure;

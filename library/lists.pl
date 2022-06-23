@@ -11,8 +11,9 @@
 	]).
 
 reverse(Xs, Ys) :-
-    (  nonvar(Xs) -> reverse_(Xs, Ys, [], Xs)
-    ;  reverse_(Ys, Xs, [], Ys)
+    (	nonvar(Xs)
+	->	reverse_(Xs, Ys, [], Xs)
+    ;	reverse_(Ys, Xs, [], Ys)
     ).
 
 reverse_([], [], YsRev, YsRev).

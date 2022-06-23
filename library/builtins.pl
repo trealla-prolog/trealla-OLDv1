@@ -9,14 +9,17 @@ predicate_property(P, A) :-
 	'$legacy_predicate_property'(P, A).
 predicate_property(P, A) :-
 	'$load_properties',
-	(	var(A) -> true
+	(	var(A)
+	->	true
 	; 	(	(Controls = [built_in,control_construct,discontiguous,private,static,dynamic,tabled,persist,multifile,meta_predicate(_)],
-			memberchk(A, Controls)) -> true
+			memberchk(A, Controls))
+		->	true
 		;	throw(error(domain_error(predicate_property, A), P))
 		)
 	),
 	must_be(P, callable, predicate_property/2, _),
-	(	P = (M:P2) -> M:'$predicate_property'(P2, A)
+	(	P = (M:P2)
+	->	M:'$predicate_property'(P2, A)
 	;	'$predicate_property'(P, A)
 	).
 
@@ -124,7 +127,8 @@ keysort_(_, _, Sorted, _) :-
 % Derived from code by R.A. O'Keefe
 
 setof(Template, Generator, Set) :-
-    ( 	var(Set) -> true
+    ( 	var(Set)
+    ->	true
     ; 	must_be(Set, list_or_partial_list, setof/3, _)
     ),
 	bagof_(Template, Generator, Bag),
@@ -133,7 +137,8 @@ setof(Template, Generator, Set) :-
 :- meta_predicate(setof(-,0,?)).
 
 bagof(Template, Generator, Bag) :-
-    (	var(Bag) ->	true
+    (	var(Bag)
+    ->	true
 	;	must_be(Bag, list_or_partial_list, bagof/3, _)
 	),
 	bagof_(Template, Generator, Bag).
@@ -346,13 +351,15 @@ recorded(K, V, R) :- nonvar(K), clause('$record_key'(K,V), _, R).
 call_with_time_limit(Time, Goal) :-
 	Time0 is truncate(Time * 1000),
 	'$alarm'(Time0),
-	(	catch(once(Goal), E, ('$alarm'(0), throw(E))) -> '$alarm'(0)
+	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
+	->	'$alarm'(0)
 	;	('$alarm'(0), fail)
 	).
 
 time_out(Goal, Time, Result) :-
 	'$alarm'(Time),
-	(	catch(once(Goal), E, ('$alarm'(0), throw(E))) -> ('$alarm'(0), Result = success)
+	(	catch(once(Goal), E, ('$alarm'(0), throw(E)))
+	->	('$alarm'(0), Result = success)
 	;	('$alarm'(0), fail)
 	).
 
@@ -394,8 +401,9 @@ not(_).
 
 iso_dif(X, Y) :-
 	X \== Y,
-	( X \= Y -> true
-	; throw(error(instantiation_error,iso_dif/2))
+	(	X \= Y
+	->	true
+	;	throw(error(instantiation_error,iso_dif/2))
 	).
 
 :- meta_predicate(once(0)).
@@ -626,11 +634,13 @@ put_atts(Var, -Attr) :- !,
 	var(Var),
 	'$get_attributes'(Var, D),
 	Attr =.. [Module,Value],
-	(	var(Value) -> Functor = Value
+	(	var(Value)
+	->	Functor = Value
 	; 	functor(Value, Functor, _)
 	),
 	dict:del(D, Module, D2),
-	(	D2 = [] -> '$erase_attributes'(Var)
+	(	D2 = []
+	->	'$erase_attributes'(Var)
 	;	'$put_attributes'(Var, D2)
 	).
 
@@ -682,7 +692,8 @@ attvar(Var) :-
 
 term_attvars_([], VsIn, VsIn) :- !.
 term_attvars_([H|T], VsIn, VsOut) :-
-	(	attvar(H) -> term_attvars_(T, [H|VsIn], VsOut)
+	(	attvar(H)
+	->	term_attvars_(T, [H|VsIn], VsOut)
 	;	term_attvars_(T, VsIn, VsOut)
 	).
 
@@ -694,7 +705,7 @@ collect_goals_(_, [], GsIn, GsIn) :- !.
 collect_goals_(V, [H|T], GsIn, GsOut) :-
 	H =.. [M, _],
 	catch(M:attribute_goals(V, Goal0, []), _, Goal0 = put_atts(V, +H)),
-	(Goal0 = [H2] -> Goal = H2 ; Goal = Goal0),
+	(Goal0 = [H2]-> Goal = H2 ; Goal = Goal0),
 	collect_goals_(V, T, [Goal|GsIn], GsOut).
 
 collect_goals_([], GsIn, GsIn) :- !.
@@ -713,7 +724,7 @@ copy_term(Term, Copy, Gs) :-
 portray_atts_(Term) :-
 	copy_term(Term, _, Gs),
 	Gs = [Gs0],
-	(list(Gs0) -> toconjunction(Gs0, Gs1); Gs1 = Gs0),
+	(list(Gs0) -> toconjunction(Gs0, Gs1) ; Gs1 = Gs0),
 	write_term(Gs1, [varnames(true)]).
 
 dump_attvars_([]) :- !.
@@ -743,13 +754,15 @@ plus(_,_,_) :-
 
 succ(X,S) :- nonvar(X), Y=1, nonvar(Y),
 	must_be(X, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	X >= 0 -> true
+	(	X >= 0
+	->	true
 	; 	throw(error(domain_error(not_less_than_zero, X), succ/2))
 	),
 	S is X + Y.
 succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	must_be(S, integer, succ/2, _), must_be(Y, integer, succ/2, _), !,
-	(	S >= 0 -> true
+	(	S >= 0
+	->	true
 	; 	throw(error(domain_error(not_less_than_zero, S), succ/2))
 	),
 	!,

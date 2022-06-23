@@ -580,11 +580,13 @@ bool sl_is_next_key(sliter *iter)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			iter->l->wild_card = false;
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
+			if (iter->key) {
+				iter->l->wild_card = false;
+				int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
 
-			if (!iter->l->wild_card && (ok != 0))
-				return false;
+				if (!iter->l->wild_card && (ok != 0))
+					return false;
+			}
 
 			return true;
 		}
@@ -606,15 +608,17 @@ bool sl_next_key(sliter *iter, void **val)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			iter->l->wild_card = false;
-			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
+			if (iter->key) {
+				iter->l->wild_card = false;
+				int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
 
-			if (!iter->l->wild_card && (ok != 0))
-				return false;
+				if (!iter->l->wild_card && (ok != 0))
+					return false;
 
-			if (iter->l->wild_card && (ok != 0)) {
-				iter->idx++;
-				continue;
+				if (iter->l->wild_card && (ok != 0)) {
+					iter->idx++;
+					continue;
+				}
 			}
 
 			if (val)
