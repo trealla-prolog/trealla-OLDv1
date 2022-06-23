@@ -387,11 +387,12 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	if (!tmp_list)
 		return pl_failure;
 
-	q->st.iter = map_first(tmp_list);
+	iter = map_first(tmp_list);
 
-	if (!map_next(q->st.iter, (void*)&q->st.curr_clause))
-		q->st.iter = NULL;
+	if (!map_next(iter, (void*)&q->st.curr_clause))
+		return pl_failure;
 
+	q->st.iter = iter;
 	return pl_success;
 }
 
