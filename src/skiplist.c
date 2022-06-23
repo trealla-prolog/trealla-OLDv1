@@ -568,7 +568,6 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->p = q;
 	iter->idx = imid;
 	iter->is_dead = false;
-	l->is_find = false;
 	return iter;
 }
 
