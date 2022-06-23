@@ -325,26 +325,29 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 				return strcmp(C_STR(m, p1), C_STR(m, p2));
 
 			int arity = p1->arity;
-			bool wild_card = false;
+			//bool wild_card = false;
 			p1++; p2++;
 
 			while (arity--) {
 				if (is_variable(p1) || is_variable(p2)) {
-					p1 += p1->nbr_cells;
-					p2 += p2->nbr_cells;
-					map_wild_card(l);
-					wild_card = true;
-
 					if (map_is_find(l))
 						break;
 
+					//wild_card = true;
+					map_wild_card(l);
+					p1 += p1->nbr_cells;
+					p2 += p2->nbr_cells;
 					continue;
 				}
 
+				//if (wild_card && map_is_find(l))
+				//	break;
+
 				int ok = index_cmpkey_(p1, p2, param, l);
 
-				if (ok != 0)
-					return wild_card ? -1 : ok;
+				if (ok != 0) {
+					return ok;//return wild_card ? -1 : ok;
+				}
 
 				p1 += p1->nbr_cells;
 				p2 += p2->nbr_cells;
