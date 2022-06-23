@@ -371,23 +371,6 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
-
-		// This pre-check is faster than going through
-		// unification, and gets rid of spurious clauses
-		// that variables in the search key turn up...
-
-		if (idx != pr->idx2) {
-			q->st.m->ignore_vars = true;
-			cell *head = get_head(dbe->cl.cells);
-
-			if (index_cmpkey(head, key, q->st.m, map_get_map(iter)) != 0) {
-				q->st.m->ignore_vars = false;
-				continue;
-			}
-
-			q->st.m->ignore_vars = false;
-		}
-
 #if DEBUGIDX
 		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif
@@ -405,7 +388,10 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		return pl_failure;
 
 	q->st.iter = map_first(tmp_list);
-	map_next(q->st.iter, (void*)&q->st.curr_clause);
+
+	if (!map_next(q->st.iter, (void*)&q->st.curr_clause))
+		q->st.iter = NULL;
+
 	return pl_success;
 }
 
@@ -915,8 +901,10 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			break;
 		}
 
-		if (ch->st.iter)
+		if (ch->st.iter) {
 			map_done(ch->st.iter);
+			ch->st.iter = NULL;
+		}
 
 		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);

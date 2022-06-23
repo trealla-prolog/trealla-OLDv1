@@ -20,6 +20,8 @@ extern bool sl_get(skiplist *l, const void *k, const void **v);
 extern bool sl_del(skiplist *l, const void *k);
 
 extern skiplist *sl_get_map(const sliter *i);
+extern void sl_wild_card(skiplist *l);
+extern bool sl_is_find(skiplist *l);
 
 extern void sl_iterate(
 	const skiplist *l,

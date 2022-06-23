@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 #include "skiplist.h"
 
@@ -40,7 +41,7 @@ struct skiplist_ {
 	size_t count;
 	int level;
 	unsigned seed;
-	bool allow_dups, is_tmp_list;
+	bool allow_dups, is_tmp_list, wild_card, is_find;
 };
 
 #define MAX_LEVELS 16
@@ -87,6 +88,7 @@ skiplist *sl_create(int (*cmpkey)(const void*, const void*, const void*, void *)
 	l->delkey = delkey;
 	l->allow_dups = true;
 	l->is_tmp_list = false;
+	l->wild_card = false;
 	l->p = p;
 	return l;
 }
@@ -123,6 +125,8 @@ void sl_destroy(skiplist *l)
 	free(l);
 }
 
+void sl_wild_card(skiplist *l) { if (l) l->wild_card = true; }
+bool sl_is_find(skiplist *l) { return l ? l->is_find : true; }
 skiplist *sl_get_map(const sliter *i) { return i->l; }
 void sl_allow_dups(skiplist *l, bool mode) { l->allow_dups = mode; }
 size_t sl_count(const skiplist *l) { return l ? l->count : 0; }
@@ -430,6 +434,7 @@ void sl_find(skiplist *l, const void *key, int (*f)(const void*, const void*, co
 {
 	slnode_t *p, *q = 0;
 	p = l->header;
+	l->wild_card = false;
 
 	for (int k = l->level - 1; k >= 0; k--) {
 		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, l) < 0))
@@ -462,6 +467,7 @@ void sl_find(skiplist *l, const void *key, int (*f)(const void*, const void*, co
 sliter *sl_first(skiplist *l)
 {
 	sliter *iter;
+	l->wild_card = false;
 
 	if (!l->iters) {
 		iter = malloc(sizeof(sliter));
@@ -526,6 +532,8 @@ sliter *sl_find_key(skiplist *l, const void *key)
 {
 	slnode_t *p, *q = 0;
 	p = l->header;
+	l->wild_card = false;
+	l->is_find = true;
 
 	for (int k = l->level - 1; k >= 0; k--) {
 		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[q->nbr - 1].key, key, l->p, l) < 0))
@@ -560,6 +568,7 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->p = q;
 	iter->idx = imid;
 	iter->is_dead = false;
+	l->is_find = false;
 	return iter;
 }
 
@@ -570,10 +579,22 @@ bool sl_is_next_key(sliter *iter)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l) == 0)
-				return true;
+			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
 
-			iter->idx++;
+			if (!iter->l->wild_card && (ok != 0))
+				return false;
+
+#if 0
+			if (iter->l->wild_card && (ok < 0)) {
+				iter->idx++;
+				continue;
+			}
+#endif
+
+			if (iter->l->wild_card && (ok > 0))
+				return false;
+
+			return true;
 		}
 
 		iter->p = iter->p->forward[0];
@@ -590,9 +611,19 @@ bool sl_next_key(sliter *iter, void **val)
 		return false;
 
 	while (iter->p) {
-		if (iter->idx < iter->p->nbr) {
-			if (iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l) != 0)
-				break;
+		while (iter->idx < iter->p->nbr) {
+			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
+
+			if (!iter->l->wild_card && (ok != 0))
+				return false;
+
+			if (iter->l->wild_card && (ok < 0)) {
+				iter->idx++;
+				continue;
+			}
+
+			if (iter->l->wild_card && (ok > 0))
+				return false;
 
 			if (val)
 				*val = iter->p->bkt[iter->idx].val;
@@ -622,15 +653,15 @@ void sl_done(sliter *iter)
 	if (iter->is_dead)
 		return;
 
-	if (iter->l->is_tmp_list) {
-		sl_destroy(iter->l);
-		free(iter);
-		return;
-	}
-
 	iter->is_dead = true;
 	iter->next = iter->l->iters;
 	iter->l->iters = iter;
+
+	if (iter->l->is_tmp_list) {
+		sl_destroy(iter->l);
+	}
+
+	iter->l = NULL;
 }
 
 void sl_set_tmp(skiplist *l)
