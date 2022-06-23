@@ -568,7 +568,6 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->p = q;
 	iter->idx = imid;
 	iter->is_dead = false;
-	l->is_find = false;
 	return iter;
 }
 
@@ -581,9 +580,6 @@ bool sl_is_next_key(sliter *iter)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			if (!iter->key)
-				return true;
-
 			iter->l->wild_card = false;
 			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
 
@@ -610,9 +606,6 @@ bool sl_next_key(sliter *iter, void **val)
 
 	while (iter->p) {
 		while (iter->idx < iter->p->nbr) {
-			if (!iter->key)
-				return true;
-
 			iter->l->wild_card = false;
 			int ok = iter->l->cmpkey(iter->p->bkt[iter->idx].key, iter->key, iter->l->p, iter->l);
 

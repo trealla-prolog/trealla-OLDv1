@@ -22,12 +22,15 @@
 #define map_del sl_del
 #define map_count sl_count
 #define map_find sl_find
+
+#define map_first sl_first
 #define map_is_next sl_is_next
 #define map_next sl_next
+
 #define map_find_key sl_find_key
 #define map_is_next_key sl_is_next_key
 #define map_next_key sl_next_key
-#define map_first sl_first
+
 #define map_get_map sl_get_map
 #define map_wild_card sl_wild_card
 #define map_is_find sl_is_find

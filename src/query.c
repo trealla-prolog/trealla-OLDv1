@@ -210,17 +210,9 @@ static bool is_ground(const cell *c)
 
 static bool is_next_key(query *q, clause *r)
 {
-	const frame *f = GET_CURR_FRAME();
-
 	if (q->st.iter) {
-		db_entry *next;
-
-		while (map_is_next(q->st.iter, (void*)&next)) {
-			if (can_view(f, next))
-				return true;
-
-			map_next(q->st.iter, (void*)&next);
-		}
+		if (map_is_next(q->st.iter, NULL))
+			return true;
 
 		q->st.iter = NULL;
 		return false;
@@ -239,9 +231,6 @@ static bool is_next_key(query *q, clause *r)
 		return false;
 
 	db_entry *next = q->st.curr_clause->next;
-
-	while (next && !can_view(f, next))
-		next = next->next;
 
 	if (!next)
 		return false;
@@ -387,11 +376,12 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	if (!tmp_list)
 		return pl_failure;
 
-	q->st.iter = map_first(tmp_list);
+	iter = map_first(tmp_list);
 
-	if (!map_next(q->st.iter, (void*)&q->st.curr_clause))
-		q->st.iter = NULL;
+	if (!map_next(iter, (void*)&q->st.curr_clause))
+		return pl_failure;
 
+	q->st.iter = iter;
 	return pl_success;
 }
 
