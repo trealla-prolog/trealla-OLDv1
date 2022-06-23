@@ -362,16 +362,6 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		return pl_success;
 	}
 
-#define TESTINGIDX 0
-
-#if TESTINGIDX
-	if (!map_next_key(iter, (void*)&q->st.curr_clause))
-		return pl_failure;
-
-	q->st.iter = iter;
-	return pl_success;
-#endif
-
 	// If the index search has found just one (definite) solution
 	// then we can use it with no problems. If more than one then
 	// results must be returned in database order, so prefetch all
