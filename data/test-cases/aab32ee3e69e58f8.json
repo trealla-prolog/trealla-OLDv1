@@ -1,0 +1,55 @@
+{
+  "uid" : "aab32ee3e69e58f8",
+  "name" : "inlining_03",
+  "fullName" : "inlining_03::tests",
+  "historyId" : "inlining_03::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/inlining/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/inlining/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/inlining/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/inlining/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "50-51"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/8ea3d1c495d528875bdd473259360059e2cc95b4/examples/inlining/tests.lgt#L50"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "aab32ee3e69e58f8.json",
+  "parameterValues" : [ "examples/inlining/tests.lgt", "50-51", "https://github.com/LogtalkDotOrg/logtalk3/tree/8ea3d1c495d528875bdd473259360059e2cc95b4/examples/inlining/tests.lgt#L50" ]
+}
