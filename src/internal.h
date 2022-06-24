@@ -1,11 +1,11 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
-#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #ifndef USE_OPENSSL
@@ -48,16 +48,6 @@ char *realpath(const char *path, char resolved_path[PATH_MAX]);
 #endif
 
 static const unsigned INITIAL_NBR_CELLS = 100;		// cells
-
-typedef enum {
-	pl_halt    =  0,
-	pl_abort   =  0,
-	pl_yield   =  0,
-	pl_cycle   =  0,
-	pl_error   =  0,
-	pl_failure =  0,
-	pl_success =  1,
-} pl_status;
 
 extern unsigned g_string_cnt, g_interned_cnt;
 
@@ -388,7 +378,7 @@ struct cell_ {
 		struct {
 			union {
 				struct {
-					pl_status (*fn)(query*);
+					bool (*fn)(query*);
 					builtins *fn_ptr;
 				};
 
@@ -475,7 +465,7 @@ struct predicate_ {
 struct builtins_ {
 	const char *name;
 	unsigned arity;
-	pl_status (*fn)(query*);
+	bool (*fn)(query*);
 	const char *help;
 	bool function;
 	bool ffi;

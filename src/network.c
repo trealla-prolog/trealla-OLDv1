@@ -1,9 +1,9 @@
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
-#include <errno.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -33,7 +33,6 @@
 #include <openssl/err.h>
 #endif
 
-#include "internal.h"
 #include "network.h"
 #include "query.h"
 

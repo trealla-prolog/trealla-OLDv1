@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal.h"
+
 #define DUMP_ERRS 0
 
 parser *create_parser(module *m);

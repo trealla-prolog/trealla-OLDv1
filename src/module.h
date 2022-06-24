@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal.h"
+
 module *create_module(prolog *pl, const char *name);
 void duplicate_module(prolog *pl, module *m, const char *name);
 void destroy_module(module *m);

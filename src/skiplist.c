@@ -1,10 +1,10 @@
+#include <assert.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
-#include <math.h>
-#include <assert.h>
 
 #include "skiplist.h"
 

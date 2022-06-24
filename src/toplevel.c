@@ -4,13 +4,12 @@
 #include <string.h>
 #include <time.h>
 
-#include "internal.h"
+#include "heap.h"
 #include "history.h"
-#include "parser.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 #include "query.h"
-#include "heap.h"
 #include "utf8.h"
 
 #ifdef _WIN32

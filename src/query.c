@@ -4,12 +4,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "internal.h"
-#include "parser.h"
+#include "heap.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 #include "query.h"
-#include "heap.h"
 #include "utf8.h"
 
 #ifdef _WIN32
@@ -103,14 +102,14 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	}
 }
 
-static USE_RESULT pl_status check_trail(query *q)
+static USE_RESULT bool check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		if (q->st.tp >= q->trails_size) {
 			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
 			if (!new_trailssize) {
 				q->is_oom = q->error = true;
-				return pl_error;
+				return false;
 			}
 
 			q->trails_size = new_trailssize;
@@ -119,17 +118,17 @@ static USE_RESULT pl_status check_trail(query *q)
 		q->max_trails = q->st.tp;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status check_choice(query *q)
+static USE_RESULT bool check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		if (q->cp >= q->choices_size) {
 			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
 			if (!new_choicessize) {
 				q->is_oom = q->error = true;
-				return pl_error;
+				return false;
 			}
 
 			q->choices_size = new_choicessize;
@@ -138,17 +137,17 @@ static USE_RESULT pl_status check_choice(query *q)
 		q->max_choices = q->cp;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status check_frame(query *q)
+static USE_RESULT bool check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		if (q->st.fp >= q->frames_size) {
 			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
 			if (!new_framessize) {
 				q->is_oom = q->error = true;
-				return pl_error;
+				return false;
 			}
 
 			q->frames_size = new_framessize;
@@ -157,10 +156,10 @@ static USE_RESULT pl_status check_frame(query *q)
 		q->max_frames = q->st.fp;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
+static USE_RESULT bool check_slot(query *q, unsigned cnt)
 {
 	pl_idx_t nbr = q->st.sp + cnt;
 
@@ -169,7 +168,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2);
 			if (!new_slotssize) {
 				q->is_oom = q->error = true;
-				return pl_error;
+				return false;
 			}
 
 			memset(q->slots+q->slots_size, 0, sizeof(slot) * (new_slotssize - q->slots_size));
@@ -179,7 +178,7 @@ static USE_RESULT pl_status check_slot(query *q, unsigned cnt)
 		q->max_slots = nbr;
 	}
 
-	return pl_success;
+	return true;
 }
 
 bool more_data(query *q, db_entry *dbe)
@@ -271,7 +270,7 @@ const char *dump_id(const void *k, const void *v, const void *p)
 	return tmpbuf;
 }
 
-static pl_status find_key(query *q, predicate *pr, cell *key)
+static bool find_key(query *q, predicate *pr, cell *key)
 {
 	q->st.definite = false;
 	q->st.arg1_is_ground = false;
@@ -288,7 +287,7 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
-			return pl_success;
+			return true;
 
 		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
 
@@ -317,7 +316,7 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 		if (q->pl->opt && arg3 && is_ground(arg3))
 			q->st.arg3_is_ground = true;
 
-		return pl_success;
+		return true;
 	}
 
 	//sl_dump(pr->idx, dump_key, q);
@@ -330,7 +329,7 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	if (arg1 && (is_variable(arg1) || pr->is_var_in_first_arg)) {
 		if (!pr->idx2) {
 			q->st.curr_clause = pr->head;
-			return pl_success;
+			return true;
 		}
 
 		cell *arg2 = arg1 + arg1->nbr_cells;
@@ -348,15 +347,15 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	miter *iter;
 
 	if (!(iter = map_find_key(idx, key)))
-		return pl_failure;
+		return false;
 
 	if (pr->is_unique) {
 		if (!map_next_key(iter, (void*)&q->st.curr_clause))
-			return pl_failure;
+			return false;
 
 		q->st.definite = true;
 		map_done(iter);
-		return pl_success;
+		return true;
 	}
 
 #define TESTINGIDX 0
@@ -368,10 +367,10 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	// for testing purposes only...
 
 	if (!map_next_key(iter, (void*)&q->st.curr_clause))
-		return pl_failure;
+		return false;
 
 	q->st.iter = iter;
-	return pl_success;
+	return true;
 #endif
 
 	// If the index search has found just one (definite) solution
@@ -397,17 +396,17 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	}
 
 	if (!tmp_idx)
-		return pl_failure;
+		return false;
 
 	//sl_dump(tmp_idx, dump_id, q);
 
 	iter = map_first(tmp_idx);
 
 	if (!map_next(iter, (void*)&q->st.curr_clause))
-		return pl_failure;
+		return false;
 
 	q->st.iter = iter;
-	return pl_success;
+	return true;
 }
 
 size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, bool *has_var, bool *is_partial)
@@ -481,8 +480,8 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 
 static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
 {
-	if (check_trail(q) != pl_success) {
-		q->error = pl_error;
+	if (check_trail(q) != true) {
+		q->error = false;
 		return;
 	}
 
@@ -514,7 +513,7 @@ void undo_me(query *q)
 	unwind_trail(q, ch);
 }
 
-pl_status try_me(query *q, unsigned nbr_vars)
+bool try_me(query *q, unsigned nbr_vars)
 {
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
@@ -535,7 +534,7 @@ pl_status try_me(query *q, unsigned nbr_vars)
 	q->has_vars = false;
 	q->no_tco = false;
 	q->tot_matches++;
-	return pl_success;
+	return true;
 }
 
 static void trim_heap(query *q, const choice *ch)
@@ -823,7 +822,7 @@ void stash_me(query *q, const clause *r, bool last_match)
 	q->st.sp += nbr_vars;
 }
 
-pl_status push_choice(query *q)
+bool push_choice(query *q)
 {
 	may_error(check_choice(q));
 	const frame *f = GET_CURR_FRAME();
@@ -836,35 +835,35 @@ pl_status push_choice(query *q)
 	ch->nbr_vars = f->nbr_vars;
 	ch->nbr_slots = f->nbr_slots;
 	ch->overflow = f->overflow;
-	return pl_success;
+	return true;
 }
 
 // A barrier is used when making a call, it sets a
 // new choice generation so that normal cuts are contained.
 // A '$inner_cut' though will also remove the barrier...
 
-pl_status push_barrier(query *q)
+bool push_barrier(query *q)
 {
 	may_error(push_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
 	ch->cgen = f->cgen = ++q->cgen;
 	ch->barrier = true;
-	return pl_success;
+	return true;
 }
 
 // Set a special flag so that '$cut_if_det' knows to also
 // remove the barrier if it needs to...
 
-pl_status push_call_barrier(query *q)
+bool push_call_barrier(query *q)
 {
 	may_error(push_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->call_barrier = true;
-	return pl_success;
+	return true;
 }
 
-pl_status push_catcher(query *q, enum q_retry retry)
+bool push_catcher(query *q, enum q_retry retry)
 {
 	may_error(push_call_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
@@ -875,7 +874,7 @@ pl_status push_catcher(query *q, enum q_retry retry)
 	else if (retry == QUERY_EXCEPTION)
 		ch->catchme_exception = true;
 
-	return pl_success;
+	return true;
 }
 
 void cut_me(query *q, bool inner_cut, bool soft_cut)
@@ -1072,7 +1071,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = f->nbr_vars;
 
-	if (check_slot(q, var_nbr+cnt) != pl_success)
+	if (check_slot(q, var_nbr+cnt) != true)
 		return 0;
 
 	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
@@ -1165,7 +1164,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 // Match HEAD :- BODY.
 
-USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
+USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
@@ -1207,7 +1206,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	if (!q->st.curr_clause2) {
 		unshare_predicate(q, q->st.pr2);
-		return pl_failure;
+		return false;
 	}
 
 	may_error(check_frame(q));
@@ -1247,7 +1246,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 				tmp.val_off = g_true_s;
 				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
 			} else
-				ok = pl_success;
+				ok = true;
 
 			return ok;
 		}
@@ -1257,13 +1256,13 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	drop_choice(q);
 	unshare_predicate(q, q->st.pr2);
-	return pl_failure;
+	return false;
 }
 
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
+USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *c = p1;
@@ -1291,7 +1290,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 			}
 
 			q->st.curr_clause2 = NULL;
-			return pl_failure;
+			return false;
 		}
 
 		if (!pr->is_dynamic) {
@@ -1311,7 +1310,7 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 
 	if (!q->st.curr_clause2) {
 		unshare_predicate(q, q->st.pr2);
-		return pl_failure;
+		return false;
 	}
 
 	may_error(check_frame(q));
@@ -1335,17 +1334,17 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 		q->tot_matches++;
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
-			return pl_success;
+			return true;
 
 		undo_me(q);
 	}
 
 	drop_choice(q);
 	unshare_predicate(q, q->st.pr2);
-	return pl_failure;
+	return false;
 }
 
-static USE_RESULT pl_status match_head(query *q)
+static USE_RESULT bool match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
@@ -1365,11 +1364,11 @@ static USE_RESULT pl_status match_head(query *q)
 					if (q->st.m->flags.unknown == UNK_ERROR)
 						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
 					else
-						return pl_failure;
+						return false;
 				else
 					q->error = true;
 
-				return pl_error;
+				return false;
 			}
 
 			c->match = pr;
@@ -1384,7 +1383,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 	if (!q->st.curr_clause) {
 		unshare_predicate(q, q->st.pr);
-		return pl_failure;
+		return false;
 	}
 
 	may_error(check_frame(q));
@@ -1402,11 +1401,11 @@ static USE_RESULT pl_status match_head(query *q)
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error) {
 				q->st.pr = NULL;
-				return pl_error;
+				return false;
 			}
 
 			commit_me(q, r);
-			return pl_success;
+			return true;
 		}
 
 		undo_me(q);
@@ -1414,7 +1413,7 @@ static USE_RESULT pl_status match_head(query *q)
 
 	drop_choice(q);
 	unshare_predicate(q, q->st.pr);
-	return pl_failure;
+	return false;
 }
 
 static bool any_outstanding_choices(query *q)
@@ -1432,7 +1431,7 @@ static bool any_outstanding_choices(query *q)
 	return q->cp ? true : false;
 }
 
-static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
+static bool consultall(query *q, cell *l, pl_idx_t l_ctx)
 {
 	if (is_string(l)) {
 		char *s = DUP_STR(q, l);
@@ -1443,7 +1442,7 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		}
 
 		free(s);
-		return pl_success;
+		return true;
 	}
 
 	LIST_HANDLER(l);
@@ -1455,8 +1454,8 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		pl_idx_t h_ctx = q->latest_ctx;
 
 		if (is_list(h)) {
-			if (consultall(q, h, h_ctx) != pl_success)
-				return pl_failure;
+			if (consultall(q, h, h_ctx) != true)
+				return false;
 		} else {
 			char *s = DUP_STR(q, h);
 
@@ -1473,10 +1472,10 @@ static pl_status consultall(query *q, cell *l, pl_idx_t l_ctx)
 		l_ctx = q->latest_ctx;
 	}
 
-	return pl_success;
+	return true;
 }
 
-pl_status start(query *q)
+bool start(query *q)
 {
 	q->yielded = false;
 	bool done = false;
@@ -1485,9 +1484,9 @@ pl_status start(query *q)
 #ifndef _WIN32
 		if (g_tpl_interrupt == SIGALRM) {
 			g_tpl_interrupt = 0;
-			pl_status ok = throw_error(q, q->st.curr_cell, q->st.curr_frame, "time_limit_exceeded", "timed_out");
+			bool ok = throw_error(q, q->st.curr_cell, q->st.curr_frame, "time_limit_exceeded", "timed_out");
 
-			if (ok == pl_failure)
+			if (ok == false)
 				q->retry = true;
 
 			continue;
@@ -1502,7 +1501,7 @@ pl_status start(query *q)
 
 			switch (ok) {
 				case 1:
-					return pl_success;
+					return true;
 				case -1:
 					q->retry = true;
 				default:
@@ -1537,7 +1536,7 @@ pl_status start(query *q)
 				continue;
 			}
 
-			pl_status status;
+			bool status;
 
 #if USE_FFI
 			if (q->st.curr_cell->fn_ptr && q->st.curr_cell->fn_ptr->ffi) {
@@ -1549,7 +1548,7 @@ pl_status start(query *q)
 #endif
 				status = q->st.curr_cell->fn(q);
 
-			if ((status == pl_failure) && !q->is_oom) {
+			if ((status == false) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 
 				if (q->yielded)
@@ -1564,7 +1563,7 @@ pl_status start(query *q)
 
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
-			if (consultall(q, q->st.curr_cell, q->st.curr_frame) != pl_success) {
+			if (consultall(q, q->st.curr_cell, q->st.curr_frame) != true) {
 				q->retry = true;
 				continue;
 			}
@@ -1573,7 +1572,7 @@ pl_status start(query *q)
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
 				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
-			} else if ((match_head(q) != pl_success) && !q->is_oom) {
+			} else if ((match_head(q) != true) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 				q->tot_backtracks++;
 				continue;
@@ -1589,7 +1588,7 @@ pl_status start(query *q)
 		if (q->is_oom) {
 			q->is_oom = q->error = false;
 
-			if (throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "memory") != pl_success) {
+			if (throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "memory") != true) {
 				q->retry = QUERY_RETRY;
 				q->tot_backtracks++;
 				continue;
@@ -1618,7 +1617,7 @@ pl_status start(query *q)
 					if (!check_redo(q))
 						break;
 
-					return pl_success;
+					return true;
 				}
 
 				done = q->status = true;
@@ -1631,14 +1630,14 @@ pl_status start(query *q)
 	}
 
 	if (!q->p)
-		return pl_success;
+		return true;
 
 	if (q->halt)
 		q->error = false;
 	else if (q->do_dump_vars && !q->abort && q->status && !q->error)
 		dump_vars(q, false);
 
-	return pl_success;
+	return true;
 }
 
 #ifdef _WIN32
@@ -1718,7 +1717,7 @@ uint64_t get_time_in_usec(void)
 	return (uint64_t)(now.tv_sec * 1000 * 1000) + (now.tv_nsec / 1000);
 }
 
-pl_status execute(query *q, cell *cells, unsigned nbr_vars)
+bool execute(query *q, cell *cells, unsigned nbr_vars)
 {
 	q->pl->did_dump_vars = false;
 	q->st.curr_cell = cells;

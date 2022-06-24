@@ -1,12 +1,11 @@
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
 
-#include "internal.h"
-#include "query.h"
 #include "heap.h"
+#include "query.h"
 
 static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
 {

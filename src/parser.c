@@ -1,17 +1,16 @@
+#include <ctype.h>
+#include <float.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
-#include <float.h>
 
-#include "internal.h"
+#include "heap.h"
 #include "library.h"
-#include "parser.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 #include "query.h"
-#include "heap.h"
 #include "utf8.h"
 
 static const unsigned INITIAL_TOKEN_SIZE = 100;		// bytes

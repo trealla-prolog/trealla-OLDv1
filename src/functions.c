@@ -1,17 +1,16 @@
+#include <ctype.h>
+#include <errno.h>
+#include <float.h>
+#include <fenv.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-#include <fenv.h>
-#include <errno.h>
 
-#include "internal.h"
-#include "query.h"
+#include "heap.h"
 #include "module.h"
 #include "prolog.h"
-#include "heap.h"
+#include "query.h"
 
 #define SET_ACCUM() {											\
 	if (errno == ENOMEM)										\
@@ -190,10 +189,10 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 	}
 }
 
-pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
+bool call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	if (is_string(c))
 		return throw_error(q, c, c_ctx, "type_error", "evaluable");
@@ -216,7 +215,7 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	pl_status ok = start(q);
+	bool ok = start(q);
 	q->error = false;
 
 	if (!q->did_throw) {
@@ -227,7 +226,7 @@ pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx)
 	return ok;
 }
 
-static USE_RESULT pl_status fn_return_1(query *q)
+static USE_RESULT bool fn_return_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
@@ -236,10 +235,10 @@ static USE_RESULT pl_status fn_return_1(query *q)
 	drop_choice(q);
 	trim_trail(q);
 	q->error = true;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_is_2(query *q)
+static USE_RESULT bool fn_iso_is_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -249,7 +248,7 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_variable(p1) && is_number(&p2)) {
 		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		clr_accum(&q->accum);
-		return pl_success;
+		return true;
 	}
 
 	if (is_bigint(p1) && is_bigint(&p2))
@@ -273,10 +272,10 @@ static USE_RESULT pl_status fn_iso_is_2(query *q)
 	if (is_atom(p1) && is_number(&p2) && !strcmp(C_STR(q, p1), "inf"))
 		return is_float(&p2) ? isinf(p2.val_float) : 0;
 
-	return pl_failure;
+	return false;
 }
 
-USE_RESULT pl_status fn_iso_float_1(query *q)
+USE_RESULT bool fn_iso_float_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -286,7 +285,7 @@ USE_RESULT pl_status fn_iso_float_1(query *q)
 		if (is_float(&p1)) {
 			q->accum.val_float = p1.val_float;
 			q->accum.tag = TAG_FLOAT;
-			return pl_success;
+			return true;
 		}
 
 		if (is_bigint(&p1)) {
@@ -296,13 +295,13 @@ USE_RESULT pl_status fn_iso_float_1(query *q)
 				return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
 
 			q->accum.tag = TAG_FLOAT;
-			return pl_success;
+			return true;
 		}
 
 		if (is_smallint(&p1)) {
 			q->accum.val_float = (double)p1.val_int;
 			q->accum.tag = TAG_FLOAT;
-			return pl_success;
+			return true;
 		}
 
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "integer_or_float");
@@ -311,7 +310,7 @@ USE_RESULT pl_status fn_iso_float_1(query *q)
 	return is_float(p1_tmp);
 }
 
-USE_RESULT pl_status fn_iso_integer_1(query *q)
+USE_RESULT bool fn_iso_integer_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 
@@ -321,19 +320,19 @@ USE_RESULT pl_status fn_iso_integer_1(query *q)
 		if (is_float(&p1) && (p1.val_float < (double)PL_INT_MAX) && (p1.val_float > (double)PL_INT_MIN)) {
 			q->accum.val_int = (pl_int_t)p1.val_float;
 			q->accum.tag = TAG_INTEGER;
-			return pl_success;
+			return true;
 		}
 
 		if (is_float(&p1)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
-			return pl_success;
+			return true;
 		}
 
 		if (is_integer(&p1)) {
 			share_cell(&p1);
 			q->accum = p1;
-			return pl_success;
+			return true;
 		}
 
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "integer_or_float");
@@ -342,7 +341,7 @@ USE_RESULT pl_status fn_iso_integer_1(query *q)
 	return is_integer(p1_tmp);
 }
 
-static USE_RESULT pl_status fn_iso_abs_1(query *q)
+static USE_RESULT bool fn_iso_abs_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -359,10 +358,10 @@ static USE_RESULT pl_status fn_iso_abs_1(query *q)
 	else
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_sign_1(query *q)
+static USE_RESULT bool fn_iso_sign_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -378,19 +377,19 @@ static USE_RESULT pl_status fn_iso_sign_1(query *q)
 	else
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_positive_1(query *q)
+static USE_RESULT bool fn_iso_positive_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum = p1;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_negative_1(query *q)
+static USE_RESULT bool fn_iso_negative_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -409,34 +408,34 @@ static USE_RESULT pl_status fn_iso_negative_1(query *q)
 	else
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_epsilon_0(query *q)
+static USE_RESULT bool fn_iso_epsilon_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_float = DBL_EPSILON;
 	q->accum.tag = TAG_FLOAT;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_pi_0(query *q)
+static USE_RESULT bool fn_iso_pi_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_float = M_PI;
 	q->accum.tag = TAG_FLOAT;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_e_0(query *q)
+static USE_RESULT bool fn_iso_e_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.val_float = M_E;
 	q->accum.tag = TAG_FLOAT;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_add_2(query *q)
+USE_RESULT bool fn_iso_add_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -444,10 +443,10 @@ USE_RESULT pl_status fn_iso_add_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 	DO_OP2(+, add, p1, p2);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_sub_2(query *q)
+static USE_RESULT bool fn_iso_sub_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -455,10 +454,10 @@ static USE_RESULT pl_status fn_iso_sub_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 	DO_OP2(-, sub, p1, p2);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_mul_2(query *q)
+static USE_RESULT bool fn_iso_mul_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -466,10 +465,10 @@ static USE_RESULT pl_status fn_iso_mul_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 	DO_OP2(*, mul, p1, p2);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_exp_1(query *q)
+static USE_RESULT bool fn_iso_exp_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -507,10 +506,10 @@ static USE_RESULT pl_status fn_iso_exp_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
+static USE_RESULT bool fn_iso_sqrt_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -543,10 +542,10 @@ static USE_RESULT pl_status fn_iso_sqrt_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_log_1(query *q)
+static USE_RESULT bool fn_iso_log_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -579,10 +578,10 @@ static USE_RESULT pl_status fn_iso_log_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_popcount_1(query *q)
+static USE_RESULT bool fn_popcount_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -614,10 +613,10 @@ static USE_RESULT pl_status fn_popcount_1(query *q)
 	}
 
 	q->accum.tag = TAG_INTEGER;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_lsb_1(query *q)
+static USE_RESULT bool fn_lsb_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -648,10 +647,10 @@ static USE_RESULT pl_status fn_lsb_1(query *q)
 	}
 
 	q->accum.tag = TAG_INTEGER;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_msb_1(query *q)
+static USE_RESULT bool fn_msb_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -682,10 +681,10 @@ static USE_RESULT pl_status fn_msb_1(query *q)
 	}
 
 	q->accum.tag = TAG_INTEGER;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_truncate_1(query *q)
+static USE_RESULT bool fn_iso_truncate_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -707,10 +706,10 @@ static USE_RESULT pl_status fn_iso_truncate_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_round_1(query *q)
+static USE_RESULT bool fn_iso_round_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -739,10 +738,10 @@ static USE_RESULT pl_status fn_iso_round_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
+static USE_RESULT bool fn_iso_ceiling_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -764,10 +763,10 @@ static USE_RESULT pl_status fn_iso_ceiling_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
+static USE_RESULT bool fn_iso_float_integer_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -784,10 +783,10 @@ static USE_RESULT pl_status fn_iso_float_integer_part_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
+static USE_RESULT bool fn_iso_float_fractional_part_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -808,10 +807,10 @@ static USE_RESULT pl_status fn_iso_float_fractional_part_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_floor_1(query *q)
+static USE_RESULT bool fn_iso_floor_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -833,10 +832,10 @@ static USE_RESULT pl_status fn_iso_floor_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_sin_1(query *q)
+static USE_RESULT bool fn_iso_sin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -860,10 +859,10 @@ static USE_RESULT pl_status fn_iso_sin_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_cos_1(query *q)
+static USE_RESULT bool fn_iso_cos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -887,10 +886,10 @@ static USE_RESULT pl_status fn_iso_cos_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_tan_1(query *q)
+static USE_RESULT bool fn_iso_tan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -922,10 +921,10 @@ static USE_RESULT pl_status fn_iso_tan_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_asin_1(query *q)
+static USE_RESULT bool fn_iso_asin_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -949,10 +948,10 @@ static USE_RESULT pl_status fn_iso_asin_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_acos_1(query *q)
+static USE_RESULT bool fn_iso_acos_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -976,10 +975,10 @@ static USE_RESULT pl_status fn_iso_acos_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_atan_1(query *q)
+static USE_RESULT bool fn_iso_atan_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1003,10 +1002,10 @@ static USE_RESULT pl_status fn_iso_atan_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_atan2_2(query *q)
+static USE_RESULT bool fn_iso_atan2_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1050,10 +1049,10 @@ static USE_RESULT pl_status fn_iso_atan2_2(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sinh_1(query *q)
+static USE_RESULT bool fn_sinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1077,10 +1076,10 @@ static USE_RESULT pl_status fn_sinh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_cosh_1(query *q)
+static USE_RESULT bool fn_cosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1104,10 +1103,10 @@ static USE_RESULT pl_status fn_cosh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_tanh_1(query *q)
+static USE_RESULT bool fn_tanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1131,10 +1130,10 @@ static USE_RESULT pl_status fn_tanh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_asinh_1(query *q)
+static USE_RESULT bool fn_asinh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1158,10 +1157,10 @@ static USE_RESULT pl_status fn_asinh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_acosh_1(query *q)
+static USE_RESULT bool fn_acosh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1185,10 +1184,10 @@ static USE_RESULT pl_status fn_acosh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_atanh_1(query *q)
+static USE_RESULT bool fn_atanh_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1213,10 +1212,10 @@ static USE_RESULT pl_status fn_atanh_1(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_copysign_2(query *q)
+static USE_RESULT bool fn_iso_copysign_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1250,10 +1249,10 @@ static USE_RESULT pl_status fn_iso_copysign_2(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_pow_2(query *q)
+static USE_RESULT bool fn_iso_pow_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1271,7 +1270,7 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 			return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow");
 
 		q->accum.tag = TAG_FLOAT;
-		return pl_success;
+		return true;
 	}
 
 	if (is_smallint(&p1) && is_smallint(&p2)) {
@@ -1323,10 +1322,10 @@ static USE_RESULT pl_status fn_iso_pow_2(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_powi_2(query *q)
+static USE_RESULT bool fn_iso_powi_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1377,7 +1376,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 		if (p2.val_int < 0) {
 			q->accum.val_int = pow(p1.val_int, p2.val_int);
 			q->accum.tag = TAG_INTEGER;
-			return pl_success;
+			return true;
 		}
 
 		if (p2.val_int > (INT32_MAX/2))
@@ -1391,7 +1390,7 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 
 		if (mp_int_compare_value(&q->tmp_ival, MP_SMALL_MAX) > 0) {
 			SET_ACCUM();
-			return pl_success;
+			return true;
 		}
 
 		q->accum.val_int = pow(p1.val_int, p2.val_int);
@@ -1426,10 +1425,10 @@ static USE_RESULT pl_status fn_iso_powi_2(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_divide_2(query *q)
+static USE_RESULT bool fn_iso_divide_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1554,10 +1553,10 @@ static USE_RESULT pl_status fn_iso_divide_2(query *q)
 	if (is_float(&q->accum) && isnan(q->accum.val_float))
 		return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "undefined");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_divint_2(query *q)
+static USE_RESULT bool fn_iso_divint_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1581,10 +1580,10 @@ static USE_RESULT pl_status fn_iso_divint_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_mod_2(query *q)
+static USE_RESULT bool fn_iso_mod_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1634,10 +1633,10 @@ static USE_RESULT pl_status fn_iso_mod_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_div_2(query *q)
+static USE_RESULT bool fn_iso_div_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1685,10 +1684,10 @@ static USE_RESULT pl_status fn_iso_div_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_rem_2(query *q)
+static USE_RESULT bool fn_iso_rem_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1725,10 +1724,10 @@ static USE_RESULT pl_status fn_iso_rem_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_max_2(query *q)
+static USE_RESULT bool fn_iso_max_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1797,10 +1796,10 @@ static USE_RESULT pl_status fn_iso_max_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_min_2(query *q)
+static USE_RESULT bool fn_iso_min_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1869,10 +1868,10 @@ static USE_RESULT pl_status fn_iso_min_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_xor_2(query *q)
+static USE_RESULT bool fn_iso_xor_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1906,10 +1905,10 @@ static USE_RESULT pl_status fn_iso_xor_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_or_2(query *q)
+static USE_RESULT bool fn_iso_or_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1943,10 +1942,10 @@ static USE_RESULT pl_status fn_iso_or_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_and_2(query *q)
+static USE_RESULT bool fn_iso_and_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -1980,10 +1979,10 @@ static USE_RESULT pl_status fn_iso_and_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_shl_2(query *q)
+static USE_RESULT bool fn_iso_shl_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2000,7 +1999,7 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 
 		if ((q->accum.val_int >= 0) && (p2.val_int < 64)) {
 			q->accum.tag = TAG_INTEGER;
-			return pl_success;
+			return true;
 		}
 
 		mp_int_init_value(&q->tmp_ival, p1.val_int);
@@ -2014,10 +2013,10 @@ static USE_RESULT pl_status fn_iso_shl_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_shr_2(query *q)
+static USE_RESULT bool fn_iso_shr_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2041,10 +2040,10 @@ static USE_RESULT pl_status fn_iso_shr_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_neg_1(query *q)
+static USE_RESULT bool fn_iso_neg_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2059,10 +2058,10 @@ static USE_RESULT pl_status fn_iso_neg_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_seq_2(query *q)
+static USE_RESULT bool fn_iso_seq_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2070,7 +2069,7 @@ static USE_RESULT pl_status fn_iso_seq_2(query *q)
 	return res == 0 || res == ERR_CYCLE_CMP;
 }
 
-static USE_RESULT pl_status fn_iso_sne_2(query *q)
+static USE_RESULT bool fn_iso_sne_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2078,7 +2077,7 @@ static USE_RESULT pl_status fn_iso_sne_2(query *q)
 	return res != 0 && res != ERR_CYCLE_CMP;
 }
 
-static USE_RESULT pl_status fn_iso_slt_2(query *q)
+static USE_RESULT bool fn_iso_slt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2086,7 +2085,7 @@ static USE_RESULT pl_status fn_iso_slt_2(query *q)
 	return res != ERR_CYCLE_CMP && res < 0;
 }
 
-static USE_RESULT pl_status fn_iso_sle_2(query *q)
+static USE_RESULT bool fn_iso_sle_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2094,7 +2093,7 @@ static USE_RESULT pl_status fn_iso_sle_2(query *q)
 	return res != ERR_CYCLE_CMP && res <= 0;
 }
 
-static USE_RESULT pl_status fn_iso_sgt_2(query *q)
+static USE_RESULT bool fn_iso_sgt_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2102,7 +2101,7 @@ static USE_RESULT pl_status fn_iso_sgt_2(query *q)
 	return res != ERR_CYCLE_CMP && res > 0;
 }
 
-static USE_RESULT pl_status fn_iso_sge_2(query *q)
+static USE_RESULT bool fn_iso_sge_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2110,7 +2109,7 @@ static USE_RESULT pl_status fn_iso_sge_2(query *q)
 	return res != ERR_CYCLE_CMP && res >= 0;
 }
 
-static USE_RESULT pl_status fn_iso_neq_2(query *q)
+static USE_RESULT bool fn_iso_neq_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2135,7 +2134,7 @@ static USE_RESULT pl_status fn_iso_neq_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_iso_nne_2(query *q)
+static USE_RESULT bool fn_iso_nne_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2160,7 +2159,7 @@ static USE_RESULT pl_status fn_iso_nne_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_iso_nge_2(query *q)
+static USE_RESULT bool fn_iso_nge_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2185,7 +2184,7 @@ static USE_RESULT pl_status fn_iso_nge_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_iso_ngt_2(query *q)
+static USE_RESULT bool fn_iso_ngt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2210,7 +2209,7 @@ static USE_RESULT pl_status fn_iso_ngt_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_iso_nle_2(query *q)
+static USE_RESULT bool fn_iso_nle_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2235,7 +2234,7 @@ static USE_RESULT pl_status fn_iso_nle_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_iso_nlt_2(query *q)
+static USE_RESULT bool fn_iso_nlt_2(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	GET_NEXT_ARG(p2_tmp,any);
@@ -2260,7 +2259,7 @@ static USE_RESULT pl_status fn_iso_nlt_2(query *q)
 	return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 }
 
-static USE_RESULT pl_status fn_log_2(query *q)
+static USE_RESULT bool fn_log_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2336,10 +2335,10 @@ static USE_RESULT pl_status fn_log_2(query *q)
 		q->accum.tag = TAG_FLOAT;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_log10_1(query *q)
+static USE_RESULT bool fn_log10_1(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2369,7 +2368,7 @@ static USE_RESULT pl_status fn_log10_1(query *q)
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
 	}
 
-	return pl_success;
+	return true;
 }
 
 static pl_uint_t g_seed = 0;
@@ -2381,23 +2380,23 @@ static double rnd(void)
 	return((double)g_seed / (double)random_M);
 }
 
-static USE_RESULT pl_status fn_set_seed_1(query *q)
+static USE_RESULT bool fn_set_seed_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	g_seed = p1->val_int;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_get_seed_1(query *q)
+static USE_RESULT bool fn_get_seed_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, g_seed);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_random_between_3(query *q)
+static USE_RESULT bool fn_random_between_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -2415,49 +2414,49 @@ static USE_RESULT pl_status fn_random_between_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_random_1(query *q)
+static USE_RESULT bool fn_random_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_float(&tmp, rnd());
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_random_integer_0(query *q)
+static USE_RESULT bool fn_random_integer_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.tag = TAG_INTEGER;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_random_float_0(query *q)
+static USE_RESULT bool fn_random_float_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.tag = TAG_FLOAT;
 	q->accum.val_float = rnd();
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_rand_0(query *q)
+static USE_RESULT bool fn_rand_0(query *q)
 {
 	CHECK_CALC();
 	q->accum.tag = TAG_INTEGER;
 	q->accum.val_int = rnd() * ((int64_t)RAND_MAX+1);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_rand_1(query *q)
+static USE_RESULT bool fn_rand_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, rnd() * ((int64_t)RAND_MAX+1));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_set_prob_1(query *q)
+static USE_RESULT bool fn_sys_set_prob_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	double p;
@@ -2488,17 +2487,17 @@ static USE_RESULT pl_status fn_sys_set_prob_1(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "range_error");
 
 	q->st.prob *= p;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_get_prob_1(query *q)
+static USE_RESULT bool fn_sys_get_prob_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_float(&tmp, q->st.prob);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	q->st.prob = 1.0;
-	return pl_success;
+	return true;
 }
 
 static pl_int_t gcd(pl_int_t num, pl_int_t remainder)
@@ -2509,7 +2508,7 @@ static pl_int_t gcd(pl_int_t num, pl_int_t remainder)
 	return gcd(remainder, num % remainder);
 }
 
-static USE_RESULT pl_status fn_gcd_2(query *q)
+static USE_RESULT bool fn_gcd_2(query *q)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1_tmp,any);
@@ -2545,7 +2544,7 @@ static USE_RESULT pl_status fn_gcd_2(query *q)
 		return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 	}
 
-	return pl_success;
+	return true;
 }
 
 const builtins g_functions_bifs[] =

@@ -1,18 +1,17 @@
+#include <ctype.h>
+#include <float.h>
+#include <inttypes.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-#include <inttypes.h>
 
-#include "internal.h"
-#include "parser.h"
-#include "module.h"
-#include "query.h"
-#include "network.h"
 #include "heap.h"
+#include "module.h"
+#include "network.h"
+#include "parser.h"
+#include "query.h"
 #include "utf8.h"
 
 #ifndef DBL_DECIMAL_DIG
@@ -1260,7 +1259,7 @@ char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 	return buf;
 }
 
-pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
+bool print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
@@ -1293,7 +1292,7 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
-			return pl_error;
+			return false;
 		}
 
 		len -= nbytes;
@@ -1301,10 +1300,10 @@ pl_status print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_c
 	}
 
 	free(dst);
-	return pl_success;
+	return true;
 }
 
-pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
+bool print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
@@ -1338,7 +1337,7 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
-			return pl_error;
+			return false;
 		}
 
 		len -= nbytes;
@@ -1346,7 +1345,7 @@ pl_status print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int runni
 	}
 
 	free(dst);
-	return pl_success;
+	return true;
 }
 
 char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
@@ -1375,7 +1374,7 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 	return buf;
 }
 
-pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
+bool print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
@@ -1406,7 +1405,7 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 		if (feof(str->fp)) {
 			q->error = true;
 			free(dst);
-			return pl_error;
+			return false;
 		}
 
 		len -= nbytes;
@@ -1414,10 +1413,10 @@ pl_status print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 	}
 
 	free(dst);
-	return pl_success;
+	return true;
 }
 
-pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
+bool print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 {
 	pl_int_t skip = 0, max = 1000000000;
 	pl_idx_t tmp_ctx = c_ctx;
@@ -1448,7 +1447,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 		if (feof(fp)) {
 			q->error = true;
 			free(dst);
-			return pl_error;
+			return false;
 		}
 
 		len -= nbytes;
@@ -1456,7 +1455,7 @@ pl_status print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	}
 
 	free(dst);
-	return pl_success;
+	return true;
 }
 
 void clear_write_options(query *q)

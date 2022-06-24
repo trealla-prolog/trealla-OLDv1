@@ -1,20 +1,19 @@
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#include "internal.h"
-#include "library.h"
-#include "parser.h"
-#include "module.h"
-#include "prolog.h"
-#include "query.h"
+#include "base64.h"
 #include "heap.h"
 #include "history.h"
-#include "base64.h"
+#include "library.h"
+#include "module.h"
+#include "parser.h"
+#include "prolog.h"
+#include "query.h"
 #include "utf8.h"
 
 #if USE_OPENSSL
@@ -74,13 +73,13 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	return false;
 }
 
-pl_status do_yield_0(query *q, int msecs)
+bool do_yield_0(query *q, int msecs)
 {
 	q->yielded = true;
 	q->tmo_msecs = get_time_in_usec() / 1000;
 	q->tmo_msecs += msecs > 0 ? msecs : 1;
 	may_error(push_choice(q));
-	return pl_failure;
+	return false;
 }
 
 static void set_params(query *q, pl_idx_t p1, pl_idx_t p2)
@@ -296,37 +295,37 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 	return tmp;
 }
 
-USE_RESULT pl_status make_cstringn(cell *d, const char *s, size_t n)
+USE_RESULT bool make_cstringn(cell *d, const char *s, size_t n)
 {
 	if (!n) {
 		make_atom(d, g_empty_s);
-		return pl_success;
+		return true;
 	}
 
 	if (n < MAX_SMALL_STRING) {
 		make_smalln(d, s, n);
-		return pl_success;
+		return true;
 	}
 
 	*d = (cell){0};
 	d->tag = TAG_CSTR;
 	d->nbr_cells = 1;
 	SET_STR(d, s, n, 0);
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
+USE_RESULT bool make_stringn(cell *d, const char *s, size_t n)
 {
 	if (!n) {
 		make_atom(d, g_empty_s);
-		return pl_success;
+		return true;
 	}
 
 	if (n < MAX_SMALL_STRING) {
 		make_smalln(d, s, n);
 		d->flags = FLAG_CSTR_STRING;
 		d->arity = 2;
-		return pl_success;
+		return true;
 	}
 
 	*d = (cell){0};
@@ -335,21 +334,21 @@ USE_RESULT pl_status make_stringn(cell *d, const char *s, size_t n)
 	d->nbr_cells = 1;
 	d->arity = 2;
 	SET_STR(d, s, n, 0);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size_t off, size_t n)
+static USE_RESULT bool make_slice(query *q, cell *d, const cell *orig, size_t off, size_t n)
 {
 	if (!n) {
 		make_atom(d, g_empty_s);
-		return pl_success;
+		return true;
 	}
 
 	if (is_static(orig)) {
 		*d = *orig;
 		d->val_str += off;
 		d->str_len = n;
-		return pl_success;
+		return true;
 	}
 
 	if (n < MAX_SMALL_STRING) {
@@ -366,7 +365,7 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size
 		d->strb_off += off;
 		d->strb_len = n;
 		share_cell(orig);
-		return pl_success;
+		return true;
 	}
 
 	const char *s = C_STR(q, orig);
@@ -377,7 +376,7 @@ static USE_RESULT pl_status make_slice(query *q, cell *d, const cell *orig, size
 	return make_cstringn(d, s+off, n);
 }
 
-static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
+static USE_RESULT bool fn_iso_unify_with_occurs_check_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -385,10 +384,10 @@ static USE_RESULT pl_status fn_iso_unify_with_occurs_check_2(query *q)
 	q->flags.occurs_check = OCCURS_CHECK_TRUE;
 	bool ok = unify(q, p1, p1_ctx, p2, p2_ctx);
 	q->flags.occurs_check = save;
-	return ok ? pl_success : pl_failure;
+	return ok ? true : false;
 }
 
-USE_RESULT pl_status fn_iso_unify_2(query *q)
+USE_RESULT bool fn_iso_unify_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -397,13 +396,13 @@ USE_RESULT pl_status fn_iso_unify_2(query *q)
 	if (q->cycle_error)
 		return throw_error(q, p2, p2_ctx, "representation_error", "term");
 
-	return ok ? pl_success : pl_failure;
+	return ok ? true : false;
 }
 
-static USE_RESULT pl_status fn_iso_notunify_2(query *q)
+static USE_RESULT bool fn_iso_notunify_2(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_RAW_ARG(p1,any);
 	GET_NEXT_RAW_ARG(p2,any);
@@ -422,85 +421,85 @@ static USE_RESULT pl_status fn_iso_notunify_2(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 
-static USE_RESULT pl_status fn_dcgs_2(query *q)
+static USE_RESULT bool fn_dcgs_2(query *q)
 {
 	return throw_error(q, q->st.curr_cell, q->st.curr_frame, "existence_error", "procedure");
 }
 
-static USE_RESULT pl_status fn_iso_repeat_0(query *q)
+static USE_RESULT bool fn_iso_repeat_0(query *q)
 {
 	may_error(push_choice(q));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_halt_0(query *q)
+static USE_RESULT bool fn_iso_halt_0(query *q)
 {
 	q->halt_code = 0;
 	q->halt = q->error = true;
-	return pl_halt;
+	return false;
 }
 
-static USE_RESULT pl_status fn_iso_halt_1(query *q)
+static USE_RESULT bool fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	q->halt_code = get_int(p1);
 	q->halt = q->error = true;
-	return pl_halt;
+	return false;
 }
 
-static USE_RESULT pl_status fn_iso_number_1(query *q)
+static USE_RESULT bool fn_iso_number_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_number(p1);
 }
 
-static USE_RESULT pl_status fn_iso_atom_1(query *q)
+static USE_RESULT bool fn_iso_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_iso_atom(p1);
 }
 
-static USE_RESULT pl_status fn_iso_compound_1(query *q)
+static USE_RESULT bool fn_iso_compound_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_compound(p1) ? 1 : 0;
 }
 
-static USE_RESULT pl_status fn_iso_atomic_1(query *q)
+static USE_RESULT bool fn_iso_atomic_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_atomic(p1);
 }
 
-static USE_RESULT pl_status fn_iso_var_1(query *q)
+static USE_RESULT bool fn_iso_var_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_variable(p1);
 }
 
-static USE_RESULT pl_status fn_iso_nonvar_1(query *q)
+static USE_RESULT bool fn_iso_nonvar_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return !is_variable(p1);
 }
 
-static USE_RESULT pl_status fn_iso_ground_1(query *q)
+static USE_RESULT bool fn_iso_ground_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return !has_vars(q, p1, p1_ctx);
 }
 
-static USE_RESULT pl_status fn_iso_callable_1(query *q)
+static USE_RESULT bool fn_iso_callable_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_callable(p1);
 }
 
-static USE_RESULT pl_status fn_iso_char_code_2(query *q)
+static USE_RESULT bool fn_iso_char_code_2(query *q)
 {
 	GET_FIRST_ARG(p1,character_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -545,7 +544,7 @@ static USE_RESULT pl_status fn_iso_char_code_2(query *q)
 	return ch == get_int(p2);
 }
 
-static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
+static USE_RESULT bool fn_iso_atom_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -564,7 +563,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	if (is_atom(p1) && !C_STRLEN(q, p1) && is_nil(p2))
-		return pl_success;
+		return true;
 
 	if (is_variable(p1) && is_nil(p2)) {
 		cell tmp;
@@ -583,7 +582,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		may_error(make_stringn(&tmp, C_STR(q, p1), C_STRLEN(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	if (is_variable(p2)) {
@@ -591,7 +590,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		may_error(make_stringn(&tmp, C_STR(q, p1), C_STRLEN(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	if (is_string(p2)) {
@@ -599,7 +598,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		may_error(make_slice(q, &tmp, p2, 0, C_STRLEN(q, p2)));
 		tmp.flags &= ~FLAG_CSTR_STRING;
 		tmp.arity = 0;
-		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -647,7 +646,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		tmp.flags &= ~FLAG_CSTR_STRING;
 		tmp.arity = 0;
 		set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	if (!is_variable(p2) && is_variable(p1)) {
@@ -673,7 +672,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		cell tmp;
 		may_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
-		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -700,7 +699,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
+static USE_RESULT bool fn_iso_number_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -836,7 +835,7 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 		p->srcptr = NULL;
 		free(tmpbuf);
 		cell tmp = p->v;
-		pl_status ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok2;
 	}
@@ -848,12 +847,12 @@ static USE_RESULT pl_status fn_iso_number_chars_2(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dst));
 	free(dst);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
+static USE_RESULT bool fn_iso_atom_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -949,7 +948,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 		cell tmp;
 		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
-		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -973,7 +972,7 @@ static USE_RESULT pl_status fn_iso_atom_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_string_codes_2(query *q)
+static USE_RESULT bool fn_string_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -1069,7 +1068,7 @@ static USE_RESULT pl_status fn_string_codes_2(query *q)
 		cell tmp;
 		may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
-		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -1093,7 +1092,7 @@ static USE_RESULT pl_status fn_string_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_hex_bytes_2(query *q)
+static USE_RESULT bool fn_hex_bytes_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -1173,7 +1172,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 		cell tmp;
 		may_error(make_string(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
-		pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
@@ -1257,7 +1256,7 @@ static USE_RESULT pl_status fn_hex_bytes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
+static USE_RESULT bool fn_iso_number_codes_2(query *q)
 {
 	GET_FIRST_ARG(p1,number_or_var);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -1390,7 +1389,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 		p->srcptr = NULL;
 		free(tmpbuf);
 		cell tmp = p->v;
-		pl_status ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		bool ok2 = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok2;
 	}
@@ -1415,7 +1414,7 @@ static USE_RESULT pl_status fn_iso_number_codes_2(query *q)
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
+static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer_or_var);		// before
@@ -1470,7 +1469,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 
 	if (before > len_p1) {
 		drop_choice(q);
-		return pl_failure;
+		return false;
 	}
 
 	for (size_t i = before; i <= len_p1; i++) {
@@ -1519,7 +1518,7 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 					drop_choice(q);
 				}
 
-				return pl_success;
+				return true;
 			}
 
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
@@ -1536,19 +1535,19 @@ static USE_RESULT pl_status fn_iso_sub_atom_5(query *q)
 				drop_choice(q);
 			}
 
-			return pl_success;
+			return true;
 		}
 
 		len = 0;
 	}
 
 	drop_choice(q);
-	return pl_failure;
+	return false;
 }
 
 // NOTE: this just handles the mode(-,-,+) case...
 
-static pl_status do_atom_concat_3(query *q)
+static bool do_atom_concat_3(query *q)
 {
 	if (!q->retry) {
 		GET_FIRST_ARG(p1,variable);
@@ -1562,7 +1561,7 @@ static pl_status do_atom_concat_3(query *q)
 		if (C_STRLEN(q, p3))
 			may_error(push_choice(q));
 
-		return pl_success;
+		return true;
 	}
 
 	GET_FIRST_ARG(p1,atom);
@@ -1592,10 +1591,10 @@ static pl_status do_atom_concat_3(query *q)
 	if (!done)
 		may_error(push_choice(q));
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
+static USE_RESULT bool fn_iso_atom_concat_3(query *q)
 {
 	if (q->retry)
 		return do_atom_concat_3(q);
@@ -1622,7 +1621,7 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 		ASTRING_free(pr);
 		set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	if (is_variable(p1)) {
@@ -1633,13 +1632,13 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			return false;
 
 		if (memcmp(s3+(len3-len2), s2, len2))
-			return pl_failure;
+			return false;
 
 		cell tmp;
 		may_error(make_slice(q, &tmp, p3, 0, len3-len2));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	if (is_variable(p2)) {
@@ -1650,31 +1649,31 @@ static USE_RESULT pl_status fn_iso_atom_concat_3(query *q)
 			return false;
 
 		if (memcmp(s3, s1, len1))
-			return pl_failure;
+			return false;
 
 		cell tmp;
 		may_error(make_slice(q, &tmp, p3, len1, len3-len1));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	size_t len1 = C_STRLEN(q, p1), len2 = C_STRLEN(q, p2), len3 = C_STRLEN(q, p3);
 	const char *s1 = C_STR(q, p1), *s2 = C_STR(q, p2), *s3 = C_STR(q, p3);
 
 	if ((len1 + len2) != len3)
-		return pl_failure;
+		return false;
 
 	if (memcmp(s3, s1, len1))
-		return pl_failure;
+		return false;
 
 	if (memcmp(s3+len1, s2, len2))
-		return pl_failure;
+		return false;
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
+static USE_RESULT bool fn_iso_atom_length_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,smallint_or_var);
@@ -1688,7 +1687,7 @@ static USE_RESULT pl_status fn_iso_atom_length_2(query *q)
 	size_t len = substrlen_utf8(C_STR(q, p1), C_STRLEN(q, p1));
 	cell tmp;
 	make_int(&tmp, len);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
@@ -1783,7 +1782,7 @@ static void db_log(query *q, db_entry *dbe, enum log_type l)
 	q->quoted = 0;
 }
 
-static USE_RESULT pl_status fn_iso_arg_3(query *q)
+static USE_RESULT bool fn_iso_arg_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,compound);
@@ -1793,12 +1792,12 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		return throw_error(q, p1, p1_ctx, "domain_error", "not_less_than_zero");
 
 	if (is_bigint(p1))
-		return pl_failure;
+		return false;
 
 	pl_int_t arg_nbr = get_smallint(p1);
 
 	if ((arg_nbr == 0) || (arg_nbr > p2->arity))
-		return pl_failure;
+		return false;
 
 	if (is_list(p2)) {
 		LIST_HANDLER(p2);
@@ -1828,10 +1827,10 @@ static USE_RESULT pl_status fn_iso_arg_3(query *q)
 		p2 += p2->nbr_cells;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_univ_2(query *q)
+static USE_RESULT bool fn_iso_univ_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -2022,7 +2021,7 @@ static cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx)
 	return tmp;
 }
 
-static USE_RESULT pl_status fn_iso_term_variables_2(query *q)
+static USE_RESULT bool fn_iso_term_variables_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -2101,7 +2100,7 @@ static cell *do_term_singletons(query *q, cell *p1, pl_idx_t p1_ctx)
 	return tmp;		// returns on tmp_heap
 }
 
-static USE_RESULT pl_status fn_term_singletons_2(query *q)
+static USE_RESULT bool fn_term_singletons_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,iso_list_or_nil_or_var);
@@ -2130,7 +2129,7 @@ static USE_RESULT pl_status fn_term_singletons_2(query *q)
 	return unify(q, p2, p2_ctx, tmp2, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
+static USE_RESULT bool fn_iso_copy_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2153,7 +2152,7 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 			e2->c.attrs_ctx = q->st.curr_frame;
 		}
 
-		return pl_success;
+		return true;
 	}
 
 	if (is_atomic(p1) && is_variable(p2))
@@ -2176,13 +2175,13 @@ static USE_RESULT pl_status fn_iso_copy_term_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
+static USE_RESULT bool fn_copy_term_nat_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
 	if (is_variable(p1) && is_variable(p2))
-		return pl_success;
+		return true;
 
 	if (is_atomic(p1) && is_variable(p2))
 		return unify(q, p1, p1_ctx, p2, p2_ctx);
@@ -2204,17 +2203,17 @@ static USE_RESULT pl_status fn_copy_term_nat_2(query *q)
 	return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_clause_2(query *q)
+static USE_RESULT bool fn_iso_clause_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == pl_success) {
-		if (q->did_throw) return pl_success;
+	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == true) {
+		if (q->did_throw) return true;
 		CHECK_INTERRUPT();
 		clause *r = &q->st.curr_clause2->cl;
 		cell *body = get_body(r->cells);
-		pl_status ok;
+		bool ok;
 
 		if (body)
 			ok = unify(q, p2, p2_ctx, body, q->st.fp);
@@ -2228,7 +2227,7 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 			db_entry *dbe = q->st.curr_clause2;
 			bool last_match = !more_data(q, dbe);
 			stash_me(q, r, last_match);
-			return pl_success;
+			return true;
 		}
 
 		undo_me(q);
@@ -2236,10 +2235,10 @@ static USE_RESULT pl_status fn_iso_clause_2(query *q)
 		q->retry = QUERY_RETRY;
 	}
 
-	return pl_failure;
+	return false;
 }
 
-pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
+bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	cell *head = deref(q, get_head(p1), p1_ctx);
 
@@ -2249,14 +2248,14 @@ pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_re
 	if (!is_callable(head))
 		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
 
-	pl_status match;
+	bool match;
 
 	if (check_if_rule(p1))
 		match = match_rule(q, p1, p1_ctx);
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
 
-	if ((match != pl_success) || q->did_throw)
+	if ((match != true) || q->did_throw)
 		return match;
 
 	db_entry *dbe = q->st.curr_clause2;
@@ -2267,16 +2266,16 @@ pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_re
 		db_log(q, dbe, LOG_ERASE);
 
 	add_to_dirty_list(q->st.m, dbe);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_retract_1(query *q)
+static USE_RESULT bool fn_iso_retract_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	return do_retract(q, p1, p1_ctx, DO_RETRACT);
 }
 
-static pl_status do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
+static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	cell *head = deref(q, get_head(p1), p1_ctx);
 	predicate *pr = search_predicate(q->st.m, head);
@@ -2287,13 +2286,13 @@ static pl_status do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (get_builtin(q->pl, C_STR(q, head), head->arity, &found, NULL), found)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
-		return pl_success;
+		return true;
 	}
 
 	unsigned cnt = 0;
 
 	while (do_retract(q, p1, p1_ctx, DO_RETRACTALL)) {
-		if (q->did_throw) return pl_success;
+		if (q->did_throw) return true;
 		CHECK_INTERRUPT();
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
@@ -2302,19 +2301,19 @@ static pl_status do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	//printf("*** purge %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_retractall_1(query *q)
+static USE_RESULT bool fn_iso_retractall_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	return do_retractall(q, p1, p1_ctx);
 }
 
-static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
+static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
 	predicate *pr = search_predicate(q->st.m, c);
-	if (!pr) return pl_success;
+	if (!pr) return true;
 
 	if (!pr->is_dynamic)
 		return throw_error(q, c_orig, q->st.curr_frame, "permission_error", "modify,static_procedure");
@@ -2339,10 +2338,10 @@ static pl_status do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 
 	pr->head = pr->tail = NULL;
 	pr->cnt = 0;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_abolish_1(query *q)
+static USE_RESULT bool fn_iso_abolish_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -2385,7 +2384,7 @@ static USE_RESULT pl_status fn_iso_abolish_1(query *q)
 	return do_abolish(q, p1, &tmp, true);
 }
 
-static USE_RESULT pl_status fn_soft_abolish_1(query *q)
+static USE_RESULT bool fn_soft_abolish_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -2481,7 +2480,7 @@ static void do_term_assign_vars(parser *p)
 	}
 }
 
-static USE_RESULT pl_status fn_iso_asserta_1(query *q)
+static USE_RESULT bool fn_iso_asserta_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -2542,10 +2541,10 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTA);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_assertz_1(query *q)
+static USE_RESULT bool fn_iso_assertz_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 
@@ -2606,10 +2605,10 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTZ);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_functor_3(query *q)
+static USE_RESULT bool fn_iso_functor_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -2667,7 +2666,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 		}
 
-		return pl_success;
+		return true;
 	}
 
 	cell tmp = *p1;
@@ -2683,15 +2682,15 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 
 	GET_NEXT_ARG(p2,any);
 
-	if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) != pl_success)
-		return pl_failure;
+	if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) != true)
+		return false;
 
 	GET_NEXT_ARG(p3,any);
 	make_int(&tmp, p1->arity);
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
+static USE_RESULT bool fn_iso_current_rule_1(query *q)
 {
 	GET_FIRST_ARG(p1,structure);
 	int add_two = 0;
@@ -2721,12 +2720,12 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 		sscanf(functor, "%255[^:]:%255s", tmpbuf1, tmpbuf2);
 		tmpbuf1[sizeof(tmpbuf1)-1] = tmpbuf2[sizeof(tmpbuf2)-1] = '\0';
 		module *m = m = find_module(q->pl, tmpbuf1);
-		if (!m) return pl_failure;
+		if (!m) return false;
 
 		if (find_functor(m, functor, arity))
-			return pl_success;
+			return true;
 
-		return pl_failure;
+		return false;
 	}
 
 	cell tmp = (cell){0};
@@ -2735,14 +2734,14 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	tmp.arity = arity;
 
 	if (search_predicate(q->st.m, &tmp))
-		return pl_success;
+		return true;
 
 	bool found = false;
 
 	if (get_builtin(q->pl, functor, arity, &found, NULL), found)
-		return pl_success;
+		return true;
 
-	return pl_failure;
+	return false;
 }
 
 static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
@@ -2759,7 +2758,7 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 		if (pr->is_abolished)
 			continue;
 
-		if (try_me(q, MAX_ARITY) != pl_success)
+		if (try_me(q, MAX_ARITY) != true)
 			return false;
 
 		cell tmpn, tmpa;
@@ -2778,7 +2777,7 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 	return false;
 }
 
-static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
+static USE_RESULT bool fn_iso_current_predicate_1(query *q)
 {
 	GET_FIRST_ARG(p_pi,any);
 	cell *p1, *p2;
@@ -2805,7 +2804,7 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 		return throw_error(q, p_pi, p_pi_ctx, "type_error", "predicate_indicator");
 
 	if (is_variable(p1) || is_variable(p2))
-		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
+		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? true : false;
 
 	cell tmp = (cell){0};
 	tmp.tag = TAG_INTERNED;
@@ -2815,19 +2814,19 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
 
-static USE_RESULT pl_status fn_cyclic_term_1(query *q)
+static USE_RESULT bool fn_cyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_cyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
+	return is_cyclic_term(q, p1, p1_ctx) ? true : false;
 }
 
-static USE_RESULT pl_status fn_iso_acyclic_term_1(query *q)
+static USE_RESULT bool fn_iso_acyclic_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	return is_acyclic_term(q, p1, p1_ctx) ? pl_success : pl_failure;
+	return is_acyclic_term(q, p1, p1_ctx) ? true : false;
 }
 
-static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
+static USE_RESULT bool fn_iso_current_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
@@ -2987,7 +2986,7 @@ static USE_RESULT pl_status fn_iso_current_prolog_flag_2(query *q)
 	return throw_error(q, p1, p1_ctx, "domain_error", "prolog_flag");
 }
 
-static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
+static USE_RESULT bool fn_iso_set_prolog_flag_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -2997,7 +2996,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 
 	if (!CMP_STR_CSTR(q, p1, "cpu_count") && is_integer(p2)) {
 		g_cpu_count = get_int(p2);
-		return pl_success;
+		return true;
 	}
 
 	if (!is_atom(p2) && !is_integer(p2))
@@ -3133,7 +3132,7 @@ static USE_RESULT pl_status fn_iso_set_prolog_flag_2(query *q)
 	}
 
 	q->flags = q->st.m->flags;
-	return pl_success;
+	return true;
 }
 
 typedef struct { cell *c; pl_idx_t c_ctx; query *q; bool ascending; int arg; } basepair;
@@ -3171,7 +3170,7 @@ static int nodecmp(const void *ptr1, const void *ptr2)
 		return ok < 0 ? 1 : ok > 0 ? -1 : 0;
 }
 
-static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keysort, pl_status *status)
+static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keysort, bool *status)
 {
 	pl_int_t max = PL_INT_MAX, skip = 0;
 	pl_idx_t tmp_ctx = p1_ctx;
@@ -3249,7 +3248,7 @@ static cell *nodesort(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool keys
 	return l;
 }
 
-static USE_RESULT pl_status fn_iso_sort_2(query *q)
+static USE_RESULT bool fn_iso_sort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -3274,13 +3273,13 @@ static USE_RESULT pl_status fn_iso_sort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = pl_failure;
+	bool status = false;
 	cell *l = nodesort(q, p1, p1_ctx, true, false, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_msort_2(query *q)
+static USE_RESULT bool fn_iso_msort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -3305,13 +3304,13 @@ static USE_RESULT pl_status fn_iso_msort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = pl_failure;
+	bool status = false;
 	cell *l = nodesort(q, p1, p1_ctx, false, false, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_iso_keysort_2(query *q)
+static USE_RESULT bool fn_iso_keysort_2(query *q)
 {
 	GET_FIRST_ARG(p1,list_or_nil);
 	GET_NEXT_ARG(p2,list_or_nil_or_var);
@@ -3347,13 +3346,13 @@ static USE_RESULT pl_status fn_iso_keysort_2(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = pl_failure;
+	bool status = false;
 	cell *l = nodesort(q, p1, p1_ctx, false, true, &status);
 	if (!l) return status;
 	return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 }
 
-static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool ascending, int arg, pl_status *status)
+static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool ascending, int arg, bool *status)
 {
 	pl_int_t max = PL_INT_MAX, skip = 0;
 	pl_idx_t tmp_ctx = p1_ctx;
@@ -3419,7 +3418,7 @@ static cell *nodesort4(query *q, cell *p1, pl_idx_t p1_ctx, bool dedup, bool asc
 	return l;
 }
 
-static USE_RESULT pl_status fn_sort_4(query *q)
+static USE_RESULT bool fn_sort_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -3478,7 +3477,7 @@ static USE_RESULT pl_status fn_sort_4(query *q)
 	if (skip1 && skip2 && (skip2 > skip1))
 		return false;
 
-	pl_status status = pl_failure;
+	bool status = false;
 	cell *l = nodesort4(q, p3, p3_ctx, dedup, ascending, arg, &status);
 	if (!l) return status;
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
@@ -3512,24 +3511,24 @@ static cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells)
 	return l;
 }
 
-static USE_RESULT pl_status fn_sys_list_1(query *q)
+static USE_RESULT bool fn_sys_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *l = convert_to_list(q, get_queue(q), queue_used(q));
 	return unify(q, p1, p1_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_queue_1(query *q)
+static USE_RESULT bool fn_sys_queue_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_raw_copy_to_tmp(q, p1, p1_ctx);
 	may_heap_error(tmp);
 	may_ptr_error(alloc_on_queuen(q, 0, tmp));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_queuen_2(query *q)
+static USE_RESULT bool fn_sys_queuen_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,any);
@@ -3537,10 +3536,10 @@ static USE_RESULT pl_status fn_sys_queuen_2(query *q)
 	cell *tmp = deep_raw_copy_to_tmp(q, p2, p2_ctx);
 	may_heap_error(tmp);
 	may_ptr_error(alloc_on_queuen(q, get_int(p1), tmp));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_findall_3(query *q)
+static USE_RESULT bool fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(xp1,any);
 	GET_NEXT_ARG(xp2,callable);
@@ -3574,16 +3573,16 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 		init_queuen(q);
 		free(q->tmpq[q->st.qnbr]);
 		q->tmpq[q->st.qnbr] = NULL;
-		return pl_success;
+		return true;
 	}
 
 	if (!queuen_used(q)) {
 		q->st.qnbr--;
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
-		pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 
-		if (ok == pl_success)
+		if (ok == true)
 			unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 		return ok;
@@ -3625,15 +3624,15 @@ static USE_RESULT pl_status fn_iso_findall_3(query *q)
 	q->tmpq[q->st.qnbr] = NULL;
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
-	pl_status ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
+	bool ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
 
-	if (ok == pl_success)
+	if (ok == true)
 		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
 
 	return ok;
 }
 
-static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
+static bool do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -3680,7 +3679,7 @@ static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 		return throw_error(q, p3, p3_ctx, "permission_error", "create,operator");
 
 	if (!tmp_pri && !pri)
-		return pl_success;
+		return true;
 
 	tmp_pri = find_op(q->st.m, C_STR(q, p3), OP_FX);
 
@@ -3695,10 +3694,10 @@ static pl_status do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 	if (!set_op(q->st.m, C_STR(q, p3), specifier, pri))
 		return throw_error(q, p3, p3_ctx, "resource_error", "too_many_ops");
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_op_3(query *q)
+static USE_RESULT bool fn_iso_op_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -3713,9 +3712,9 @@ static USE_RESULT pl_status fn_iso_op_3(query *q)
 		CHECK_INTERRUPT();
 		cell *h = LIST_HEAD(p3);
 		h = deref(q, h, p3_ctx);
-		pl_status ok = do_op(q, h, q->latest_ctx);
+		bool ok = do_op(q, h, q->latest_ctx);
 
-		if (ok != pl_success)
+		if (ok != true)
 			return ok;
 
 		p3 = LIST_TAIL(p3);
@@ -3726,16 +3725,16 @@ static USE_RESULT pl_status fn_iso_op_3(query *q)
 			return throw_error(q, p3, p3_ctx, "instantiation_error", "atom");
 
 		if (is_nil(p3))
-			return pl_success;
+			return true;
 	}
 
 	if (is_atom(p3))
 		return do_op(q, p3, p3_ctx);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_erase_1(query *q)
+static USE_RESULT bool fn_erase_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	uuid u;
@@ -3746,10 +3745,10 @@ static USE_RESULT pl_status fn_erase_1(query *q)
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ERASE);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_instance_2(query *q)
+static USE_RESULT bool fn_instance_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,any);
@@ -3760,7 +3759,7 @@ static USE_RESULT pl_status fn_instance_2(query *q)
 	return unify(q, p2, p2_ctx, dbe->cl.cells, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_clause_3(query *q)
+static USE_RESULT bool fn_clause_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable_or_var);
 	GET_NEXT_ARG(p2,callable_or_var);
@@ -3788,7 +3787,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 			if (!unify(q, p1, p1_ctx, head, q->st.fp))
 				break;
 		} else {
-			if (match_clause(q, p1, p1_ctx, DO_CLAUSE) != pl_success)
+			if (match_clause(q, p1, p1_ctx, DO_CLAUSE) != true)
 				break;
 
 			char tmpbuf[128];
@@ -3801,7 +3800,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		}
 
 		cell *body = get_body(r->cells);
-		pl_status ok;
+		bool ok;
 
 		if (body)
 			ok = unify(q, p2, p2_ctx, body, q->st.fp);
@@ -3821,7 +3820,7 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 				drop_choice(q);
 			}
 
-			return pl_success;
+			return true;
 		}
 
 		if (!is_variable(p3))
@@ -3832,10 +3831,10 @@ static USE_RESULT pl_status fn_clause_3(query *q)
 		q->retry = QUERY_RETRY;
 	}
 
-	return pl_failure;
+	return false;
 }
 
-static pl_status do_asserta_2(query *q)
+static bool do_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *head = deref(q, get_head(p1), p1_ctx);
@@ -3911,10 +3910,10 @@ static pl_status do_asserta_2(query *q)
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTA);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_asserta_2(query *q)
+static USE_RESULT bool fn_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
@@ -3925,7 +3924,7 @@ static USE_RESULT pl_status fn_asserta_2(query *q)
 	return do_asserta_2(q);
 }
 
-static USE_RESULT pl_status fn_sys_asserta_2(query *q)
+static USE_RESULT bool fn_sys_asserta_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
@@ -3936,7 +3935,7 @@ static USE_RESULT pl_status fn_sys_asserta_2(query *q)
 	return do_asserta_2(q);
 }
 
-static pl_status do_assertz_2(query *q)
+static bool do_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	cell *head = deref(q, get_head(p1), p1_ctx);
@@ -4012,10 +4011,10 @@ static pl_status do_assertz_2(query *q)
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTZ);
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_assertz_2(query *q)
+static USE_RESULT bool fn_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
@@ -4026,7 +4025,7 @@ static USE_RESULT pl_status fn_assertz_2(query *q)
 	return do_assertz_2(q);
 }
 
-static USE_RESULT pl_status fn_sys_assertz_2(query *q)
+static USE_RESULT bool fn_sys_assertz_2(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 
@@ -4078,10 +4077,10 @@ static void save_db(FILE *fp, query *q, int logging)
 	q->listing = false;
 }
 
-static USE_RESULT pl_status fn_listing_0(query *q)
+static USE_RESULT bool fn_listing_0(query *q)
 {
 	save_db(stdout, q, 0);
-	return pl_success;
+	return true;
 }
 
 static void save_name(FILE *fp, query *q, pl_idx_t name, unsigned arity)
@@ -4108,7 +4107,7 @@ static void save_name(FILE *fp, query *q, pl_idx_t name, unsigned arity)
 	}
 }
 
-static USE_RESULT pl_status fn_listing_1(query *q)
+static USE_RESULT bool fn_listing_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	pl_idx_t name = p1->val_off;
@@ -4136,7 +4135,7 @@ static USE_RESULT pl_status fn_listing_1(query *q)
 	}
 
 	save_name(stdout, q, name, arity);
-	return pl_success;
+	return true;
 }
 
 const char *dump_key(const void *k, const void *v, const void *p)
@@ -4148,7 +4147,7 @@ const char *dump_key(const void *k, const void *v, const void *p)
 	return tmpbuf;
 }
 
-static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
+static USE_RESULT bool fn_sys_dump_keys_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	const char *name = NULL;
@@ -4178,36 +4177,36 @@ static USE_RESULT pl_status fn_sys_dump_keys_1(query *q)
 	predicate *pr = find_functor(q->st.m, name, arity);
 
 	if (!pr)
-		return pl_failure;
+		return false;
 
 	if (!pr->idx)
-		return pl_success;
+		return true;
 
 	fprintf(stderr, "\n"); sl_dump(pr->idx, dump_key, q);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_timer_0(query *q)
+static USE_RESULT bool fn_sys_timer_0(query *q)
 {
 	q->time_started = get_time_in_usec();
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_elapsed_0(query *q)
+static USE_RESULT bool fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
 	fprintf(stdout, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_trace_0(query *q)
+static USE_RESULT bool fn_trace_0(query *q)
 {
 	q->trace = !q->trace;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_time_1(query *q)
+static USE_RESULT bool fn_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	DISCARD_RESULT fn_sys_timer_0(q);
@@ -4216,20 +4215,20 @@ static USE_RESULT pl_status fn_time_1(query *q)
 	make_struct(tmp+nbr_cells++, g_sys_elapsed_s, fn_sys_elapsed_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_statistics_0(query *q)
+static USE_RESULT bool fn_statistics_0(query *q)
 {
 	fprintf(stdout,
 		"Goals %llu, Matches %llu, Max frames %u, choices %u, trails %u, slots %u, heap: %u. Backtracks %llu, TCOs:%llu\n",
 		(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
 		q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->st.hp,
 		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_statistics_2(query *q)
+static USE_RESULT bool fn_statistics_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,list_or_var);
@@ -4240,14 +4239,14 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 		cell tmp;
 		make_float(&tmp, elapsed/1000/1000);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	if (!CMP_STR_CSTR(q, p1, "gctime") && is_variable(p2)) {
 		cell tmp;
 		make_float(&tmp, 0);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	if (!CMP_STR_CSTR(q, p1, "runtime")) {
@@ -4266,13 +4265,13 @@ static USE_RESULT pl_status fn_statistics_2(query *q)
 		return unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
-	return pl_failure;
+	return false;
 }
 
-static USE_RESULT pl_status fn_sleep_1(query *q)
+static USE_RESULT bool fn_sleep_1(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,integer);
 
@@ -4280,13 +4279,13 @@ static USE_RESULT pl_status fn_sleep_1(query *q)
 		return do_yield_0(q, get_int(p1)*1000);
 
 	sleep((unsigned)get_int(p1));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_delay_1(query *q)
+static USE_RESULT bool fn_delay_1(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,integer);
 
@@ -4294,21 +4293,21 @@ static USE_RESULT pl_status fn_delay_1(query *q)
 		return do_yield_0(q, get_int(p1));
 
 	msleep((unsigned)get_int(p1));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_busy_1(query *q)
+static USE_RESULT bool fn_busy_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	pl_int_t elapse = get_int(p1);
 
 	if (elapse < 0)
-		return pl_success;
+		return true;
 
 	// Limit to 60 seconds...
 
 	if (elapse > (60 * 1000))
-		return pl_success;
+		return true;
 
 	pl_uint_t started = get_time_in_usec() / 1000;
 	pl_uint_t end = started + elapse;
@@ -4317,48 +4316,48 @@ static USE_RESULT pl_status fn_busy_1(query *q)
 		CHECK_INTERRUPT();
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_now_0(query *q)
+static USE_RESULT bool fn_now_0(query *q)
 {
 	pl_int_t secs = get_time_in_usec() / 1000 / 1000;
 	q->accum.tag = TAG_INTEGER;
 	set_smallint(&q->accum, secs);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_now_1(query *q)
+static USE_RESULT bool fn_now_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	pl_int_t secs = get_time_in_usec() / 1000 / 1000;
 	cell tmp;
 	make_int(&tmp, secs);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_get_time_1(query *q)
+static USE_RESULT bool fn_get_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	double v = ((double)get_time_in_usec()-q->get_started) / 1000 / 1000;
 	cell tmp;
 	make_float(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_cpu_time_1(query *q)
+static USE_RESULT bool fn_cpu_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	double v = ((double)cpu_time_in_usec()-q->time_cpu_started) / 1000 / 1000;
 	cell tmp;
 	make_float(&tmp, (double)v);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_between_3(query *q)
+static USE_RESULT bool fn_between_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -4373,16 +4372,16 @@ static USE_RESULT pl_status fn_between_3(query *q)
 
 	if (!q->retry) {
 		if (get_int(p1) > get_int(p2))
-			return pl_failure;
+			return false;
 
 		if (!is_variable(p3)) {
 			if (get_int(p3) > get_int(p2))
-				return pl_failure;
+				return false;
 
 			if (get_int(p3) < get_int(p1))
-				return pl_failure;
+				return false;
 
-			return pl_success;
+			return true;
 		}
 
 		reset_var(q, p4, q->st.curr_frame, p1, q->st.curr_frame, false);
@@ -4391,7 +4390,7 @@ static USE_RESULT pl_status fn_between_3(query *q)
 			may_error(push_choice(q));
 
 		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	pl_int_t val = get_int(p4) + 1;
@@ -4404,14 +4403,14 @@ static USE_RESULT pl_status fn_between_3(query *q)
 		may_error(push_choice(q));
 
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
 #if 0
-static USE_RESULT pl_status fn_forall_2(query *q)
+static USE_RESULT bool fn_forall_2(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
@@ -4423,11 +4422,11 @@ static USE_RESULT pl_status fn_forall_2(query *q)
 	make_struct(tmp+nbr_cells, g_fail_s, fn_iso_fail_0, 0, 0);
 	may_error(push_choice(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 #endif
 
-static USE_RESULT pl_status fn_split_atom_4(query *q)
+static USE_RESULT bool fn_split_atom_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -4487,7 +4486,7 @@ static USE_RESULT pl_status fn_split_atom_4(query *q)
 	return unify(q, p4, p4_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_split_4(query *q)
+static USE_RESULT bool fn_split_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -4499,7 +4498,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 		make_atom(&tmp, g_nil_s);
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame))
-			return pl_failure;
+			return false;
 
 		return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	}
@@ -4517,7 +4516,7 @@ static USE_RESULT pl_status fn_split_4(query *q)
 
 		if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame)) {
 			unshare_cell(&tmp);
-			return pl_failure;
+			return false;
 		}
 
 		unshare_cell(&tmp);
@@ -4531,20 +4530,20 @@ static USE_RESULT pl_status fn_split_4(query *q)
 		else
 			make_atom(&tmp, g_nil_s);
 
-		pl_status ok = unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
 	}
 
 	if (!unify(q, p3, p3_ctx, p1, p1_ctx))
-		return pl_failure;
+		return false;
 
 	cell tmp;
 	make_atom(&tmp, g_nil_s);
 	return unify(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_is_partial_string_1(query *q)
+static USE_RESULT bool fn_sys_is_partial_string_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -4556,14 +4555,14 @@ static USE_RESULT pl_status fn_sys_is_partial_string_1(query *q)
 	return is_partial;
 }
 
-static USE_RESULT pl_status fn_is_list_1(query *q)
+static USE_RESULT bool fn_is_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	bool is_partial;
 	return check_list(q, p1, p1_ctx, &is_partial, NULL);
 }
 
-static USE_RESULT pl_status fn_is_partial_list_1(query *q)
+static USE_RESULT bool fn_is_partial_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -4578,7 +4577,7 @@ static USE_RESULT pl_status fn_is_partial_list_1(query *q)
 	return is_partial;
 }
 
-static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
+static USE_RESULT bool fn_is_list_or_partial_list_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 
@@ -4593,7 +4592,7 @@ static USE_RESULT pl_status fn_is_list_or_partial_list_1(query *q)
 	return is_partial;
 }
 
-static USE_RESULT pl_status fn_must_be_4(query *q)
+static USE_RESULT bool fn_must_be_4(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,atom);
@@ -4643,10 +4642,10 @@ static USE_RESULT pl_status fn_must_be_4(query *q)
 			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_must_be_2(query *q)
+static USE_RESULT bool fn_must_be_2(query *q)
 {
 	GET_FIRST_ARG(p2,atom);
 	GET_NEXT_ARG(p1,any);
@@ -4694,10 +4693,10 @@ static USE_RESULT pl_status fn_must_be_2(query *q)
 			return throw_error(q, p1, p1_ctx, "type_error", "list");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_can_be_4(query *q)
+static USE_RESULT bool fn_can_be_4(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,atom);
@@ -4705,7 +4704,7 @@ static USE_RESULT pl_status fn_can_be_4(query *q)
 	GET_NEXT_ARG(p4,any);
 
 	if (is_variable(p1))
-		return pl_success;
+		return true;
 
 	const char *src = C_STR(q, p2);
 
@@ -4742,16 +4741,16 @@ static USE_RESULT pl_status fn_can_be_4(query *q)
 			return throw_error2(q, p1, p1_ctx, "type_error", "list", p3);
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_can_be_2(query *q)
+static USE_RESULT bool fn_can_be_2(query *q)
 {
 	GET_FIRST_ARG(p2,atom);
 	GET_NEXT_ARG(p1,any);
 
 	if (is_variable(p1))
-		return pl_success;
+		return true;
 
 	const char *src = C_STR(q, p2);
 
@@ -4788,10 +4787,10 @@ static USE_RESULT pl_status fn_can_be_2(query *q)
 			return throw_error(q, p1, p1_ctx, "type_error", "list");
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
+static USE_RESULT bool fn_sys_skip_max_list_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -4819,9 +4818,9 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 		c = p3;
 	}
 
-	pl_status ok = unify(q, p4, p4_ctx, c, c_ctx);
+	bool ok = unify(q, p4, p4_ctx, c, c_ctx);
 
-	if (ok != pl_success)
+	if (ok != true)
 		return ok;
 
 	if (!is_iso_list_or_nil(c) && !(is_cstring(c) && !strcmp(C_STR(q,c), "[]")) && !is_variable(c)) {
@@ -4833,7 +4832,7 @@ static USE_RESULT pl_status fn_sys_skip_max_list_4(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_is_stream_1(query *q)
+static USE_RESULT bool fn_is_stream_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_stream(p1);
@@ -4863,7 +4862,7 @@ static query *pop_task(module *m, query *task)
 	return task->next;
 }
 
-static USE_RESULT pl_status fn_wait_0(query *q)
+static USE_RESULT bool fn_wait_0(query *q)
 {
 	while (q->st.m->tasks) {
 		CHECK_INTERRUPT();
@@ -4907,10 +4906,10 @@ static USE_RESULT pl_status fn_wait_0(query *q)
 			msleep(1);
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_await_0(query *q)
+static USE_RESULT bool fn_await_0(query *q)
 {
 	while (q->st.m->tasks) {
 		CHECK_INTERRUPT();
@@ -4960,21 +4959,21 @@ static USE_RESULT pl_status fn_await_0(query *q)
 	}
 
 	if (!q->st.m->tasks)
-		return pl_failure;
+		return false;
 
 	may_error(push_choice(q));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_yield_0(query *q)
+static USE_RESULT bool fn_yield_0(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	return do_yield_0(q, 0);
 }
 
-static USE_RESULT pl_status fn_task_n(query *q)
+static USE_RESULT bool fn_task_n(query *q)
 {
 	pl_idx_t save_hp = q->st.hp;
 	cell *p0 = deep_clone_to_heap(q, q->st.curr_cell, q->st.curr_frame);
@@ -5007,19 +5006,19 @@ static USE_RESULT pl_status fn_task_n(query *q)
 	query *task = create_sub_query(q, tmp);
 	task->yielded = task->spawned = true;
 	push_task(q->st.m, task);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_fork_0(query *q)
+static USE_RESULT bool fn_fork_0(query *q)
 {
 	cell *curr_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 	query *task = create_sub_query(q, curr_cell);
 	task->yielded = true;
 	push_task(q->st.m, task);
-	return pl_failure;
+	return false;
 }
 
-static USE_RESULT pl_status fn_send_1(query *q)
+static USE_RESULT bool fn_send_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	query *dstq = q->parent ? q->parent : q;
@@ -5034,35 +5033,35 @@ static USE_RESULT pl_status fn_send_1(query *q)
 
 	may_ptr_error(alloc_on_queuen(dstq, 0, c));
 	q->yielded = true;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_recv_1(query *q)
+static USE_RESULT bool fn_recv_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell *c = pop_queue(q);
 	return unify(q, p1, p1_ctx, c, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_pid_1(query *q)
+static USE_RESULT bool fn_pid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, getpid());
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_wall_time_1(query *q)
+static USE_RESULT bool fn_wall_time_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, time(NULL));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_date_time_7(query *q)
+static USE_RESULT bool fn_date_time_7(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -5089,10 +5088,10 @@ static USE_RESULT pl_status fn_date_time_7(query *q)
 	set_var(q, p6, p6_ctx, &tmp, q->st.curr_frame);
 	make_int(&tmp, 0);
 	set_var(q, p7, p7_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_date_time_6(query *q)
+static USE_RESULT bool fn_date_time_6(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -5116,20 +5115,20 @@ static USE_RESULT pl_status fn_date_time_6(query *q)
 	set_var(q, p5, p5_ctx, &tmp, q->st.curr_frame);
 	make_int(&tmp, tm.tm_sec);
 	set_var(q, p6, p6_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_shell_1(query *q)
+static USE_RESULT bool fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	int status = system(C_STR(q, p1));
 	if (status == 0)
-		return pl_success;
+		return true;
 	else
-		return pl_failure;
+		return false;
 }
 
-static USE_RESULT pl_status fn_shell_2(query *q)
+static USE_RESULT bool fn_shell_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -5137,17 +5136,17 @@ static USE_RESULT pl_status fn_shell_2(query *q)
 	cell tmp;
 	make_int(&tmp, status);
 	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_format_2(query *q)
+static USE_RESULT bool fn_format_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,list_or_nil);
 
 	if (is_nil(p1)) {
 		if (is_nil(p2))
-			return pl_success;
+			return true;
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "list");
 	}
@@ -5155,7 +5154,7 @@ static USE_RESULT pl_status fn_format_2(query *q)
 	return do_format(q, NULL, 0, p1, p1_ctx, !is_nil(p2)?p2:NULL, p2_ctx);
 }
 
-static USE_RESULT pl_status fn_format_3(query *q)
+static USE_RESULT bool fn_format_3(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,atom_or_list);
@@ -5163,7 +5162,7 @@ static USE_RESULT pl_status fn_format_3(query *q)
 
 	if (is_nil(p1)) {
 		if (is_nil(p2))
-			return pl_success;
+			return true;
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "list");
 	}
@@ -5172,7 +5171,7 @@ static USE_RESULT pl_status fn_format_3(query *q)
 }
 
 #if USE_OPENSSL
-static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
+static USE_RESULT bool fn_crypto_data_hash_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5255,7 +5254,7 @@ static USE_RESULT pl_status fn_crypto_data_hash_3(query *q)
 
 	cell tmp;
 	may_error(make_string(&tmp, tmpbuf));
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
@@ -5273,7 +5272,7 @@ static int do_b64encode_2(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
@@ -5290,12 +5289,12 @@ static int do_b64decode_2(query *q)
 	cell tmp;
 	may_error(make_string(&tmp, dstbuf), free(dstbuf));
 	free(dstbuf);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_base64_3(query *q)
+static USE_RESULT bool fn_base64_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5347,7 +5346,7 @@ char *url_decode(const char *src, char *dstbuf)
 	return dstbuf;
 }
 
-static pl_status do_urlencode_2(query *q)
+static bool do_urlencode_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -5364,12 +5363,12 @@ static pl_status do_urlencode_2(query *q)
 		may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
 
 	free(dstbuf);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static pl_status do_urldecode_2(query *q)
+static bool do_urldecode_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,atom);
@@ -5386,12 +5385,12 @@ static pl_status do_urldecode_2(query *q)
 		may_error(make_cstring(&tmp, dstbuf), free(dstbuf));
 
 	free(dstbuf);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_urlenc_3(query *q)
+static USE_RESULT bool fn_urlenc_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5404,7 +5403,7 @@ static USE_RESULT pl_status fn_urlenc_3(query *q)
 	return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 }
 
-static USE_RESULT pl_status fn_atom_lower_2(query *q)
+static USE_RESULT bool fn_atom_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_atom);
 	GET_NEXT_ARG(p2,iso_atom_or_var);
@@ -5424,12 +5423,12 @@ static USE_RESULT pl_status fn_atom_lower_2(query *q)
 	cell tmp;
 	may_error(make_cstringn(&tmp, tmps, C_STRLEN(q, p1)), free(tmps));
 	free(tmps);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_atom_upper_2(query *q)
+static USE_RESULT bool fn_atom_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_atom);
 	GET_NEXT_ARG(p2,iso_atom_or_var);
@@ -5449,13 +5448,13 @@ static USE_RESULT pl_status fn_atom_upper_2(query *q)
 	cell tmp;
 	may_error(make_cstringn(&tmp, tmps, C_STRLEN(q, p1)), free(tmps));
 	free(tmps);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
 
-static USE_RESULT pl_status fn_string_lower_2(query *q)
+static USE_RESULT bool fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5475,12 +5474,12 @@ static USE_RESULT pl_status fn_string_lower_2(query *q)
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, C_STRLEN(q, p1)), free(tmps));
 	free(tmps);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_string_upper_2(query *q)
+static USE_RESULT bool fn_string_upper_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5500,7 +5499,7 @@ static USE_RESULT pl_status fn_string_upper_2(query *q)
 	cell tmp;
 	may_error(make_stringn(&tmp, tmps, C_STRLEN(q, p1)), free(tmps));
 	free(tmps);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
@@ -5521,13 +5520,13 @@ static pl_idx_t jenkins_one_at_a_time_hash(const char *key, size_t len)
 	return hash;
 }
 
-static USE_RESULT pl_status fn_term_hash_2(query *q)
+static USE_RESULT bool fn_term_hash_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_variable(p1))
-		return pl_success;
+		return true;
 
 	cell tmp;
 
@@ -5546,7 +5545,7 @@ static USE_RESULT pl_status fn_term_hash_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_hex_chars_2(query *q)
+static USE_RESULT bool fn_hex_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5571,7 +5570,7 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 		if (is_bigint(p1)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	char *src = DUP_STR(q, p2);
@@ -5594,12 +5593,12 @@ static USE_RESULT pl_status fn_hex_chars_2(query *q)
 	}
 
 	mp_int_clear(&v2);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_octal_chars_2(query *q)
+static USE_RESULT bool fn_octal_chars_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5624,7 +5623,7 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 		if (is_bigint(p1)) free(dst);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		return pl_success;
+		return true;
 	}
 
 	char *src = DUP_STR(q, p2);
@@ -5647,25 +5646,25 @@ static USE_RESULT pl_status fn_octal_chars_2(query *q)
 	}
 
 	mp_int_clear(&v2);
-	pl_status ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_atom_1(query *q)
+static USE_RESULT bool fn_atom_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	return is_string(p1);
 }
 
-static USE_RESULT pl_status fn_getenv_2(query *q)
+static USE_RESULT bool fn_getenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
 	const char *value = getenv(C_STR(q, p1));
 
 	if (!value)
-		return pl_failure;
+		return false;
 
 	cell tmp;
 
@@ -5674,12 +5673,12 @@ static USE_RESULT pl_status fn_getenv_2(query *q)
 	else
 		may_error(make_cstring(&tmp, value));
 
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_setenv_2(query *q)
+static USE_RESULT bool fn_setenv_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_int);
@@ -5691,19 +5690,19 @@ static USE_RESULT pl_status fn_setenv_2(query *q)
 		sprint_int(tmpbuf, sizeof(tmpbuf), get_int(p2), 10);
 		setenv(C_STR(q, p1), tmpbuf, 1);
 	} else
-		return pl_failure;
+		return false;
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_unsetenv_1(query *q)
+static USE_RESULT bool fn_unsetenv_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	unsetenv(C_STR(q, p1));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_uuid_1(query *q)
+static USE_RESULT bool fn_uuid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	uuid u;
@@ -5714,10 +5713,10 @@ static USE_RESULT pl_status fn_uuid_1(query *q)
 	may_error(make_string(&tmp, tmpbuf));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_atomic_concat_3(query *q)
+static USE_RESULT bool fn_atomic_concat_3(query *q)
 {
 	GET_FIRST_ARG(p1,atomic);
 	GET_NEXT_ARG(p2,atomic);
@@ -5735,12 +5734,12 @@ static USE_RESULT pl_status fn_atomic_concat_3(query *q)
 	cell tmp;
 	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 	ASTRING_free(pr);
-	pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
+static USE_RESULT bool fn_atomic_list_concat_3(query *q)
 {
 	GET_FIRST_ARG(p1,iso_list_or_nil);
 	GET_NEXT_ARG(p2,atomic);
@@ -5783,12 +5782,12 @@ static USE_RESULT pl_status fn_atomic_list_concat_3(query *q)
 	cell tmp;
 	may_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
 	ASTRING_free(pr);
-	pl_status ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_replace_4(query *q)
+static USE_RESULT bool fn_replace_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -5825,34 +5824,34 @@ static USE_RESULT pl_status fn_replace_4(query *q)
 	ASTRING_free(pr);
 	set_var(q, p4, p4_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	return pl_success;
+	return true;
 }
 
 static void load_properties(module *m);
 
-static USE_RESULT pl_status fn_sys_load_properties_0(query *q)
+static USE_RESULT bool fn_sys_load_properties_0(query *q)
 {
 	load_properties(q->st.m);
-	return pl_success;
+	return true;
 }
 
 static void load_flags(query *q);
 
-static USE_RESULT pl_status fn_sys_load_flags_0(query *q)
+static USE_RESULT bool fn_sys_load_flags_0(query *q)
 {
 	load_flags(q);
-	return pl_success;
+	return true;
 }
 
 static void load_ops(query *q);
 
-static USE_RESULT pl_status fn_sys_load_ops_0(query *q)
+static USE_RESULT bool fn_sys_load_ops_0(query *q)
 {
 	load_ops(q);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
+static USE_RESULT bool fn_sys_legacy_predicate_property_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -5862,8 +5861,8 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 	if (get_builtin(q->pl, C_STR(q, p1), p1->arity, &found, NULL), found) {
 		make_atom(&tmp, index_from_pool(q->pl, "built_in"));
 
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 		else
 			return throw_error(q, p2, p2_ctx, "domain_error", "predicate_property");
 	}
@@ -5872,71 +5871,71 @@ static USE_RESULT pl_status fn_sys_legacy_predicate_property_2(query *q)
 
 	if (pr && !pr->is_dynamic && !is_variable(p2)) {
 		make_atom(&tmp, index_from_pool(q->pl, "built_in"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_multifile) {
 		make_atom(&tmp, index_from_pool(q->pl, "multifile"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_dynamic) {
 		make_atom(&tmp, index_from_pool(q->pl, "dynamic"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && !pr->is_dynamic) {
 		make_atom(&tmp, index_from_pool(q->pl, "static"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_tabled) {
 		make_atom(&tmp, index_from_pool(q->pl, "tabled"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_persist) {
 		make_atom(&tmp, index_from_pool(q->pl, "persist"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_public) {
 		make_atom(&tmp, index_from_pool(q->pl, "public"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr && pr->is_public) {
 		make_atom(&tmp, index_from_pool(q->pl, "exported"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr) {
 		make_atom(&tmp, index_from_pool(q->pl, "static"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr) {
 		make_atom(&tmp, index_from_pool(q->pl, "meta_predicate"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
 	if (pr) {
 		make_atom(&tmp, index_from_pool(q->pl, "visible"));
-		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == pl_success)
-			return pl_success;
+		if (unify(q, p2, p2_ctx, &tmp, q->st.curr_frame) == true)
+			return true;
 	}
 
-	return pl_failure;
+	return false;
 }
 
 unsigned count_bits(const uint8_t *mask, unsigned bit)
@@ -5951,7 +5950,7 @@ unsigned count_bits(const uint8_t *mask, unsigned bit)
 	return bits;
 }
 
-static USE_RESULT pl_status fn_var_number_2(query *q)
+static USE_RESULT bool fn_var_number_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -5961,7 +5960,7 @@ static USE_RESULT pl_status fn_var_number_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_char_type_2(query *q)
+static USE_RESULT bool fn_char_type_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_int);
 	GET_NEXT_ARG(p2,atom);
@@ -5969,7 +5968,7 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 
 	if (is_atom(p1)) {
 		if (strlen_utf8(C_STR(q, p1)) != 1)
-			return pl_failure;
+			return false;
 
 		ch = peek_char_utf8(C_STR(q, p1));
 	} else
@@ -6010,7 +6009,7 @@ static USE_RESULT pl_status fn_char_type_2(query *q)
 	else if (!CMP_STR_CSTR(q, p2, "period"))
 		return (ch == '.') || (ch == '!') || (ch == '?');
 
-	return pl_failure;
+	return false;
 }
 
 static void restore_db(module *m, FILE *fp)
@@ -6065,19 +6064,19 @@ void do_db_load(module *m)
 	ensure(m->fp);
 }
 
-static USE_RESULT pl_status fn_sys_db_load_0(query *q)
+static USE_RESULT bool fn_sys_db_load_0(query *q)
 {
 	do_db_load(q->st.m);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_db_save_0(query *q)
+static USE_RESULT bool fn_sys_db_save_0(query *q)
 {
 	if (!q->st.m->fp)
-		return pl_failure;
+		return false;
 
 	if (strlen(q->st.m->name) >= 1024*4-4)
-		return pl_error;
+		return false;
 
 	fclose(q->st.m->fp);
 	char filename[1024*4];
@@ -6092,10 +6091,10 @@ static USE_RESULT pl_status fn_sys_db_save_0(query *q)
 	rename(filename2, filename);
 	q->st.m->fp = fopen(filename, "ab");
 	may_ptr_error(q->st.m->fp);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_abolish_2(query *q)
+static USE_RESULT bool fn_abolish_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
@@ -6105,7 +6104,7 @@ static USE_RESULT pl_status fn_abolish_2(query *q)
 	return do_abolish(q, &tmp, &tmp, true);
 }
 
-static USE_RESULT pl_status fn_sys_lt_2(query *q)
+static USE_RESULT bool fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -6113,15 +6112,15 @@ static USE_RESULT pl_status fn_sys_lt_2(query *q)
 
 	if (num < get_int(p2)) {
 		set_smallint(p1, num+1);
-		return pl_success;
+		return true;
 	}
 
 	drop_choice(q);
 	trim_trail(q);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_limit_2(query *q)
+static USE_RESULT bool fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
@@ -6132,10 +6131,10 @@ static USE_RESULT pl_status fn_limit_2(query *q)
 	make_int(tmp+nbr_cells++, get_int(p1));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_gt_2(query *q)
+static USE_RESULT bool fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -6143,13 +6142,13 @@ static USE_RESULT pl_status fn_sys_gt_2(query *q)
 
 	if (num <= get_int(p2)) {
 		set_smallint(p1, num+1);
-		return pl_failure;
+		return false;
 	}
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_offset_2(query *q)
+static USE_RESULT bool fn_offset_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
@@ -6160,10 +6159,10 @@ static USE_RESULT pl_status fn_offset_2(query *q)
 	make_int(tmp+nbr_cells++, get_int(p1));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_ne_2(query *q)
+static USE_RESULT bool fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
@@ -6171,31 +6170,31 @@ static USE_RESULT pl_status fn_sys_ne_2(query *q)
 
 	if (num != get_int(p2)) {
 		set_smallint(p1, num+1);
-		return pl_failure;
+		return false;
 	}
 
 	drop_choice(q);
 	trim_trail(q);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_incr_2(query *q)
+static USE_RESULT bool fn_sys_incr_2(query *q)
 {
 	GET_FIRST_ARG(p1, variable);
 	GET_NEXT_ARG(p2, integer);
 	int64_t n = get_smallint(p2);
 	set_smallint(p2, n+1);
 	set_var(q, p1, p1_ctx, p2, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_call_nth_2(query *q)
+static USE_RESULT bool fn_call_nth_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
 
 	if (is_integer(p2) && is_zero(p2))
-		return pl_failure;
+		return false;
 
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "domain_error", "not_less_than_zero");
@@ -6213,7 +6212,7 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 		make_int(tmp+nbr_cells++, 0);
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 4);
@@ -6223,10 +6222,10 @@ static USE_RESULT pl_status fn_call_nth_2(query *q)
 	make_int(tmp+nbr_cells++, get_int(p2));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_lengthchk_2(query *q)
+static USE_RESULT bool fn_sys_lengthchk_2(query *q)
 {
 	GET_FIRST_ARG(p1,iso_list_or_nil);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -6245,7 +6244,7 @@ static USE_RESULT pl_status fn_sys_lengthchk_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
+static USE_RESULT bool fn_sys_unifiable_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -6259,7 +6258,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 		q->in_hook = save_hook;
 		undo_me(q);
 		drop_choice(q);
-		return pl_failure;
+		return false;
 	}
 
 	q->in_hook = save_hook;
@@ -6302,7 +6301,7 @@ static USE_RESULT pl_status fn_sys_unifiable_3(query *q)
 	return unify(q, p3, p3_ctx, l, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
+static USE_RESULT bool fn_sys_list_attributed_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	parser *p = q->p;
@@ -6341,16 +6340,16 @@ static USE_RESULT pl_status fn_sys_list_attributed_1(query *q)
 	return unify(q, p1, p1_ctx, l, 0);
 }
 
-static USE_RESULT pl_status fn_sys_erase_attributes_1(query *q)
+static USE_RESULT bool fn_sys_erase_attributes_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	frame *f = GET_FRAME(p1_ctx);
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = NULL;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
+static USE_RESULT bool fn_sys_put_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -6358,10 +6357,10 @@ static USE_RESULT pl_status fn_sys_put_attributes_2(query *q)
 	slot *e = GET_SLOT(f, p1->var_nbr);
 	e->c.attrs = p2;
 	e->c.attrs_ctx = p2_ctx;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
+static USE_RESULT bool fn_sys_get_attributes_2(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	GET_NEXT_ARG(p2,variable);
@@ -6372,14 +6371,14 @@ static USE_RESULT pl_status fn_sys_get_attributes_2(query *q)
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	set_var(q, p2, p2_ctx, e->c.attrs, e->c.attrs_ctx);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
+static USE_RESULT bool fn_get_unbuffered_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
@@ -6436,7 +6435,7 @@ static USE_RESULT pl_status fn_get_unbuffered_code_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
+static USE_RESULT bool fn_get_unbuffered_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
@@ -6501,7 +6500,7 @@ static USE_RESULT pl_status fn_get_unbuffered_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT pl_status fn_kv_set_3(query *q)
+static USE_RESULT bool fn_kv_set_3(query *q)
 {
 	GET_FIRST_ARG(p1,smallint_or_atom);
 	GET_NEXT_ARG(p2,smallint_or_atom);
@@ -6552,7 +6551,7 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 	if (do_create) {
 		if (map_get(q->pl->keyval, key, NULL)) {
 			free(key);
-			return pl_failure;
+			return false;
 		}
 	}
 
@@ -6571,10 +6570,10 @@ static USE_RESULT pl_status fn_kv_set_3(query *q)
 
 	may_ptr_error(val);
 	map_set(q->pl->keyval, key, val);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_kv_get_3(query *q)
+static USE_RESULT bool fn_kv_get_3(query *q)
 {
 	GET_FIRST_ARG(p1,atomic);
 	GET_NEXT_ARG(p2,atomic_or_var);
@@ -6625,7 +6624,7 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 
 	if (!map_get(q->pl->keyval, key, (void*)&val)) {
 		if (key != tmpbuf) free(key);
-		return pl_failure;
+		return false;
 	}
 
 	cell tmp;
@@ -6651,19 +6650,19 @@ static USE_RESULT pl_status fn_kv_get_3(query *q)
 		map_del(q->pl->keyval, key);
 
 	if (key != tmpbuf) free(key);
-	pl_status ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	return ok;
 }
 
-static USE_RESULT pl_status fn_current_module_1(query *q)
+static USE_RESULT bool fn_current_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 
 	if (!q->retry) {
 		if (is_atom(p1)) {
 			const char *name = C_STR(q, p1);
-			return find_module(q->pl, name) ? pl_success : pl_failure;
+			return find_module(q->pl, name) ? true : false;
 		}
 
 		may_error(push_choice(q));
@@ -6671,34 +6670,34 @@ static USE_RESULT pl_status fn_current_module_1(query *q)
 		cell tmp;
 		make_atom(&tmp, index_from_pool(q->pl, m->name));
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	if (!q->current_m)
-		return pl_failure;
+		return false;
 
 	module *m = q->current_m = q->current_m->next;
 
 	if (!m)
-		return pl_failure;
+		return false;
 
 	may_error(push_choice(q));
 	cell tmp;
 	make_atom(&tmp, index_from_pool(q->pl, m->name));
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_use_module_1(query *q)
+static USE_RESULT bool fn_use_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
-	if (!is_atom(p1) && !is_structure(p1)) return pl_error;
+	if (!is_atom(p1) && !is_structure(p1)) return false;
 	const char *name = C_STR(q, p1);
 	char dstbuf[1024*4];
 
 	if (is_structure(p1) && !strcmp(name, "library")) {
 		p1 = p1 + 1;
-		if (!is_interned(p1)) return pl_error;
+		if (!is_interned(p1)) return false;
 		name = C_STR(q, p1);
 		module *m;
 
@@ -6709,7 +6708,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			return pl_success;
+			return true;
 		}
 
 		if (!strcmp(name, "between")
@@ -6718,7 +6717,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		    || !strcmp(name, "types")
 			|| !strcmp(name, "iso_ext")
 		    || !strcmp(name, "files"))
-			return pl_success;
+			return true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (strcmp(lib->name, name))
@@ -6740,7 +6739,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			return pl_success;
+			return true;
 		}
 
 		snprintf(dstbuf, sizeof(dstbuf), "%s%c", g_tpl_lib, PATH_SEP_CHAR);
@@ -6760,7 +6759,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			return pl_success;
+			return true;
 		}
 
 		if (!strcmp(name, "between")
@@ -6769,7 +6768,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 		    || !strcmp(name, "types")
 			|| !strcmp(name, "iso_ext")
 		    || !strcmp(name, "files"))
-			return pl_success;
+			return true;
 
 		for (library *lib = g_libs; lib->name; lib++) {
 			if (strcmp(lib->name, name))
@@ -6791,7 +6790,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 			if (m != q->st.m)
 				q->st.m->used[q->st.m->idx_used++] = m;
 
-			return pl_success;
+			return true;
 		}
 	}
 
@@ -6801,7 +6800,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 	if (!(m = load_file(q->st.m, filename, false))) {
 		fprintf(stdout, "Error: module file not found: %s\n", filename);
 		free(filename);
-		return pl_failure;
+		return false;
 	}
 
 	free(filename);
@@ -6809,17 +6808,17 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 	if (m != q->st.m)
 		q->st.m->used[q->st.m->idx_used++] = m;
 
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_use_module_2(query *q)
+static USE_RESULT bool fn_use_module_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
 	return fn_use_module_1(q);
 }
 
-static USE_RESULT pl_status fn_module_1(query *q)
+static USE_RESULT bool fn_module_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 
@@ -6828,7 +6827,7 @@ static USE_RESULT pl_status fn_module_1(query *q)
 		make_atom(&tmp, index_from_pool(q->pl, (q->save_m?q->save_m:q->st.m)->name));
 		q->save_m = NULL;
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	const char *name = C_STR(q, p1);
@@ -6842,10 +6841,10 @@ static USE_RESULT pl_status fn_module_1(query *q)
 	}
 
 	q->st.m = m;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_using_0(query *q)
+static USE_RESULT bool fn_using_0(query *q)
 {
 	module *m = q->st.m;
 	fprintf(stdout, "%% %s --> [", m->name);
@@ -6856,22 +6855,22 @@ static USE_RESULT pl_status fn_using_0(query *q)
 	}
 
 	fprintf(stdout, "].\n");
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_register_term_1(query *q)
+static USE_RESULT bool fn_sys_register_term_1(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	may_error(push_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_term = true;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_alarm_1(query *q)
+static USE_RESULT bool fn_sys_alarm_1(query *q)
 {
 #ifdef _WIN32
-	return pl_failure;
+	return false;
 #else
 	GET_FIRST_ARG(p1,number);
 	int time0 = 0;
@@ -6891,7 +6890,7 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 
 	if (time0 == 0) {
 		setitimer(ITIMER_REAL, &it, NULL);
-		return pl_success;
+		return true;
 	}
 
 	int ms = time0;
@@ -6901,11 +6900,11 @@ static USE_RESULT pl_status fn_sys_alarm_1(query *q)
 	it.it_value.tv_sec = secs;
 	it.it_value.tv_usec = ms * 1000;
 	setitimer(ITIMER_REAL, &it, NULL);
-	return pl_success;
+	return true;
 #endif
 }
 
-static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
+static USE_RESULT bool fn_sys_register_cleanup_1(query *q)
 {
 	if (q->retry) {
 		GET_FIRST_ARG(p1,callable);
@@ -6915,34 +6914,34 @@ static USE_RESULT pl_status fn_sys_register_cleanup_1(query *q)
 		make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	may_error(push_choice(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->register_cleanup = true;
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_get_level_1(query *q)
+static USE_RESULT bool fn_sys_get_level_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, q->cp);
 	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_sys_choice_0(query *q)
+static USE_RESULT bool fn_sys_choice_0(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	may_error(push_choice(q));
-	return pl_success;
+	return true;
 }
 
-static USE_RESULT pl_status fn_iso_compare_3(query *q)
+static USE_RESULT bool fn_iso_compare_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_var);
 	GET_NEXT_ARG(p2,any);
@@ -7429,7 +7428,7 @@ static void load_flags(query *q)
 	make_atom(&tmp, index_from_pool(q->pl, "$current_prolog_flag"));
 	tmp.arity = 2;
 
-	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
+	if (do_abolish(q, &tmp, &tmp, false) != true)
 		return;
 
 	module *m = q->st.m;
@@ -7467,7 +7466,7 @@ static void load_ops(query *q)
 	make_atom(&tmp, index_from_pool(q->pl, "$current_op"));
 	tmp.arity = 3;
 
-	if (do_abolish(q, &tmp, &tmp, false) != pl_success)
+	if (do_abolish(q, &tmp, &tmp, false) != true)
 		return;
 
 	q->st.m->loaded_ops = true;

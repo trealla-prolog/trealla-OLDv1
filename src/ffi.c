@@ -1,16 +1,15 @@
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#include "internal.h"
-#include "query.h"
 
 #if USE_FFI
 #include <dlfcn.h>
 #include <ffi.h>
 #endif
+
+#include "query.h"
 
 // These are pseudo tags just used here...
 
@@ -45,7 +44,7 @@ union result_ {
 };
 
 #if USE_FFI
-USE_RESULT pl_status fn_sys_dlopen_3(query *q)
+USE_RESULT bool fn_sys_dlopen_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
@@ -76,7 +75,7 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 
 	int flag = get_smallint(p2);
 	void *handle = dlopen(filename2, !flag ? RTLD_LAZY | RTLD_GLOBAL : flag);
-	if (!handle) return pl_failure;
+	if (!handle) return false;
 	cell tmp;
 	make_uint(&tmp, (uint64_t)handle);
 	tmp.flags |= FLAG_INT_HANDLE | FLAG_HANDLE_DLL;
@@ -84,7 +83,7 @@ USE_RESULT pl_status fn_sys_dlopen_3(query *q)
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-USE_RESULT pl_status fn_sys_dlsym_3(query *q)
+USE_RESULT bool fn_sys_dlsym_3(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -96,14 +95,14 @@ USE_RESULT pl_status fn_sys_dlsym_3(query *q)
 		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
 
 	void *ptr = dlsym((void*)handle, symbol);
-	if (!ptr) return pl_failure;
+	if (!ptr) return false;
 	cell tmp;
 	make_uint(&tmp, (uint64_t)ptr);
 	tmp.flags |= FLAG_INT_HANDLE | FLAG_INT_OCTAL;
 	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
-USE_RESULT pl_status fn_sys_dlclose_1(query *q)
+USE_RESULT bool fn_sys_dlclose_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	uint64_t handle = get_smalluint(p1);
@@ -111,10 +110,10 @@ USE_RESULT pl_status fn_sys_dlclose_1(query *q)
 	if (!(p1->flags & FLAG_INT_HANDLE) && !(p1->flags & FLAG_HANDLE_DLL))
 		return throw_error(q, p1, p1_ctx, "existence_error", "handle");
 
-	return dlclose((void*)handle) ? pl_failure : pl_success;
+	return dlclose((void*)handle) ? false : true;
 }
 
-USE_RESULT pl_status fn_sys_register_function_4(query *q)
+USE_RESULT bool fn_sys_register_function_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -127,7 +126,7 @@ USE_RESULT pl_status fn_sys_register_function_4(query *q)
 	uint64_t handle = get_smalluint(p1);
 	const char *symbol = C_STR(q, p2);
 	void *func = dlsym((void*)handle, symbol);
-	if (!func) return pl_failure;
+	if (!func) return false;
 
 	uint8_t arg_types[MAX_ARITY], ret_type = 0;
 	LIST_HANDLER(l);
@@ -206,10 +205,10 @@ USE_RESULT pl_status fn_sys_register_function_4(query *q)
 		ret_type = 0;
 
 	register_ffi(q->pl, symbol, idx, (void*)func, arg_types, ret_type, true);
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_sys_register_predicate_4(query *q)
+USE_RESULT bool fn_sys_register_predicate_4(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,atom);
@@ -222,7 +221,7 @@ USE_RESULT pl_status fn_sys_register_predicate_4(query *q)
 	uint64_t handle = get_smalluint(p1);
 	const char *symbol = C_STR(q, p2);
 	void *func = dlsym((void*)handle, symbol);
-	if (!func) return pl_failure;
+	if (!func) return false;
 
 	uint8_t arg_types[MAX_ARITY], ret_type = 0;
 	bool arg_vars[MAX_ARITY];
@@ -343,10 +342,10 @@ USE_RESULT pl_status fn_sys_register_predicate_4(query *q)
 	}
 
 	register_ffi(q->pl, symbol, idx, (void*)func, arg_types, ret_type, false);
-	return pl_success;
+	return true;
 }
 
-pl_status wrapper_for_function(query *q, builtins *ptr)
+bool wrapper_for_function(query *q, builtins *ptr)
 {
 	CHECK_CALC();
 	GET_FIRST_ARG(p1, any);
@@ -476,10 +475,10 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	else if (ptr->ret_type == TAG_CCSTR)
 		ret_type = &ffi_type_pointer;
 	else
-		return pl_failure;
+		return false;
 
 	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, ptr->arity, ret_type, arg_types) != FFI_OK)
-		return pl_failure;
+		return false;
 
 	union result_ result;
 	ffi_call(&cif, FFI_FN(ptr->fn), &result, arg_values);
@@ -513,13 +512,13 @@ pl_status wrapper_for_function(query *q, builtins *ptr)
 	else if (ptr->ret_type == TAG_CCSTR)
 		make_cstring(&tmp, result.p);
 	else
-		return pl_failure;
+		return false;
 
 	q->accum = tmp;
-	return pl_success;
+	return true;
 }
 
-pl_status wrapper_for_predicate(query *q, builtins *ptr)
+bool wrapper_for_predicate(query *q, builtins *ptr)
 {
 	GET_FIRST_ARG(p1, any);
 	cell *c = p1;
@@ -721,10 +720,10 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 	else if (ptr->ret_type == TAG_CCSTR)
 		ret_type = &ffi_type_pointer;
 	else
-		return pl_failure;
+		return false;
 
 	if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, ptr->arity-1, ret_type, arg_types) != FFI_OK)
-		return pl_failure;
+		return false;
 
 	union result_ result;
 	ffi_call(&cif, FFI_FN(ptr->fn), &result, arg_values);
@@ -739,49 +738,49 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 			if (ptr->types[i] == MARK_OUT(TAG_INT8)) {
 				make_int(&tmp, cells[i].val_int8);
-				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_INT16)) {
 				make_int(&tmp, cells[i].val_int16);
-				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_INT32)) {
 				make_int(&tmp, cells[i].val_int32);
-				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_INT64)) {
 				make_int(&tmp, cells[i].val_int64);
-				pl_status ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify (q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT32)) {
 				make_float(&tmp, cells[i].val_float32);
-				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_FLOAT)) {
 				make_float(&tmp, cells[i].val_float);
-				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_PTR)) {
 				make_ptr(&tmp, cells[i].val_ptr);
-				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_CSTR)) {
 				may_error(make_cstring(&tmp, cells[i].val_str));
-				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_CCSTR)) {
 				may_error(make_cstring(&tmp, cells[i].val_str));
-				pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
-				if (ok != pl_success) return ok;
+				if (ok != true) return ok;
 			}
 		}
 
@@ -794,53 +793,53 @@ pl_status wrapper_for_predicate(query *q, builtins *ptr)
 
 	if (ptr->ret_type == TAG_INT8) {
 		make_int(&tmp, result.i8);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_INT16) {
 		make_int(&tmp, result.i16);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_INT32) {
 		make_int(&tmp, result.i32);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_INT64) {
 		make_int(&tmp, result.i64);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_FLOAT32) {
 		make_float(&tmp, result.f32);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_FLOAT) {
 		make_float(&tmp, result.f64);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_PTR) {
 		make_ptr(&tmp, result.p);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_CSTR) {
 		may_error(make_cstring(&tmp, result.s));
 		free(result.s);
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_CCSTR) {
 		may_error(make_cstring(&tmp, result.s));
-		pl_status ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
-		if (ok != pl_success) return ok;
+		if (ok != true) return ok;
 	}
 
-	return pl_success;
+	return true;
 }
 #endif
 
