@@ -187,7 +187,7 @@ bool more_data(query *q, db_entry *dbe)
 		return false;
 
 	const frame *f = GET_CURR_FRAME();
-	db_entry *next = dbe->next;
+	const db_entry *next = dbe->next;
 
 	while (next && !can_view(f, next))
 		next = next->next;
@@ -263,7 +263,7 @@ static void next_key(query *q)
 
 const char *dump_id(const void *k, const void *v, const void *p)
 {
-	query *q = (query*)p;
+	const query *q = (query*)p;
 	uint64_t id = (uint64_t)k;
 	static char tmpbuf[1024];
 	sprintf(tmpbuf, "%llu", (unsigned long long)id);
@@ -385,7 +385,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	// the results and return them sorted as an iterator...
 
 	map *tmp_idx = NULL;
-	db_entry *dbe;
+	const db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
 #if DEBUGIDX
