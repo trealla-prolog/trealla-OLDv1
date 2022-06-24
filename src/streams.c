@@ -543,6 +543,7 @@ static USE_RESULT pl_status fn_iso_stream_property_2(query *q)
 
 	may_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_clone_to_tmp(q, q->st.curr_cell, q->st.curr_frame);
+	may_heap_error(tmp);
 	tmp->val_off = g_sys_stream_property_s;
 
 	if (match_clause(q, tmp, q->st.curr_frame, DO_CLAUSE) != pl_success) {
