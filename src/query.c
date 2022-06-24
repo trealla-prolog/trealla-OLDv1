@@ -281,13 +281,6 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	q->st.iter = NULL;
 	bool noindex = false;
 
-	if (pr->idx && 0) {
-		cell *arg1 = deref(q, key + 1, q->st.curr_frame);
-
-		if (is_variable(arg1))
-			noindex = true;
-	}
-
 	if (pr->is_unique)
 		q->st.definite = true;
 
