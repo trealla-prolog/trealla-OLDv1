@@ -37,7 +37,7 @@ bool is_multifile_in_db(prolog *pl, const char *mod, const char *name, unsigned 
 	if (!m) return false;
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	if (tmp.val_off == ERR_IDX) return false;
 	tmp.arity = arity;
@@ -66,7 +66,7 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
 	map_set(pl->symtab, key, (void*)(size_t)offset);
-	g_literal_cnt++;
+	g_interned_cnt++;
 	return (pl_idx_t)offset;
 }
 

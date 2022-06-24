@@ -75,7 +75,7 @@ cell *list_tail(cell *l, cell *tmp)
 	size_t len = len_char_utf8(src);
 
 	if (str_len == len) {
-		tmp->tag = TAG_LITERAL;
+		tmp->tag = TAG_INTERNED;
 		tmp->nbr_cells = 1;
 		tmp->arity = 0;
 		tmp->flags = 0;
@@ -131,7 +131,7 @@ cell *get_logical_body(cell *c)
 	// A body of just 'true' is equivalent to no body at all,
 	// and of course vice-versa.
 
-	if (!body->arity && is_literal(body) && (body->val_off == g_true_s))
+	if (!body->arity && is_interned(body) && (body->val_off == g_true_s))
 		return NULL;
 
 	return body;
@@ -252,7 +252,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 {
 	cell *p1 = c + 1, *p2 = c + 2, *p3 = c + 3;
 
-	if (!is_integer(p1) || !is_literal(p2) || (!is_atom(p3) && !is_list(p3))) {
+	if (!is_integer(p1) || !is_interned(p2) || (!is_atom(p3) && !is_list(p3))) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: unknown op\n");
 
@@ -346,7 +346,7 @@ static void directives(parser *p, cell *d)
 {
 	p->skip = false;
 
-	if (!is_literal(d))
+	if (!is_interned(d))
 		return;
 
 	if (is_list(d) && p->command) {
@@ -360,7 +360,7 @@ static void directives(parser *p, cell *d)
 
 	cell *c = d + 1;
 
-	if (!is_literal(c))
+	if (!is_interned(c))
 		return;
 
 	const char *dirname = C_STR(p, c);
@@ -543,7 +543,7 @@ static void directives(parser *p, cell *d)
 				if (!strcmp(C_STR(p, head), "/")
 					|| !strcmp(C_STR(p, head), "//")) {
 					cell *f = head+1, *a = f+1;
-					if (!is_literal(f)) return;
+					if (!is_interned(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
 					tmp.arity = get_int(a);
@@ -582,7 +582,7 @@ static void directives(parser *p, cell *d)
 
 		if (!strcmp(name, "library")) {
 			p1 = p1 + 1;
-			if (!is_literal(p1)) return;
+			if (!is_interned(p1)) return;
 			name = C_STR(p, p1);
 			module *m;
 
@@ -670,7 +670,7 @@ static void directives(parser *p, cell *d)
 		if (!strcmp(C_STR(p, p1), "indexing_threshold") && is_smallint(p2))
 			p->m->indexing_threshold = get_smallint(p2);
 
-		if (!is_literal(p2)) return;
+		if (!is_interned(p2)) return;
 
 		if (!strcmp(C_STR(p, p1), "double_quotes")) {
 			if (!strcmp(C_STR(p, p2), "atom")) {
@@ -733,7 +733,7 @@ static void directives(parser *p, cell *d)
 	while (is_list(p1) && !g_tpl_interrupt) {
 		cell *h = LIST_HEAD(p1);
 
-		if (is_literal(h) && (!strcmp(C_STR(p, h), "/") || !strcmp(C_STR(p, h), "//")) && (h->arity == 2)) {
+		if (is_interned(h) && (!strcmp(C_STR(p, h), "/") || !strcmp(C_STR(p, h), "//")) && (h->arity == 2)) {
 			cell *c_name = h + 1;
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
@@ -812,7 +812,7 @@ static void directives(parser *p, cell *d)
 
 	//printf("*** %s\n", dirname);
 
-	while (is_literal(p1) && !g_tpl_interrupt) {
+	while (is_interned(p1) && !g_tpl_interrupt) {
 		module *m = p->m;
 		cell *c_id = p1;
 
@@ -1082,7 +1082,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 	for (pl_idx_t i = start_idx; i < p->cl->cidx;) {
 		cell *c = p->cl->cells + i;
 
-		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
+		if ((c->nbr_cells > 1) || !is_interned(c) || !c->priority) {
 			i += c->nbr_cells;
 			continue;
 		}
@@ -1116,7 +1116,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 	for (pl_idx_t i = start_idx; i <= end_idx;) {
 		cell *c = p->cl->cells + i;
 
-		if ((c->nbr_cells > 1) || !is_literal(c) || !c->priority) {
+		if ((c->nbr_cells > 1) || !is_interned(c) || !c->priority) {
 			last_idx = i;
 			i += c->nbr_cells;
 			continue;
@@ -1133,7 +1133,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			printf("*** OP2 last=%u/start=%u '%s' type=%u, specifier=%u, pri=%u, last_op=%d, is_op=%d\n", last_idx, start_idx, C_STR(p, c), c->tag, GET_OP(c), c->priority, last_op, IS_OP(c));
 #endif
 
-		c->tag = TAG_LITERAL;
+		c->tag = TAG_INTERNED;
 		c->arity = 1;
 
 		// Prefix...
@@ -1369,7 +1369,7 @@ static bool dcg_expansion(parser *p)
 
 static cell *goal_expansion(parser *p, cell *goal)
 {
-	if (p->error || p->internal || !is_literal(goal))
+	if (p->error || p->internal || !is_interned(goal))
 		return goal;
 
 	if (is_builtin(goal) || is_op(goal))
@@ -1482,7 +1482,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 
 static bool term_expansion(parser *p)
 {
-	if (p->error || p->internal || !is_literal(p->cl->cells))
+	if (p->error || p->internal || !is_interned(p->cl->cells))
 		return false;
 
 	if (p->cl->cells->val_off == g_dcg_s)
@@ -1581,7 +1581,7 @@ static cell *insert_here(parser *p, cell *c, cell *p1)
 		*dst-- = *last--;
 
 	p1 = p->cl->cells + p1_idx;
-	p1->tag = TAG_LITERAL;
+	p1->tag = TAG_INTERNED;
 	p1->flags = FLAG_BUILTIN;
 	p1->fn = fn_iso_call_n;
 	p1->fn_ptr = NULL;
@@ -1711,7 +1711,7 @@ bool virtual_term(parser *p, const char *src)
 static cell *make_a_literal(parser *p, pl_idx_t offset)
 {
 	cell *c = make_a_cell(p);
-	c->tag = TAG_LITERAL;
+	c->tag = TAG_INTERNED;
 	c->nbr_cells = 1;
 	c->val_off = offset;
 	return c;
@@ -2289,7 +2289,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	char *dst = p->token;
 	*dst = '\0';
 	bool neg = false;
-	p->v.tag = TAG_LITERAL;
+	p->v.tag = TAG_INTERNED;
 	p->v.flags = 0;
 	p->v.nbr_cells = 1;
 	p->quote_char = 0;
@@ -2796,7 +2796,7 @@ static bool process_term(parser *p, cell *p1)
 		}
 
 		unshare_cell(h);
-		h->tag = TAG_LITERAL;
+		h->tag = TAG_INTERNED;
 		h->val_off = off;
 		h->flags = 0;
 		h->arity = 0;
@@ -3210,7 +3210,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		unsigned specifier = 0;
 		int priority = 0;
 
-		if (is_literal(&p->v)) {
+		if (is_interned(&p->v)) {
 			char *s = eat_space(p);
 
 			if (!s || !*s) {
@@ -3285,13 +3285,13 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		// Operators in canonical form..
 
 		if (last_op && priority && (*p->srcptr == '(')) {
-			p->v.tag = TAG_LITERAL;
+			p->v.tag = TAG_INTERNED;
 			specifier = 0;
 			priority = 0;
 			p->quote_char = 0;
 		}
 
-		int func = last_op && is_literal(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
+		int func = last_op && is_interned(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
 
 		if ((p->was_string || p->string) && func) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -3473,7 +3473,7 @@ bool run(parser *p, const char *pSrc, bool dump)
 				q->max_frames, q->max_choices, q->max_trails, q->max_slots, (q->pages?q->pages->max_hp_used:0),
 				(unsigned long long)q->tot_backtracks, (unsigned long long)q->tot_retries,
 				(unsigned long long)q->tot_tcos,
-				g_string_cnt, g_literal_cnt);
+				g_string_cnt, g_interned_cnt);
 		}
 
 		ok = !q->error;

@@ -30,7 +30,7 @@ pl_status wrapper_for_function(query *q, builtins *fn_ptr);
 pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
 #endif
 
-#define is_callable_or_var(c) (is_literal(c) || is_cstring(c) || is_variable(c))
+#define is_callable_or_var(c) (is_interned(c) || is_cstring(c) || is_variable(c))
 #define is_list_or_nil(c) (is_list(c) || is_nil(c))
 #define is_list_or_atom_or_var(c) (is_list(c) || is_atom(c) || is_variable(c))
 #define is_list_or_nil_or_var(c) (is_list_or_nil(c) || is_variable(c))
@@ -76,6 +76,13 @@ void make_var2(cell *tmp, pl_idx_t off);
 void make_return(query *q, cell *tmp);
 void make_return2(query *q, cell *tmp, cell *ret);
 void make_end(cell *tmp);
+
+void make_atom(cell *tmp, pl_idx_t offset);
+void make_smalln(cell *tmp, const char *s, size_t n);
+void make_indirect(cell *tmp, cell *c);
+
+pl_status make_cstringn(cell *d, const char *s, size_t n);
+pl_status make_stringn(cell *d, const char *s, size_t n);
 
 #if USE_FFI
 USE_RESULT pl_status fn_sys_dlopen_3(query *q);

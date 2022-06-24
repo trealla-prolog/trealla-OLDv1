@@ -34,7 +34,7 @@ static const unsigned INITIAL_NBR_SLOTS = 1000;
 static const unsigned INITIAL_NBR_CHOICES = 1000;
 static const unsigned INITIAL_NBR_TRAILS = 1000;
 
-unsigned g_string_cnt = 0, g_literal_cnt = 0;
+unsigned g_string_cnt = 0, g_interned_cnt = 0;
 int g_tpl_interrupt = 0;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
@@ -467,7 +467,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		*has_var = *is_partial = true;
 	} else if (is_string(l))
 		;
-	else if (!is_literal(l) || !is_nil(l))
+	else if (!is_interned(l) || !is_nil(l))
 		is_chars_list = 0;
 
 	return is_chars_list;
@@ -1171,12 +1171,12 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
 
-		if (!is_literal(c)) {
+		if (!is_interned(c)) {
 			// For now convert it to a literal
 			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_LITERAL;
+			c->tag = TAG_INTERNED;
 			c->val_off = off;
 			c->flags = 0;
 			c->arity = 0;
@@ -1242,7 +1242,7 @@ USE_RESULT pl_status match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 				p1_body = deref(q, p1_body, p1_ctx);
 				pl_idx_t p1_body_ctx = q->latest_ctx;
 				cell tmp = (cell){0};
-				tmp.tag = TAG_LITERAL;
+				tmp.tag = TAG_INTERNED;
 				tmp.nbr_cells = 1;
 				tmp.val_off = g_true_s;
 				ok = unify(q, p1_body, p1_body_ctx, &tmp, q->st.curr_frame);
@@ -1268,12 +1268,12 @@ USE_RESULT pl_status match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clau
 	if (!q->retry) {
 		cell *c = p1;
 
-		if (!is_literal(c)) {
+		if (!is_interned(c)) {
 			// For now convert it to a literal
 			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
 			may_idx_error(off);
 			unshare_cell(c);
-			c->tag = TAG_LITERAL;
+			c->tag = TAG_INTERNED;
 			c->val_off = off;
 			c->flags = 0;
 		}
@@ -1351,7 +1351,7 @@ static USE_RESULT pl_status match_head(query *q)
 		cell *c = q->st.curr_cell;
 		predicate *pr = NULL;
 
-		if (is_literal(c))
+		if (is_interned(c))
 			pr = c->match;
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
@@ -1361,7 +1361,7 @@ static USE_RESULT pl_status match_head(query *q)
 			q->save_m = q->st.m;
 
 			if (!pr) {
-				if (!is_end(c) && !(is_literal(c) && !strcmp(C_STR(q, c), "initialization")))
+				if (!is_end(c) && !(is_interned(c) && !strcmp(C_STR(q, c), "initialization")))
 					if (q->st.m->flags.unknown == UNK_ERROR)
 						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
 					else

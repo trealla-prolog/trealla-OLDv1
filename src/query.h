@@ -13,8 +13,8 @@ pl_status push_catcher(query *q, enum q_retry type);
 
 pl_status do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract);
 pl_status do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src);
-void make_smalln(cell *tmp, const char *s, size_t n);
 pl_status do_yield_0(query *q, int msecs);
+
 void cut_me(query *q, bool inner_cut, bool soft_cut);
 void set_var(query *q, const cell *c, pl_idx_t ctx, cell *v, pl_idx_t v_ctx);
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing);
@@ -52,9 +52,6 @@ bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
 bool is_acyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
 pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx);
 size_t slicecpy(char *dst, size_t dstlen, const char *src, size_t len);
-pl_status make_cstringn(cell *d, const char *s, size_t n);
-pl_status make_stringn(cell *d, const char *s, size_t n);
-void make_atom(cell *tmp, pl_idx_t offset);
 int get_stream(query *q, cell *p1);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 pl_status call_userfun(query *q, cell *c, pl_idx_t c_ctx);
@@ -62,7 +59,6 @@ void do_cleanup(query *q, cell *p1);
 bool cut_if_det(query *q);
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
 void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
-void make_indirect(cell *tmp, cell *c);
 bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip);
 bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx_t *vnames_ctx);
 bool has_vars(query *q, cell *p1, pl_idx_t p1_ctx);

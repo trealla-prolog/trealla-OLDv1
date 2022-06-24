@@ -811,7 +811,7 @@ pl_status do_post_unification_hook(query *q, bool is_builtin)
 	tmp[0].nbr_cells = 1;
 	tmp[0].flags = FLAG_BUILTIN;
 
-	tmp[1].tag = TAG_LITERAL;
+	tmp[1].tag = TAG_INTERNED;
 	tmp[1].nbr_cells = 1;
 	tmp[1].arity = 0;
 	tmp[1].flags = 0;
@@ -900,7 +900,7 @@ static bool unify_reals(query *q, cell *p1, cell *p2)
 
 static bool unify_literals(query *q, cell *p1, cell *p2)
 {
-	if (is_literal(p2))
+	if (is_interned(p2))
 		return p1->val_off == p2->val_off;
 
 	if (is_cstring(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
@@ -914,7 +914,7 @@ static bool unify_cstrings(query *q, cell *p1, cell *p2)
 	if (is_cstring(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
 		return !memcmp(C_STR(q, p1), C_STR(q, p2), C_STRLEN(q, p1));
 
-	if (is_literal(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
+	if (is_interned(p2) && (C_STRLEN(q, p1) == C_STRLEN(q, p2)))
 		return !memcmp(C_STR(q, p1), GET_POOL(q, p2->val_off), C_STRLEN(q, p1));
 
 	return false;
@@ -929,7 +929,7 @@ static const struct dispatch g_disp[] =
 {
 	{TAG_EMPTY, NULL},
 	{TAG_VAR, NULL},
-	{TAG_LITERAL, unify_literals},
+	{TAG_INTERNED, unify_literals},
 	{TAG_CSTR, unify_cstrings},
 	{TAG_INTEGER, unify_integers},
 	{TAG_FLOAT, unify_reals},
