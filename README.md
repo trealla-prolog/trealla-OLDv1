@@ -622,7 +622,7 @@ Then, given the code in *samples/sqlite3.pl*...
 
 	test(Database, Query) :-
 		flag('SQLITE_OK', SQLITE_OK),
-		sqlite3_open(Database, Connection, Ret), Ret is SQLITE_OK,
+		sqlite3_open(Database, Connection, Ret), Ret =:= SQLITE_OK,
 		bagof(Row, sqlite3_query(Connection, Query, Row, _), Results),
 		writeq(Results), nl.
 ```
