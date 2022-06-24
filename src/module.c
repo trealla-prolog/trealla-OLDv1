@@ -257,7 +257,7 @@ static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *para
 	return strcmp(m->pl->pool+p1->val_off, m->pl->pool+p2->val_off);
 }
 
-static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, void *l)
+static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, void *l, unsigned depth)
 {
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
@@ -328,7 +328,7 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 			p1++; p2++;
 
 			while (arity--) {
-				if (is_variable(p1) || is_variable(p2)) {
+				if (!depth && (is_variable(p1) || is_variable(p2))) {
 					if (map_is_find(l))
 						break;
 
@@ -338,7 +338,7 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 					continue;
 				}
 
-				int ok = index_cmpkey_(p1, p2, param, l);
+				int ok = index_cmpkey_(p1, p2, param, l, depth+1);
 
 				if (ok != 0)
 					return ok;
@@ -357,7 +357,7 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 
 int index_cmpkey(const void *ptr1, const void *ptr2, const void *param, void *l)
 {
-	return index_cmpkey_(ptr1, ptr2, param, l);
+	return index_cmpkey_(ptr1, ptr2, param, l, 0);
 }
 
 db_entry *find_in_db(module *m, uuid *ref)
