@@ -1,0 +1,55 @@
+{
+  "uid" : "bd90feae520d6b8c",
+  "name" : "meta_scan_right_4_01",
+  "fullName" : "meta_scan_right_4_01::tests",
+  "historyId" : "meta_scan_right_4_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/meta/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/meta/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/meta/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/meta/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "142-143"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/801ba39917ac2cf2199018ef3c4a57a288761bde/library/meta/tests.lgt#L142"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "bd90feae520d6b8c.json",
+  "parameterValues" : [ "library/meta/tests.lgt", "142-143", "https://github.com/LogtalkDotOrg/logtalk3/tree/801ba39917ac2cf2199018ef3c4a57a288761bde/library/meta/tests.lgt#L142" ]
+}
