@@ -59,7 +59,7 @@ typedef enum {
 	pl_success =  1,
 } pl_status;
 
-extern unsigned g_string_cnt, g_literal_cnt;
+extern unsigned g_string_cnt, g_interned_cnt;
 
 // Sentinel Value
 #define ERR_IDX (~(pl_idx_t)0)
@@ -99,7 +99,7 @@ extern unsigned g_string_cnt, g_literal_cnt;
 
 #define is_empty(c) ((c)->tag == TAG_EMPTY)
 #define is_variable(c) ((c)->tag == TAG_VAR)
-#define is_literal(c) ((c)->tag == TAG_LITERAL)
+#define is_interned(c) ((c)->tag == TAG_INTERNED)
 #define is_cstring(c) ((c)->tag == TAG_CSTR)
 #define is_integer(c) ((c)->tag == TAG_INTEGER)
 #define is_float(c) ((c)->tag == TAG_FLOAT)
@@ -109,8 +109,8 @@ extern unsigned g_string_cnt, g_literal_cnt;
 
 // Derived type...
 
-#define is_iso_atom(c) ((is_literal(c) || is_cstring(c)) && !(c)->arity)
-#define is_iso_list(c) (is_literal(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
+#define is_iso_atom(c) ((is_interned(c) || is_cstring(c)) && !(c)->arity)
+#define is_iso_list(c) (is_interned(c) && ((c)->arity == 2) && ((c)->val_off == g_dot_s))
 
 #define get_float(c) (c)->val_float
 #define set_float(c,v) (c)->val_float = (v)
@@ -149,15 +149,15 @@ extern unsigned g_string_cnt, g_literal_cnt;
 
 #define is_smallint(c) (is_integer(c) && !((c)->flags & FLAG_MANAGED))
 #define is_bigint(c) (is_integer(c) && ((c)->flags & FLAG_MANAGED))
-#define is_boolean(c) ((is_literal(c) && !(c)->arity) && (c->val_off != g_true_s) && (c->val_off != g_false_s))
-#define is_atom(c) ((is_literal(c) && !(c)->arity) || is_cstring(c))
+#define is_boolean(c) ((is_interned(c) && !(c)->arity) && (c->val_off != g_true_s) && (c->val_off != g_false_s))
+#define is_atom(c) ((is_interned(c) && !(c)->arity) || is_cstring(c))
 #define is_string(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_STRING))
 #define is_managed(c) ((c)->flags & FLAG_MANAGED)
 #define is_cstr_blob(c) (is_cstring(c) && ((c)->flags & FLAG_CSTR_BLOB))
 #define is_list(c) (is_iso_list(c) || is_string(c))
 #define is_static(c) (is_cstr_blob(c) && ((c)->flags & FLAG_STATIC))
 #define is_strbuf(c) (is_cstr_blob(c) && !((c)->flags & FLAG_STATIC))
-#define is_nil(c) (is_literal(c) && !(c)->arity && ((c)->val_off == g_nil_s))
+#define is_nil(c) (is_interned(c) && !(c)->arity && ((c)->val_off == g_nil_s))
 #define is_quoted(c) ((c)->flags & FLAG_CSTR_QUOTED)
 #define is_fresh(c) ((c)->flags & FLAG_VAR_FRESH)
 #define is_anon(c) ((c)->flags & FLAG_VAR_ANON)
@@ -167,8 +167,8 @@ extern unsigned g_string_cnt, g_literal_cnt;
 #define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
 #define is_ref(c) ((c)->flags & FLAG_REF)
 #define is_op(c) (c->flags & 0xE000)
-#define is_callable(c) (is_literal(c) || is_cstring(c))
-#define is_structure(c) (is_literal(c) && (c)->arity)
+#define is_callable(c) (is_interned(c) || is_cstring(c))
+#define is_structure(c) (is_interned(c) && (c)->arity)
 #define is_compound(c) (is_structure(c) || is_string(c))
 #define is_number(c) (is_integer(c) || is_float(c))
 #define is_atomic(c) (is_atom(c) || is_number(c))
@@ -239,7 +239,7 @@ typedef struct {
 enum {
 	TAG_EMPTY=0,
 	TAG_VAR=1,
-	TAG_LITERAL=2,
+	TAG_INTERNED=2,
 	TAG_CSTR=3,
 	TAG_INTEGER=4,
 	TAG_FLOAT=5,
@@ -405,7 +405,7 @@ struct cell_ {
 				};
 			};
 
-			uint32_t val_off;			// used with TAG_VAR & TAG_LITERAL
+			uint32_t val_off;			// used with TAG_VAR & TAG_INTERNED
 			uint32_t var_nbr;			// used with TAG_VAR
 		};
 

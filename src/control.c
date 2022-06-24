@@ -568,7 +568,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 	else
 		fprintf(stdout, "  ");
 
-	if (!is_literal(e) || strcmp(C_STR(q, e), "error"))
+	if (!is_interned(e) || strcmp(C_STR(q, e), "error"))
 		fprintf(stdout, "throw(");
 
 	if (is_cyclic_term(q, e, e_ctx)) {
@@ -579,7 +579,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		print_term(q, stdout, e, e_ctx, 1);
 	}
 
-	if (!is_literal(e) || strcmp(C_STR(q, e), "error"))
+	if (!is_interned(e) || strcmp(C_STR(q, e), "error"))
 		fprintf(stdout, ")");
 
 	fprintf(stdout, ".\n");

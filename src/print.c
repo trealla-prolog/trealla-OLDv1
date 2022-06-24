@@ -689,7 +689,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 		pl_idx_t head_ctx = q->latest_ctx;
 		bool special_op = false;
 
-		if (is_literal(head)) {
+		if (is_interned(head)) {
 			special_op = (
 				!strcmp(C_STR(q, head), ",")
 				|| !strcmp(C_STR(q, head), "|")
@@ -713,7 +713,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 		c_ctx = q->latest_ctx;
 		size_t tmp_len = 0;
 
-		if (is_literal(tail) && !is_structure(tail)) {
+		if (is_interned(tail) && !is_structure(tail)) {
 			const char *src = C_STR(q, tail);
 
 			if (strcmp(src, "[]")) {
@@ -921,10 +921,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		int dq = 0, braces = 0;
 		if (is_string(c)) dq = quote = 1;
 		if (q->quoted < 0) quote = 0;
-		if ((c->arity == 1) && is_literal(c) && !strcmp(src, "{}")) braces = 1;
+		if ((c->arity == 1) && is_interned(c) && !strcmp(src, "{}")) braces = 1;
 		cell *c1 = c->arity ? deref(q, c+1, c_ctx) : NULL;
 
-		if (running && is_literal(c) && c->arity && !strcmp(src, "$VAR") && c1
+		if (running && is_interned(c) && c->arity && !strcmp(src, "$VAR") && c1
 			&& q->numbervars && is_integer(c1) && q->nv_start != -1) {
 			dst += snprintf(dst, dstlen, "%s", varformat2(c1, q->nv_start));
 			q->last_thing_was_symbol = false;
@@ -1028,7 +1028,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 				bool parens = false;
 
-				if (!braces && is_literal(tmp)) {
+				if (!braces && is_interned(tmp)) {
 					unsigned tmp_priority = search_op(q->st.m, C_STR(q, tmp), NULL, tmp->arity==1);
 
 					if ((tmp_priority >= 1000) && tmp->arity)
@@ -1096,7 +1096,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		rhs = running ? deref(q, rhs, c_ctx) : rhs;
 		pl_idx_t rhs_ctx = q->latest_ctx;
 		unsigned my_priority = search_op(q->st.m, src, NULL, true);
-		unsigned rhs_pri = is_literal(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, true) : 0;
+		unsigned rhs_pri = is_interned(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, true) : 0;
 
 		bool space = (c->val_off == g_minus_s) && (is_number(rhs) || search_op(q->st.m, C_STR(q, rhs), NULL, true));
 		if ((c->val_off == g_plus_s) && search_op(q->st.m, C_STR(q, rhs), NULL, true) && rhs->arity) space = true;
@@ -1115,7 +1115,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		bool quote = q->quoted && has_spaces(src, src_len);
 
-		if (is_literal(rhs) && !rhs->arity && !parens) {
+		if (is_interned(rhs) && !rhs->arity && !parens) {
 			const char *rhs_src = C_STR(q, rhs);
 			if (!iswalpha(*rhs_src) && !isdigit(*rhs_src) && strcmp(rhs_src, "[]") && strcmp(rhs_src, "{}"))
 				space = 1;
@@ -1146,10 +1146,10 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	rhs = running ? deref(q, rhs, c_ctx) : rhs;
 	pl_idx_t rhs_ctx = q->latest_ctx;
 
-	unsigned lhs_pri_1 = is_literal(lhs) ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
-	unsigned lhs_pri_2 = is_literal(lhs) && !lhs->arity ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
-	unsigned rhs_pri_1 = is_literal(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
-	unsigned rhs_pri_2 = is_literal(rhs) && !rhs->arity ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
+	unsigned lhs_pri_1 = is_interned(lhs) ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
+	unsigned lhs_pri_2 = is_interned(lhs) && !lhs->arity ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
+	unsigned rhs_pri_1 = is_interned(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
+	unsigned rhs_pri_2 = is_interned(rhs) && !rhs->arity ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
 	unsigned my_priority = search_op(q->st.m, src, NULL, false);
 
 	bool lhs_parens = lhs_pri_1 >= my_priority;
@@ -1183,7 +1183,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		|| !*src;
 #endif
 
-	if (is_literal(lhs) && !lhs->arity && !lhs_parens) {
+	if (is_interned(lhs) && !lhs->arity && !lhs_parens) {
 		const char *lhs_src = C_STR(q, lhs);
 		if (!isalpha(*lhs_src) && !isdigit(*lhs_src) && (*lhs_src != '$')
 			&& strcmp(src, ",") && strcmp(src, ";")

@@ -160,7 +160,7 @@ void make_ptr(cell *tmp, void *v)
 void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t extra_cells)
 {
 	*tmp = (cell){0};
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_INTERNED;
 	tmp->nbr_cells = 1 + extra_cells;
 	if (fn) tmp->flags |= FLAG_BUILTIN;
 	tmp->fn = fn;
@@ -197,7 +197,7 @@ void make_return2(query *q, cell *tmp, cell *c_ret)
 void make_atom(cell *tmp, pl_idx_t offset)
 {
 	*tmp = (cell){0};
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_INTERNED;
 	tmp->nbr_cells = 1;
 	tmp->val_off = offset;
 }
@@ -282,7 +282,7 @@ static USE_RESULT cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
-	tmp->tag = TAG_LITERAL;
+	tmp->tag = TAG_INTERNED;
 	tmp->nbr_cells = 1;
 	tmp->val_off = g_nil_s;
 	tmp->arity = tmp->flags = 0;
@@ -578,7 +578,7 @@ static USE_RESULT pl_status fn_iso_atom_chars_2(query *q)
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	}
 
-	if (is_variable(p2) && (is_literal(p1) || (C_STRLEN(q, p1) < MAX_SMALL_STRING))) {
+	if (is_variable(p2) && (is_interned(p1) || (C_STRLEN(q, p1) < MAX_SMALL_STRING))) {
 		cell tmp;
 		may_error(make_stringn(&tmp, C_STR(q, p1), C_STRLEN(q, p1)));
 		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
@@ -1923,7 +1923,7 @@ static USE_RESULT pl_status fn_iso_univ_2(query *q)
 			convert_to_literal(q->st.m, tmp2);
 		}
 
-		if (!is_literal(tmp2) && arity)
+		if (!is_interned(tmp2) && arity)
 			return throw_error(q, tmp2, q->st.curr_frame, "type_error", "atom");
 
 		if (tmp2->arity && arity)
@@ -2496,7 +2496,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, q->st.curr_frame, "instantiation_error", "args_not_sufficiently_instantiated");
 
-	if (!is_literal(head) && !is_cstring(head))
+	if (!is_interned(head) && !is_cstring(head))
 		return throw_error(q, head, q->st.curr_frame, "type_error", "callable");
 
 	bool found = false;
@@ -2528,7 +2528,7 @@ static USE_RESULT pl_status fn_iso_asserta_1(query *q)
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
 
-	if (!is_literal(h))
+	if (!is_interned(h))
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
 	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->nbr_temporaries, p->cl->cells, 0);
@@ -2560,7 +2560,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (is_variable(head))
 		return throw_error(q, head, q->st.curr_frame, "instantiation_error", "args_not_sufficiently_instantiated");
 
-	if (!is_literal(head) && !is_cstring(head))
+	if (!is_interned(head) && !is_cstring(head))
 		return throw_error(q, head, q->st.curr_frame, "type_error", "callable");
 
 	bool found = false, function = false;
@@ -2592,7 +2592,7 @@ static USE_RESULT pl_status fn_iso_assertz_1(query *q)
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
 
-	if (!is_literal(h))
+	if (!is_interned(h))
 		return throw_error(q, h, q->st.curr_frame, "type_error", "callable");
 
 	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->nbr_temporaries, p->cl->cells, 0);
@@ -2646,7 +2646,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 			cell *tmp = alloc_on_heap(q, 1+arity);
 			may_heap_error(tmp);
 			*tmp = (cell){0};
-			tmp[0].tag = TAG_LITERAL;
+			tmp[0].tag = TAG_INTERNED;
 			tmp[0].arity = arity;
 			tmp[0].nbr_cells = 1 + arity;
 
@@ -2676,7 +2676,7 @@ static USE_RESULT pl_status fn_iso_functor_3(query *q)
 	CLR_OP(&tmp);
 
 	if (is_string(p1)) {
-		tmp.tag = TAG_LITERAL;
+		tmp.tag = TAG_INTERNED;
 		tmp.val_off = g_dot_s;
 		tmp.flags = 0;
 	}
@@ -2730,7 +2730,7 @@ static USE_RESULT pl_status fn_iso_current_rule_1(query *q)
 	}
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(q->pl, functor);
 	tmp.arity = arity;
 
@@ -2808,8 +2808,8 @@ static USE_RESULT pl_status fn_iso_current_predicate_1(query *q)
 		return search_functor(q, p1, p1_ctx, p2, p2_ctx) ? pl_success : pl_failure;
 
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
-	tmp.val_off = is_literal(p1) ? p1->val_off : index_from_pool(q->pl, C_STR(q, p1));
+	tmp.tag = TAG_INTERNED;
+	tmp.val_off = is_interned(p1) ? p1->val_off : index_from_pool(q->pl, C_STR(q, p1));
 	tmp.arity = get_int(p2);
 
 	return search_predicate(q->st.m, &tmp) != NULL;
@@ -3884,7 +3884,7 @@ static pl_status do_asserta_2(query *q)
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
 
-	if (!is_literal(h))
+	if (!is_interned(h))
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
 	db_entry *dbe = asserta_to_db(q->st.m, p->cl->nbr_vars, p->cl->nbr_temporaries, p->cl->cells, 0);
@@ -3985,7 +3985,7 @@ static pl_status do_assertz_2(query *q)
 	if (is_cstring(h))
 		convert_to_literal(q->st.m, h);
 
-	if (!is_literal(h))
+	if (!is_interned(h))
 		return throw_error(q, h, q->latest_ctx, "type_error", "callable");
 
 	db_entry *dbe = assertz_to_db(q->st.m, p->cl->nbr_vars, p->cl->nbr_temporaries, p->cl->cells, 0);
@@ -6698,7 +6698,7 @@ static USE_RESULT pl_status fn_use_module_1(query *q)
 
 	if (is_structure(p1) && !strcmp(name, "library")) {
 		p1 = p1 + 1;
-		if (!is_literal(p1)) return pl_error;
+		if (!is_interned(p1)) return pl_error;
 		name = C_STR(q, p1);
 		module *m;
 

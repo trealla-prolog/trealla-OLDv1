@@ -188,7 +188,7 @@ predicate *create_predicate(module *m, cell *c)
 
 	pr->m = m;
 	pr->key = *c;
-	pr->key.tag = TAG_LITERAL;
+	pr->key.tag = TAG_INTERNED;
 	pr->key.nbr_cells = 1;
 	pr->is_noindex = m->pl->noindex || !pr->key.arity;
 
@@ -294,8 +294,8 @@ static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, 
 			return 1;
 		else if (!is_variable(p2))
 			return -1;
-	} else if (is_literal(p1) && !p1->arity) {
-		if (is_literal(p2) && !p2->arity) {
+	} else if (is_interned(p1) && !p1->arity) {
+		if (is_interned(p2) && !p2->arity) {
 			if (p1->val_off == p2->val_off)
 				return 0;
 
@@ -398,7 +398,7 @@ db_entry *erase_from_db(module *m, uuid *ref)
 void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -415,7 +415,7 @@ void set_discontiguous_in_db(module *m, const char *name, unsigned arity)
 void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -432,7 +432,7 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -448,7 +448,7 @@ void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
 void set_table_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -465,7 +465,7 @@ void set_table_in_db(module *m, const char *name, unsigned arity)
 void set_dynamic_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -485,7 +485,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 	const char *name = C_STR(m, c);
 	unsigned arity = c->arity;
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off != ERR_IDX);
 	tmp.arity = arity;
@@ -509,7 +509,7 @@ void set_meta_predicate_in_db(module *m, cell *c)
 void set_persist_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	ensure(tmp.val_off == ERR_IDX);
 	tmp.arity = arity;
@@ -540,7 +540,7 @@ void convert_to_literal(module *m, cell *c)
 	char *src = DUP_STR(m, c);
 	pl_idx_t off = index_from_pool(m->pl, src);
 	unshare_cell(c);
-	c->tag = TAG_LITERAL;
+	c->tag = TAG_INTERNED;
 	c->val_off = off;
 	c->match = NULL;
 	c->flags = 0;
@@ -550,7 +550,7 @@ void convert_to_literal(module *m, cell *c)
 predicate *find_predicate(module *m, cell *c)
 {
 	cell tmp = *c;
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.flags = 0;
 	tmp.nbr_cells = 1;
 
@@ -575,7 +575,7 @@ predicate *find_predicate(module *m, cell *c)
 predicate *find_functor(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
-	tmp.tag = TAG_LITERAL;
+	tmp.tag = TAG_INTERNED;
 	tmp.val_off = index_from_pool(m->pl, name);
 	tmp.arity = arity;
 	return find_predicate(m, &tmp);
@@ -1241,7 +1241,7 @@ void xref_rule(module *m, clause *r, predicate *parent)
 
 		c->flags &= ~FLAG_TAIL_REC;
 
-		if (!is_literal(c))
+		if (!is_interned(c))
 			continue;
 
 		xref_cell(m, r, c, parent);

@@ -1138,10 +1138,10 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 	pl_idx_t c1_ctx = q->latest_ctx;
 
 	if (!CMP_STR_CSTR(q, c, "character_escapes")) {
-		if (is_literal(c1))
+		if (is_interned(c1))
 			p->flags.character_escapes = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "double_quotes")) {
-		if (is_literal(c1)) {
+		if (is_interned(c1)) {
 			if (!CMP_STR_CSTR(q, c1, "atom")) {
 				p->flags.double_quote_codes = p->flags.double_quote_chars = false;
 				p->flags.double_quote_atom = true;
@@ -1780,7 +1780,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 		return false;
 	}
 
-	if (!is_literal(c) || !is_structure(c)) {
+	if (!is_interned(c) || !is_structure(c)) {
 		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 		return false;
 	}
@@ -1802,7 +1802,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1814,7 +1814,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1826,7 +1826,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1838,7 +1838,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1850,7 +1850,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1862,7 +1862,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (!is_literal(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
+		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
 			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
@@ -1903,7 +1903,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 				return false;
 			}
 
-			if (is_literal(h)) {
+			if (is_interned(h)) {
 				cell *h1 = deref(q, h+1, h_ctx);
 
 				if (is_variable(h1)) {
@@ -4098,7 +4098,7 @@ static USE_RESULT pl_status fn_absolute_file_name_3(query *q)
 
 		if (is_structure(h) && (h->arity == 1)) {
 			if (!CMP_STR_CSTR(q, h, "expand")) {
-				if (is_literal(h+1)) {
+				if (is_interned(h+1)) {
 					if (!CMP_STR_CSTR(q, h+1, "true"))
 						expand = true;
 				}
