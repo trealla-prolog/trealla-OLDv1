@@ -1,14 +1,13 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
-#include "internal.h"
-#include "parser.h"
+#include "heap.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 #include "query.h"
-#include "heap.h"
 
 USE_RESULT pl_status fn_iso_true_0(query *q)
 {

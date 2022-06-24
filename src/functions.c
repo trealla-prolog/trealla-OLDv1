@@ -1,17 +1,16 @@
+#include <ctype.h>
+#include <errno.h>
+#include <float.h>
+#include <fenv.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-#include <fenv.h>
-#include <errno.h>
 
-#include "internal.h"
-#include "query.h"
+#include "heap.h"
 #include "module.h"
 #include "prolog.h"
-#include "heap.h"
+#include "query.h"
 
 #define SET_ACCUM() {											\
 	if (errno == ENOMEM)										\

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdio.h>
+#include <assert.h>
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
-#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #ifndef USE_OPENSSL

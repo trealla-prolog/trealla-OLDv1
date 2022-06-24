@@ -1,12 +1,11 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/stat.h>
 
-#include "internal.h"
-#include "parser.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 #include "query.h"
 #include "utf8.h"

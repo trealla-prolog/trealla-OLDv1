@@ -1,9 +1,8 @@
 #include <stdlib.h>
 
-#include "internal.h"
+#include "heap.h"
 #include "module.h"
 #include "query.h"
-#include "heap.h"
 #include "utf8.h"
 
 static int compare_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth)

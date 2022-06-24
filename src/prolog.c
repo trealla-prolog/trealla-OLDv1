@@ -1,12 +1,11 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
-#include "internal.h"
 #include "library.h"
-#include "parser.h"
 #include "module.h"
+#include "parser.h"
 #include "prolog.h"
 
 void convert_path(char *filename);

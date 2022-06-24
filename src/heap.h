@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal.h"
+
 USE_RESULT size_t alloc_grow(void **addr, size_t elem_size, size_t min_elements, size_t max_elements);
 
 USE_RESULT cell *append_to_tmp(query *q, cell *p1);

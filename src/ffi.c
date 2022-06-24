@@ -1,16 +1,15 @@
+#include <ctype.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#include "internal.h"
-#include "query.h"
 
 #if USE_FFI
 #include <dlfcn.h>
 #include <ffi.h>
 #endif
+
+#include "query.h"
 
 // These are pseudo tags just used here...
 

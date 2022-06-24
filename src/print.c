@@ -1,18 +1,17 @@
+#include <ctype.h>
+#include <float.h>
+#include <inttypes.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-#include <inttypes.h>
 
-#include "internal.h"
-#include "parser.h"
-#include "module.h"
-#include "query.h"
-#include "network.h"
 #include "heap.h"
+#include "module.h"
+#include "network.h"
+#include "parser.h"
+#include "query.h"
 #include "utf8.h"
 
 #ifndef DBL_DECIMAL_DIG

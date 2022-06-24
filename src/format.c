@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "internal.h"
 #include "network.h"
 #include "query.h"
 #include "utf8.h"

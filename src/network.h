@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal.h"
+
 extern int net_server(const char *hostname, unsigned port, bool is_udp, const char *keyfile, const char *certfile);
 extern int net_connect(const char *hostname, unsigned port, bool is_udp, bool is_nodelay);
 
