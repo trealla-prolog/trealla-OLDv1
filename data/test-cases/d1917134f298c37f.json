@@ -1,0 +1,55 @@
+{
+  "uid" : "d1917134f298c37f",
+  "name" : "set_symdiff_3_03",
+  "fullName" : "set_symdiff_3_03::tests(set(integer))",
+  "historyId" : "set_symdiff_3_03::tests(set(integer))",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "testClass",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "package",
+    "value" : "library/sets/tests.lgt::tests(set(integer))"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/sets/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "388-393"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/801ba39917ac2cf2199018ef3c4a57a288761bde/library/sets/tests.lgt#L388"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d1917134f298c37f.json",
+  "parameterValues" : [ "library/sets/tests.lgt", "388-393", "https://github.com/LogtalkDotOrg/logtalk3/tree/801ba39917ac2cf2199018ef3c4a57a288761bde/library/sets/tests.lgt#L388" ]
+}
