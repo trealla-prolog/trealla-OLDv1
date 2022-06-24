@@ -180,9 +180,8 @@ USE_RESULT pl_status fn_iso_call_1(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
-	may_heap_error(deep_clone_to_tmp(q, p1, p1_ctx));
-	cell *tmp2 = get_tmp_heap(q, 0);
-	tmp2->nbr_cells = tmp_heap_used(q);
+	cell *tmp2 = deep_clone_to_tmp(q, p1, p1_ctx);
+	may_heap_error(tmp2);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
@@ -204,9 +203,8 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
-	may_heap_error(deep_clone_to_tmp(q, p1, p1_ctx));
-	cell *tmp2 = get_tmp_heap(q, 0);
-	tmp2->nbr_cells = tmp_heap_used(q);
+	cell *tmp2 = deep_clone_to_tmp(q, p1, p1_ctx);
+	may_heap_error(tmp2);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
@@ -228,9 +226,8 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
-	may_heap_error(deep_clone_to_tmp(q, p1, p1_ctx));
-	cell *tmp2 = get_tmp_heap(q, 0);
-	tmp2->nbr_cells = tmp_heap_used(q);
+	cell *tmp2 = deep_clone_to_tmp(q, p1, p1_ctx);
+	may_heap_error(tmp2);
 
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
