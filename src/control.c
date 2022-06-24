@@ -9,20 +9,20 @@
 #include "prolog.h"
 #include "query.h"
 
-USE_RESULT pl_status fn_iso_true_0(query *q)
+USE_RESULT bool fn_iso_true_0(query *q)
 {
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_fail_0(query *q)
+USE_RESULT bool fn_iso_fail_0(query *q)
 {
-	return pl_failure;
+	return false;
 }
 
-USE_RESULT pl_status fn_sys_cut_if_det_0(query *q)
+USE_RESULT bool fn_sys_cut_if_det_0(query *q)
 {
 	cut_if_det(q);
-	return pl_success;
+	return true;
 }
 
 void do_cleanup(query *q, cell *p1)
@@ -35,25 +35,25 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
-static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
+static USE_RESULT bool fn_sys_cleanup_if_det_0(query *q)
 {
 	if (!q->cp)		// redundant
-		return pl_success;
+		return true;
 
 	choice *ch = GET_CURR_CHOICE();
 	frame *f = GET_CURR_FRAME();
 
 	if (!ch->call_barrier || (ch->cgen != f->cgen))
-		return pl_success;
+		return true;
 
 	drop_choice(q);
 	ch = GET_CURR_CHOICE();
 
 	if (!ch->register_cleanup)
-		return pl_success;
+		return true;
 
 	if (ch->did_cleanup)
-		return pl_success;
+		return true;
 
 	drop_choice(q);
 	ch->did_cleanup = true;
@@ -61,12 +61,12 @@ static USE_RESULT pl_status fn_sys_cleanup_if_det_0(query *q)
 	pl_idx_t c_ctx = q->latest_ctx;
 	c = deref(q, c+1, c_ctx);
 	do_cleanup(q, c);
-	return pl_success;
+	return true;
 }
 
 // module:goal
 
-USE_RESULT pl_status fn_iso_invoke_2(query *q)
+USE_RESULT bool fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
@@ -88,13 +88,13 @@ USE_RESULT pl_status fn_iso_invoke_2(query *q)
 	q->st.curr_cell = tmp;
 	q->st.curr_frame = p2_ctx;
 	q->st.m = q->save_m = m;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_call_0(query *q, cell *p1)
+USE_RESULT bool fn_call_0(query *q, cell *p1)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	p1 = deref(q, p1, q->st.curr_frame);
 	pl_idx_t p1_ctx = q->latest_ctx;
@@ -115,13 +115,13 @@ USE_RESULT pl_status fn_call_0(query *q, cell *p1)
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	q->st.curr_frame = p1_ctx;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_call_n(query *q)
+USE_RESULT bool fn_iso_call_n(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
@@ -169,13 +169,13 @@ USE_RESULT pl_status fn_iso_call_n(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_call_1(query *q)
+USE_RESULT bool fn_iso_call_1(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
@@ -192,13 +192,13 @@ USE_RESULT pl_status fn_iso_call_1(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_once_1(query *q)
+USE_RESULT bool fn_iso_once_1(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
@@ -215,13 +215,13 @@ USE_RESULT pl_status fn_iso_once_1(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_ignore_1(query *q)
+USE_RESULT bool fn_ignore_1(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,callable);
 	may_heap_error(init_tmp_heap(q));
@@ -238,15 +238,15 @@ USE_RESULT pl_status fn_ignore_1(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // if -> then
 
-USE_RESULT pl_status fn_iso_if_then_2(query *q)
+USE_RESULT bool fn_iso_if_then_2(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
@@ -258,15 +258,15 @@ USE_RESULT pl_status fn_iso_if_then_2(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // if *-> then
 
-USE_RESULT pl_status fn_if_2(query *q)
+USE_RESULT bool fn_if_2(query *q)
 {
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
@@ -278,12 +278,12 @@ USE_RESULT pl_status fn_if_2(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // if -> then ; else
 
-static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
+static bool do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -291,7 +291,7 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 		pl_idx_t nbr_cells = 1 + p3->nbr_cells;
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
@@ -302,12 +302,12 @@ static pl_status do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // if *-> then ; else
 
-static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
+static bool do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 {
 	if (q->retry) {
 		cell *tmp = clone_to_heap(q, true, p3, 1);
@@ -315,7 +315,7 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 		pl_idx_t nbr_cells = 1 + p3->nbr_cells;
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 1+p2->nbr_cells+1);
@@ -326,12 +326,12 @@ static pl_status do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // if_(if,then,else)
 
-USE_RESULT pl_status fn_if_3(query *q)
+USE_RESULT bool fn_if_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
@@ -341,7 +341,7 @@ USE_RESULT pl_status fn_if_3(query *q)
 
 // either ; or
 
-USE_RESULT pl_status fn_iso_disjunction_2(query *q)
+USE_RESULT bool fn_iso_disjunction_2(query *q)
 {
 	if ((q->st.curr_cell+1)->fn == fn_iso_if_then_2) {
 		cell *p1 = q->st.curr_cell + 2;
@@ -366,7 +366,7 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
 		make_return(q, tmp+nbr_cells);
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	cell *tmp = clone_to_heap(q, true, p1, 1);
@@ -375,15 +375,15 @@ USE_RESULT pl_status fn_iso_disjunction_2(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_choice(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 // \+ goal
 
-USE_RESULT pl_status fn_iso_negation_1(query *q)
+USE_RESULT bool fn_iso_negation_1(query *q)
 {
 	if (q->retry)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,callable);
 	cell *tmp = clone_to_heap(q, true, p1, 3);
@@ -394,53 +394,53 @@ USE_RESULT pl_status fn_iso_negation_1(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_barrier(q));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_cut_0(query *q)
+USE_RESULT bool fn_iso_cut_0(query *q)
 {
 	cut_me(q, false, false);
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_sys_inner_cut_0(query *q)
+USE_RESULT bool fn_sys_inner_cut_0(query *q)
 {
 	cut_me(q, true, false);
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_sys_soft_inner_cut_0(query *q)
+USE_RESULT bool fn_sys_soft_inner_cut_0(query *q)
 {
 	cut_me(q, true, true);
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_sys_block_catcher_1(query *q)
+USE_RESULT bool fn_sys_block_catcher_1(query *q)
 {
 	if (!q->cp)
-		return pl_success;
+		return true;
 
 	GET_FIRST_ARG(p1,integer);
 	pl_idx_t cp = get_smallint(p1);
 	choice *ch = GET_CHOICE(cp);
 
 	if (!ch->catchme_retry)
-		return pl_failure;
+		return false;
 
 	if (q->retry) {
 		ch->block_catcher = false;
-		return pl_failure;
+		return false;
 	}
 
 	if (cut_if_det(q))
-		return pl_success;
+		return true;
 
 	ch->block_catcher = true;
 	may_error(push_choice(q));
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_iso_catch_3(query *q)
+USE_RESULT bool fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -463,11 +463,11 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 		make_return(q, tmp+nbr_cells);
 		may_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	// First time through? Try the primary goal...
 
@@ -480,10 +480,10 @@ USE_RESULT pl_status fn_iso_catch_3(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
-USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
+USE_RESULT bool fn_sys_call_cleanup_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -506,11 +506,11 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 		make_return(q, tmp+nbr_cells);
 		may_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
-		return pl_success;
+		return true;
 	}
 
 	if (q->retry)
-		return pl_failure;
+		return false;
 
 	// First time through? Try the primary goal...
 
@@ -521,7 +521,7 @@ USE_RESULT pl_status fn_sys_call_cleanup_3(query *q)
 	make_return(q, tmp+nbr_cells);
 	may_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 USE_RESULT bool find_exception_handler(query *q, cell *e)
@@ -551,7 +551,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 		q->exception = e2;
 		q->retry = QUERY_EXCEPTION;
 
-		if (fn_iso_catch_3(q) != pl_success) {
+		if (fn_iso_catch_3(q) != true) {
 			free(e2);
 			q->exception = NULL;
 			continue;
@@ -589,7 +589,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 	return false;
 }
 
-USE_RESULT pl_status fn_iso_throw_1(query *q)
+USE_RESULT bool fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	cell *e;
@@ -611,17 +611,17 @@ USE_RESULT pl_status fn_iso_throw_1(query *q)
 
 	if (!find_exception_handler(q, e)) {
 		free(e);
-		return pl_failure;
+		return false;
 	}
 
 	free(e);
 	return fn_iso_catch_3(q);
 }
 
-pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
+bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
 {
 	if (g_tpl_interrupt)
-		return pl_failure;
+		return false;
 
 	q->did_throw = true;
 	q->quoted = 0;
@@ -869,10 +869,10 @@ pl_status throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 	}
 
 	free(e);
-	return pl_failure;
+	return false;
 }
 
-pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
+bool throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal)
 {
 	cell tmp;
 	tmp = goal[1];
@@ -880,7 +880,7 @@ pl_status throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, 
 	return throw_error3(q, c, c_ctx, err_type, expected, &tmp);
 }
 
-pl_status throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected)
+bool throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected)
 {
 	return throw_error3(q, c, c_ctx, err_type, expected, q->st.curr_cell);
 }

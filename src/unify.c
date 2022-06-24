@@ -727,7 +727,7 @@ static void set_new_var(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 	set_var(q, tmp, q->st.curr_frame, v, ctx);
 }
 
-pl_status fn_sys_undo_trail_1(query *q)
+bool fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 
@@ -736,7 +736,7 @@ pl_status fn_sys_undo_trail_1(query *q)
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
 		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-		return pl_success;
+		return true;
 	}
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
@@ -776,10 +776,10 @@ pl_status fn_sys_undo_trail_1(query *q)
 	cell *tmp = end_list(q);
 	may_ptr_error(tmp);
 	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
-	return pl_success;
+	return true;
 }
 
-pl_status fn_sys_redo_trail_0(query * q)
+bool fn_sys_redo_trail_0(query * q)
 {
 	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
@@ -792,10 +792,10 @@ pl_status fn_sys_redo_trail_0(query * q)
 	free(q->save_e);
 	q->save_e = NULL;
 	q->in_hook = false;
-	return pl_success;
+	return true;
 }
 
-pl_status do_post_unification_hook(query *q, bool is_builtin)
+bool do_post_unification_hook(query *q, bool is_builtin)
 {
 	q->in_hook = true;
 	q->run_hook = false;
@@ -826,7 +826,7 @@ pl_status do_post_unification_hook(query *q, bool is_builtin)
 		make_return2(q, tmp+2, q->st.curr_cell);
 
 	q->st.curr_cell = tmp;
-	return pl_success;
+	return true;
 }
 
 static bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, unsigned depth);
@@ -1056,7 +1056,7 @@ static bool unify_structs(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_
 			}
 
 			if (both == 2) {
-				return pl_success;
+				return true;
 			}
 		}
 
@@ -1171,7 +1171,7 @@ bool unify(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 
 		if (check_list(q, p1, p1_ctx, &is_partial, NULL) && check_list(q, p2, p2_ctx, &is_partial, NULL)) {
 			q->lists_ok = true;
-			pl_status ok = unify_lists(q, p1, p1_ctx, p2, p2_ctx, 0);
+			bool ok = unify_lists(q, p1, p1_ctx, p2, p2_ctx, 0);
 			q->lists_ok = false;
 			return ok;
 		}

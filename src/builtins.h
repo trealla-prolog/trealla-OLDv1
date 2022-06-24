@@ -26,8 +26,8 @@ void clr_accum(cell *p);
 
 #if USE_FFI
 void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_t *types, uint8_t ret_type, bool function);
-pl_status wrapper_for_function(query *q, builtins *fn_ptr);
-pl_status wrapper_for_predicate(query *q, builtins *fn_ptr);
+bool wrapper_for_function(query *q, builtins *fn_ptr);
+bool wrapper_for_predicate(query *q, builtins *fn_ptr);
 #endif
 
 #define is_callable_or_var(c) (is_interned(c) || is_cstring(c) || is_variable(c))
@@ -81,21 +81,21 @@ void make_atom(cell *tmp, pl_idx_t offset);
 void make_smalln(cell *tmp, const char *s, size_t n);
 void make_indirect(cell *tmp, cell *c);
 
-pl_status make_cstringn(cell *d, const char *s, size_t n);
-pl_status make_stringn(cell *d, const char *s, size_t n);
+bool make_cstringn(cell *d, const char *s, size_t n);
+bool make_stringn(cell *d, const char *s, size_t n);
 
 #if USE_FFI
-USE_RESULT pl_status fn_sys_dlopen_3(query *q);
-USE_RESULT pl_status fn_sys_dlsym_3(query *q);
-USE_RESULT pl_status fn_sys_dlclose_1(query *q);
-USE_RESULT pl_status fn_sys_ffi_register_function_4(query *q);
-USE_RESULT pl_status fn_sys_ffi_register_predicate_4(query *q);
+USE_RESULT bool fn_sys_dlopen_3(query *q);
+USE_RESULT bool fn_sys_dlsym_3(query *q);
+USE_RESULT bool fn_sys_dlclose_1(query *q);
+USE_RESULT bool fn_sys_ffi_register_function_4(query *q);
+USE_RESULT bool fn_sys_ffi_register_predicate_4(query *q);
 #endif
 
-USE_RESULT pl_status fn_iso_add_2(query *q);
-USE_RESULT pl_status fn_local_cut_0(query *q);
-USE_RESULT pl_status fn_iso_float_1(query *q);
-USE_RESULT pl_status fn_iso_integer_1(query *q);
+USE_RESULT bool fn_iso_add_2(query *q);
+USE_RESULT bool fn_local_cut_0(query *q);
+USE_RESULT bool fn_iso_float_1(query *q);
+USE_RESULT bool fn_iso_integer_1(query *q);
 
 inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
 {
@@ -213,7 +213,7 @@ inline static cell *get_raw_arg(const query *q, int n)
 	is_callable(c) ? (call_userfun(q, c, c##_ctx), q->accum) : *c;		\
 	q->accum.flags = 0;													\
 	if (q->did_throw)													\
-		return pl_success; 												\
+		return true; 												\
 	if (is_variable(c))													\
 		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number"); \
 	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1)) \

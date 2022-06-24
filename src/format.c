@@ -118,7 +118,7 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 	}                                                       \
 }
 
-pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
+bool do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx)
 {
 	list_reader_t fmt1 = {0}, fmt2 = {0};
 	list_reader_t save_fmt1 = {0}, save_fmt2 = {0};
@@ -586,7 +586,7 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 				if (feof(str->fp) || ferror(str->fp)) {
 					free(tmpbuf);
 					fprintf(stdout, "Error: end of file on write\n");
-					return pl_error;
+					return false;
 				}
 			}
 
@@ -600,6 +600,6 @@ pl_status do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1
 	}
 
 	free(tmpbuf);
-	return pl_success;
+	return true;
 }
 
