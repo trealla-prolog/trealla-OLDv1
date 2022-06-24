@@ -393,9 +393,6 @@ between(I,J,K) :- '$between'(I,J,K,_).
 forall(Cond, Action) :- \+ (Cond, \+ Action).
 catch(G, E, C) :- '$catch'(call(G), E, call(C)).
 throw(E) :- '$throw'(E).
-once(G) :- G, !.
-ignore(G) :- G, !.
-ignore(_).
 not(G) :- G, !, fail.
 not(_).
 
@@ -406,8 +403,6 @@ iso_dif(X, Y) :-
 	;	throw(error(instantiation_error,iso_dif/2))
 	).
 
-:- meta_predicate(once(0)).
-:- meta_predicate(ignore(0)).
 :- meta_predicate(not(0)).
 :- meta_predicate(forall(0,0)).
 :- meta_predicate(catch(0,?,0)).

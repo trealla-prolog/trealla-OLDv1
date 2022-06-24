@@ -6987,6 +6987,7 @@ static const builtins g_iso_bifs[] =
 	{"call", 7, fn_iso_call_n, NULL, false, BLAH},
 	{"call", 8, fn_iso_call_n, NULL, false, BLAH},
 
+	{"once", 1, fn_iso_once_1, NULL, false, BLAH},
 	{"repeat", 0, fn_iso_repeat_0, NULL, false, BLAH},
 	{"true", 0, fn_iso_true_0, NULL, false, BLAH},
 	{"fail", 0, fn_iso_fail_0, NULL, false, BLAH},
@@ -7079,6 +7080,7 @@ static const builtins g_other_bifs[] =
 
 	{"sort", 4, fn_sort_4, NULL, false, BLAH},
 
+	{"ignore", 1, fn_ignore_1, NULL, false, BLAH},
 	{"soft_abolish", 1, fn_soft_abolish_1, NULL, false, BLAH},
 	{"string_codes", 2, fn_string_codes_2, NULL, false, BLAH},
 	{"term_singletons", 2, fn_term_singletons_2, NULL, false, BLAH},
@@ -7323,6 +7325,8 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "*->", 2, "meta_predicate((0*->0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "if", 3, "meta_predicate(if(0,0,0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "once", 1, "meta_predicate(once(0))"); ASTRING_strcat(pr, tmpbuf);
+	format_property(m, tmpbuf, sizeof(tmpbuf), "ignore", 1, "meta_predicate(ignore(0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "call", 1, "meta_predicate(call(0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 3, "meta_predicate(findall(?,0,-))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "|", 2, "meta_predicate((:|+))"); ASTRING_strcat(pr, tmpbuf);
