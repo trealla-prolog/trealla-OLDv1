@@ -1,0 +1,55 @@
+{
+  "uid" : "d29d88da796f2739",
+  "name" : "zlist_delete_and_next_2_01",
+  "fullName" : "zlist_delete_and_next_2_01::tests",
+  "historyId" : "zlist_delete_and_next_2_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/zippers/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/zippers/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/zippers/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/zippers/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "167-171"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e22e019a72f6bfae77c000d92296dd14e3e5652b/library/zippers/tests.lgt#L167"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "d29d88da796f2739.json",
+  "parameterValues" : [ "library/zippers/tests.lgt", "167-171", "https://github.com/LogtalkDotOrg/logtalk3/tree/e22e019a72f6bfae77c000d92296dd14e3e5652b/library/zippers/tests.lgt#L167" ]
+}
