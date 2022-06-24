@@ -279,11 +279,19 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 	q->st.arg3_is_ground = false;
 	q->st.key = key;
 	q->st.iter = NULL;
+	bool noindex = false;
+
+	if (pr->idx && 0) {
+		cell *arg1 = deref(q, key + 1, q->st.curr_frame);
+
+		if (is_variable(arg1))
+			noindex = true;
+	}
 
 	if (pr->is_unique)
 		q->st.definite = true;
 
-	if (!pr->idx) {
+	if (!pr->idx || noindex) {
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
@@ -361,6 +369,11 @@ static pl_status find_key(query *q, predicate *pr, cell *key)
 #define TESTINGIDX 0
 
 #if TESTINGIDX
+
+	// This returns results in index order but not database order
+	// as is required for normal Prolog operations. Just used
+	// for testing purposes only...
+
 	if (!map_next_key(iter, (void*)&q->st.curr_clause))
 		return pl_failure;
 
