@@ -278,12 +278,11 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	q->st.arg3_is_ground = false;
 	q->st.key = key;
 	q->st.iter = NULL;
-	bool noindex = false;
 
 	if (pr->is_unique)
 		q->st.definite = true;
 
-	if (!pr->idx || noindex) {
+	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
@@ -323,6 +322,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	may_error(init_tmp_heap(q));
 	q->st.key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
+
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
 
@@ -333,6 +333,12 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		}
 
 		cell *arg2 = arg1 + arg1->nbr_cells;
+
+		if (is_variable(arg2)) {
+			q->st.curr_clause = pr->head;
+			return true;
+		}
+
 		q->st.key = key = arg2;
 		idx = pr->idx2;
 	}
