@@ -210,7 +210,7 @@ static bool is_ground(const cell *c)
 static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
-		if (map_is_next_key(q->st.iter))
+		if (map_is_next(q->st.iter, NULL))
 			return true;
 
 		q->st.iter = NULL;
@@ -251,7 +251,7 @@ static bool is_next_key(query *q, clause *r)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!map_next_key(q->st.iter, (void*)&q->st.curr_clause)) {
+		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
