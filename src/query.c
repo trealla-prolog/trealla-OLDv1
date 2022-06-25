@@ -210,7 +210,7 @@ static bool is_ground(const cell *c)
 static bool is_next_key(query *q, clause *r)
 {
 	if (q->st.iter) {
-		if (map_is_next_key(q->st.iter))
+		if (map_is_next(q->st.iter, NULL))
 			return true;
 
 		q->st.iter = NULL;
@@ -251,7 +251,7 @@ static bool is_next_key(query *q, clause *r)
 static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (!map_next_key(q->st.iter, (void*)&q->st.curr_clause)) {
+		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
 			q->st.iter = NULL;
 		}
@@ -386,8 +386,11 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	map *tmp_idx = NULL;
 	const db_entry *dbe;
+	unsigned cnt = 0;
 
 	while (map_next_key(iter, (void*)&dbe)) {
+		CHECK_INTERRUPT();
+
 #if DEBUGIDX
 		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif
@@ -399,7 +402,10 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		}
 
 		map_app(tmp_idx, (void*)dbe->db_id, (void*)dbe);
+		cnt++;
 	}
+
+	//printf("*** cnt=%u\n", cnt);
 
 	if (!tmp_idx)
 		return false;
@@ -599,7 +605,7 @@ LOOP:
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
 
-	if (q->st.iter) {
+	if (q->st.iter && false) {
 		map_done(q->st.iter);
 		q->st.iter = NULL;
 	}
@@ -1175,19 +1181,17 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
+		predicate *pr = NULL;
 
-		if (!is_interned(c)) {
-			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_INTERNED;
-			c->val_off = off;
-			c->flags = 0;
-			c->arity = 0;
+		if (is_interned(c))
+			pr = c->match;
+		else if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
+
+		if (!pr) {
+			pr = search_predicate(q->st.m, c);
+			c->match = pr;
 		}
-
-		predicate *pr = search_predicate(q->st.m, head);
 
 		if (!pr) {
 			bool found = false;
@@ -1222,6 +1226,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
@@ -1272,18 +1278,17 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 {
 	if (!q->retry) {
 		cell *c = p1;
+		predicate *pr = NULL;
 
-		if (!is_interned(c)) {
-			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_INTERNED;
-			c->val_off = off;
-			c->flags = 0;
+		if (is_interned(c))
+			pr = c->match;
+		else if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
+
+		/* if (!pr WHY??? */ {
+			pr = search_predicate(q->st.m, c);
+			c->match = pr;
 		}
-
-		predicate *pr = search_predicate(q->st.m, p1);
 
 		if (!pr) {
 			bool found = false;
@@ -1300,10 +1305,10 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		}
 
 		if (!pr->is_dynamic) {
-			if (is_retract != DO_CLAUSE)
-				return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
-			else
+			if (is_retract == DO_CLAUSE)
 				return throw_error(q, p1, p1_ctx, "permission_error", "access,private_procedure");
+			else
+				return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 		}
 
 		q->st.curr_clause2 = pr->head;
@@ -1324,6 +1329,8 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
@@ -1397,6 +1404,8 @@ static USE_RESULT bool match_head(query *q)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause))
 			continue;
 
@@ -1406,7 +1415,12 @@ static USE_RESULT bool match_head(query *q)
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error) {
-				q->st.pr = NULL;
+				if (q->st.iter) {
+					map_done(q->st.iter);
+					q->st.iter = NULL;
+				}
+
+				unshare_predicate(q, q->st.pr);
 				return false;
 			}
 
