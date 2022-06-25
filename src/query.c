@@ -1177,19 +1177,17 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
 		cell *c = head;
+		predicate *pr = NULL;
 
-		if (!is_interned(c)) {
-			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_INTERNED;
-			c->val_off = off;
-			c->flags = 0;
-			c->arity = 0;
+		if (is_interned(c))
+			pr = c->match;
+		else if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
+
+		if (!pr) {
+			pr = search_predicate(q->st.m, c);
+			c->match = pr;
 		}
-
-		predicate *pr = search_predicate(q->st.m, head);
 
 		if (!pr) {
 			bool found = false;
@@ -1276,18 +1274,17 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 {
 	if (!q->retry) {
 		cell *c = p1;
+		predicate *pr = NULL;
 
-		if (!is_interned(c)) {
-			// For now convert it to a literal
-			pl_idx_t off = index_from_pool(q->pl, C_STR(q, c));
-			may_idx_error(off);
-			unshare_cell(c);
-			c->tag = TAG_INTERNED;
-			c->val_off = off;
-			c->flags = 0;
+		if (is_interned(c))
+			pr = c->match;
+		else if (is_cstring(c))
+			convert_to_literal(q->st.m, c);
+
+		/* if (!pr */ {
+			pr = search_predicate(q->st.m, c);
+			c->match = pr;
 		}
-
-		predicate *pr = search_predicate(q->st.m, c);
 
 		if (!pr) {
 			bool found = false;
