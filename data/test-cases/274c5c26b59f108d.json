@@ -1,0 +1,55 @@
+{
+  "uid" : "274c5c26b59f108d",
+  "name" : "iso8601_date_string_3_09",
+  "fullName" : "iso8601_date_string_3_09::tests",
+  "historyId" : "iso8601_date_string_3_09::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/iso8601/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/iso8601/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/iso8601/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "contributions/iso8601/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "245-248"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/bbd2d986679788bb73ae937a12e0677f5aa5084c/contributions/iso8601/tests.lgt#L245"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "274c5c26b59f108d.json",
+  "parameterValues" : [ "contributions/iso8601/tests.lgt", "245-248", "https://github.com/LogtalkDotOrg/logtalk3/tree/bbd2d986679788bb73ae937a12e0677f5aa5084c/contributions/iso8601/tests.lgt#L245" ]
+}

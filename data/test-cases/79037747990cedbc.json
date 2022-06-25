@@ -1,0 +1,55 @@
+{
+  "uid" : "79037747990cedbc",
+  "name" : "lo_travellers_4",
+  "fullName" : "lo_travellers_4::tests",
+  "historyId" : "lo_travellers_4::tests",
+  "time" : {
+    "duration" : 24
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/lo/travellers/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/lo/travellers/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/lo/travellers/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/lo/travellers/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "44-46"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/bbd2d986679788bb73ae937a12e0677f5aa5084c/examples/lo/travellers/tests.lgt#L44"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "79037747990cedbc.json",
+  "parameterValues" : [ "examples/lo/travellers/tests.lgt", "44-46", "https://github.com/LogtalkDotOrg/logtalk3/tree/bbd2d986679788bb73ae937a12e0677f5aa5084c/examples/lo/travellers/tests.lgt#L44" ]
+}
