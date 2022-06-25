@@ -1281,7 +1281,7 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
 
-		/* if (!pr */ {
+		/* if (!pr WHY??? */ {
 			pr = search_predicate(q->st.m, c);
 			c->match = pr;
 		}
