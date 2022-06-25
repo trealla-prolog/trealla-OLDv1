@@ -584,6 +584,11 @@ bool retry_choice(query *q)
 {
 LOOP:
 
+	if (q->st.iter && false) {
+		map_done(q->st.iter);
+		q->st.iter = NULL;
+	}
+
 	if (!q->cp)
 		return false;
 
@@ -604,11 +609,6 @@ LOOP:
 	f->nbr_vars = ch->nbr_vars;
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
-
-	if (q->st.iter && false) {
-		map_done(q->st.iter);
-		q->st.iter = NULL;
-	}
 
 	return true;
 }

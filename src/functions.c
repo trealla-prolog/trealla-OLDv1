@@ -57,7 +57,16 @@ void clr_accum(cell *p)
 #endif
 
 #define DO_OP2(op,op2,p1,p2) \
-	if (is_bigint(&p1)) { \
+	if (is_smallint(&p1) && is_smallint(&p2)) { \
+		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
+			mp_int_set_value(&q->tmp_ival, p1.val_int); \
+			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
+			SET_ACCUM(); \
+		} else { \
+			q->accum.val_int = p1.val_int op p2.val_int; \
+			q->accum.tag = TAG_INTEGER; \
+		} \
+	} else if (is_bigint(&p1)) { \
 		if (is_bigint(&p2)) { \
 			mp_int_##op2(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival); \
 			SET_ACCUM(); \
@@ -85,15 +94,6 @@ void clr_accum(cell *p)
 			q->accum.tag = TAG_FLOAT; \
 			q->accum.flags = 0; \
 		} \
-	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
-		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
-			mp_int_set_value(&q->tmp_ival, p1.val_int); \
-			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
-			SET_ACCUM(); \
-		} else { \
-			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.tag = TAG_INTEGER; \
-		} \
 	} else if (is_smallint(&p1) && is_float(&p2)) { \
 		q->accum.val_float = (double)p1.val_int op p2.val_float; \
 		if (isinf(q->accum.val_float)) return throw_error(q, &q->accum, q->st.curr_frame, "evaluation_error", "float_overflow"); \
@@ -113,7 +113,16 @@ void clr_accum(cell *p)
 	}
 
 #define DO_OP2int(op,op2,p1,p2) \
-	if (is_bigint(&p1)) { \
+	if (is_smallint(&p1) && is_smallint(&p2)) { \
+		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
+			mp_int_set_value(&q->tmp_ival, p1.val_int); \
+			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
+			SET_ACCUM(); \
+		} else { \
+			q->accum.val_int = p1.val_int op p2.val_int; \
+			q->accum.tag = TAG_INTEGER; \
+		} \
+	} else if (is_bigint(&p1)) { \
 		if (is_bigint(&p2)) { \
 			mp_int_##op2(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival); \
 			SET_ACCUM(); \
@@ -132,15 +141,6 @@ void clr_accum(cell *p)
 			SET_ACCUM(); \
 		} else { \
 			return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable"); \
-		} \
-	} else if (is_smallint(&p1) && is_smallint(&p2)) { \
-		ON_OVERFLOW(op, p1.val_int, p2.val_int) { \
-			mp_int_set_value(&q->tmp_ival, p1.val_int); \
-			mp_int_##op2##_value(&q->tmp_ival, p2.val_int, &q->tmp_ival); \
-			SET_ACCUM(); \
-		} else { \
-			q->accum.val_int = p1.val_int op p2.val_int; \
-			q->accum.tag = TAG_INTEGER; \
 		} \
 	} else if (is_variable(&p1) || is_variable(&p2)) { \
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated"); \
@@ -251,6 +251,9 @@ static USE_RESULT bool fn_iso_is_2(query *q)
 		return true;
 	}
 
+	if (is_smallint(p1) && is_smallint(&p2))
+		return (p1->val_int == p2.val_int);
+
 	if (is_bigint(p1) && is_bigint(&p2))
 		return !mp_int_compare(&p1->val_bigint->ival, &p2.val_bigint->ival);
 
@@ -259,9 +262,6 @@ static USE_RESULT bool fn_iso_is_2(query *q)
 
 	if (is_bigint(&p2) && is_smallint(p1))
 		return !mp_int_compare_value(&p2.val_bigint->ival, p1->val_int);
-
-	if (is_smallint(p1) && is_smallint(&p2))
-		return (p1->val_int == p2.val_int);
 
 	if (is_float(p1) && is_float(&p2))
 		return p1->val_float == p2.val_float;
@@ -317,6 +317,12 @@ USE_RESULT bool fn_iso_integer_1(query *q)
 	if (q->eval) {
 		CLEANUP cell p1 = eval(q, p1_tmp);
 
+		if (is_integer(&p1)) {
+			share_cell(&p1);
+			q->accum = p1;
+			return true;
+		}
+
 		if (is_float(&p1) && (p1.val_float < (double)PL_INT_MAX) && (p1.val_float > (double)PL_INT_MIN)) {
 			q->accum.val_int = (pl_int_t)p1.val_float;
 			q->accum.tag = TAG_INTEGER;
@@ -326,12 +332,6 @@ USE_RESULT bool fn_iso_integer_1(query *q)
 		if (is_float(&p1)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
-			return true;
-		}
-
-		if (is_integer(&p1)) {
-			share_cell(&p1);
-			q->accum = p1;
 			return true;
 		}
 
@@ -348,12 +348,12 @@ static USE_RESULT bool fn_iso_abs_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum.tag = p1.tag;
 
-	if (is_bigint(&p1)) {
+	if (is_smallint(&p1))
+		q->accum.val_int = llabs((long long)p1.val_int);
+	else if (is_bigint(&p1)) {
 		mp_int_abs(&p1.val_bigint->ival, &q->tmp_ival);
 		SET_ACCUM();
-	} else if (is_smallint(&p1))
-		q->accum.val_int = llabs((long long)p1.val_int);
-	else if (is_float(&p1))
+	} else if (is_float(&p1))
 		q->accum.val_float = fabs(p1.val_float);
 	else
 		return throw_error(q, &p1, q->st.curr_frame, "type_error", "evaluable");
@@ -368,10 +368,10 @@ static USE_RESULT bool fn_iso_sign_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum.tag = p1.tag;
 
-	if (is_bigint(&p1)) {
-		q->accum.val_int = mp_int_compare_zero(&p1.val_bigint->ival);
-	} else if (is_smallint(&p1))
+	if (is_smallint(&p1))
 		q->accum.val_int = p1.val_int < 0 ? -1 : p1.val_int > 0  ? 1 : 0;
+	else if (is_bigint(&p1))
+		q->accum.val_int = mp_int_compare_zero(&p1.val_bigint->ival);
 	else if (is_float(&p1))
 		q->accum.val_float = p1.val_float < 0 ? -1 : p1.val_float > 0  ? 1 : 0;
 	else
@@ -396,12 +396,12 @@ static USE_RESULT bool fn_iso_negative_1(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	q->accum.tag = p1.tag;
 
-	if (is_bigint(&p1)) {
+	if (is_smallint(&p1))
+		q->accum.val_int = -p1.val_int;
+	else if (is_bigint(&p1)) {
 		mp_int_neg(&p1.val_bigint->ival, &q->tmp_ival);
 		SET_ACCUM();
-	} else if (is_smallint(&p1))
-		q->accum.val_int = -p1.val_int;
-	else if (is_float(&p1))
+	} else if (is_float(&p1))
 		q->accum.val_float = -p1.val_float;
 	else if (is_variable(&p1))
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
@@ -1591,7 +1591,20 @@ static USE_RESULT bool fn_iso_mod_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
+	if (is_smallint(&p1) && is_smallint(&p2)) {
+		if (p2.val_int == 0)
+			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
+
+		q->accum.val_int = p1.val_int % p2.val_int;
+
+		if (p2.val_int < 0)
+			q->accum.val_int *= -1;
+
+		if (p1.val_int < 0)
+			q->accum.val_int *= -1;
+
+		q->accum.tag = TAG_INTEGER;
+	} else if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_int_mod(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
 
 		if (mp_int_compare_zero(&p2.val_bigint->ival))
@@ -1612,19 +1625,6 @@ static USE_RESULT bool fn_iso_mod_2(query *q)
 		mp_int_mod(&tmp, &p2.val_bigint->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		if (p2.val_int == 0)
-			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
-
-		q->accum.val_int = p1.val_int % p2.val_int;
-
-		if (p2.val_int < 0)
-			q->accum.val_int *= -1;
-
-		if (p1.val_int < 0)
-			q->accum.val_int *= -1;
-
-		q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1695,7 +1695,13 @@ static USE_RESULT bool fn_iso_rem_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2)) {
+	if (is_smallint(&p1) && is_smallint(&p2)) {
+		if (p2.val_int == 0)
+			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
+
+		q->accum.val_int = p1.val_int % p2.val_int;
+		q->accum.tag = TAG_INTEGER;
+	} if (is_bigint(&p1) && is_bigint(&p2)) {
 		mp_int_mod(&p1.val_bigint->ival, &p2.val_bigint->ival, &q->tmp_ival);
 		SET_ACCUM();
 	} else if (is_bigint(&p1) && is_smallint(&p2)) {
@@ -1710,12 +1716,6 @@ static USE_RESULT bool fn_iso_rem_2(query *q)
 		mp_int_mod(&tmp, &p2.val_bigint->ival, &q->tmp_ival);
 		mp_int_clear(&tmp);
 		SET_ACCUM();
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		if (p2.val_int == 0)
-			return throw_error(q, &p1, q->st.curr_frame, "evaluation_error", "zero_divisor");
-
-		q->accum.val_int = p1.val_int % p2.val_int;
-		q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1) || is_variable(&p2)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
 	} else if (!is_integer(&p1)) {
@@ -1735,7 +1735,14 @@ static USE_RESULT bool fn_iso_max_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1)) {
+ 	if (is_smallint(&p1) && is_smallint(&p2)) {
+		if (p1.val_int >= p2.val_int)
+			q->accum = p1;
+		else
+			q->accum = p2;
+
+		q->accum.tag = TAG_INTEGER;
+	} else if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
 			if (mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) >= 0)
 				mp_int_copy(&p1.val_bigint->ival, &q->tmp_ival);
@@ -1762,13 +1769,6 @@ static USE_RESULT bool fn_iso_max_2(query *q)
 			return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 
 		SET_ACCUM();
- 	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		if (p1.val_int >= p2.val_int)
-			q->accum = p1;
-		else
-			q->accum = p2;
-
-		q->accum.tag = TAG_INTEGER;
 	} else if (is_smallint(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_int;
 
@@ -1807,7 +1807,14 @@ static USE_RESULT bool fn_iso_min_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1)) {
+	if (is_smallint(&p1) && is_smallint(&p2)) {
+		if (p1.val_int <= p2.val_int)
+			q->accum = p1;
+		else
+			q->accum = p2;
+
+		q->accum.tag = TAG_INTEGER;
+	} if (is_bigint(&p1)) {
 		if (is_bigint(&p2)) {
 			if (mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) <= 0)
 				mp_int_copy(&p1.val_bigint->ival, &q->tmp_ival);
@@ -1834,13 +1841,6 @@ static USE_RESULT bool fn_iso_min_2(query *q)
 			return throw_error(q, &p2, q->st.curr_frame, "type_error", "integer");
 
 		SET_ACCUM();
-	} else if (is_smallint(&p1) && is_smallint(&p2)) {
-		if (p1.val_int <= p2.val_int)
-			q->accum = p1;
-		else
-			q->accum = p2;
-
-		q->accum.tag = TAG_INTEGER;
 	} else if (is_smallint(&p1) && is_float(&p2)) {
 		double f1 = (double)p1.val_int;
 
