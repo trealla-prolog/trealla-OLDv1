@@ -405,6 +405,8 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		cnt++;
 	}
 
+	//printf("*** cnt=%u\n", cnt);
+
 	if (!tmp_idx)
 		return false;
 
@@ -603,7 +605,7 @@ LOOP:
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
 
-	if (q->st.iter) {
+	if (q->st.iter && false) {
 		map_done(q->st.iter);
 		q->st.iter = NULL;
 	}
