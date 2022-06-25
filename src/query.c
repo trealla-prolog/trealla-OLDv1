@@ -386,6 +386,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	map *tmp_idx = NULL;
 	const db_entry *dbe;
+	unsigned cnt = 0;
 
 	while (map_next_key(iter, (void*)&dbe)) {
 		CHECK_INTERRUPT();
@@ -401,6 +402,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		}
 
 		map_app(tmp_idx, (void*)dbe->db_id, (void*)dbe);
+		cnt++;
 	}
 
 	if (!tmp_idx)
@@ -1411,7 +1413,12 @@ static USE_RESULT bool match_head(query *q)
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error) {
-				q->st.pr = NULL;
+				if (q->st.iter) {
+					map_done(q->st.iter);
+					q->st.iter = NULL;
+				}
+
+				unshare_predicate(q, q->st.pr);
 				return false;
 			}
 
