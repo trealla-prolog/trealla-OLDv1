@@ -3349,7 +3349,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_FLOAT) {
 			set_float(c, get_float(&p->v));
-		} else if (((!p->is_quoted && !p->string && p->consulting) || func || p->is_op || p->is_variable
+		} else if ((!p->is_quoted || func || p->is_op || p->is_variable
 			|| (get_builtin(p->m->pl, p->token, 0, &found, NULL), found)
 			//|| !strcmp(p->token, "[]")
 			) && !p->string) {
