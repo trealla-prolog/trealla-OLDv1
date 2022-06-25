@@ -388,6 +388,8 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	const db_entry *dbe;
 
 	while (map_next_key(iter, (void*)&dbe)) {
+		CHECK_INTERRUPT();
+
 #if DEBUGIDX
 		DUMP_TERM("   got, key = ", dbe->cl.cells, q->st.curr_frame);
 #endif
@@ -1222,6 +1224,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
@@ -1283,7 +1287,7 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 			c->flags = 0;
 		}
 
-		predicate *pr = search_predicate(q->st.m, p1);
+		predicate *pr = search_predicate(q->st.m, c);
 
 		if (!pr) {
 			bool found = false;
@@ -1324,6 +1328,8 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
@@ -1397,6 +1403,8 @@ static USE_RESULT bool match_head(query *q)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
+		CHECK_INTERRUPT();
+
 		if (!can_view(f, q->st.curr_clause))
 			continue;
 
