@@ -2116,14 +2116,14 @@ static USE_RESULT bool fn_iso_neq_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int == p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) == 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) == 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) == 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int == p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int == p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
@@ -2141,14 +2141,14 @@ static USE_RESULT bool fn_iso_nne_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int != p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) != 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) != 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) != 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int != p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int != p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
@@ -2166,14 +2166,14 @@ static USE_RESULT bool fn_iso_nge_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int >= p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) >= 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) >= 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) < 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int >= p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int >= p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
@@ -2191,14 +2191,14 @@ static USE_RESULT bool fn_iso_ngt_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int > p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) > 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) > 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) <= 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int > p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int > p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
@@ -2216,14 +2216,14 @@ static USE_RESULT bool fn_iso_nle_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int <= p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) <= 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) <= 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) > 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int <= p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int <= p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
@@ -2241,14 +2241,14 @@ static USE_RESULT bool fn_iso_nlt_2(query *q)
 	CLEANUP cell p1 = eval(q, p1_tmp);
 	CLEANUP cell p2 = eval(q, p2_tmp);
 
-	if (is_bigint(&p1) && is_bigint(&p2))
+	if (is_smallint(&p1) && is_smallint(&p2))
+		return p1.val_int < p2.val_int;
+	else if (is_bigint(&p1) && is_bigint(&p2))
 		return mp_int_compare(&p1.val_bigint->ival, &p2.val_bigint->ival) < 0;
 	else if (is_bigint(&p1) && is_smallint(&p2))
 		return mp_int_compare_value(&p1.val_bigint->ival, p2.val_int) < 0;
 	else if (is_bigint(&p2) && is_smallint(&p1))
 		return mp_int_compare_value(&p2.val_bigint->ival, p1.val_int) >= 0;
-	else if (is_smallint(&p1) && is_smallint(&p2))
-		return p1.val_int < p2.val_int;
 	else if (is_smallint(&p1) && is_float(&p2))
 		return p1.val_int < p2.val_float;
 	else if (is_float(&p1) && is_float(&p2))
