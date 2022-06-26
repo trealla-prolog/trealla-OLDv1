@@ -3465,16 +3465,6 @@ bool run(parser *p, const char *pSrc, bool dump)
 		p->m->pl->status = q->status;
 		p->m->pl->is_redo = q->is_redo;
 
-		if (!p->m->pl->quiet && !p->directive && dump && q->pl->stats) {
-			fprintf(stdout,
-				"Goals %llu. Matches %llu. Max frames %u, choices %u, trails: %u, slots %u, heap %u. Backtracks %llu. Retries %llu. TCOs:%llu, strings=%u, atoms=%u\n",
-				(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-				q->max_frames, q->max_choices, q->max_trails, q->max_slots, (q->pages?q->pages->max_hp_used:0),
-				(unsigned long long)q->tot_backtracks, (unsigned long long)q->tot_retries,
-				(unsigned long long)q->tot_tcos,
-				g_string_cnt, g_interned_cnt);
-		}
-
 		ok = !q->error;
 		p->m = q->st.m;
 		destroy_query(q);

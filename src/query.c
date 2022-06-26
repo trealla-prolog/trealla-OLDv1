@@ -39,15 +39,14 @@ int g_tpl_interrupt = 0;
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 // Note: when in commit there is a provisional choice point
-// that we should skip over, hence the '2' ...
+// that we should skip over, hence the '1' ...
 
 static bool any_choices(const query *q, const frame *f)
 {
-	if (q->cp <= (q->in_commit ? 2 : 1))
+	if (q->cp == (q->in_commit ? 1 : 0))
 		return false;
 
-	pl_idx_t curr_choice = q->cp - (q->in_commit ? 2 : 1);
-	const choice *ch = GET_CHOICE(curr_choice);
+	const choice *ch = q->in_commit ? GET_PREV_CHOICE() : GET_CURR_CHOICE();
 	return ch->cgen > f->cgen;
 }
 
@@ -801,10 +800,11 @@ static void commit_me(query *q, clause *r)
 	// slots by the number of temporaries...
 
 	if (last_match && recursive && !choices && slots_ok
-		&& (r->nbr_vars == r->nbr_temporaries))
+		&& (r->nbr_vars == r->nbr_temporaries)
+		&& q->pl->opt)
 		tco = true;
 
-	if (tco && q->pl->opt)
+	if (tco)
 		reuse_frame(q, r->nbr_vars);
 	else
 		f = push_frame(q, r->nbr_vars);

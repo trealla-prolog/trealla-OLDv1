@@ -176,8 +176,6 @@ int main(int ac, char *av[])
 			set_opt(pl, 0);
 		else if (!strcmp(av[i], "-t") || !strcmp(av[i], "--trace"))
 			set_trace(pl);
-		else if (!strcmp(av[i], "--stats"))
-			set_stats(pl);
 		else if (!strcmp(av[i], "--ns"))
 			ns = true;
 		else if (!strcmp(av[i], "-d") || !strcmp(av[i], "--daemon"))
@@ -291,7 +289,6 @@ int main(int ac, char *av[])
 		fprintf(stdout, "  -d, --daemon\t\t- daemonize\n");
 		fprintf(stdout, "  -w, --watchdog\t- create watchdog\n");
 		fprintf(stdout, "  --consult\t\t- consult from STDIN\n");
-		fprintf(stdout, "  --stats\t\t- print stats\n");
 	}
 
 	if (version) {

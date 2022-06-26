@@ -109,7 +109,6 @@ int get_halt_code(prolog *pl) { return pl->halt_code; }
 
 void set_trace(prolog *pl) { pl->trace = true; }
 void set_quiet(prolog *pl) { pl->quiet = true; }
-void set_stats(prolog *pl) { pl->stats = true; }
 void set_opt(prolog *pl, int level) { pl->opt = level; }
 
 bool pl_eval(prolog *pl, const char *s)

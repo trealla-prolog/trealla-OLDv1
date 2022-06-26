@@ -52,7 +52,6 @@ where options can be:
 	-h, --help         - help
 	-d, --daemonize    - daemonize
 	-w, --watchdog     - create watchdog
-	--stats            - print stats
 	--consult          - consult from STDIN
 
 For example:

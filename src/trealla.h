@@ -19,7 +19,6 @@ extern bool did_dump_vars(prolog*);
 
 extern void set_trace(prolog*);
 extern void set_quiet(prolog*);
-extern void set_stats(prolog*);
 extern void set_noindex(prolog*);
 extern void set_opt(prolog*, int onoff);
 
