@@ -969,9 +969,9 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		if (ch->is_tail_rec) {
 			printf("*** here2\n");
 			frame *f_prev = GET_FRAME(f->prev_frame);
-			f->prev_frame = g_prev->prev_frame;
-			f->prev_cell = g_prev->prev_cell;
-			*g_prev = *g;
+			f->prev_frame = f_prev->prev_frame;
+			f->prev_cell = f_prev->prev_cell;
+			*f_prev = *f;
 			q->st.curr_frame--;
 			q->st.fp--;
 			q->tot_tcos++;
