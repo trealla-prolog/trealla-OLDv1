@@ -33,6 +33,47 @@ Logo
 ![Trealla Logo: Trealla](trealla.png)
 
 
+Usage
+=====
+
+	tpl [options] [files] [-- args]
+
+where options can be:
+
+	-O0, --noopt       - no optimization
+	-f file            - load file (*~/.tplrc* not loaded)
+	-l file            - load file (*~/.tplrc* loaded)
+	file               - load file (*~/.tplrc* loaded)
+	-g goal            - query goal (only used once)
+	--library path     - alt to TPL_LIBRARY_PATH env variable
+	-t, --trace        - trace
+	-q, --quiet        - quiet mode (no banner)
+	-v, --version      - version
+	-h, --help         - help
+	-d, --daemonize    - daemonize
+	-w, --watchdog     - create watchdog
+	--stats            - print stats
+	--consult          - consult from STDIN
+
+For example:
+
+	tpl -g test2,halt samples/sieve
+
+Invocation without any goal presents the REPL.
+
+The default path to the library is relative to the executable location.
+
+The file *~/.tplrc* is consulted on startup unless the *-f* option is present.
+
+When consulting, reconsulting and deconsulting files the *.pl* version
+of the filename is always preferred (if not specified) when looking for a
+file.
+
+To run the Pereira benchmark suite:
+
+	tpl -g "bench_peirera,halt" -f samples/peirera.pl
+
+
 A note on UTF-8
 ===============
 
@@ -138,47 +179,6 @@ $ file tpl.exe
 tpl.exe: PE32+ executable (console) x86-64, for MS Windows
 $ wine tpl.exe -g test5,halt -f samples/sieve.pl
 ```
-
-Usage
-=====
-
-	tpl [options] [files] [-- args]
-
-where options can be:
-
-	-O0, --noopt       - no optimization
-	-f file            - load file (*~/.tplrc* not loaded)
-	-l file            - load file (*~/.tplrc* loaded)
-	file               - load file (*~/.tplrc* loaded)
-	-g goal            - query goal (only used once)
-	--library path     - alt to TPL_LIBRARY_PATH env variable
-	-t, --trace        - trace
-	-q, --quiet        - quiet mode (no banner)
-	-v, --version      - version
-	-h, --help         - help
-	-d, --daemonize    - daemonize
-	-w, --watchdog     - create watchdog
-	--stats            - print stats
-	--consult          - consult from STDIN
-
-For example:
-
-	tpl -g test2,halt samples/sieve
-
-Invocation without any goal presents the REPL.
-
-The default path to the library is relative to the executable location.
-
-The file *~/.tplrc* is consulted on startup unless the *-f* option is present.
-
-When consulting, reconsulting and deconsulting files the *.pl* version
-of the filename is always preferred (if not specified) when looking for a
-file.
-
-To run the Pereira benchmark suite:
-
-	tpl -g "bench_peirera,halt" -f samples/peirera.pl
-
 
 Acknowledgements
 ================
