@@ -568,6 +568,7 @@ predicate *find_predicate(module *m, cell *c)
 		return pr;
 	}
 
+	map_done(iter);
 	return NULL;
 }
 
@@ -647,6 +648,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
+	map_done(iter);
 	iter = map_find_key(m->defops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
@@ -668,6 +670,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 		return true;
 	}
 
+	map_done(iter);
 	op_table *tmp = malloc(sizeof(op_table));
 	tmp->name = set_known(m, name);
 	tmp->priority = priority;
@@ -701,6 +704,7 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 		}
 	}
 
+	map_done(iter);
 	iter = map_find_key(m->defops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
@@ -713,6 +717,7 @@ static unsigned find_op_internal(module *m, const char *name, unsigned specifier
 		}
 	}
 
+	map_done(iter);
 	return 0;
 }
 
@@ -761,6 +766,7 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
+	map_done(iter);
 	iter = map_find_key(m->ops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
@@ -779,6 +785,7 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
+	map_done(iter);
 	iter = map_find_key(m->defops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
@@ -797,6 +804,7 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		return n;
 	}
 
+	map_done(iter);
 	iter = map_find_key(m->ops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
@@ -814,6 +822,8 @@ static unsigned search_op_internal(module *m, const char *name, unsigned *specif
 		map_done(iter);
 		return n;
 	}
+
+	map_done(iter);
 
 	if (hint_prefix)
 		return search_op_internal(m, name, specifier, false);
@@ -1624,12 +1634,14 @@ void destroy_module(module *m)
 	while (map_next(iter, (void**)&opptr))
 		free(opptr);
 
+	map_done(iter);
 	map_destroy(m->defops);
 	iter = map_first(m->ops);
 
 	while (map_next(iter, (void**)&opptr))
 		free(opptr);
 
+	map_done(iter);
 	map_destroy(m->ops);
 
 	for (predicate *pr = m->head; pr;) {

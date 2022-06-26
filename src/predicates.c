@@ -2758,8 +2758,10 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 		if (pr->is_abolished)
 			continue;
 
-		if (try_me(q, MAX_ARITY) != true)
+		if (try_me(q, MAX_ARITY) != true) {
+			map_done(q->st.f_iter);
 			return false;
+		}
 
 		cell tmpn, tmpa;
 		make_atom(&tmpn, pr->key.val_off);
@@ -2773,6 +2775,7 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 		undo_me(q);
 	}
 
+	map_done(q->st.f_iter);
 	drop_choice(q);
 	return false;
 }
@@ -7204,15 +7207,16 @@ builtins *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found,
 
 	while (map_next_key(iter, (void**)&ptr)) {
 		if (ptr->arity == arity) {
-			map_done(iter);
 			if (found) *found = true;
 			if (function) *function = ptr->function;
+			map_done(iter);
 			return ptr;
 		}
 	}
 
 	if (found) *found = false;
 	if (function) *function = false;
+	map_done(iter);
 	return NULL;
 }
 
@@ -7512,6 +7516,7 @@ static void load_ops(query *q)
 		ASTRING_strcat(pr, tmpbuf);
 	}
 
+	map_done(iter);
 	iter = map_first(q->st.m->defops);
 
 	while (map_next(iter, (void**)&ptr)) {
