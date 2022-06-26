@@ -2536,13 +2536,7 @@ static USE_RESULT bool fn_iso_asserta_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-
-	if (dbe->owner->is_persist)
-		uuid_gen(q->pl, &dbe->u);
-	else {
-		dbe->u.u1 = dbe->db_id;
-		dbe->u.u2 = 0;
-	}
+	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTA);
@@ -2606,13 +2600,7 @@ static USE_RESULT bool fn_iso_assertz_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-
-	if (dbe->owner->is_persist)
-		uuid_gen(q->pl, &dbe->u);
-	else {
-		dbe->u.u1 = dbe->db_id;
-		dbe->u.u2 = 0;
-	}
+	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTZ);
@@ -3915,13 +3903,7 @@ static bool do_asserta_2(query *q)
 		uuid_from_buf(C_STR(q, p2), &u);
 		dbe->u = u;
 	} else {
-		if (dbe->owner->is_persist)
-			uuid_gen(q->pl, &dbe->u);
-		else {
-			dbe->u.u1 = dbe->db_id;
-			dbe->u.u2 = 0;
-		}
-
+		uuid_gen(q->pl, &dbe->u);
 		char tmpbuf[128];
 		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
@@ -4022,13 +4004,7 @@ static bool do_assertz_2(query *q)
 		uuid_from_buf(C_STR(q, p2), &u);
 		dbe->u = u;
 	} else {
-		if (dbe->owner->is_persist)
-			uuid_gen(q->pl, &dbe->u);
-		else {
-			dbe->u.u1 = dbe->db_id;
-			dbe->u.u2 = 0;
-		}
-
+		uuid_gen(q->pl, &dbe->u);
 		char tmpbuf[128];
 		uuid_to_buf(&dbe->u, tmpbuf, sizeof(tmpbuf));
 		cell tmp2;
