@@ -234,6 +234,7 @@ static void destroy_predicate(module *m, predicate *pr)
 	}
 
 	map_destroy(pr->idx_save);
+	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
 	free(pr);
 }

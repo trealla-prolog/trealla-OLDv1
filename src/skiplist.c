@@ -36,6 +36,7 @@ struct skiplist_ {
 	int (*cmpkey)(const void*, const void*, const void*, void *l);
 	void (*delkey)(void*, void*, const void*);
 	const void *p;
+	sliter tmp_iter;
 	sliter *iters;
 	size_t count;
 	int level;
@@ -129,6 +130,7 @@ bool sl_is_find(skiplist *l) { return l ? l->is_find : true; }
 skiplist *sl_get_map(const sliter *i) { return i->l; }
 void sl_allow_dups(skiplist *l, bool mode) { l->allow_dups = mode; }
 size_t sl_count(const skiplist *l) { return l ? l->count : 0; }
+void sl_set_tmp(skiplist *l) { l->is_tmp_list = true; }
 
 // Modified binary search: return position where it is or ought to be
 
@@ -468,7 +470,9 @@ sliter *sl_first(skiplist *l)
 	sliter *iter;
 	l->wild_card = false;
 
-	if (!l->iters) {
+	if (l->is_tmp_list)
+		iter = &l->tmp_iter;
+	else if (!l->iters) {
 		iter = malloc(sizeof(sliter));
 		if (!iter) return NULL;
 	} else {
@@ -636,16 +640,14 @@ void sl_done(sliter *iter)
 		return;
 
 	skiplist *l = iter->l;
-	iter->next = l->iters;
-	l->iters = iter;
+
+	if (!l->is_tmp_list) {
+		iter->next = l->iters;
+		l->iters = iter;
+	}
 
 	if (l->is_tmp_list)
 		sl_destroy(l);
-}
-
-void sl_set_tmp(skiplist *l)
-{
-	l->is_tmp_list = true;
 }
 
 void sl_dump(const skiplist *l, const char *(*f)(const void*, const void*, const void*), const void *p1)
