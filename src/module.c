@@ -690,10 +690,8 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 
 static unsigned find_op_internal(module *m, const char *name, unsigned specifier)
 {
-	miter *iter;
 	op_table *ptr;
-
-	iter = map_find_key(m->ops, name);
+	miter *iter = map_find_key(m->ops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
@@ -746,10 +744,8 @@ unsigned find_op(module *m, const char *name, unsigned specifier)
 
 static unsigned search_op_internal(module *m, const char *name, unsigned *specifier, bool hint_prefix)
 {
-	miter *iter;
 	op_table *ptr;
-
-	iter = map_find_key(m->defops, name);
+	miter *iter = map_find_key(m->defops, name);
 
 	while (map_next_key(iter, (void**)&ptr)) {
 		if (!ptr->priority)
