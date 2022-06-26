@@ -106,7 +106,7 @@ static USE_RESULT bool check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		if (q->st.tp >= q->trails_size) {
-			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*2);
+			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
 			if (!new_trailssize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -125,7 +125,7 @@ static USE_RESULT bool check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		if (q->cp >= q->choices_size) {
-			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*2);
+			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
 			if (!new_choicessize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -144,7 +144,7 @@ static USE_RESULT bool check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		if (q->st.fp >= q->frames_size) {
-			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*2);
+			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
 			if (!new_framessize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -165,7 +165,7 @@ static USE_RESULT bool check_slot(query *q, unsigned cnt)
 
 	if (nbr > q->max_slots) {
 		while (nbr >= q->slots_size) {
-			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*2);
+			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2);
 			if (!new_slotssize) {
 				q->is_oom = q->error = true;
 				return false;
