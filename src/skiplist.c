@@ -29,7 +29,6 @@ struct sliter_ {
 	slnode_t *p;
 	const void *key;
 	int idx;
-	bool is_dead;
 };
 
 struct skiplist_ {
@@ -481,7 +480,6 @@ sliter *sl_first(skiplist *l)
 	iter->l = l;
 	iter->p = l->header->forward[0];
 	iter->idx = 0;
-	iter->is_dead = false;
 	return iter;
 }
 
@@ -502,7 +500,6 @@ bool sl_is_next(sliter *iter, void **val)
 		iter->idx = 0;
 	}
 
-	sl_done(iter);
 	return false;
 }
 
@@ -524,7 +521,6 @@ bool sl_next(sliter *iter, void **val)
 		iter->idx = 0;
 	}
 
-	sl_done(iter);
 	return false;
 }
 
@@ -567,7 +563,6 @@ sliter *sl_find_key(skiplist *l, const void *key)
 	iter->l = l;
 	iter->p = q;
 	iter->idx = imid;
-	iter->is_dead = false;
 	return iter;
 }
 
@@ -593,7 +588,6 @@ bool sl_is_next_key(sliter *iter)
 		iter->idx = 0;
 	}
 
-	sl_done(iter);
 	return false;
 }
 
@@ -628,7 +622,6 @@ bool sl_next_key(sliter *iter, void **val)
 		iter->idx = 0;
 	}
 
-	sl_done(iter);
 	return false;
 }
 
@@ -642,18 +635,12 @@ void sl_done(sliter *iter)
 	if (!iter)
 		return;
 
-	if (iter->is_dead)
-		return;
+	skiplist *l = iter->l;
+	iter->next = l->iters;
+	l->iters = iter;
 
-	iter->is_dead = true;
-	iter->next = iter->l->iters;
-	iter->l->iters = iter;
-
-	if (iter->l->is_tmp_list) {
-		sl_destroy(iter->l);
-	}
-
-	iter->l = NULL;
+	if (l->is_tmp_list)
+		sl_destroy(l);
 }
 
 void sl_set_tmp(skiplist *l)

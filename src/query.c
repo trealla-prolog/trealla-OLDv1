@@ -356,8 +356,10 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		return false;
 
 	if (pr->is_unique) {
-		if (!map_next_key(iter, (void*)&q->st.curr_clause))
+		if (!map_next_key(iter, (void*)&q->st.curr_clause)) {
+			map_done(iter);
 			return false;
+		}
 
 		q->st.definite = true;
 		map_done(iter);
@@ -372,8 +374,10 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	// as is required for normal Prolog operations. Just used
 	// for testing purposes only...
 
-	if (!map_next_key(iter, (void*)&q->st.curr_clause))
+	if (!map_next_key(iter, (void*)&q->st.curr_clause)) {
+		map_done(iter);
 		return false;
+	}
 
 	q->st.iter = iter;
 	return true;
@@ -405,6 +409,8 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		cnt++;
 	}
 
+	map_done(iter);
+
 	//printf("*** cnt=%u\n", cnt);
 
 	if (!tmp_idx)
@@ -414,8 +420,10 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	iter = map_first(tmp_idx);
 
-	if (!map_next(iter, (void*)&q->st.curr_clause))
+	if (!map_next(iter, (void*)&q->st.curr_clause)) {
+		map_done(iter);
 		return false;
+	}
 
 	q->st.iter = iter;
 	return true;
@@ -580,19 +588,34 @@ static void trim_heap(query *q, const choice *ch)
 #endif
 }
 
+void drop_choice(query *q)
+{
+	if (!q->cp)
+		return;
+
+	choice *ch = GET_CURR_CHOICE();
+
+	if (ch->st.iter) {
+		map_done(ch->st.iter);
+		ch->st.iter = NULL;
+	}
+
+	--q->cp;
+}
+
+inline static pl_idx_t redo_choice(query *q)
+{
+	return q->cp ? --q->cp : 0;
+}
+
 bool retry_choice(query *q)
 {
 LOOP:
 
-	if (q->st.iter && false) {
-		map_done(q->st.iter);
-		q->st.iter = NULL;
-	}
-
 	if (!q->cp)
 		return false;
 
-	pl_idx_t curr_choice = drop_choice(q);
+	pl_idx_t curr_choice = redo_choice(q);
 	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
@@ -792,12 +815,6 @@ static void commit_me(query *q, clause *r)
 		f->is_last = true;
 		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
-
-		if (q->st.iter) {
-			map_done(q->st.iter);
-			q->st.iter = NULL;
-		}
-
 		drop_choice(q);
 		trim_trail(q);
 	} else {
@@ -806,6 +823,7 @@ static void commit_me(query *q, clause *r)
 		ch->cgen = f->cgen;
 	}
 
+	q->st.iter = NULL;
 	q->st.curr_cell = get_body(r->cells);
 	q->in_commit = false;
 }
@@ -1415,12 +1433,8 @@ static USE_RESULT bool match_head(query *q)
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error) {
-				if (q->st.iter) {
-					map_done(q->st.iter);
-					q->st.iter = NULL;
-				}
-
 				unshare_predicate(q, q->st.pr);
+				drop_choice(q);
 				return false;
 			}
 
