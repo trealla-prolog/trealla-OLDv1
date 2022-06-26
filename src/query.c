@@ -1261,7 +1261,6 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		}
 
 		may_error(try_me(q, r->nbr_vars));
-		q->tot_matches++;
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			int ok;
@@ -1361,7 +1360,6 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 			continue;
 
 		may_error(try_me(q, r->nbr_vars));
-		q->tot_matches++;
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
 			return true;
