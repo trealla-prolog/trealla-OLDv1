@@ -353,6 +353,7 @@ struct cell_ {
 		bigint *val_bigint;
 		blob *val_blob;
 		cell *val_ptr;
+		uint16_t priority;				// used in parsing operators
 
 		struct {
 			cell *val_ret;
@@ -383,7 +384,6 @@ struct cell_ {
 
 		struct {
 			predicate *match;
-			uint16_t priority;			// used in parsing operators
 		};
 
 		struct {

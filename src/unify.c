@@ -1111,9 +1111,6 @@ static bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 	} else if (is_variable(p1))
 		q->has_vars = true;
 
-	if (p1_ctx == q->st.curr_frame)
-		q->no_tco = true;
-
 	if (is_variable(p1)) {
 		bool was_cyclic = false;
 

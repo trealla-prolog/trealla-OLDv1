@@ -21,14 +21,4 @@ extern pl_idx_t g_error_s, g_slash_s, g_sys_cleanup_if_det_s, g_sys_table_s;
 extern pl_idx_t g_goal_expansion_s;
 extern void convert_path(char *filename);
 
-inline static module *find_module_id(const prolog *pl, unsigned id)
-{
-	module *m = pl->modmap[id];
-
-	if (!m)
-		return pl->user_m;
-
-	return m;
-}
-
 extern void sigfn(int s);

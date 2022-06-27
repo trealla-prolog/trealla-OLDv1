@@ -792,8 +792,8 @@ static void commit_me(query *q, clause *r)
 	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d\n",
-		tco, q->no_tco, last_match, recursive, choices, slots_ok);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
 #endif
 
 	// For now. It would also be good to reduce the number of
@@ -1004,14 +1004,11 @@ bool cut_if_det(query *q)
 static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
-	frame *f = GET_CURR_FRAME();
-
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
-			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
-
-			if (q->st.curr_cell->mod_id != q->st.m->id)
-				q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_id);
+			frame *f = GET_CURR_FRAME();
+			f->cgen = q->st.curr_cell->cgen;
+			q->st.m = q->pl->modmap[q->st.curr_cell->mod_id];
 		}
 
 		if (!(q->st.curr_cell = q->st.curr_cell->val_ret))
@@ -1158,6 +1155,9 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		share_cell(v);
 		e->c = *v;
 	}
+
+	if (is_structure(v) || is_variable(v))
+		q->no_tco = true;
 
 	e->c.flags &= ~FLAG_REF;
 	e->ctx = v_ctx;
