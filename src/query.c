@@ -1008,10 +1008,8 @@ static void proceed(query *q)
 
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
-			f->cgen = q->st.curr_cell->cgen;	// set the cgen back
-
-			if (q->st.curr_cell->mod_id != q->st.m->id)
-				q->st.m = find_module_id(q->pl, q->st.curr_cell->mod_id);
+			f->cgen = q->st.curr_cell->cgen;
+			q->st.m = q->pl->modmap[q->st.curr_cell->mod_id];
 		}
 
 		if (!(q->st.curr_cell = q->st.curr_cell->val_ret))
