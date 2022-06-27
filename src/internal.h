@@ -73,6 +73,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 
 #define GET_CHOICE(i) (q->choices+(i))
 #define GET_CURR_CHOICE() GET_CHOICE(q->cp?q->cp-1:q->cp)
+#define GET_PREV_CHOICE() GET_CHOICE(q->cp?q->cp-2:q->cp)
 
 #define GET_FRAME(i) (q->frames+(i))
 #define GET_FIRST_FRAME() GET_FRAME(0)
@@ -376,22 +377,22 @@ struct cell_ {
 		};
 
 		struct {
-			union {
-				struct {
-					bool (*fn)(query*);
-					builtins *fn_ptr;
-				};
+			bool (*fn)(query*);
+			builtins *fn_ptr;
+		};
 
-				predicate *match;
-				uint16_t priority;		// used in parsing operators
+		struct {
+			predicate *match;
+			uint16_t priority;			// used in parsing operators
+		};
 
-				struct {
-					cell *tmp_attrs;	// used with TAG_VAR in copy_term
+		struct {
+			struct {
+				cell *tmp_attrs;		// used with TAG_VAR in copy_term
 
-					union {
-						pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-						pl_idx_t ref_ctx;	// used with TAG_VAR & refs
-					};
+				union {
+					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
+					pl_idx_t ref_ctx;	// used with TAG_VAR & refs
 				};
 			};
 
@@ -764,7 +765,6 @@ struct prolog_ {
 	bool status:1;
 	bool did_dump_vars:1;
 	bool quiet:1;
-	bool stats:1;
 	bool noindex:1;
 	bool iso_only:1;
 	bool trace:1;

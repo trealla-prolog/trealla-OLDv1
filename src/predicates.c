@@ -1704,13 +1704,8 @@ static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 
 static void uuid_gen(prolog *pl, uuid *u)
 {
-#ifdef NDEBUG
 	if (!pl->seed)
 		pl->seed = (uint64_t)time(0) & MASK_FINAL;
-#else
-	if (!pl->seed)
-		pl->seed = 0xdeadbeefULL & MASK_FINAL;
-#endif
 
 	uint64_t now = get_time_in_usec();
 	compare_and_zero(now, &pl->s_last, &pl->s_cnt);
