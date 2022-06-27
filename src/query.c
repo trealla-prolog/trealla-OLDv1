@@ -792,8 +792,8 @@ static void commit_me(query *q, clause *r)
 	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d\n",
-		tco, q->no_tco, last_match, recursive, choices, slots_ok);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
 #endif
 
 	// For now. It would also be good to reduce the number of
