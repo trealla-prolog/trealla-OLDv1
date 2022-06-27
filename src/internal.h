@@ -377,22 +377,22 @@ struct cell_ {
 		};
 
 		struct {
-			union {
-				struct {
-					bool (*fn)(query*);
-					builtins *fn_ptr;
-				};
+			bool (*fn)(query*);
+			builtins *fn_ptr;
+		};
 
-				predicate *match;
-				uint16_t priority;		// used in parsing operators
+		struct {
+			predicate *match;
+			uint16_t priority;			// used in parsing operators
+		};
 
-				struct {
-					cell *tmp_attrs;	// used with TAG_VAR in copy_term
+		struct {
+			struct {
+				cell *tmp_attrs;		// used with TAG_VAR in copy_term
 
-					union {
-						pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-						pl_idx_t ref_ctx;	// used with TAG_VAR & refs
-					};
+				union {
+					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
+					pl_idx_t ref_ctx;	// used with TAG_VAR & refs
 				};
 			};
 
