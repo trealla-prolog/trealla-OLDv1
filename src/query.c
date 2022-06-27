@@ -1004,10 +1004,9 @@ bool cut_if_det(query *q)
 static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
-	frame *f = GET_CURR_FRAME();
-
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
+			frame *f = GET_CURR_FRAME();
 			f->cgen = q->st.curr_cell->cgen;
 			q->st.m = q->pl->modmap[q->st.curr_cell->mod_id];
 		}
