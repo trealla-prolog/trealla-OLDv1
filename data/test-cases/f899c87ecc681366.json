@@ -1,0 +1,55 @@
+{
+  "uid" : "f899c87ecc681366",
+  "name" : "sendmore_01",
+  "fullName" : "sendmore_01::tests",
+  "historyId" : "sendmore_01::tests",
+  "time" : {
+    "duration" : 9
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/bench/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/bench/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "98-99"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/90ab6497879310bc3709f96da3b64c190251494f/examples/bench/tests.lgt#L98"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f899c87ecc681366.json",
+  "parameterValues" : [ "examples/bench/tests.lgt", "98-99", "https://github.com/LogtalkDotOrg/logtalk3/tree/90ab6497879310bc3709f96da3b64c190251494f/examples/bench/tests.lgt#L98" ]
+}
