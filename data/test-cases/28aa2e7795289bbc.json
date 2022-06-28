@@ -1,0 +1,55 @@
+{
+  "uid" : "28aa2e7795289bbc",
+  "name" : "dynamicly_created_object_is_dynanic",
+  "fullName" : "dynamicly_created_object_is_dynanic::tests",
+  "historyId" : "dynamicly_created_object_is_dynanic::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/testing/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/testing/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/testing/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/testing/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "111-115"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/examples/testing/tests.lgt#L111"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "28aa2e7795289bbc.json",
+  "parameterValues" : [ "examples/testing/tests.lgt", "111-115", "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/examples/testing/tests.lgt#L111" ]
+}

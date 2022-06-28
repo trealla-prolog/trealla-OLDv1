@@ -1,0 +1,55 @@
+{
+  "uid" : "8dc9716b6a551983",
+  "name" : "deprecated_flag",
+  "fullName" : "deprecated_flag::tests",
+  "historyId" : "deprecated_flag::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "74-75"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt#L74"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8dc9716b6a551983.json",
+  "parameterValues" : [ "tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt", "74-75", "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/tests/logtalk/predicates/current_logtalk_flag_2/tests.lgt#L74" ]
+}

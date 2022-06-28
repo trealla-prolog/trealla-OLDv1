@@ -1,0 +1,55 @@
+{
+  "uid" : "8635e3b3e6729c8c",
+  "name" : "hierarchies_ancestors_1_01",
+  "fullName" : "hierarchies_ancestors_1_01::tests_classes",
+  "historyId" : "hierarchies_ancestors_1_01::tests_classes",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/hierarchies/tests_classes.lgt::tests_classes"
+  }, {
+    "name" : "testClass",
+    "value" : "library/hierarchies/tests_classes.lgt::tests_classes"
+  }, {
+    "name" : "package",
+    "value" : "library/hierarchies/tests_classes.lgt::tests_classes"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/hierarchies/tests_classes.lgt"
+  }, {
+    "name" : "position",
+    "value" : "55-57"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/library/hierarchies/tests_classes.lgt#L55"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8635e3b3e6729c8c.json",
+  "parameterValues" : [ "library/hierarchies/tests_classes.lgt", "55-57", "https://github.com/LogtalkDotOrg/logtalk3/tree/1a316e2f834d662b3c799ec1e4d3cc3376108c7b/library/hierarchies/tests_classes.lgt#L55" ]
+}
