@@ -105,7 +105,7 @@ static USE_RESULT bool check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		if (q->st.tp >= q->trails_size) {
-			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*3/2);
+			pl_idx_t new_trailssize = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size*4/3);
 			if (!new_trailssize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -124,7 +124,7 @@ static USE_RESULT bool check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		if (q->cp >= q->choices_size) {
-			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*3/2);
+			pl_idx_t new_choicessize = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size*4/3);
 			if (!new_choicessize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -143,7 +143,7 @@ static USE_RESULT bool check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		if (q->st.fp >= q->frames_size) {
-			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*3/2);
+			pl_idx_t new_framessize = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size*4/3);
 			if (!new_framessize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -164,7 +164,7 @@ static USE_RESULT bool check_slot(query *q, unsigned cnt)
 
 	if (nbr > q->max_slots) {
 		while (nbr >= q->slots_size) {
-			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*3/2);
+			pl_idx_t new_slotssize = alloc_grow((void**)&q->slots, sizeof(slot), nbr, q->slots_size*4/3);
 			if (!new_slotssize) {
 				q->is_oom = q->error = true;
 				return false;
@@ -789,7 +789,7 @@ static void commit_me(query *q, clause *r)
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, f);
 	bool slots_ok = check_slots(q, f, r);
-	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok;
+	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok && !q->retry;
 
 #if 0
 	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
@@ -1156,7 +1156,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
-	//if (is_structure(v) || is_variable(v))
+	if ((is_structure(v) || is_variable(v)) && (c_ctx != q->st.curr_frame))
 		q->no_tco = true;
 
 	e->c.flags &= ~FLAG_REF;
