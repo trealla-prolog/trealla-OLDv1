@@ -1883,6 +1883,7 @@ static USE_RESULT bool fn_iso_univ_2(query *q)
 		if (is_variable(p22))
 			return throw_error(q, p2, p2_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
+		pl_idx_t save_hp = q->st.hp;
 		cell *tmp = deep_clone_to_heap(q, p2, p2_ctx);
 		may_heap_error(tmp);
 		p2 = tmp;
@@ -1929,6 +1930,7 @@ static USE_RESULT bool fn_iso_univ_2(query *q)
 		if (arity > MAX_ARITY)
 			return throw_error(q, tmp2, q->st.curr_frame, "representation_error", "max_arity");
 
+		q->st.hp = save_hp;
 		may_ptr_error(tmp = alloc_on_heap(q, nbr_cells));
 		safe_copy_cells(tmp, tmp2, nbr_cells);
 		tmp->nbr_cells = nbr_cells;
