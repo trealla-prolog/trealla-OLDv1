@@ -143,4 +143,4 @@ test3 :-
 	sudoku(L),
 	pretty_print(L).
 
-:- initialization((test1,!, test2, !, test3, !, halt)).
+test :- test1, !, test2, !, test3, !.

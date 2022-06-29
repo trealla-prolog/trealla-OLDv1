@@ -3,8 +3,7 @@
 :- initialization(main).
 
 main :-
-    solve('METHINKS IT IS LIKE A WEASEL'),
-    halt.
+    solve('METHINKS IT IS LIKE A WEASEL').
 
 solve(TargetAtom) :-
     atom_codes(TargetAtom, Target),
