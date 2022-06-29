@@ -668,7 +668,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	slot *from = GET_FIRST_SLOT(newf);
+	const slot *from = GET_FIRST_SLOT(newf);
 	slot *to = GET_FIRST_SLOT(f);
 
 	for (pl_idx_t i = 0; i < nbr_vars; i++) {
@@ -789,7 +789,7 @@ static void commit_me(query *q, clause *r)
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool choices = any_choices(q, f);
 	bool slots_ok = check_slots(q, f, r);
-	bool tco = last_match && !q->no_tco && recursive && !choices && slots_ok && !q->retry;
+	bool tco = last_match && recursive && !choices && slots_ok && !q->retry;
 
 #if 0
 	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
@@ -799,12 +799,10 @@ static void commit_me(query *q, clause *r)
 	// For now. It would also be good to reduce the number of
 	// slots by the number of temporaries...
 
-	if (last_match && recursive && !choices && slots_ok
-		&& (r->nbr_vars == r->nbr_temporaries)
-		&& q->pl->opt)
-		tco = true;
+	if (q->no_tco && (r->nbr_vars != r->nbr_temporaries))
+		tco = false;
 
-	if (tco)
+	if (tco && q->pl->opt)
 		reuse_frame(q, r->nbr_vars);
 	else
 		f = push_frame(q, r->nbr_vars);
@@ -1004,6 +1002,7 @@ bool cut_if_det(query *q)
 static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
+
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
 			frame *f = GET_CURR_FRAME();
@@ -1066,7 +1065,7 @@ static bool resume_frame(query *q)
 	return true;
 }
 
-// Note: there is no reason this couldn't include a context.
+// NOTE: there is no reason this couldn't include a context.
 // Currently it is assumed everything has been copied into the
 // heap area and all variables are local. It should also be
 // possible to make it an offset rather than a pointer by
@@ -1646,7 +1645,7 @@ bool start(query *q)
 					drop_choice(q);
 				}
 
-				if (any_outstanding_choices(q) && q->p && !q->run_init) {
+				if (q->p && !q->run_init && any_outstanding_choices(q)) {
 					if (!check_redo(q))
 						break;
 
