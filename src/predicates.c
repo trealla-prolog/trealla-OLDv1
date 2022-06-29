@@ -181,7 +181,7 @@ void make_return(query *q, cell *tmp)
 	frame *f = GET_CURR_FRAME();
 	tmp->val_ret = c ? c + c->nbr_cells : NULL;	// save the return instruction
 	tmp->cgen = f->cgen;						// ... choice-generation
-	tmp->mod_id = q->st.m->id;					// ... current-module
+	tmp->mid = q->st.m->id;					// ... current-module
 }
 
 void make_return2(query *q, cell *tmp, cell *c_ret)
@@ -190,7 +190,7 @@ void make_return2(query *q, cell *tmp, cell *c_ret)
 	frame *f = GET_CURR_FRAME();
 	tmp->val_ret = q->st.curr_cell;				// save the return instruction
 	tmp->cgen = f->cgen;						// ... choice-generation
-	tmp->mod_id = q->st.m->id;					// ... current-module
+	tmp->mid = q->st.m->id;					// ... current-module
 }
 
 void make_atom(cell *tmp, pl_idx_t offset)

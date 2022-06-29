@@ -61,7 +61,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_MODULES 256
+#define MAX_MODULES 1024
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define MAX_IGNORES 64000
@@ -358,7 +358,7 @@ struct cell_ {
 		struct {
 			cell *val_ret;
 			uint64_t cgen;				// choice generation
-			uint8_t mod_id;
+			uint8_t mid;
 		};
 
 		struct {
@@ -498,7 +498,7 @@ struct frame_ {
 	uint64_t ugen, cgen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars;
-	uint8_t mod_id;
+	uint16_t mid;
 	bool is_complex:1;
 	bool is_last:1;
 };
@@ -531,10 +531,9 @@ struct stream_ {
 struct prolog_state_ {
 	cell *curr_cell, *key;
 	db_entry *curr_clause, *curr_clause2;
-	miter *f_iter;
+	miter *iter, *f_iter;
 	predicate *pr, *pr2;
 	module *m;
-	miter *iter;
 	double prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
@@ -714,9 +713,9 @@ struct loaded_file {
 };
 
 struct module_ {
+	module *used[MAX_MODULES];
 	module *next, *orig;
 	prolog *pl;
-	module *used[MAX_MODULES];
 	query *tasks;
 	const char *filename, *name;
 	predicate *head, *tail;
@@ -746,13 +745,12 @@ typedef struct {
 struct prolog_ {
 	stream streams[MAX_STREAMS];
 	module *modmap[MAX_MODULES];
-	module *modules;
-	module *system_m, *user_m, *curr_m, *dcgs;
-	parser *p;
+	module *modules, *system_m, *user_m, *curr_m, *dcgs;
 	var_item *tabs;
-	struct { pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES]; };
+	parser *p;
 	map *symtab, *biftab, *keyval;
 	char *pool;
+	struct { pl_idx_t tab1[MAX_IGNORES], tab2[MAX_IGNORES]; };
 	size_t pool_offset, pool_size, tabs_size;
 	uint64_t s_last, s_cnt, seed, ugen;
 	unsigned next_mod_id;
