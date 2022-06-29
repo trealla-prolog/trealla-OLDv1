@@ -1207,7 +1207,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
 
-		if (!pr) {
+		/* if (!pr WHY??? */ {
 			pr = search_predicate(q->st.m, c);
 			c->match = pr;
 		}
