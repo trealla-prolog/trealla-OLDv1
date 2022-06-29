@@ -1156,8 +1156,12 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
-	if ((is_structure(v) || is_variable(v)) && (c_ctx != q->st.curr_frame))
-		q->no_tco = true;
+	if (is_structure(v) || is_variable(v)) {
+		if (c_ctx != q->st.curr_frame) {
+			if (v_ctx == q->st.curr_frame)
+				q->no_tco = true;
+		}
+	}
 
 	e->c.flags &= ~FLAG_REF;
 	e->ctx = v_ctx;
