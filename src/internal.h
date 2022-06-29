@@ -377,27 +377,26 @@ struct cell_ {
 			uint64_t str_len;			// slice_length
 		};
 
-		struct {
-			bool (*fn)(query*);
-			builtins *fn_ptr;
-		};
 
 		struct {
 			predicate *match;
 		};
 
 		struct {
-			struct {
-				cell *tmp_attrs;		// used with TAG_VAR in copy_term
+			union {
+				struct {
+					bool (*fn)(query*);
+					builtins *fn_ptr;
+				};
 
-				union {
+				struct {
+					cell *tmp_attrs;	// used with TAG_VAR in copy_term
 					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-					pl_idx_t ref_ctx;	// used with TAG_VAR & refs
 				};
 			};
 
+			pl_idx_t var_nbr;			// used with TAG_VAR in copy_term
 			uint32_t val_off;			// used with TAG_VAR & TAG_INTERNED
-			uint32_t var_nbr;			// used with TAG_VAR
 		};
 
 		struct {
