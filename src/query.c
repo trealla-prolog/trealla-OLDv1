@@ -782,7 +782,7 @@ static void commit_me(query *q, clause *r)
 {
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
-	f->m = q->st.m;
+	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
@@ -1008,7 +1008,7 @@ static void proceed(query *q)
 		if (q->st.curr_cell->val_ret) {
 			frame *f = GET_CURR_FRAME();
 			f->cgen = q->st.curr_cell->cgen;
-			q->st.m = q->pl->modmap[q->st.curr_cell->mod_id];
+			q->st.m = q->pl->modmap[q->st.curr_cell->mid];
 		}
 
 		if (!(q->st.curr_cell = q->st.curr_cell->val_ret))
@@ -1062,7 +1062,7 @@ static bool resume_frame(query *q)
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
 	f = GET_CURR_FRAME();
-	q->st.m = f->m;
+	q->st.m = q->pl->modmap[f->mid];
 	return true;
 }
 
@@ -1207,7 +1207,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
 
-		if (!pr) {
+		/* if (!pr WHY??? */ {
 			pr = search_predicate(q->st.m, c);
 			c->match = pr;
 		}
@@ -1226,7 +1226,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 		q->st.curr_clause2 = pr->head;
-		share_predicate(q->st.pr2=pr);
+		share_predicate(pr);
+		q->st.pr2 = pr;
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
