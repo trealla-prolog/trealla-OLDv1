@@ -185,7 +185,7 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_at
 			tmp->flags |= FLAG_REF;
 			tmp->val_off = to->val_off;
 			tmp->var_nbr = to->var_nbr;
-			tmp->ref_ctx = to_ctx;
+			tmp->tmp_ctx = to_ctx;
 		} else if (copy_attrs && e->c.attrs) {
 			push_tmp_heap(q);
 			cell *tmp2 = deep_copy_to_heap_with_replacement(q, e->c.attrs, e->c.attrs_ctx, false, NULL, 0, NULL, 0);
@@ -461,7 +461,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, re
 
 	if (is_variable(tmp) && !is_ref(tmp)) {
 		tmp->flags |= FLAG_REF;
-		tmp->ref_ctx = p1_ctx;
+		tmp->tmp_ctx = p1_ctx;
 	}
 
 	if (!is_structure(p1))
@@ -596,7 +596,7 @@ cell *append_to_tmp(query *q, cell *p1)
 			continue;
 
 		dst->flags |= FLAG_REF;
-		dst->ref_ctx = q->st.curr_frame;
+		dst->tmp_ctx = q->st.curr_frame;
 	}
 
 	return tmp;
@@ -631,7 +631,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 			continue;
 
 		dst->flags |= FLAG_REF;
-		dst->ref_ctx = q->st.curr_frame;
+		dst->tmp_ctx = q->st.curr_frame;
 	}
 
 	return tmp;

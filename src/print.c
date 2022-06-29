@@ -322,7 +322,7 @@ static void reformat_float(char *tmpbuf)
 	*dst = '\0';
 }
 
-static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t ref_ctx)
+static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t tmp_ctx)
 {
 	const frame *f = GET_FRAME(q->st.curr_frame);
 	const slot *e = GET_FIRST_SLOT(f);
@@ -331,7 +331,7 @@ static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t ref_ctx)
 		if (!is_variable(&e->c))
 			continue;
 
-		if (e->ctx != ref_ctx)
+		if (e->ctx != tmp_ctx)
 			continue;
 
 		if (e->c.var_nbr == var_nbr)
@@ -459,14 +459,14 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 			pl_idx_t h_ctx = q->latest_ctx;
 			cell *name = deref(q, h+1, h_ctx);
 			cell *var = h+2;
-			pl_idx_t ref_ctx = h_ctx;
+			pl_idx_t tmp_ctx = h_ctx;
 
 			if (!q->is_dump_vars) {
 				var = deref(q, var, h_ctx);
-				ref_ctx = q->latest_ctx;
+				tmp_ctx = q->latest_ctx;
 			}
 
-			if (is_variable(var) && (var->var_nbr == c->var_nbr) && (ref_ctx = c_ctx)) {
+			if (is_variable(var) && (var->var_nbr == c->var_nbr) && (tmp_ctx = c_ctx)) {
 				dst += snprintf(dst, dstlen, "%s", C_STR(q, name));
 				return dst - save_dst;
 			}
@@ -942,14 +942,14 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				pl_idx_t h_ctx = q->latest_ctx;
 				cell *name = deref(q, h+1, h_ctx);
 				cell *var = h+2;
-				pl_idx_t ref_ctx = h_ctx;
+				pl_idx_t tmp_ctx = h_ctx;
 
 				if (!q->is_dump_vars) {
 					var = deref(q, var, h_ctx);
-					ref_ctx = q->latest_ctx;
+					tmp_ctx = q->latest_ctx;
 				}
 
-				if (is_variable(var) && (var->var_nbr == c->var_nbr) && (ref_ctx == c_ctx)) {
+				if (is_variable(var) && (var->var_nbr == c->var_nbr) && (tmp_ctx == c_ctx)) {
 					dst += snprintf(dst, dstlen, "%s", C_STR(q, name));
 					q->last_thing_was_symbol = false;
 					return dst - save_dst;
