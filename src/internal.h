@@ -379,11 +379,9 @@ struct cell_ {
 
 
 		struct {
-			predicate *match;
-		};
-
-		struct {
 			union {
+				predicate *match;
+
 				struct {
 					bool (*fn)(query*);
 					builtins *fn_ptr;
@@ -392,10 +390,10 @@ struct cell_ {
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term
 					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
+					pl_idx_t var_nbr;	// used with TAG_VAR in copy_term
 				};
 			};
 
-			pl_idx_t var_nbr;			// used with TAG_VAR in copy_term
 			uint32_t val_off;			// used with TAG_VAR & TAG_INTERNED
 		};
 

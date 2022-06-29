@@ -1004,6 +1004,7 @@ bool cut_if_det(query *q)
 static void proceed(query *q)
 {
 	q->st.curr_cell += q->st.curr_cell->nbr_cells;
+
 	while (is_end(q->st.curr_cell)) {
 		if (q->st.curr_cell->val_ret) {
 			frame *f = GET_CURR_FRAME();
@@ -1066,7 +1067,7 @@ static bool resume_frame(query *q)
 	return true;
 }
 
-// Note: there is no reason this couldn't include a context.
+// NOTE: there is no reason this couldn't include a context.
 // Currently it is assumed everything has been copied into the
 // heap area and all variables are local. It should also be
 // possible to make it an offset rather than a pointer by
@@ -1646,7 +1647,7 @@ bool start(query *q)
 					drop_choice(q);
 				}
 
-				if (any_outstanding_choices(q) && q->p && !q->run_init) {
+				if (q->p && !q->run_init && any_outstanding_choices(q)) {
 					if (!check_redo(q))
 						break;
 
