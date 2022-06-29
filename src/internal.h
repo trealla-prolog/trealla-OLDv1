@@ -498,7 +498,7 @@ struct frame_ {
 	uint64_t ugen, cgen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars;
-	uint16_t mid;
+	uint8_t mid;
 	bool is_complex:1;
 	bool is_last:1;
 };
@@ -534,7 +534,7 @@ struct prolog_state_ {
 	miter *iter, *f_iter;
 	predicate *pr, *pr2;
 	module *m;
-	double prob;
+	float prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
 	uint8_t qnbr;
