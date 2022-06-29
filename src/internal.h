@@ -61,7 +61,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_MODULES 1024
+#define MAX_MODULES 256
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define MAX_IGNORES 64000
@@ -358,7 +358,7 @@ struct cell_ {
 		struct {
 			cell *val_ret;
 			uint64_t cgen;				// choice generation
-			uint16_t mod_id;
+			uint8_t mod_id;
 		};
 
 		struct {
@@ -495,10 +495,10 @@ struct slot_ {
 
 struct frame_ {
 	cell *prev_cell;
-	module *m;
 	uint64_t ugen, cgen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars;
+	uint8_t mod_id;
 	bool is_complex:1;
 	bool is_last:1;
 };
@@ -713,12 +713,10 @@ struct loaded_file {
 	bool is_loaded:1;
 };
 
-#define MAX_MODULES_USED 64
-
 struct module_ {
 	module *next, *orig;
 	prolog *pl;
-	module *used[MAX_MODULES_USED];
+	module *used[MAX_MODULES];
 	query *tasks;
 	const char *filename, *name;
 	predicate *head, *tail;

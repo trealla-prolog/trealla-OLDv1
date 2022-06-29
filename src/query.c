@@ -782,7 +782,7 @@ static void commit_me(query *q, clause *r)
 {
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
-	f->m = q->st.m;
+	f->mod_id = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
@@ -1062,7 +1062,7 @@ static bool resume_frame(query *q)
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
 	f = GET_CURR_FRAME();
-	q->st.m = f->m;
+	q->st.m = q->pl->modmap[f->mod_id];
 	return true;
 }
 
