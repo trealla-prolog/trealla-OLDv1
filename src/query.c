@@ -1207,7 +1207,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
 
-		/* if (!pr WHY??? */ {
+		if (!pr || is_function(c) || is_builtin(c)) {
 			pr = search_predicate(q->st.m, c);
 			c->match = pr;
 		}
@@ -1226,8 +1226,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 		q->st.curr_clause2 = pr->head;
-		share_predicate(pr);
-		q->st.pr2 = pr;
+		share_predicate(q->st.pr2 = pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
@@ -1304,7 +1303,7 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		else if (is_cstring(c))
 			convert_to_literal(q->st.m, c);
 
-		/* if (!pr WHY??? */ {
+		if (!pr || is_function(c) || is_builtin(c)) {
 			pr = search_predicate(q->st.m, c);
 			c->match = pr;
 		}
