@@ -7240,34 +7240,34 @@ void register_ffi(prolog *pl, const char *name, unsigned arity, void *fn, uint8_
 		ptr->types[i] = types[i];
 
 	ptr->ret_type = ret_type;
-	map_set(pl->biftab, ptr->name, ptr);
+	map_app(pl->biftab, ptr->name, ptr);
 }
 
 void load_builtins(prolog *pl)
 {
 	for (const builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 		max_ffi_idx++;
 	}
 
 	for (const builtins *ptr = g_other_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_files_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 
 	for (const builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
-		map_set(pl->biftab, ptr->name, ptr);
+		map_app(pl->biftab, ptr->name, ptr);
 	}
 }
 
@@ -7373,7 +7373,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
-		map_set(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7382,7 +7382,7 @@ static void load_properties(module *m)
  	}
 
 	for (const builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
-		map_set(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7391,7 +7391,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_other_bifs; ptr->name; ptr++) {
-		map_set(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7400,7 +7400,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
-		map_set(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);
@@ -7409,7 +7409,7 @@ static void load_properties(module *m)
 	}
 
 	for (const builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
-		map_set(m->pl->biftab, ptr->name, ptr);
+		map_app(m->pl->biftab, ptr->name, ptr);
 		if (ptr->name[0] == '$') continue;
 		if (ptr->function) continue;
 		format_property(m, tmpbuf, sizeof(tmpbuf), ptr->name, ptr->arity, "built_in"); ASTRING_strcat(pr, tmpbuf);

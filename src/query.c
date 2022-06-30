@@ -403,7 +403,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 			map_set_tmp(tmp_idx);
 		}
 
-		map_set(tmp_idx, (void*)dbe->db_id, (void*)dbe);
+		map_app(tmp_idx, (void*)dbe->db_id, (void*)dbe);
 		cnt++;
 	}
 
