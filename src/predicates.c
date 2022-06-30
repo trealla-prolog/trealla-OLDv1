@@ -6571,7 +6571,7 @@ static USE_RESULT bool fn_kv_set_3(query *q)
 	}
 
 	may_ptr_error(val);
-	map_set(q->pl->keyval, key, val);
+	map_app(q->pl->keyval, key, val);
 	return true;
 }
 

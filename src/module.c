@@ -1063,17 +1063,10 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (arg1 && is_variable(arg1))
 		pr->is_var_in_first_arg = true;
 
-	if (!append) {
-		map_set(pr->idx, c, dbe);
+	map_app(pr->idx, c, dbe);
 
-		if (pr->idx2 && arg2)
-			map_set(pr->idx2, arg2, dbe);
-	} else {
-		map_app(pr->idx, c, dbe);
-
-		if (pr->idx2 && arg2)
-			map_app(pr->idx2, arg2, dbe);
-	}
+	if (pr->idx2 && arg2)
+		map_app(pr->idx2, arg2, dbe);
 }
 
 static bool check_multifile(module *m, predicate *pr, db_entry *dbe)

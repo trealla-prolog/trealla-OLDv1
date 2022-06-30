@@ -14,7 +14,7 @@ static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
 	if (map_get(q->vars, (void*)(size_t)slot_nbr, &v))
 		return (unsigned)(size_t)v;
 
-	map_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
+	map_app(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
 	return -1;
 }
 
@@ -357,7 +357,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 			q->tab_idx++;
 		}
 
-		map_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)q->varno);
+		map_app(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)q->varno);
 		q->varno++;
 	}
 
