@@ -170,7 +170,7 @@ static int random_level(unsigned *seedp)
 	return lvl < MAX_LEVEL ? lvl : MAX_LEVEL;
 }
 
-bool sl_app(skiplist *l, const void *key, const void *val)
+bool sl_set(skiplist *l, const void *key, const void *val)
 {
 	slnode_t *update[MAX_LEVELS];
 	slnode_t *p, *q;

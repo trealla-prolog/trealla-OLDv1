@@ -214,7 +214,7 @@ bool accum_var(query *q, const cell *c, pl_idx_t c_ctx)
 		return true;
 	}
 
-	map_app(q->vars, e, (void*)(size_t)q->tab_idx);
+	map_set(q->vars, e, (void*)(size_t)q->tab_idx);
 
 	if (!q->pl->tabs) {
 		q->pl->tabs_size = 4000;

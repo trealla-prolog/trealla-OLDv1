@@ -64,7 +64,7 @@ static pl_idx_t add_to_pool(prolog *pl, const char *name)
 	memcpy(pl->pool + offset, name, len+1);
 	pl->pool_offset += len + 1;
 	const char *key = strdup(name);
-	map_app(pl->symtab, key, (void*)(size_t)offset);
+	map_set(pl->symtab, key, (void*)(size_t)offset);
 	g_interned_cnt++;
 	return (pl_idx_t)offset;
 }

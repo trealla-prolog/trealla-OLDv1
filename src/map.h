@@ -16,7 +16,7 @@
 #define map_create sl_create
 #define map_allow_dups sl_allow_dups
 #define map_set_tmp sl_set_tmp
-#define map_app sl_app
+#define map_set sl_set
 #define map_get sl_get
 #define map_del sl_del
 #define map_count sl_count
