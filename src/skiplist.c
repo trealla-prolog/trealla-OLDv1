@@ -180,7 +180,7 @@ bool sl_set(skiplist *l, const void *key, const void *val)
 	p = l->header;
 
 	for (int k = l->level - 1; k >= 0; k--) {
-		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, l) <= 0))
+		while ((q = p->forward[k]) && (l->cmpkey(q->bkt[0].key, key, l->p, l) < 0))
 			p = q;
 
 		update[k] = p;
