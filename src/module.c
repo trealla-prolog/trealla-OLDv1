@@ -196,7 +196,7 @@ predicate *create_predicate(module *m, cell *c)
 	//if (C_STR(m, c)[0] == '$')
 	//	pr->is_noindex = true;
 
-	map_set(m->index, &pr->key, pr);
+	map_app(m->index, &pr->key, pr);
 	return pr;
 }
 
@@ -678,7 +678,7 @@ bool set_op(module *m, const char *name, unsigned specifier, unsigned priority)
 	tmp->specifier = specifier;
 	m->loaded_ops = false;
 	m->user_ops = true;
-	map_set(m->ops, tmp->name, tmp);
+	map_app(m->ops, tmp->name, tmp);
 
 #if DUMP_KEYS
 	sl_dump(m->ops, dump_key, m);
@@ -914,7 +914,7 @@ static void check_rule(module *m, db_entry *dbe)
 
 		if (!index_cmpkey(head, head2, m, NULL)) {
 			matched = true;
-			//break;
+			break;
 		}
 	}
 
@@ -922,15 +922,15 @@ static void check_rule(module *m, db_entry *dbe)
 		r->is_unique = true;
 	}
 
-	if (!p1_matched /*&& r->is_unique*/) {
+	if (!p1_matched && r->is_unique) {
 		r->arg1_is_unique = true;
 	}
 
-	if (!p2_matched /*&& r->is_unique*/) {
+	if (!p2_matched && r->is_unique) {
 		r->arg2_is_unique = true;
 	}
 
-	if (!p3_matched /*&& r->is_unique*/) {
+	if (!p3_matched && r->is_unique) {
 		r->arg3_is_unique = true;
 	}
 }
@@ -1044,13 +1044,13 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 			cell *c = get_head(cl2->cl.cells);
 
 			if (!cl2->cl.ugen_erased) {
-				map_set(pr->idx, c, cl2);
+				map_app(pr->idx, c, cl2);
 
 				cell *arg1 = c->arity ? c + 1 : NULL;
 				cell *arg2 = arg1 ? arg1 + arg1->nbr_cells : NULL;
 
 				if (pr->idx2 && arg2) {
-					map_set(pr->idx2, arg2, cl2);
+					map_app(pr->idx2, arg2, cl2);
 				}
 			}
 		}
@@ -1063,10 +1063,17 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (arg1 && is_variable(arg1))
 		pr->is_var_in_first_arg = true;
 
-	map_set(pr->idx, c, dbe);
+	if (!append) {
+		map_set(pr->idx, c, dbe);
 
-	if (pr->idx2 && arg2)
-		map_set(pr->idx2, arg2, dbe);
+		if (pr->idx2 && arg2)
+			map_set(pr->idx2, arg2, dbe);
+	} else {
+		map_app(pr->idx, c, dbe);
+
+		if (pr->idx2 && arg2)
+			map_app(pr->idx2, arg2, dbe);
+	}
 }
 
 static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
@@ -1688,7 +1695,7 @@ module *create_module(prolog *pl, const char *name)
 		for (const op_table *ptr = g_ops; ptr->name; ptr++) {
 			op_table *tmp = malloc(sizeof(op_table));
 			memcpy(tmp, ptr, sizeof(op_table));
-			map_set(m->defops, tmp->name, tmp);
+			map_app(m->defops, tmp->name, tmp);
 		}
 	}
 
