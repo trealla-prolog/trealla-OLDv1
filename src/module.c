@@ -993,7 +993,9 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
 
-	db_entry *dbe = calloc(sizeof(db_entry)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
+	size_t dbe_size = sizeof(db_entry) + (sizeof(cell) * (p1->nbr_cells+1));
+	db_entry *dbe = calloc(1, dbe_size);
+
 	if (!dbe) {
 		pr->is_abolished = true;
 		return NULL;

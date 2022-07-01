@@ -224,7 +224,7 @@ prolog *pl_create()
 			g_tpl_lib = strdup("../library");
 	}
 
-	pl->pool = calloc(pl->pool_size=INITIAL_POOL_SIZE, 1);
+	pl->pool = calloc(1, pl->pool_size=INITIAL_POOL_SIZE);
 	if (!pl->pool) return NULL;
 	bool error = false;
 
