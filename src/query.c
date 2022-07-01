@@ -251,6 +251,7 @@ static void next_key(query *q)
 	if (q->st.iter) {
 		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
 			q->st.curr_clause = NULL;
+			map_done(q->st.iter);
 			q->st.iter = NULL;
 		}
 	} else if (!q->st.definite)

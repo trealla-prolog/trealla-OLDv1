@@ -1125,7 +1125,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, false);
 
-	if (!consulting && (pr->cnt > 1))
+	if (!consulting && (pr->cnt > 1) && !pr->idx)
 		check_rule(m, dbe);
 
 	return dbe;
