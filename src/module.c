@@ -914,7 +914,7 @@ static void check_rule(module *m, db_entry *dbe)
 
 		if (!index_cmpkey(head, head2, m, NULL)) {
 			matched = true;
-			//break;
+			break;
 		}
 	}
 
@@ -922,15 +922,15 @@ static void check_rule(module *m, db_entry *dbe)
 		r->is_unique = true;
 	}
 
-	if (!p1_matched /*&& r->is_unique*/) {
+	if (!p1_matched && r->is_unique) {
 		r->arg1_is_unique = true;
 	}
 
-	if (!p2_matched /*&& r->is_unique*/) {
+	if (!p2_matched && r->is_unique) {
 		r->arg2_is_unique = true;
 	}
 
-	if (!p3_matched /*&& r->is_unique*/) {
+	if (!p3_matched && r->is_unique) {
 		r->arg3_is_unique = true;
 	}
 }

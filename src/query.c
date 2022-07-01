@@ -631,6 +631,11 @@ LOOP:
 	f->nbr_slots = ch->nbr_slots;
 	f->overflow = ch->overflow;
 
+	if (q->st.iter && false) {
+		map_done(q->st.iter);
+		q->st.iter = NULL;
+	}
+
 	return true;
 }
 
