@@ -1054,6 +1054,8 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 				}
 			}
 		}
+
+		return;
 	}
 
 	cell *c = get_head(dbe->cl.cells);
