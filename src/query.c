@@ -721,7 +721,7 @@ static bool check_slots(const query *q, const frame *f, const clause *r)
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
-		if (is_indirect(&e->c))
+		if (is_indirect(&e->c) && (e->ctx != q->st.curr_frame))
 			return false;
 
 		if (is_managed(&e->c))
