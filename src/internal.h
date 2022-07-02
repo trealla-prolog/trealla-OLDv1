@@ -448,7 +448,7 @@ struct predicate_ {
 	bool is_dynamic:1;
 	bool is_meta_predicate:1;
 	bool is_persist:1;
-	bool is_unique:1;
+	bool is_det:1;
 	bool is_multifile:1;
 	bool is_discontiguous:1;
 	bool is_abolished:1;

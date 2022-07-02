@@ -429,7 +429,7 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 		m->error = true;
 }
 
-void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
+void set_det_in_db(module *m, const char *name, pl_idx_t arity)
 {
 	cell tmp = (cell){0};
 	tmp.tag = TAG_INTERNED;
@@ -440,7 +440,7 @@ void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
 	if (!pr) pr = create_predicate(m, &tmp);
 
 	if (pr) {
-		pr->is_unique = true;
+		pr->is_det = true;
 	} else
 		m->error = true;
 }
@@ -993,7 +993,9 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
 
-	db_entry *dbe = calloc(sizeof(db_entry)+(sizeof(cell)*(p1->nbr_cells+1)), 1);
+	size_t dbe_size = sizeof(db_entry) + (sizeof(cell) * (p1->nbr_cells+1));
+	db_entry *dbe = calloc(1, dbe_size);
+
 	if (!dbe) {
 		pr->is_abolished = true;
 		return NULL;
