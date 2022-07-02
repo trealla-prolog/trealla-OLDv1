@@ -1,0 +1,55 @@
+{
+  "uid" : "de2f7687195c4549",
+  "name" : "if_elif_endif_0",
+  "fullName" : "if_elif_endif_0::tests",
+  "historyId" : "if_elif_endif_0::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/logtalk/directives/if_1/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/logtalk/directives/if_1/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/logtalk/directives/if_1/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/logtalk/directives/if_1/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "96-97"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/tests/logtalk/directives/if_1/tests.lgt#L96"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "de2f7687195c4549.json",
+  "parameterValues" : [ "tests/logtalk/directives/if_1/tests.lgt", "96-97", "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/tests/logtalk/directives/if_1/tests.lgt#L96" ]
+}
