@@ -541,9 +541,13 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_iso_list(c)) {
 		LIST_HANDLER(c);
-		int cnt = 0;
+		unsigned cnt = 0;
 
 		while (is_iso_list(c)) {
+			if (q->max_depth && (cnt >= q->max_depth)) {
+				dst += snprintf(dst, dstlen, ",...");
+				break;
+			}
 
 			dst += snprintf(dst, dstlen, "'.'(");
 
