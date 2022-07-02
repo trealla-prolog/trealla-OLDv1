@@ -278,9 +278,6 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	q->st.key = key;
 	q->st.iter = NULL;
 
-	if (pr->is_det)
-		q->st.definite = true;
-
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
@@ -353,17 +350,6 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	if (!(iter = map_find_key(idx, key)))
 		return false;
-
-	if (pr->is_det) {
-		if (!map_next_key(iter, (void*)&q->st.curr_clause)) {
-			map_done(iter);
-			return false;
-		}
-
-		q->st.definite = true;
-		map_done(iter);
-		return true;
-	}
 
 #define TESTINGIDX 0
 
