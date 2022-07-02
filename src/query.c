@@ -43,7 +43,7 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 static bool any_choices(const query *q, const frame *f)
 {
-	if (q->cp == (q->in_commit ? 1 : 0))
+	if (q->cp == (unsigned)(q->in_commit ? 1 : 0))
 		return false;
 
 	const choice *ch = q->in_commit ? GET_PREV_CHOICE() : GET_CURR_CHOICE();
