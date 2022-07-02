@@ -429,7 +429,7 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 		m->error = true;
 }
 
-void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
+void set_det_in_db(module *m, const char *name, pl_idx_t arity)
 {
 	cell tmp = (cell){0};
 	tmp.tag = TAG_INTERNED;
@@ -440,7 +440,7 @@ void set_unique_in_db(module *m, const char *name, pl_idx_t arity)
 	if (!pr) pr = create_predicate(m, &tmp);
 
 	if (pr) {
-		pr->is_unique = true;
+		pr->is_det = true;
 	} else
 		m->error = true;
 }
