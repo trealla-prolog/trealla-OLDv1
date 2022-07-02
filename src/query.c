@@ -1855,7 +1855,7 @@ query *create_query(module *m, bool is_task)
 	// Allocate these later as needed...
 
 	q->h_size = is_task ? INITIAL_NBR_HEAP_CELLS/10 : INITIAL_NBR_HEAP_CELLS;
-	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+	q->tmph_size = INITIAL_NBR_CELLS;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
 		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE_CELLS/10 : INITIAL_NBR_QUEUE_CELLS;
