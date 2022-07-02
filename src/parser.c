@@ -962,7 +962,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	cl->is_cut_only = false;
 
 	// Any variable that is only used in the head of a
-	// clause is a temporary variables...
+	// clause is a temporary variable...
 
 	cell *body = get_body(cl->cells);
 	bool in_body = false;
@@ -990,10 +990,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
 
-		if (!is_variable(c))
-			continue;
-
-		if (is_temporary(c))
+		if (!is_variable(c) || is_temporary(c))
 			continue;
 
 		if (rebase) {
@@ -1025,10 +1022,7 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
 
-		if (!is_variable(c))
-			continue;
-
-		if (!is_temporary(c))
+		if (!is_variable(c) || !is_temporary(c))
 			continue;
 
 		if (rebase) {

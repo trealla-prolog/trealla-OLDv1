@@ -453,7 +453,6 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		LIST_HANDLER(l);
 
 		while (is_iso_list(l)) {
-			CHECK_INTERRUPT();
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
@@ -541,9 +540,13 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 	if (is_iso_list(c)) {
 		LIST_HANDLER(c);
-		int cnt = 0;
+		unsigned cnt = 0;
 
 		while (is_iso_list(c)) {
+			if (q->max_depth && (cnt >= q->max_depth)) {
+				dst += snprintf(dst, dstlen, ",...");
+				break;
+			}
 
 			dst += snprintf(dst, dstlen, "'.'(");
 
@@ -697,8 +700,6 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		CHECK_INTERRUPT();
-
 		if (q->max_depth && (cnt++ >= q->max_depth)) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", ",...]");
@@ -971,7 +972,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 			LIST_HANDLER(l);
 
 			while (is_iso_list(l)) {
-				CHECK_INTERRUPT();
 				cell *h = LIST_HEAD(l);
 				h = deref(q, h, l_ctx);
 				pl_idx_t h_ctx = q->latest_ctx;
