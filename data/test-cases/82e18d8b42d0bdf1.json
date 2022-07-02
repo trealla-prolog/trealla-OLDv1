@@ -1,0 +1,55 @@
+{
+  "uid" : "82e18d8b42d0bdf1",
+  "name" : "cbor_parse_2_71",
+  "fullName" : "cbor_parse_2_71::tests_common",
+  "historyId" : "cbor_parse_2_71::tests_common",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "testClass",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "package",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/cbor/tests_common.lgt"
+  }, {
+    "name" : "position",
+    "value" : "280-281"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/library/cbor/tests_common.lgt#L280"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "82e18d8b42d0bdf1.json",
+  "parameterValues" : [ "library/cbor/tests_common.lgt", "280-281", "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/library/cbor/tests_common.lgt#L280" ]
+}
