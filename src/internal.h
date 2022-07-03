@@ -389,7 +389,7 @@ struct cell_ {
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term
 					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-					pl_idx_t var_nbr;	// used with TAG_VAR in copy_term
+					pl_idx_t var_nbr;	// used with TAG_VAR
 				};
 			};
 
