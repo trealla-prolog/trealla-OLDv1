@@ -774,8 +774,6 @@ static void directives(parser *p, cell *d)
 			} else if (!strcmp(dirname, "public")) {
 			} else if (!strcmp(dirname, "table") && false) {
 				set_table_in_db(p->m, C_STR(p, c_name), arity);
-			} else if (!strcmp(dirname, "det")) {
-				set_det_in_db(p->m, C_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "discontiguous")) {
 				set_discontiguous_in_db(p->m, C_STR(p, c_name), arity);
 			} else if (!strcmp(dirname, "multifile")) {
@@ -838,8 +836,6 @@ static void directives(parser *p, cell *d)
 
 			if (!strcmp(dirname, "multifile"))
 				set_multifile_in_db(m, C_STR(p, c_name), arity);
-			else if (!strcmp(dirname, "det"))
-				set_det_in_db(m, C_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "discontiguous"))
 				set_discontiguous_in_db(m, C_STR(p, c_name), arity);
 			else if (!strcmp(dirname, "public"))
@@ -961,10 +957,10 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 	cl->is_first_cut = false;
 	cl->is_cut_only = false;
 
-	// Any variable that is only used in the head of a
-	// clause is a temporary variable...
+	// Any variable that only occurs in the head of
+	// a clause we consider a temporary variable...
 
-	cell *body = get_body(cl->cells);
+	const cell *body = get_body(cl->cells);
 	bool in_body = false;
 
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
@@ -1011,13 +1007,12 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		p->vartab.var_name[c->var_nbr] = C_STR(p, c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
-			c->flags |= FLAG_VAR_FIRST_USE;
 			cl->nbr_vars++;
 			p->nbr_vars++;
 		}
 	}
 
-	// Do them last...
+	// Do temporaries last...
 
 	for (pl_idx_t i = 0; i < cl->cidx; i++) {
 		cell *c = cl->cells + i;
@@ -1043,7 +1038,6 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		p->vartab.var_name[c->var_nbr] = C_STR(p, c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
-			c->flags |= FLAG_VAR_FIRST_USE;
 			cl->nbr_temporaries++;
 			cl->nbr_vars++;
 			p->nbr_vars++;
