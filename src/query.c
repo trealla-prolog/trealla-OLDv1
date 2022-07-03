@@ -43,7 +43,7 @@ typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
 static bool any_choices(const query *q, const frame *f)
 {
-	if (q->cp == (q->in_commit ? 1 : 0))
+	if (q->cp == (unsigned)(q->in_commit ? 1 : 0))
 		return false;
 
 	const choice *ch = q->in_commit ? GET_PREV_CHOICE() : GET_CURR_CHOICE();
@@ -52,7 +52,10 @@ static bool any_choices(const query *q, const frame *f)
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 {
-	if (!c || !c->fn || is_empty(c))
+	if (!c || !c->fn_ptr || is_empty(c))
+		return;
+
+	if (c->fn_ptr && !c->fn_ptr->fn)
 		return;
 
 #if 0
@@ -776,23 +779,23 @@ static void commit_me(query *q, clause *r)
 	frame *f = GET_CURR_FRAME();
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool choices = any_choices(q, f);
-	bool slots_ok = !q->retry && check_slots(q, f, r);
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
-	bool tco = recursive && !choices && slots_ok && last_match;
-
-#if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
-		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
-#endif
-
-	// For now. It would also be good to reduce the number of
-	// slots by the number of temporaries...
+	bool tco;
 
 	if (q->no_tco && (r->nbr_vars != r->nbr_temporaries))
 		tco = false;
+	else {
+		bool recursive = is_tail_recursive(q->st.curr_cell);
+		bool slots_ok = !q->retry && check_slots(q, f, r);
+		bool choices = any_choices(q, f);
+		tco = last_match && recursive && !choices && slots_ok;
+
+#if 0
+		printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
+			tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
+#endif
+}
 
 	if (tco && q->pl->opt)
 		reuse_frame(q, r->nbr_vars);
@@ -1554,7 +1557,8 @@ bool start(query *q)
 		q->before_hook_tp = q->st.tp;
 
 		if (is_builtin(q->st.curr_cell)) {
-			if (!q->st.curr_cell->fn) {					// NO-OP
+			if (!q->st.curr_cell->fn_ptr
+				|| !q->st.curr_cell->fn_ptr->fn) {		// NO-OP
 				q->tot_goals--;
 				q->st.curr_cell++;
 				continue;
@@ -1570,7 +1574,7 @@ bool start(query *q)
 					status = wrapper_for_predicate(q, q->st.curr_cell->fn_ptr);
 			} else
 #endif
-				status = q->st.curr_cell->fn(q);
+				status = q->st.curr_cell->fn_ptr->fn(q);
 
 			if ((status == false) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
@@ -1855,7 +1859,7 @@ query *create_query(module *m, bool is_task)
 	// Allocate these later as needed...
 
 	q->h_size = is_task ? INITIAL_NBR_HEAP_CELLS/10 : INITIAL_NBR_HEAP_CELLS;
-	q->tmph_size = is_task ? INITIAL_NBR_CELLS/10 : INITIAL_NBR_CELLS;
+	q->tmph_size = INITIAL_NBR_CELLS;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
 		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE_CELLS/10 : INITIAL_NBR_QUEUE_CELLS;

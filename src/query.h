@@ -108,6 +108,8 @@ bool fn_sys_undo_trail_1(query *q);
 bool fn_sys_redo_trail_0(query *q);
 bool fn_sys_soft_inner_cut_0(query *q);
 bool fn_iso_unify_2(query *q);
+bool fn_sys_block_catcher_1(query *q);
+bool fn_sys_cleanup_if_det_0(query *q);
 
 inline static void share_predicate(predicate *pr)
 {

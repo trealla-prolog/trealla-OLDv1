@@ -429,22 +429,6 @@ void set_multifile_in_db(module *m, const char *name, pl_idx_t arity)
 		m->error = true;
 }
 
-void set_det_in_db(module *m, const char *name, pl_idx_t arity)
-{
-	cell tmp = (cell){0};
-	tmp.tag = TAG_INTERNED;
-	tmp.val_off = index_from_pool(m->pl, name);
-	ensure(tmp.val_off != ERR_IDX);
-	tmp.arity = arity;
-	predicate *pr = find_predicate(m, &tmp);
-	if (!pr) pr = create_predicate(m, &tmp);
-
-	if (pr) {
-		pr->is_det = true;
-	} else
-		m->error = true;
-}
-
 void set_table_in_db(module *m, const char *name, unsigned arity)
 {
 	cell tmp = (cell){0};
@@ -1187,8 +1171,6 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 	c->fn_ptr = get_builtin(m->pl, functor, c->arity, &found, &function);
 
 	if (found) {
-		c->fn = c->fn_ptr->fn;
-
 		if (function)
 			c->flags |= FLAG_FUNCTION;
 		else
@@ -1196,7 +1178,7 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 
 		return;
 	} else
-		c->fn = NULL;
+		c->fn_ptr = NULL;
 
 	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {

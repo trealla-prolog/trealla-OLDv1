@@ -47,7 +47,7 @@ typedef uint32_t pl_idx_t;
 char *realpath(const char *path, char resolved_path[PATH_MAX]);
 #endif
 
-static const unsigned INITIAL_NBR_CELLS = 100;		// cells
+static const unsigned INITIAL_NBR_CELLS = 10;
 
 extern unsigned g_string_cnt, g_interned_cnt;
 
@@ -250,15 +250,14 @@ enum {
 	FLAG_CSTR_STRING=1<<1,				// used with TAG_CSTR
 	FLAG_CSTR_QUOTED=1<<2,				// used with TAG_CSTR
 
-	FLAG_VAR_FIRST_USE=1<<0,			// used with TAG_VAR
-	FLAG_VAR_ANON=1<<1,					// used with TAG_VAR
-	FLAG_VAR_FRESH=1<<2,				// used with TAG_VAR
-	FLAG_VAR_TEMPORARY=1<<3,			// used with TAG_VAR
+	FLAG_VAR_ANON=1<<0,					// used with TAG_VAR
+	FLAG_VAR_FRESH=1<<1,				// used with TAG_VAR
+	FLAG_VAR_TEMPORARY=1<<2,			// used with TAG_VAR
 
 	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
 
-	FLAG_SPARE1=1<<6,
+	FLAG_FFI=1<<6,
 	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
@@ -381,16 +380,12 @@ struct cell_ {
 		struct {
 			union {
 				predicate *match;
-
-				struct {
-					bool (*fn)(query*);
-					builtins *fn_ptr;
-				};
+				builtins *fn_ptr;
 
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term
 					pl_idx_t tmp_ctx;	// used with TAG_VAR in copy_term
-					pl_idx_t var_nbr;	// used with TAG_VAR in copy_term
+					pl_idx_t var_nbr;	// used with TAG_VAR
 				};
 			};
 
@@ -448,7 +443,6 @@ struct predicate_ {
 	bool is_dynamic:1;
 	bool is_meta_predicate:1;
 	bool is_persist:1;
-	bool is_det:1;
 	bool is_multifile:1;
 	bool is_discontiguous:1;
 	bool is_abolished:1;

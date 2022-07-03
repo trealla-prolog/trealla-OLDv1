@@ -216,5 +216,5 @@ inline static cell *get_raw_arg(const query *q, int n)
 		return true; 												\
 	if (is_variable(c))													\
 		return throw_error(q, c, q->st.curr_frame, "instantiation_error", "number"); \
-	if (is_builtin(c) && (c->fn != fn_iso_float_1) && (c->fn != fn_iso_integer_1)) \
+	if (is_builtin(c) && c->fn_ptr && (c->fn_ptr->fn != fn_iso_float_1) && (c->fn_ptr->fn != fn_iso_integer_1)) \
 		return throw_error(q, c, q->st.curr_frame, "type_error", "evaluable");
