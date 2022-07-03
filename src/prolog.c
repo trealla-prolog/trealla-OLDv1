@@ -203,6 +203,8 @@ void pl_destroy(prolog *pl)
 
 prolog *pl_create()
 {
+	//printf("*** sizeof(cell) = %u bytes\n", (unsigned)sizeof(cell));
+
 	prolog *pl = calloc(1, sizeof(prolog));
 
 	if (!g_tpl_count++)
