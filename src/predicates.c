@@ -161,8 +161,13 @@ void make_struct(cell *tmp, pl_idx_t offset, void *fn, unsigned arity, pl_idx_t 
 	*tmp = (cell){0};
 	tmp->tag = TAG_INTERNED;
 	tmp->nbr_cells = 1 + extra_cells;
-	if (fn) tmp->flags |= FLAG_BUILTIN;
-	tmp->fn = fn;
+
+	if (fn) {
+		tmp->flags |= FLAG_BUILTIN;
+		tmp->fn_ptr = get_fn_ptr(fn);
+		assert(tmp->fn_ptr);
+	}
+
 	tmp->arity = arity;
 	tmp->val_off = offset;
 }
@@ -1941,8 +1946,6 @@ static USE_RESULT bool fn_iso_univ_2(query *q)
 			if ((tmp->match = search_predicate(q->st.m, tmp)) != NULL) {
 				tmp->flags &= ~FLAG_BUILTIN;
 			} else if ((tmp->fn_ptr = get_builtin(q->pl, C_STR(q, tmp), tmp->arity, &found, NULL)), found) {
-				tmp->fn = tmp->fn_ptr->fn;
-
 				if (tmp->fn_ptr->function)
 					tmp->flags |= FLAG_FUNCTION;
 				else
@@ -4999,7 +5002,6 @@ static USE_RESULT bool fn_task_n(query *q)
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
 	} else if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
-		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -6965,7 +6967,7 @@ static USE_RESULT bool fn_iso_compare_3(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static const builtins g_iso_bifs[] =
+builtins g_iso_bifs[] =
 {
 	{",", 2, NULL, NULL, false, BLAH},
 
@@ -6978,6 +6980,17 @@ static const builtins g_iso_bifs[] =
 	{"$throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"$catch", 3, fn_iso_catch_3, NULL, false, BLAH},
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false, BLAH},
+	{"$block_catcher", 1, fn_sys_block_catcher_1, NULL, false, BLAH},
+	{"$queuen", 2, fn_sys_queuen_2, NULL, false, BLAH},
+	{"$cleanup_if_det", 0, fn_sys_cleanup_if_det_0, NULL, false, BLAH},
+	{"$soft_inner_cut", 0, fn_sys_soft_inner_cut_0, NULL, false, BLAH},
+	{"$inner_cut", 0, fn_sys_inner_cut_0, NULL, false, BLAH},
+	{"$cut_if_det", 0, fn_sys_cut_if_det_0, NULL, false, BLAH},
+	{"$elapsed", 0, fn_sys_elapsed_0, NULL, false, BLAH},
+	{"$lt", 2, fn_sys_lt_2, NULL, false, BLAH},
+	{"$gt", 2, fn_sys_gt_2, NULL, false, BLAH},
+	{"$ne", 2, fn_sys_ne_2, NULL, false, BLAH},
+	{"$incr", 2, fn_sys_incr_2, NULL, false, BLAH},
 
 	{"call", 1, fn_iso_call_1, NULL, false, BLAH},
 	{"call", 2, fn_iso_call_n, NULL, false, BLAH},
@@ -7045,7 +7058,7 @@ static const builtins g_iso_bifs[] =
 	{0}
 };
 
-static const builtins g_other_bifs[] =
+static builtins g_other_bifs[] =
 {
 	{"*->", 2, fn_if_2, NULL, false, BLAH},
 	{"if", 3, fn_if_3, NULL, false, BLAH},
@@ -7221,8 +7234,43 @@ builtins *get_builtin(prolog *pl, const char *name, unsigned arity, bool *found,
 
 extern builtins g_ffi_bifs[];
 extern builtins g_contrib_bifs[];
-extern const builtins g_files_bifs[];
-extern const builtins g_functions_bifs[];
+extern builtins g_files_bifs[];
+extern builtins g_functions_bifs[];
+
+builtins *get_fn_ptr(void *fn)
+{
+	for (builtins *ptr = g_iso_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	for (builtins *ptr = g_functions_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	for (builtins *ptr = g_other_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	for (builtins *ptr = g_files_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	for (builtins *ptr = g_ffi_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	for (builtins *ptr = g_contrib_bifs; ptr->name; ptr++) {
+		if (ptr->fn == fn)
+			return ptr;
+	}
+
+	return NULL;
+}
 
 static int max_ffi_idx = 0;
 

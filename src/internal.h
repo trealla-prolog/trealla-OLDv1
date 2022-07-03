@@ -257,7 +257,7 @@ enum {
 	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
 
-	FLAG_SPARE1=1<<6,
+	FLAG_FFI=1<<6,
 	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
 	FLAG_STATIC=1<<9,
@@ -380,11 +380,7 @@ struct cell_ {
 		struct {
 			union {
 				predicate *match;
-
-				struct {
-					bool (*fn)(query*);
-					builtins *fn_ptr;
-				};
+				builtins *fn_ptr;
 
 				struct {
 					cell *tmp_attrs;	// used with TAG_VAR in copy_term

@@ -52,7 +52,10 @@ static bool any_choices(const query *q, const frame *f)
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 {
-	if (!c || !c->fn || is_empty(c))
+	if (!c || !c->fn_ptr || is_empty(c))
+		return;
+
+	if (c->fn_ptr && !c->fn_ptr->fn)
 		return;
 
 #if 0
@@ -1554,7 +1557,8 @@ bool start(query *q)
 		q->before_hook_tp = q->st.tp;
 
 		if (is_builtin(q->st.curr_cell)) {
-			if (!q->st.curr_cell->fn) {					// NO-OP
+			if (!q->st.curr_cell->fn_ptr
+				|| !q->st.curr_cell->fn_ptr->fn) {		// NO-OP
 				q->tot_goals--;
 				q->st.curr_cell++;
 				continue;
@@ -1570,7 +1574,7 @@ bool start(query *q)
 					status = wrapper_for_predicate(q, q->st.curr_cell->fn_ptr);
 			} else
 #endif
-				status = q->st.curr_cell->fn(q);
+				status = q->st.curr_cell->fn_ptr->fn(q);
 
 			if ((status == false) && !q->is_oom) {
 				q->retry = QUERY_RETRY;

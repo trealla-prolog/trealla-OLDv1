@@ -35,7 +35,7 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
-static USE_RESULT bool fn_sys_cleanup_if_det_0(query *q)
+USE_RESULT bool fn_sys_cleanup_if_det_0(query *q)
 {
 	if (!q->cp)		// redundant
 		return true;
@@ -148,7 +148,6 @@ USE_RESULT bool fn_iso_call_n(query *q)
 	bool found = false;
 
 	if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
-		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 
@@ -188,9 +187,9 @@ USE_RESULT bool fn_iso_call_1(query *q)
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
 	} else if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
-		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
+
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
 		return throw_error(q, tmp2, q->st.curr_frame, "type_error", "callable");
 
@@ -220,7 +219,6 @@ USE_RESULT bool fn_iso_once_1(query *q)
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
 	} else if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
-		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
@@ -252,7 +250,6 @@ USE_RESULT bool fn_ignore_1(query *q)
 	if ((tmp2->match = search_predicate(q->st.m, tmp2)) != NULL) {
 		tmp2->flags &= ~FLAG_BUILTIN;
 	} else if ((tmp2->fn_ptr = get_builtin(q->pl, C_STR(q, tmp2), tmp2->arity, &found, NULL)), found) {
-		tmp2->fn = tmp2->fn_ptr->fn;
 		tmp2->flags |= FLAG_BUILTIN;
 	}
 	if (check_body_callable(q->st.m->p, tmp2) != NULL)
@@ -370,14 +367,16 @@ USE_RESULT bool fn_if_3(query *q)
 
 USE_RESULT bool fn_iso_disjunction_2(query *q)
 {
-	if ((q->st.curr_cell+1)->fn == fn_iso_if_then_2) {
+	cell *c = q->st.curr_cell+1;
+
+	if (c->fn_ptr  && (c->fn_ptr->fn == fn_iso_if_then_2)) {
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;
 		return do_if_then_else(q, p1, p2, p3);
 	}
 
-	if ((q->st.curr_cell+1)->fn == fn_if_2) {
+	if (c->fn_ptr && (c->fn_ptr->fn == fn_if_2)) {
 		cell *p1 = q->st.curr_cell + 2;
 		cell *p2 = p1 + p1->nbr_cells;
 		cell *p3 = p2 + p2->nbr_cells;

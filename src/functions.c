@@ -179,7 +179,7 @@ void call_builtin(query *q, cell *c, pl_idx_t c_ctx)
 		wrapper_for_function(q, c->fn_ptr);
 	else
 #endif
-		c->fn(q);
+		c->fn_ptr->fn(q);
 
 	q->eval = save_calc;
 

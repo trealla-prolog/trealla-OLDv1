@@ -1171,8 +1171,6 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 	c->fn_ptr = get_builtin(m->pl, functor, c->arity, &found, &function);
 
 	if (found) {
-		c->fn = c->fn_ptr->fn;
-
 		if (function)
 			c->flags |= FLAG_FUNCTION;
 		else
@@ -1180,7 +1178,7 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 
 		return;
 	} else
-		c->fn = NULL;
+		c->fn_ptr = NULL;
 
 	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
