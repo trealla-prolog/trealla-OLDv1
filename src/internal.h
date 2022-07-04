@@ -61,7 +61,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_MODULES 1024
+#define MAX_MODULES 256
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define MAX_IGNORES 64000
