@@ -704,11 +704,7 @@ struct parser_ {
 	bool symbol:1;
 };
 
-struct loaded_file {
-	struct loaded_file *next;
-	char *filename;
-	bool is_loaded:1;
-};
+typedef struct loaded_file_ loaded_file;
 
 struct module_ {
 	module *used[MAX_MODULES];
@@ -720,7 +716,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	map *index, *nbs, *ops, *defops;
-	struct loaded_file *loaded_files;
+	loaded_file *loaded_files;
 	unsigned id, idx_used, indexing_threshold;
 	prolog_flags flags;
 	bool user_ops:1;
