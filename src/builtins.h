@@ -97,36 +97,11 @@ USE_RESULT bool fn_local_cut_0(query *q);
 USE_RESULT bool fn_iso_float_1(query *q);
 USE_RESULT bool fn_iso_integer_1(query *q);
 
-inline static cell *deref(query *q, cell *c, pl_idx_t c_ctx)
-{
-	if (!is_variable(c)) {
-		q->latest_ctx = c_ctx;
-		return c;
-	}
+cell *deref_var(query *q, cell *c, pl_idx_t c_ctx);
 
-	if (is_ref(c))
-		c_ctx = c->tmp_ctx;
-
-	const frame *f = GET_FRAME(c_ctx);
-	slot *e = GET_SLOT(f, c->var_nbr);
-
-	while (is_variable(&e->c)) {
-		c_ctx = e->ctx;
-		c = &e->c;
-		f = GET_FRAME(c_ctx);
-		e = GET_SLOT(f, c->var_nbr);
-	}
-
-	if (is_empty(&e->c))
-		return q->latest_ctx = c_ctx, c;
-
-	q->latest_ctx = e->ctx;
-
-	if (is_indirect(&e->c))
-		return e->c.val_ptr;
-
-	return &e->c;
-}
+#define deref(q,c,c_ctx)									\
+	!is_variable(c) ? q->latest_ctx = (c_ctx), (c) :		\
+	deref_var(q, c, c_ctx)
 
 #define GET_RAW_ARG(n,p) \
 	cell *p = get_raw_arg(q,n); \

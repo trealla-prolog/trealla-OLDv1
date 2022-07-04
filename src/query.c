@@ -1123,6 +1123,32 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
+cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
+{
+	if (is_ref(c))
+		c_ctx = c->tmp_ctx;
+
+	const frame *f = GET_FRAME(c_ctx);
+	slot *e = GET_SLOT(f, c->var_nbr);
+
+	while (is_variable(&e->c)) {
+		c_ctx = e->ctx;
+		c = &e->c;
+		f = GET_FRAME(c_ctx);
+		e = GET_SLOT(f, c->var_nbr);
+	}
+
+	if (is_empty(&e->c))
+		return q->latest_ctx = c_ctx, c;
+
+	q->latest_ctx = e->ctx;
+
+	if (is_indirect(&e->c))
+		return e->c.val_ptr;
+
+	return &e->c;
+}
+
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	const frame *f = GET_FRAME(c_ctx);
