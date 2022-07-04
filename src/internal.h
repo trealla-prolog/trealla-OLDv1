@@ -61,7 +61,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define MAX_ARITY UCHAR_MAX
 #define MAX_QUEUES 16
 #define MAX_STREAMS 1024
-#define MAX_MODULES 256
+#define MAX_MODULES 1024
 //#define MAX_DEPTH 9999
 #define MAX_DEPTH 6000			// Clang stack size needs this small
 #define MAX_IGNORES 64000
@@ -331,7 +331,11 @@ struct cell_ {
 	uint8_t tag;
 	uint8_t arity;
 	uint16_t flags;
-	pl_idx_t nbr_cells;
+
+	union {
+		pl_idx_t nbr_cells;
+		uint16_t mid;				// used with TAG_EMPTY so not counted
+	};
 
 	// 2 * 8 = 16 bytes.
 
@@ -360,12 +364,6 @@ struct cell_ {
 		uint16_t priority;				// used in parsing operators
 
 		struct {
-			cell *val_ret;
-			unsigned long cgen:56;		// choice generation
-			unsigned mid:8;
-		};
-
-		struct {
 			uint8_t	chr_len;
 			char val_chr[MAX_SMALL_STRING];
 		};
@@ -380,7 +378,6 @@ struct cell_ {
 			char *val_str;
 			uint64_t str_len;			// slice_length
 		};
-
 
 		struct {
 			union {
@@ -400,6 +397,11 @@ struct cell_ {
 		struct {
 			cell *attrs;				// used with TAG_EMPTY in slot
 			pl_idx_t attrs_ctx;			// to set attributes on a var
+		};
+
+		struct {
+			cell *val_ret;				// used with TAG_EMPTY returns
+			uint64_t cgen;				// choice generation
 		};
 	};
 };
@@ -494,7 +496,7 @@ struct frame_ {
 	uint64_t ugen, cgen;
 	pl_idx_t prev_frame, base_slot_nbr, overflow;
 	uint32_t nbr_slots, nbr_vars;
-	uint8_t mid;
+	uint16_t mid;
 	bool is_complex:1;
 	bool is_last:1;
 };
