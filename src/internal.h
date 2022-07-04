@@ -80,7 +80,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
-	(q->slots+(f)->base_slot_nbr+(i)) : 				\
+	(q->slots+(f)->base_slot+(i)) : 				\
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 
@@ -494,7 +494,7 @@ struct slot_ {
 struct frame_ {
 	cell *prev_cell;
 	uint64_t ugen, cgen;
-	pl_idx_t prev_frame, base_slot_nbr, overflow;
+	pl_idx_t prev_frame, base_slot, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	uint16_t mid;
 	bool is_complex:1;

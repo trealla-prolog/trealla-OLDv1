@@ -527,7 +527,7 @@ bool try_me(query *q, unsigned nbr_vars)
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
-	f->base_slot_nbr = q->st.sp;
+	f->base_slot = q->st.sp;
 	slot *e = GET_FIRST_SLOT(f);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
@@ -689,7 +689,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	f->nbr_vars = nbr_vars;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot_nbr + nbr_vars;
+	q->st.sp = f->base_slot + nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -1095,9 +1095,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (check_slot(q, var_nbr+cnt) != true)
 		return 0;
 
-	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
+	if ((f->base_slot + f->nbr_slots) >= q->st.sp) {
 		f->nbr_slots += cnt;
-		q->st.sp = f->base_slot_nbr + f->nbr_slots;
+		q->st.sp = f->base_slot + f->nbr_slots;
 	} else if (!f->overflow) {
 		f->overflow = q->st.sp;
 		q->st.sp += cnt;
