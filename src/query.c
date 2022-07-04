@@ -152,6 +152,7 @@ static USE_RESULT bool check_frame(query *q)
 				return false;
 			}
 
+			memset(q->frames+q->frames_size, 0, sizeof(frame) * (new_framessize - q->frames_size));
 			q->frames_size = new_framessize;
 		}
 
@@ -632,8 +633,8 @@ LOOP:
 static frame *push_frame(query *q, unsigned nbr_vars)
 {
 	pl_idx_t new_frame = q->st.fp++;
-	const frame *curr_f = GET_CURR_FRAME();
 	frame *f = GET_FRAME(new_frame);
+	const frame *curr_f = GET_CURR_FRAME();
 	const cell *next_cell = q->st.curr_cell + q->st.curr_cell->nbr_cells;
 
 	// Avoid long chains of useless returns...
@@ -650,6 +651,7 @@ static frame *push_frame(query *q, unsigned nbr_vars)
 	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
+
 	q->st.sp += nbr_vars;
 	q->st.curr_frame = new_frame;
 	return f;
