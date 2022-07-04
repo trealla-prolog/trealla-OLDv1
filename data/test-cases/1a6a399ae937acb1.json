@@ -1,0 +1,55 @@
+{
+  "uid" : "1a6a399ae937acb1",
+  "name" : "woodworking",
+  "fullName" : "woodworking::tests",
+  "historyId" : "woodworking::tests",
+  "time" : {
+    "duration" : 9894
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "contributions/pddl_parser/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "contributions/pddl_parser/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "71-74"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/contributions/pddl_parser/tests.lgt#L71"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "1a6a399ae937acb1.json",
+  "parameterValues" : [ "contributions/pddl_parser/tests.lgt", "71-74", "https://github.com/LogtalkDotOrg/logtalk3/tree/02f55b7dbc4fa39f4b88be89916d73fbcadb33f0/contributions/pddl_parser/tests.lgt#L71" ]
+}
