@@ -1426,11 +1426,8 @@ static USE_RESULT bool match_head(query *q)
 		may_error(try_me(q, r->nbr_vars));
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
-			if (q->error) {
-				unshare_predicate(q, q->st.pr);
-				drop_choice(q);
-				return false;
-			}
+			if (q->error)
+				break;
 
 			commit_me(q, r);
 			return true;
@@ -1438,6 +1435,9 @@ static USE_RESULT bool match_head(query *q)
 
 		undo_me(q);
 	}
+
+	choice *ch = GET_CURR_CHOICE();
+	ch->st.iter = NULL;
 
 	drop_choice(q);
 	unshare_predicate(q, q->st.pr);
