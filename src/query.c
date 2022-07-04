@@ -1146,18 +1146,20 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
+		e->ctx = v_ctx;
+
+		if ((c_ctx != q->st.curr_frame)
+			&& (v_ctx == q->st.curr_frame))
+				q->no_tco = true;
+	} else if (is_variable(v)) {
+		e->c = *v;
+		e->c.flags &= ~FLAG_REF;
+		e->ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
+		e->ctx = v_ctx;
 	}
-
-	if (is_structure(v)
-		&& (c_ctx != q->st.curr_frame)
-		&& (v_ctx == q->st.curr_frame))
-			q->no_tco = true;
-
-	e->c.flags &= ~FLAG_REF;
-	e->ctx = v_ctx;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
@@ -1175,17 +1177,21 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
+	if (q->cp && trailing)
+		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
+
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
+		e->ctx = v_ctx;
+	} else if (is_variable(v)) {
+		e->c = *v;
+		e->c.flags &= ~FLAG_REF;
+		e->ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
+		e->ctx = v_ctx;
 	}
-
-	e->ctx = v_ctx;
-
-	if (q->cp && trailing)
-		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
 // Match HEAD :- BODY.

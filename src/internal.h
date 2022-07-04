@@ -360,7 +360,6 @@ struct cell_ {
 		double val_float;
 		bigint *val_bigint;
 		blob *val_blob;
-		cell *val_ptr;
 		uint16_t priority;				// used in parsing operators
 
 		struct {
@@ -381,6 +380,7 @@ struct cell_ {
 
 		struct {
 			union {
+				cell *val_ptr;
 				predicate *match;
 				builtins *fn_ptr;
 				cell *tmp_attrs;		// used with TAG_VAR in copy_term
