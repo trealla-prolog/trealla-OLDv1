@@ -97,11 +97,11 @@ USE_RESULT bool fn_local_cut_0(query *q);
 USE_RESULT bool fn_iso_float_1(query *q);
 USE_RESULT bool fn_iso_integer_1(query *q);
 
-cell *deref_var(query *q, cell *c, pl_idx_t c_ctx);
+cell *get_var(query *q, cell *c, pl_idx_t c_ctx);
 
 #define deref(q,c,c_ctx)									\
 	!is_variable(c) ? q->latest_ctx = (c_ctx), (c) :		\
-	deref_var(q, c, c_ctx)
+	get_var(q, c, c_ctx)
 
 #define GET_RAW_ARG(n,p) \
 	cell *p = get_raw_arg(q,n); \

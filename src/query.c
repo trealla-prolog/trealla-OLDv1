@@ -1123,7 +1123,7 @@ unsigned create_vars(query *q, unsigned cnt)
 	return var_nbr;
 }
 
-cell *deref_var(query *q, cell *c, pl_idx_t c_ctx)
+cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	if (is_ref(c))
 		c_ctx = c->tmp_ctx;
