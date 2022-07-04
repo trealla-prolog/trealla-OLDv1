@@ -80,7 +80,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
-	(q->slots+(f)->base_slot_nbr+(i)) : 				\
+	(q->slots+(f)->base_slot+(i)) : 				\
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 
@@ -360,7 +360,6 @@ struct cell_ {
 		double val_float;
 		bigint *val_bigint;
 		blob *val_blob;
-		cell *val_ptr;
 		uint16_t priority;				// used in parsing operators
 
 		struct {
@@ -381,6 +380,7 @@ struct cell_ {
 
 		struct {
 			union {
+				cell *val_ptr;
 				predicate *match;
 				builtins *fn_ptr;
 				cell *tmp_attrs;		// used with TAG_VAR in copy_term
@@ -494,7 +494,7 @@ struct slot_ {
 struct frame_ {
 	cell *prev_cell;
 	uint64_t ugen, cgen;
-	pl_idx_t prev_frame, base_slot_nbr, overflow;
+	pl_idx_t prev_frame, base_slot, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	uint16_t mid;
 	bool is_complex:1;
@@ -704,11 +704,7 @@ struct parser_ {
 	bool symbol:1;
 };
 
-struct loaded_file {
-	struct loaded_file *next;
-	char *filename;
-	bool is_loaded:1;
-};
+typedef struct loaded_file_ loaded_file;
 
 struct module_ {
 	module *used[MAX_MODULES];
@@ -720,7 +716,7 @@ struct module_ {
 	parser *p;
 	FILE *fp;
 	map *index, *nbs, *ops, *defops;
-	struct loaded_file *loaded_files;
+	loaded_file *loaded_files;
 	unsigned id, idx_used, indexing_threshold;
 	prolog_flags flags;
 	bool user_ops:1;

@@ -527,7 +527,7 @@ bool try_me(query *q, unsigned nbr_vars)
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
-	f->base_slot_nbr = q->st.sp;
+	f->base_slot = q->st.sp;
 	slot *e = GET_FIRST_SLOT(f);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
@@ -689,7 +689,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	f->nbr_vars = nbr_vars;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot_nbr + nbr_vars;
+	q->st.sp = f->base_slot + nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -1095,9 +1095,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (check_slot(q, var_nbr+cnt) != true)
 		return 0;
 
-	if ((f->base_slot_nbr + f->nbr_slots) >= q->st.sp) {
+	if ((f->base_slot + f->nbr_slots) >= q->st.sp) {
 		f->nbr_slots += cnt;
-		q->st.sp = f->base_slot_nbr + f->nbr_slots;
+		q->st.sp = f->base_slot + f->nbr_slots;
 	} else if (!f->overflow) {
 		f->overflow = q->st.sp;
 		q->st.sp += cnt;
@@ -1145,19 +1145,20 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
+		if ((c_ctx != q->st.curr_frame) && (v_ctx == q->st.curr_frame))
+			q->no_tco = true;
+
 		make_indirect(&e->c, v);
+		e->ctx = v_ctx;
+	} else if (is_variable(v)) {
+		e->c = *v;
+		e->c.flags &= ~FLAG_REF;
+		e->ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
+		e->ctx = v_ctx;
 	}
-
-	if (is_structure(v)
-		&& (c_ctx != q->st.curr_frame)
-		&& (v_ctx == q->st.curr_frame))
-			q->no_tco = true;
-
-	e->c.flags &= ~FLAG_REF;
-	e->ctx = v_ctx;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
@@ -1175,17 +1176,21 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
+	if (q->cp && trailing)
+		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
+
 	if (is_structure(v)) {
 		make_indirect(&e->c, v);
+		e->ctx = v_ctx;
+	} else if (is_variable(v)) {
+		e->c = *v;
+		e->c.flags &= ~FLAG_REF;
+		e->ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
+		e->ctx = v_ctx;
 	}
-
-	e->ctx = v_ctx;
-
-	if (q->cp && trailing)
-		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 }
 
 // Match HEAD :- BODY.

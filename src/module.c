@@ -10,6 +10,12 @@
 #include "query.h"
 #include "utf8.h"
 
+struct loaded_file_ {
+	loaded_file *next;
+	char *filename;
+	bool is_loaded:1;
+};
+
 static const op_table g_ops[] =
 {
 	{":-", OP_XFX, 1200},
@@ -84,7 +90,7 @@ static const op_table g_ops[] =
 
 static const char *set_loaded(module *m, const char *filename)
 {
-	struct loaded_file *ptr = m->loaded_files;
+	loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
 		if (!strcmp(ptr->filename, filename)) {
@@ -105,7 +111,7 @@ static const char *set_loaded(module *m, const char *filename)
 
 static const char *set_known(module *m, const char *filename)
 {
-	struct loaded_file *ptr = m->loaded_files;
+	loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
 		if (!strcmp(ptr->filename, filename))
@@ -124,7 +130,7 @@ static const char *set_known(module *m, const char *filename)
 
 static void set_unloaded(module *m, const char *filename)
 {
-	struct loaded_file *ptr = m->loaded_files;
+	loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
 		if (!strcmp(ptr->filename, filename)) {
@@ -138,7 +144,7 @@ static void set_unloaded(module *m, const char *filename)
 
 static bool is_loaded(const module *m, const char *filename)
 {
-	struct loaded_file *ptr = m->loaded_files;
+	loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
 		if (ptr->is_loaded && !strcmp(ptr->filename, filename))
@@ -152,10 +158,10 @@ static bool is_loaded(const module *m, const char *filename)
 
 static void clear_loaded(const module *m)
 {
-	struct loaded_file *ptr = m->loaded_files;
+	loaded_file *ptr = m->loaded_files;
 
 	while (ptr) {
-		struct loaded_file *save = ptr;
+		loaded_file *save = ptr;
 		ptr = ptr->next;
 		free(save->filename);
 		free(save);
