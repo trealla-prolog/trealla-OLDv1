@@ -326,12 +326,14 @@ USE_RESULT bool make_stringn(cell *d, const char *s, size_t n)
 		return true;
 	}
 
+#if 0
 	if (n < MAX_SMALL_STRING) {
 		make_smalln(d, s, n);
 		d->flags = FLAG_CSTR_STRING;
 		d->arity = 2;
 		return true;
 	}
+#endif
 
 	*d = (cell){0};
 	d->tag = TAG_CSTR;
@@ -580,14 +582,6 @@ static USE_RESULT bool fn_iso_atom_chars_2(query *q)
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
 		return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	}
-
-	if (is_variable(p2) && (is_interned(p1) || (C_STRLEN(q, p1) < MAX_SMALL_STRING))) {
-		cell tmp;
-		may_error(make_stringn(&tmp, C_STR(q, p1), C_STRLEN(q, p1)));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-		unshare_cell(&tmp);
-		return true;
 	}
 
 	if (is_variable(p2)) {
