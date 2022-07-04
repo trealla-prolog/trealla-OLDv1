@@ -781,21 +781,20 @@ static void commit_me(query *q, clause *r)
 	q->st.m = q->st.curr_clause->owner->m;
 	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
 	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
+	bool recursive = is_tail_recursive(q->st.curr_cell);
+	bool slots_ok = !q->retry && check_slots(q, f, r);
+	bool choices = any_choices(q, f);
 	bool tco;
 
 	if (q->no_tco && (r->nbr_vars != r->nbr_temporaries))
 		tco = false;
-	else {
-		bool recursive = is_tail_recursive(q->st.curr_cell);
-		bool slots_ok = !q->retry && check_slots(q, f, r);
-		bool choices = any_choices(q, f);
+	else
 		tco = last_match && recursive && !choices && slots_ok;
 
 #if 0
-		printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
-			tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
 #endif
-}
 
 	if (tco && q->pl->opt)
 		reuse_frame(q, r->nbr_vars);
