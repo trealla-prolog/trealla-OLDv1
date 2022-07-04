@@ -1141,11 +1141,17 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 	if (is_empty(&e->c))
 		return q->latest_ctx = c_ctx, c;
 
-	q->latest_ctx = e->ctx;
-
-	if (is_indirect(&e->c))
+	if (is_indirect(&e->c)) {
+		q->latest_ctx = e->ctx;
 		return e->c.val_ptr;
+	}
 
+	if (!is_variable(&e->c)) {
+		q->latest_ctx = c_ctx;
+		return &e->c;
+	}
+
+	q->latest_ctx = e->ctx;
 	return &e->c;
 }
 
