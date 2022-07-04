@@ -1145,12 +1145,11 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
+		if ((c_ctx != q->st.curr_frame) && (v_ctx == q->st.curr_frame))
+			q->no_tco = true;
+
 		make_indirect(&e->c, v);
 		e->ctx = v_ctx;
-
-		if ((c_ctx != q->st.curr_frame)
-			&& (v_ctx == q->st.curr_frame))
-				q->no_tco = true;
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
