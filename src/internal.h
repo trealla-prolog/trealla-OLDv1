@@ -502,9 +502,9 @@ struct frame_ {
 
 struct prolog_state_ {
 	cell *curr_cell, *key;
-	db_entry *curr_clause, *curr_clause2;
+	union { db_entry *curr_clause; db_entry *curr_clause2; };
+	union { predicate *pr; predicate *pr2; };
 	miter *iter, *f_iter;
-	predicate *pr, *pr2;
 	module *m;
 	float prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;

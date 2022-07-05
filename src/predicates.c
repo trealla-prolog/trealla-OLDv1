@@ -92,8 +92,8 @@ static void set_params(query *q, pl_idx_t p1, pl_idx_t p2)
 static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
 {
 	choice *ch = GET_CURR_CHOICE();
-	if (p1) *p1 = ch->v1;
-	if (p2) *p2 = ch->v2;
+	*p1 = ch->v1;
+	*p2 = ch->v2;
 }
 
 void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
