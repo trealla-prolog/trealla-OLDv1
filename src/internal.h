@@ -486,7 +486,6 @@ struct trail_ {
 
 struct slot_ {
 	cell c;
-	pl_idx_t ctx;
 	uint16_t mgen;
 	bool mark:1;
 };

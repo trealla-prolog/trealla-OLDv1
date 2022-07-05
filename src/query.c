@@ -1061,12 +1061,6 @@ static bool resume_frame(query *q)
 	return true;
 }
 
-// NOTE: there is no reason this couldn't include a context.
-// Currently it is assumed everything has been copied into the
-// heap area and all variables are local. It should also be
-// possible to make it an offset rather than a pointer by
-// including the page nbr.
-
 void make_indirect(cell *tmp, cell *v, pl_idx_t v_ctx)
 {
 	tmp->tag = TAG_PTR;
@@ -1133,7 +1127,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
-		c_ctx = e->ctx;
+		c_ctx = e->c.tmp_ctx;
 		c = &e->c;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
@@ -1152,7 +1146,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		return &e->c;
 	}
 
-	q->latest_ctx = e->ctx;
+	q->latest_ctx = e->c.tmp_ctx;
 	return &e->c;
 }
 
@@ -1163,7 +1157,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
-		c_ctx = e->ctx;
+		c_ctx = e->c.tmp_ctx;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
 	}
@@ -1185,7 +1179,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
-		e->ctx = v_ctx;
+		e->c.tmp_ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
@@ -1202,7 +1196,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
-		c_ctx = e->ctx;
+		c_ctx = e->c.tmp_ctx;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
 	}
@@ -1215,7 +1209,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
-		e->ctx = v_ctx;
+		e->c.tmp_ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
@@ -1926,7 +1920,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	slot *e = GET_FIRST_SLOT(fsrc);
 
 	for (unsigned i = 0; i < fsrc->nbr_vars; i++, e++) {
-		cell *c = deref(q, &e->c, e->ctx);
+		cell *c = deref(q, &e->c, e->c.tmp_ctx);
 		cell tmp = (cell){0};
 		tmp.tag = TAG_VAR;
 		tmp.var_nbr = i;
