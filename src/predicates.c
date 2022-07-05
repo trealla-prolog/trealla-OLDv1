@@ -5375,7 +5375,6 @@ static USE_RESULT bool fn_atom_upper_2(query *q)
 	return ok;
 }
 
-
 static USE_RESULT bool fn_string_lower_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -7174,15 +7173,19 @@ static void load_ops(query *q)
 builtins g_iso_bifs[] =
 {
 	{",", 2, NULL, NULL, false, BLAH},
-
+	{";", 2, fn_iso_disjunction_2, NULL, false, BLAH},
 	{"!", 0, fn_iso_cut_0, NULL, false, BLAH},
 	{":", 2, fn_iso_invoke_2, NULL, false, BLAH},
 	{"=..", 2, fn_iso_univ_2, NULL, false, BLAH},
 	{"->", 2, fn_iso_if_then_2, NULL, false, BLAH},
-	{";", 2, fn_iso_disjunction_2, NULL, false, BLAH},
 	{"\\+", 1, fn_iso_negation_1, NULL, false, BLAH},
+	{"=", 2, fn_iso_unify_2, NULL, false, BLAH},
+	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
+	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
+
 	{"$throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"$catch", 3, fn_iso_catch_3, NULL, false, BLAH},
+
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false, BLAH},
 	{"$block_catcher", 1, fn_sys_block_catcher_1, NULL, false, BLAH},
 	{"$queuen", 2, fn_sys_queuen_2, NULL, false, BLAH},
@@ -7235,8 +7238,6 @@ builtins g_iso_bifs[] =
 	{"sort", 2, fn_iso_sort_2, NULL, false, BLAH},
 	{"msort", 2, fn_iso_msort_2, NULL, false, BLAH},
 	{"keysort", 2, fn_iso_keysort_2, NULL, false, BLAH},
-
-
 	{"end_of_file", 0, fn_iso_halt_0, NULL, false, BLAH},
 	{"halt", 0, fn_iso_halt_0, NULL, false, BLAH},
 	{"halt", 1, fn_iso_halt_1, NULL, false, BLAH},
@@ -7245,7 +7246,6 @@ builtins g_iso_bifs[] =
 	{"assertz", 1, fn_iso_assertz_1, NULL, false, BLAH},
 	{"retract", 1, fn_iso_retract_1, NULL, false, BLAH},
 	{"retractall", 1, fn_iso_retractall_1, NULL, false, BLAH},
-
 	{"$legacy_current_prolog_flag", 2, fn_iso_current_prolog_flag_2, NULL, false, BLAH},
 	{"set_prolog_flag", 2, fn_iso_set_prolog_flag_2, NULL, false, BLAH},
 	{"op", 3, fn_iso_op_3, NULL, false, BLAH},
@@ -7254,10 +7254,6 @@ builtins g_iso_bifs[] =
 	{"acyclic_term", 1, fn_iso_acyclic_term_1, NULL, false, BLAH},
 	{"compare", 3, fn_iso_compare_3, NULL, false, BLAH},
 	{"unify_with_occurs_check", 2, fn_iso_unify_with_occurs_check_2, NULL, false, BLAH},
-
-	{"=", 2, fn_iso_unify_2, NULL, false, BLAH},
-	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
-	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
 
 	{0}
 };
@@ -7273,7 +7269,6 @@ builtins g_other_bifs[] =
 	{"using", 0, fn_using_0, NULL, false, BLAH},
 	{"use_module", 1, fn_use_module_1, NULL, false, BLAH},
 	{"use_module", 2, fn_use_module_2, NULL, false, BLAH},
-
 
 	{"sleep", 1, fn_sleep_1, "+integer", false, BLAH},
 	{"delay", 1, fn_delay_1, "+integer", false, BLAH},
@@ -7297,7 +7292,6 @@ builtins g_other_bifs[] =
 	// Miscellaneous...
 
 	{"sort", 4, fn_sort_4, NULL, false, BLAH},
-
 	{"ignore", 1, fn_ignore_1, NULL, false, BLAH},
 	{"soft_abolish", 1, fn_soft_abolish_1, NULL, false, BLAH},
 	{"string_codes", 2, fn_string_codes_2, NULL, false, BLAH},
