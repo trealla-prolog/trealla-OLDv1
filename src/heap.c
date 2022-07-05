@@ -185,14 +185,14 @@ static cell *deep_copy2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_at
 			tmp->flags |= FLAG_REF;
 			tmp->val_off = to->val_off;
 			tmp->var_nbr = to->var_nbr;
-			tmp->tmp_ctx = to_ctx;
+			tmp->var_ctx = to_ctx;
 		} else if (copy_attrs && e->c.attrs) {
 			push_tmp_heap(q);
 			cell *tmp2 = deep_copy_to_heap_with_replacement(q, e->c.attrs, e->c.attrs_ctx, false, NULL, 0, NULL, 0);
 			pop_tmp_heap(q);
 			if (!tmp2) return NULL;
 			tmp->tmp_attrs = tmp2;
-			tmp->tmp_ctx = q->st.curr_frame;
+			tmp->var_ctx = q->st.curr_frame;
 		}
 
 		return tmp;
@@ -395,11 +395,11 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 
 	for (pl_idx_t i = 0; i < rec->nbr_cells; i++, c++) {
 		if (is_variable(c) && is_fresh(c) && c->tmp_attrs) {
-			//printf("*** got one var_nbr=%u / %u\n", c->var_nbr, c->tmp_ctx);
-			frame *f = GET_FRAME(c->tmp_ctx);
+			//printf("*** got one var_nbr=%u / %u\n", c->var_nbr, c->var_ctx);
+			frame *f = GET_FRAME(c->var_ctx);
 			slot *e = GET_SLOT(f, c->var_nbr);
 			e->c.attrs = c->tmp_attrs;
-			e->c.attrs_ctx = c->tmp_ctx;
+			e->c.attrs_ctx = c->var_ctx;
 		}
 	}
 
@@ -461,7 +461,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, re
 
 	if (is_variable(tmp) && !is_ref(tmp)) {
 		tmp->flags |= FLAG_REF;
-		tmp->tmp_ctx = p1_ctx;
+		tmp->var_ctx = p1_ctx;
 	}
 
 	if (!is_structure(p1))
@@ -596,7 +596,7 @@ cell *append_to_tmp(query *q, cell *p1)
 			continue;
 
 		dst->flags |= FLAG_REF;
-		dst->tmp_ctx = q->st.curr_frame;
+		dst->var_ctx = q->st.curr_frame;
 	}
 
 	return tmp;
@@ -631,7 +631,7 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 			continue;
 
 		dst->flags |= FLAG_REF;
-		dst->tmp_ctx = q->st.curr_frame;
+		dst->var_ctx = q->st.curr_frame;
 	}
 
 	return tmp;

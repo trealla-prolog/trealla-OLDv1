@@ -726,7 +726,7 @@ static bool check_slots(const query *q, const frame *f, const clause *r)
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
-		if (is_indirect(&e->c) && (e->c.tmp_ctx != q->st.curr_frame))
+		if (is_indirect(&e->c) && (e->c.var_ctx != q->st.curr_frame))
 			return false;
 
 		if (is_managed(&e->c))
@@ -1068,7 +1068,7 @@ void make_indirect(cell *tmp, cell *v, pl_idx_t v_ctx)
 	tmp->arity = 0;
 	tmp->flags = 0;
 	tmp->val_ptr = v;
-	tmp->tmp_ctx = v_ctx;
+	tmp->var_ctx = v_ctx;
 }
 
 #define MAX_VARS (1L<<30)
@@ -1121,13 +1121,13 @@ unsigned create_vars(query *q, unsigned cnt)
 cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 {
 	if (is_ref(c))
-		c_ctx = c->tmp_ctx;
+		c_ctx = c->var_ctx;
 
 	const frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
-		c_ctx = e->c.tmp_ctx;
+		c_ctx = e->c.var_ctx;
 		c = &e->c;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
@@ -1137,7 +1137,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		return q->latest_ctx = c_ctx, c;
 
 	if (is_indirect(&e->c)) {
-		q->latest_ctx = e->c.tmp_ctx;
+		q->latest_ctx = e->c.var_ctx;
 		return e->c.val_ptr;
 	}
 
@@ -1146,7 +1146,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		return &e->c;
 	}
 
-	q->latest_ctx = e->c.tmp_ctx;
+	q->latest_ctx = e->c.var_ctx;
 	return &e->c;
 }
 
@@ -1157,7 +1157,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
-		c_ctx = e->c.tmp_ctx;
+		c_ctx = e->c.var_ctx;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
 	}
@@ -1179,7 +1179,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
-		e->c.tmp_ctx = v_ctx;
+		e->c.var_ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
@@ -1196,7 +1196,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 	while (is_variable(&e->c)) {
 		c = &e->c;
-		c_ctx = e->c.tmp_ctx;
+		c_ctx = e->c.var_ctx;
 		f = GET_FRAME(c_ctx);
 		e = GET_SLOT(f, c->var_nbr);
 	}
@@ -1209,7 +1209,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
-		e->c.tmp_ctx = v_ctx;
+		e->c.var_ctx = v_ctx;
 	} else {
 		share_cell(v);
 		e->c = *v;
@@ -1920,7 +1920,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	slot *e = GET_FIRST_SLOT(fsrc);
 
 	for (unsigned i = 0; i < fsrc->nbr_vars; i++, e++) {
-		cell *c = deref(q, &e->c, e->c.tmp_ctx);
+		cell *c = deref(q, &e->c, e->c.var_ctx);
 		cell tmp = (cell){0};
 		tmp.tag = TAG_VAR;
 		tmp.var_nbr = i;
