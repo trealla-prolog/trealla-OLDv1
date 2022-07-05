@@ -210,7 +210,7 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
-static bool is_next_key(query *q, clause *r)
+static bool is_next_key(query *q, clause *cl)
 {
 	if (q->st.iter) {
 		if (map_is_next(q->st.iter, NULL))
@@ -222,13 +222,13 @@ static bool is_next_key(query *q, clause *r)
 	if (!q->st.curr_clause->next || q->st.definite)
 		return false;
 
-	if (q->st.arg1_is_ground && r->arg1_is_unique)
+	if (q->st.arg1_is_ground && cl->arg1_is_unique)
 		return false;
 
-	if (q->st.arg2_is_ground && r->arg2_is_unique)
+	if (q->st.arg2_is_ground && cl->arg2_is_unique)
 		return false;
 
-	if (q->st.arg3_is_ground && r->arg3_is_unique)
+	if (q->st.arg3_is_ground && cl->arg3_is_unique)
 		return false;
 
 	db_entry *next = q->st.curr_clause->next;
@@ -238,11 +238,11 @@ static bool is_next_key(query *q, clause *r)
 
 	// Attempt look-ahead on 1st arg...
 
-	r = &next->cl;
+	cl = &next->cl;
 
 	if (q->st.arg1_is_ground && !next->next
-		&& (q->st.key->arity == 1) && is_ground(r->cells+1)) {
-		if (compare(q, q->st.key, q->st.curr_frame, r->cells, q->st.curr_frame)) {
+		&& (q->st.key->arity == 1) && is_ground(cl->cells+1)) {
+		if (compare(q, q->st.key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
 		}
 	}
@@ -716,10 +716,10 @@ void trim_trail(query *q)
 	}
 }
 
-static bool check_slots(const query *q, const frame *f, const clause *r)
+static bool check_slots(const query *q, const frame *f, const clause *cl)
 {
-	if (r != NULL) {
-		if (f->nbr_vars != r->nbr_vars)
+	if (cl != NULL) {
+		if (f->nbr_vars != cl->nbr_vars)
 			return false;
 	}
 
@@ -775,33 +775,33 @@ void unshare_predicate(query *q, predicate *pr)
 	pr->dirty_list = NULL;
 }
 
-static void commit_me(query *q, clause *r)
+static void commit_me(query *q, clause *cl)
 {
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
-	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
+	bool implied_first_cut = q->check_unique && !q->has_vars && cl->is_unique;
+	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q, cl);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool slots_ok = !q->retry && check_slots(q, f, r);
+	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
 	bool tco;
 
-	if (q->no_tco && (r->nbr_vars != r->nbr_temporaries))
+	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
 	else
 		tco = last_match && recursive && !choices && slots_ok;
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
-		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, cl->nbr_vars=%u, cl->nbr_temporaries=%u\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok, cl->nbr_vars, cl->nbr_temporaries);
 #endif
 
 	if (tco && q->pl->opt)
-		reuse_frame(q, r->nbr_vars);
+		reuse_frame(q, cl->nbr_vars);
 	else
-		f = push_frame(q, r->nbr_vars);
+		f = push_frame(q, cl->nbr_vars);
 
 	if (last_match) {
 		f->is_complex = q->st.curr_clause->cl.is_complex;
@@ -817,7 +817,7 @@ static void commit_me(query *q, clause *r)
 	}
 
 	q->st.iter = NULL;
-	q->st.curr_cell = get_body(r->cells);
+	q->st.curr_cell = get_body(cl->cells);
 	q->in_commit = false;
 }
 
