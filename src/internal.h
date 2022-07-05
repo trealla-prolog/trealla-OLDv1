@@ -519,8 +519,14 @@ struct prolog_state_ {
 
 struct choice_ {
 	prolog_state st;
-	uint64_t ugen, cgen, frame_cgen;
-	pl_idx_t v1, v2, overflow;
+	uint64_t cgen, frame_cgen;
+
+	union {
+		struct { uint32_t v1, v2; };
+		uint64_t ugen;
+	};
+
+	pl_idx_t overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;
 	bool catchme_retry:1;

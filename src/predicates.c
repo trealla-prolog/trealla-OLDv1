@@ -82,14 +82,14 @@ bool do_yield_0(query *q, int msecs)
 	return false;
 }
 
-static void set_params(query *q, pl_idx_t p1, pl_idx_t p2)
+static void set_params(query *q, uint32_t p1, uint32_t p2)
 {
 	choice *ch = GET_CURR_CHOICE();
 	ch->v1 = p1;
 	ch->v2 = p2;
 }
 
-static void get_params(query *q, pl_idx_t *p1, pl_idx_t *p2)
+static void get_params(query *q, uint32_t *p1, uint32_t *p2)
 {
 	choice *ch = GET_CURR_CHOICE();
 	*p1 = ch->v1;
@@ -1454,7 +1454,7 @@ static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
 			len = len_p1 - before - after;
 	} else {
-		pl_idx_t v1, v2;
+		uint32_t v1, v2;
 		get_params(q, &v1, &v2);
 		before = v1;
 		len = v2;
