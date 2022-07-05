@@ -726,7 +726,7 @@ static bool check_slots(const query *q, const frame *f, const clause *r)
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
 
-		if (is_indirect(&e->c) && (e->ctx != q->st.curr_frame))
+		if (is_indirect(&e->c) && (e->c.tmp_ctx != q->st.curr_frame))
 			return false;
 
 		if (is_managed(&e->c))
@@ -1067,13 +1067,14 @@ static bool resume_frame(query *q)
 // possible to make it an offset rather than a pointer by
 // including the page nbr.
 
-void make_indirect(cell *tmp, cell *c)
+void make_indirect(cell *tmp, cell *v, pl_idx_t v_ctx)
 {
 	tmp->tag = TAG_PTR;
 	tmp->nbr_cells = 1;
 	tmp->arity = 0;
 	tmp->flags = 0;
-	tmp->val_ptr = c;
+	tmp->val_ptr = v;
+	tmp->tmp_ctx = v_ctx;
 }
 
 #define MAX_VARS (1L<<30)
@@ -1142,7 +1143,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		return q->latest_ctx = c_ctx, c;
 
 	if (is_indirect(&e->c)) {
-		q->latest_ctx = e->ctx;
+		q->latest_ctx = e->c.tmp_ctx;
 		return e->c.val_ptr;
 	}
 
@@ -1180,8 +1181,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		if ((c_ctx != q->st.curr_frame) && (v_ctx == q->st.curr_frame))
 			q->no_tco = true;
 
-		make_indirect(&e->c, v);
-		e->ctx = v_ctx;
+		make_indirect(&e->c, v, v_ctx);
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
@@ -1189,7 +1189,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	} else {
 		share_cell(v);
 		e->c = *v;
-		e->ctx = v_ctx;
 	}
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
@@ -1212,8 +1211,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 
 	if (is_structure(v)) {
-		make_indirect(&e->c, v);
-		e->ctx = v_ctx;
+		make_indirect(&e->c, v, v_ctx);
 	} else if (is_variable(v)) {
 		e->c = *v;
 		e->c.flags &= ~FLAG_REF;
@@ -1221,7 +1219,6 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	} else {
 		share_cell(v);
 		e->c = *v;
-		e->ctx = v_ctx;
 	}
 }
 

@@ -79,7 +79,7 @@ void make_end(cell *tmp);
 
 void make_atom(cell *tmp, pl_idx_t offset);
 void make_smalln(cell *tmp, const char *s, size_t n);
-void make_indirect(cell *tmp, cell *c);
+void make_indirect(cell *tmp, cell *v, pl_idx_t v_ctx);
 
 bool make_cstringn(cell *d, const char *s, size_t n);
 bool make_stringn(cell *d, const char *s, size_t n);

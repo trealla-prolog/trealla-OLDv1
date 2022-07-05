@@ -1321,7 +1321,7 @@ static bool dcg_expansion(parser *p)
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
+			q->latest_ctx = e->c.tmp_ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
 
@@ -1406,7 +1406,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
+			q->latest_ctx = e->c.tmp_ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
 
@@ -1516,7 +1516,7 @@ static bool term_expansion(parser *p)
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
+			q->latest_ctx = e->c.tmp_ctx;
 		} else
 			c = deref(q, &e->c, e->ctx);
 
