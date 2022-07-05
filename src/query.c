@@ -184,6 +184,59 @@ static USE_RESULT bool check_slot(query *q, unsigned cnt)
 	return true;
 }
 
+bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip_)
+{
+	pl_int_t skip = 0, max = 1000000000;
+	pl_idx_t c_ctx = p1_ctx;
+	cell tmp = {0};
+
+	cell *c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
+
+	if (skip_)
+		*skip_ = skip;
+
+	if (!strcmp(C_STR(q, c), "[]"))
+		return true;
+
+	if (is_variable(c))
+		*is_partial = true;
+	else
+		*is_partial = false;
+
+	return false;
+}
+
+char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
+{
+	char *tmp = malloc(len+1+1);
+	ensure(tmp);
+	char *dst = tmp;
+	LIST_HANDLER(p_chars);
+
+	while (is_list(p_chars)) {
+		CHECK_INTERRUPT();
+		cell *h = LIST_HEAD(p_chars);
+		h = deref(q, h, p_chars_ctx);
+
+		if (is_integer(h)) {
+			int ch = get_int(h);
+			dst += put_char_utf8(dst, ch);
+		} else {
+			const char *p = C_STR(q, h);
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+		}
+
+		p_chars = LIST_TAIL(p_chars);
+		p_chars = deref(q, p_chars, p_chars_ctx);
+		p_chars_ctx = q->latest_ctx;
+	}
+
+	*dst = '\0';
+	return tmp;
+}
+
 bool more_data(query *q, db_entry *dbe)
 {
 	if (!dbe->next)
@@ -210,7 +263,7 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
-static bool is_next_key(query *q, clause *r)
+static bool is_next_key(query *q, clause *cl)
 {
 	if (q->st.iter) {
 		if (map_is_next(q->st.iter, NULL))
@@ -222,13 +275,13 @@ static bool is_next_key(query *q, clause *r)
 	if (!q->st.curr_clause->next || q->st.definite)
 		return false;
 
-	if (q->st.arg1_is_ground && r->arg1_is_unique)
+	if (q->st.arg1_is_ground && cl->arg1_is_unique)
 		return false;
 
-	if (q->st.arg2_is_ground && r->arg2_is_unique)
+	if (q->st.arg2_is_ground && cl->arg2_is_unique)
 		return false;
 
-	if (q->st.arg3_is_ground && r->arg3_is_unique)
+	if (q->st.arg3_is_ground && cl->arg3_is_unique)
 		return false;
 
 	db_entry *next = q->st.curr_clause->next;
@@ -238,11 +291,11 @@ static bool is_next_key(query *q, clause *r)
 
 	// Attempt look-ahead on 1st arg...
 
-	r = &next->cl;
+	cl = &next->cl;
 
 	if (q->st.arg1_is_ground && !next->next
-		&& (q->st.key->arity == 1) && is_ground(r->cells+1)) {
-		if (compare(q, q->st.key, q->st.curr_frame, r->cells, q->st.curr_frame)) {
+		&& (q->st.key->arity == 1) && is_ground(cl->cells+1)) {
+		if (compare(q, q->st.key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
 		}
 	}
@@ -630,7 +683,7 @@ LOOP:
 	return true;
 }
 
-static frame *push_frame(query *q, unsigned nbr_vars)
+static frame *push_frame(query *q, clause *cl)
 {
 	pl_idx_t new_frame = q->st.fp++;
 	frame *f = GET_FRAME(new_frame);
@@ -652,12 +705,12 @@ static frame *push_frame(query *q, unsigned nbr_vars)
 	f->is_last = false;
 	f->overflow = 0;
 
-	q->st.sp += nbr_vars;
+	q->st.sp += cl->nbr_vars;
 	q->st.curr_frame = new_frame;
 	return f;
 }
 
-static void reuse_frame(query *q, unsigned nbr_vars)
+static void reuse_frame(query *q, clause *cl)
 {
 	const frame *newf = GET_FRAME(q->st.fp);
 	frame *f = GET_CURR_FRAME();
@@ -668,7 +721,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const slot *from = GET_FIRST_SLOT(newf);
 	slot *to = GET_FIRST_SLOT(f);
 
-	for (pl_idx_t i = 0; i < nbr_vars; i++) {
+	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
 		unshare_cell(&to->c);
 		*to++ = *from++;
 	}
@@ -685,11 +738,11 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 #endif
 
 	f->cgen = newf->cgen;
-	f->nbr_slots = nbr_vars;
-	f->nbr_vars = nbr_vars;
+	f->nbr_slots = cl->nbr_vars;
+	f->nbr_vars = cl->nbr_vars;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot + nbr_vars;
+	q->st.sp = f->base_slot + cl->nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -716,10 +769,10 @@ void trim_trail(query *q)
 	}
 }
 
-static bool check_slots(const query *q, const frame *f, const clause *r)
+static bool check_slots(const query *q, const frame *f, const clause *cl)
 {
-	if (r != NULL) {
-		if (f->nbr_vars != r->nbr_vars)
+	if (cl != NULL) {
+		if (f->nbr_vars != cl->nbr_vars)
 			return false;
 	}
 
@@ -775,33 +828,33 @@ void unshare_predicate(query *q, predicate *pr)
 	pr->dirty_list = NULL;
 }
 
-static void commit_me(query *q, clause *r)
+static void commit_me(query *q, clause *cl)
 {
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
-	bool implied_first_cut = q->check_unique && !q->has_vars && r->is_unique;
-	bool last_match = implied_first_cut || r->is_first_cut || !is_next_key(q, r);
+	bool implied_first_cut = q->check_unique && !q->has_vars && cl->is_unique;
+	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q, cl);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
-	bool slots_ok = !q->retry && check_slots(q, f, r);
+	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
 	bool tco;
 
-	if (q->no_tco && (r->nbr_vars != r->nbr_temporaries))
+	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
 	else
 		tco = last_match && recursive && !choices && slots_ok;
 
 #if 0
-	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, r->nbr_vars=%u, r->nbr_temporaries=%u\n",
-		tco, q->no_tco, last_match, recursive, choices, slots_ok, r->nbr_vars, r->nbr_temporaries);
+	printf("*** tco=%d, q->no_tco=%d, last_match=%d, rec=%d, any_choices=%d, slots_ok=%d, cl->nbr_vars=%u, cl->nbr_temporaries=%u\n",
+		tco, q->no_tco, last_match, recursive, choices, slots_ok, cl->nbr_vars, cl->nbr_temporaries);
 #endif
 
 	if (tco && q->pl->opt)
-		reuse_frame(q, r->nbr_vars);
+		reuse_frame(q, cl);
 	else
-		f = push_frame(q, r->nbr_vars);
+		f = push_frame(q, cl);
 
 	if (last_match) {
 		f->is_complex = q->st.curr_clause->cl.is_complex;
@@ -817,7 +870,7 @@ static void commit_me(query *q, clause *r)
 	}
 
 	q->st.iter = NULL;
-	q->st.curr_cell = get_body(r->cells);
+	q->st.curr_cell = get_body(cl->cells);
 	q->in_commit = false;
 }
 
@@ -906,7 +959,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 	while (q->cp) {
 		choice *ch = GET_CURR_CHOICE();
-		choice *save_ch = ch;
+		const choice *save_ch = ch;
 
 		while (soft_cut && (ch >= q->choices)) {
 			if (ch->barrier && (ch->cgen == f->cgen)) {
@@ -943,7 +996,6 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			ch->st.iter = NULL;
 		}
 
-		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);
 		q->cp--;
 
@@ -973,9 +1025,8 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #endif
 	}
 
-	if (!q->cp && !q->undo_hi_tp) {
+	if (!q->cp && !q->undo_hi_tp)
 		q->st.tp = 0;
-	}
 }
 
 // If the call is det then the barrier can be dropped...
@@ -1029,13 +1080,13 @@ static bool resume_frame(query *q)
 
 #if 0
 	if (q->st.curr_clause) {
-		clause *r = &q->st.curr_clause->cl;
+		clause *cl = &q->st.curr_clause->cl;
 
 		if ((q->st.curr_frame == (q->st.fp-1))
 			&& q->pl->opt
-			&& r->is_tail_rec
+			&& cl->is_tail_rec
 			&& !any_choices(q, f)
-			&& check_slots(q, f, r))
+			&& check_slots(q, f, cl))
 			q->st.fp--;
 	}
 #endif

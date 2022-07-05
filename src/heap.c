@@ -710,6 +710,24 @@ USE_RESULT cell *end_list(query *q)
 	return tmp;
 }
 
+USE_RESULT cell *end_list_unsafe(query *q)
+{
+	cell *tmp = alloc_on_tmp(q, 1);
+	if (!tmp) return NULL;
+	tmp->tag = TAG_INTERNED;
+	tmp->nbr_cells = 1;
+	tmp->val_off = g_nil_s;
+	tmp->arity = tmp->flags = 0;
+	pl_idx_t nbr_cells = tmp_heap_used(q);
+
+	tmp = alloc_on_heap(q, nbr_cells);
+	if (!tmp) return NULL;
+	copy_cells(tmp, get_tmp_heap(q, 0), nbr_cells);
+	tmp->nbr_cells = nbr_cells;
+	fix_list(tmp);
+	return tmp;
+}
+
 bool search_tmp_list(query *q, cell *v)
 {
 	cell *tmp = get_tmp_heap(q, 0);

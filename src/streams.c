@@ -5309,7 +5309,7 @@ static USE_RESULT bool fn_sys_put_chars_2(query *q)
 	return !ferror(str->fp);
 }
 
-const builtins g_files_bifs[] =
+builtins g_files_bifs[] =
 {
 	// ISO...
 

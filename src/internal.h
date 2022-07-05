@@ -413,7 +413,8 @@ typedef struct {
 struct clause_ {
 	uint64_t ugen_created, ugen_erased;
 	pl_idx_t nbr_cells, cidx;
-	uint32_t nbr_vars, nbr_temporaries;
+	uint32_t nbr_vars;
+	uint16_t nbr_temporaries;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
 	bool arg1_is_unique:1;
@@ -518,8 +519,14 @@ struct prolog_state_ {
 
 struct choice_ {
 	prolog_state st;
-	uint64_t ugen, cgen, frame_cgen;
-	pl_idx_t v1, v2, overflow;
+	uint64_t cgen, frame_cgen;
+
+	union {
+		struct { uint32_t v1, v2; };
+		uint64_t ugen;
+	};
+
+	pl_idx_t overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;
 	bool catchme_retry:1;
