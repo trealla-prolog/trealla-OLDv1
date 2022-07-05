@@ -331,7 +331,7 @@ static int find_binding(query *q, pl_idx_t var_nbr, pl_idx_t tmp_ctx)
 		if (!is_variable(&e->c))
 			continue;
 
-		if (e->ctx != tmp_ctx)
+		if (e->c.tmp_ctx != tmp_ctx)
 			continue;
 
 		if (e->c.var_nbr == var_nbr)

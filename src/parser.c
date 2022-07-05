@@ -1316,14 +1316,13 @@ static bool dcg_expansion(parser *p)
 		if (is_empty(&e->c))
 			break;
 
-		q->latest_ctx = e->ctx;
+		q->latest_ctx = e->c.tmp_ctx;
 		cell *c;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
 		} else
-			c = deref(q, &e->c, e->ctx);
+			c = deref(q, &e->c, e->c.tmp_ctx);
 
 		src = print_canonical_to_strbuf(q, c, q->latest_ctx, 1);
 		strcat(src, ".");
@@ -1401,14 +1400,13 @@ static cell *goal_expansion(parser *p, cell *goal)
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = e->ctx;
+		q->latest_ctx = e->c.tmp_ctx;
 		cell *c;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
 		} else
-			c = deref(q, &e->c, e->ctx);
+			c = deref(q, &e->c, e->c.tmp_ctx);
 
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;
@@ -1511,14 +1509,13 @@ static bool term_expansion(parser *p)
 		if (is_empty(&e->c))
 			continue;
 
-		q->latest_ctx = e->ctx;
+		q->latest_ctx = e->c.tmp_ctx;
 		cell *c;
 
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
-			q->latest_ctx = e->ctx;
 		} else
-			c = deref(q, &e->c, e->ctx);
+			c = deref(q, &e->c, e->c.tmp_ctx);
 
 		if (strcmp(p2->vartab.var_name[i], "_TermOut"))
 			continue;

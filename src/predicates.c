@@ -6268,7 +6268,7 @@ static USE_RESULT bool fn_sys_unifiable_3(query *q)
 		const trail *tr = q->trails + before_hook_tp;
 		const frame *f = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		cell *c = deref(q, &e->c, e->ctx);
+		cell *c = deref(q, &e->c, e->c.tmp_ctx);
 
 		if (is_indirect(c))
 			c = c->val_ptr;

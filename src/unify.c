@@ -754,7 +754,7 @@ bool fn_sys_undo_trail_1(query *q)
 
 		cell lhs, rhs;
 		make_new_var(q, &lhs, tr->var_nbr, tr->ctx);
-		set_new_var(q, &rhs, &e->c, e->ctx);
+		set_new_var(q, &rhs, &e->c, e->c.tmp_ctx);
 
 		cell tmp[3];
 		make_struct(tmp, g_minus_s, NULL, 2, 2);
