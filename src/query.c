@@ -630,7 +630,7 @@ LOOP:
 	return true;
 }
 
-static frame *push_frame(query *q, unsigned nbr_vars)
+static frame *push_frame(query *q, clause *cl)
 {
 	pl_idx_t new_frame = q->st.fp++;
 	frame *f = GET_FRAME(new_frame);
@@ -652,12 +652,12 @@ static frame *push_frame(query *q, unsigned nbr_vars)
 	f->is_last = false;
 	f->overflow = 0;
 
-	q->st.sp += nbr_vars;
+	q->st.sp += cl->nbr_vars;
 	q->st.curr_frame = new_frame;
 	return f;
 }
 
-static void reuse_frame(query *q, unsigned nbr_vars)
+static void reuse_frame(query *q, clause *cl)
 {
 	const frame *newf = GET_FRAME(q->st.fp);
 	frame *f = GET_CURR_FRAME();
@@ -668,7 +668,7 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 	const slot *from = GET_FIRST_SLOT(newf);
 	slot *to = GET_FIRST_SLOT(f);
 
-	for (pl_idx_t i = 0; i < nbr_vars; i++) {
+	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
 		unshare_cell(&to->c);
 		*to++ = *from++;
 	}
@@ -685,11 +685,11 @@ static void reuse_frame(query *q, unsigned nbr_vars)
 #endif
 
 	f->cgen = newf->cgen;
-	f->nbr_slots = nbr_vars;
-	f->nbr_vars = nbr_vars;
+	f->nbr_slots = cl->nbr_vars;
+	f->nbr_vars = cl->nbr_vars;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot + nbr_vars;
+	q->st.sp = f->base_slot + cl->nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -799,9 +799,9 @@ static void commit_me(query *q, clause *cl)
 #endif
 
 	if (tco && q->pl->opt)
-		reuse_frame(q, cl->nbr_vars);
+		reuse_frame(q, cl);
 	else
-		f = push_frame(q, cl->nbr_vars);
+		f = push_frame(q, cl);
 
 	if (last_match) {
 		f->is_complex = q->st.curr_clause->cl.is_complex;
@@ -906,7 +906,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 	while (q->cp) {
 		choice *ch = GET_CURR_CHOICE();
-		choice *save_ch = ch;
+		const choice *save_ch = ch;
 
 		while (soft_cut && (ch >= q->choices)) {
 			if (ch->barrier && (ch->cgen == f->cgen)) {
@@ -943,7 +943,6 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			ch->st.iter = NULL;
 		}
 
-		unshare_predicate(q, ch->st.pr2);
 		unshare_predicate(q, ch->st.pr);
 		q->cp--;
 
@@ -973,9 +972,8 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 #endif
 	}
 
-	if (!q->cp && !q->undo_hi_tp) {
+	if (!q->cp && !q->undo_hi_tp)
 		q->st.tp = 0;
-	}
 }
 
 // If the call is det then the barrier can be dropped...
