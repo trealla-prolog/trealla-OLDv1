@@ -390,7 +390,7 @@ struct cell_ {
 
 			union {
 				uint32_t val_off;		// used with TAG_VAR & TAG_INTERNED
-				pl_idx_t tmp_ctx;		// used with TAG_VAR
+				pl_idx_t var_ctx;		// used with TAG_VAR
 			};
 		};
 
@@ -486,7 +486,7 @@ struct trail_ {
 
 struct slot_ {
 	cell c;
-	uint16_t mgen;
+	uint16_t mgen;		// TODO: fit these 2 into cell
 	bool mark:1;
 };
 

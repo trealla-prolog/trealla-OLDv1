@@ -102,9 +102,8 @@ void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
 	tmp->flags = FLAG_REF;
-	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
-	tmp->tmp_ctx = ctx;
+	tmp->var_ctx = ctx;
 }
 
 void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr)
@@ -112,8 +111,8 @@ void make_var(cell *tmp, pl_idx_t off, unsigned var_nbr)
 	*tmp = (cell){0};
 	tmp->tag = TAG_VAR;
 	tmp->nbr_cells = 1;
-	tmp->val_off = off;
 	tmp->var_nbr = var_nbr;
+	tmp->val_off = off;
 }
 
 void make_var2(cell *tmp, pl_idx_t off)
@@ -6268,7 +6267,7 @@ static USE_RESULT bool fn_sys_unifiable_3(query *q)
 		const trail *tr = q->trails + before_hook_tp;
 		const frame *f = GET_FRAME(tr->ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		cell *c = deref(q, &e->c, e->c.tmp_ctx);
+		cell *c = deref(q, &e->c, e->c.var_ctx);
 
 		if (is_indirect(c))
 			c = c->val_ptr;
