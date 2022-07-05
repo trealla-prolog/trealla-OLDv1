@@ -486,7 +486,7 @@ struct trail_ {
 
 struct slot_ {
 	cell c;
-	uint16_t mgen;
+	uint16_t mgen;		// TODO: fit these 2 into cell
 	bool mark:1;
 };
 
