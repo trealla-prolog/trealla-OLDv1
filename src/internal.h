@@ -486,7 +486,7 @@ struct trail_ {
 
 struct slot_ {
 	cell c;
-	uint16_t mgen;
+	uint32_t mgen;
 	bool mark:1;
 };
 
@@ -498,31 +498,6 @@ struct frame_ {
 	uint16_t mid;
 	bool is_complex:1;
 	bool is_last:1;
-};
-
-enum { eof_action_eof_code, eof_action_error, eof_action_reset };
-
-struct stream_ {
-	FILE *fp;
-	char *mode, *filename, *name, *data, *src;
-	void *sslptr;
-	parser *p;
-	char srcbuf[STREAM_BUFLEN];
-	size_t data_len, alloc_nbytes;
-	int ungetch, srclen;
-	uint8_t level, eof_action;
-	bool ignore:1;
-	bool at_end_of_file:1;
-	bool bom:1;
-	bool repo:1;
-	bool binary:1;
-	bool did_getc:1;
-	bool socket:1;
-	bool nodelay:1;
-	bool nonblock:1;
-	bool udp:1;
-	bool ssl:1;
-	bool domain:1;
 };
 
 struct prolog_state_ {
@@ -557,6 +532,31 @@ struct choice_ {
 	bool register_term:1;
 	bool block_catcher:1;
 	bool catcher:1;
+};
+
+enum { eof_action_eof_code, eof_action_error, eof_action_reset };
+
+struct stream_ {
+	FILE *fp;
+	char *mode, *filename, *name, *data, *src;
+	void *sslptr;
+	parser *p;
+	char srcbuf[STREAM_BUFLEN];
+	size_t data_len, alloc_nbytes;
+	int ungetch, srclen;
+	uint8_t level, eof_action;
+	bool ignore:1;
+	bool at_end_of_file:1;
+	bool bom:1;
+	bool repo:1;
+	bool binary:1;
+	bool did_getc:1;
+	bool socket:1;
+	bool nodelay:1;
+	bool nonblock:1;
+	bool udp:1;
+	bool ssl:1;
+	bool domain:1;
 };
 
 struct page_ {
@@ -613,7 +613,7 @@ struct query_ {
 	pl_idx_t max_choices, max_frames, max_slots, max_trails, before_hook_tp;
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
-	uint16_t mgen;
+	uint32_t mgen;
 	uint8_t nv_mask[MAX_ARITY];
 	prolog_flags flags;
 	enum q_retry retry;
