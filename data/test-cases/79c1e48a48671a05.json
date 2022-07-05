@@ -1,0 +1,55 @@
+{
+  "uid" : "79c1e48a48671a05",
+  "name" : "arbitrary_arbitrary_2_20",
+  "fullName" : "arbitrary_arbitrary_2_20::tests",
+  "historyId" : "arbitrary_arbitrary_2_20::tests",
+  "time" : {
+    "duration" : 3
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/arbitrary/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/arbitrary/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/arbitrary/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/arbitrary/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "229-231"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/de4c1436c8a817e0a06a6e728899f4578f94a984/library/arbitrary/tests.lgt#L229"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "79c1e48a48671a05.json",
+  "parameterValues" : [ "library/arbitrary/tests.lgt", "229-231", "https://github.com/LogtalkDotOrg/logtalk3/tree/de4c1436c8a817e0a06a6e728899f4578f94a984/library/arbitrary/tests.lgt#L229" ]
+}

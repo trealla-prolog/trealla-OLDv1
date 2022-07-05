@@ -1,0 +1,55 @@
+{
+  "uid" : "bb80f5696470e3bc",
+  "name" : "heap_new_1_01",
+  "fullName" : "heap_new_1_01::tests(heap(<))",
+  "historyId" : "heap_new_1_01::tests(heap(<))",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/heaps/tests.lgt::tests(heap(<))"
+  }, {
+    "name" : "testClass",
+    "value" : "library/heaps/tests.lgt::tests(heap(<))"
+  }, {
+    "name" : "package",
+    "value" : "library/heaps/tests.lgt::tests(heap(<))"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/heaps/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "216-218"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/de4c1436c8a817e0a06a6e728899f4578f94a984/library/heaps/tests.lgt#L216"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "bb80f5696470e3bc.json",
+  "parameterValues" : [ "library/heaps/tests.lgt", "216-218", "https://github.com/LogtalkDotOrg/logtalk3/tree/de4c1436c8a817e0a06a6e728899f4578f94a984/library/heaps/tests.lgt#L216" ]
+}
