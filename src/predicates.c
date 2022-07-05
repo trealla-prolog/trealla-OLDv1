@@ -1480,8 +1480,7 @@ static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 			make_int(&tmp, before);
 
 			if (!unify(q, p2, p2_ctx, &tmp, q->st.curr_frame)) {
-				undo_me(q);
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
@@ -1489,8 +1488,7 @@ static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 			make_int(&tmp, len);
 
 			if (!unify(q, p3, p3_ctx, &tmp, q->st.curr_frame)) {
-				undo_me(q);
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
@@ -1498,8 +1496,7 @@ static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 			make_int(&tmp, after);
 
 			if (!unify(q, p4, p4_ctx, &tmp, q->st.curr_frame)) {
-				undo_me(q);
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
@@ -1521,8 +1518,7 @@ static USE_RESULT bool fn_iso_sub_atom_5(query *q)
 
 			if (!unify(q, p5, p5_ctx, &tmp, q->st.curr_frame)) {
 				unshare_cell(&tmp);
-				undo_me(q);
-				drop_choice(q);
+				retry_choice(q);
 				continue;
 			}
 
