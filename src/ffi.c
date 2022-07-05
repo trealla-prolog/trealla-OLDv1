@@ -9,6 +9,7 @@
 #include <ffi.h>
 #endif
 
+#include "prolog.h"
 #include "query.h"
 
 // These are pseudo tags just used here...

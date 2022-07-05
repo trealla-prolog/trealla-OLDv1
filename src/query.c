@@ -184,6 +184,59 @@ static USE_RESULT bool check_slot(query *q, unsigned cnt)
 	return true;
 }
 
+bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip_)
+{
+	pl_int_t skip = 0, max = 1000000000;
+	pl_idx_t c_ctx = p1_ctx;
+	cell tmp = {0};
+
+	cell *c = skip_max_list(q, p1, &c_ctx, max, &skip, &tmp);
+	unshare_cell(&tmp);
+
+	if (skip_)
+		*skip_ = skip;
+
+	if (!strcmp(C_STR(q, c), "[]"))
+		return true;
+
+	if (is_variable(c))
+		*is_partial = true;
+	else
+		*is_partial = false;
+
+	return false;
+}
+
+char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len)
+{
+	char *tmp = malloc(len+1+1);
+	ensure(tmp);
+	char *dst = tmp;
+	LIST_HANDLER(p_chars);
+
+	while (is_list(p_chars)) {
+		CHECK_INTERRUPT();
+		cell *h = LIST_HEAD(p_chars);
+		h = deref(q, h, p_chars_ctx);
+
+		if (is_integer(h)) {
+			int ch = get_int(h);
+			dst += put_char_utf8(dst, ch);
+		} else {
+			const char *p = C_STR(q, h);
+			int ch = peek_char_utf8(p);
+			dst += put_char_utf8(dst, ch);
+		}
+
+		p_chars = LIST_TAIL(p_chars);
+		p_chars = deref(q, p_chars, p_chars_ctx);
+		p_chars_ctx = q->latest_ctx;
+	}
+
+	*dst = '\0';
+	return tmp;
+}
+
 bool more_data(query *q, db_entry *dbe)
 {
 	if (!dbe->next)

@@ -56,3 +56,4 @@ bool search_tmp_list(query *q, cell *v);
 void allocate_list(query *q, const cell *c);
 void append_list(query *q, const cell *c);
 USE_RESULT cell *end_list(query *q);
+USE_RESULT cell *end_list_unsafe(query *q);

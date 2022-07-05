@@ -2547,7 +2547,7 @@ static USE_RESULT bool fn_gcd_2(query *q)
 	return true;
 }
 
-const builtins g_functions_bifs[] =
+builtins g_functions_bifs[] =
 {
 	// Predicate...
 
@@ -2569,6 +2569,7 @@ const builtins g_functions_bifs[] =
 	{"return", 1, fn_return_1, NULL, false, BLAH},
 	{"float", 1, fn_iso_float_1, NULL, false, BLAH},
 	{"integer", 1, fn_iso_integer_1, NULL, false, BLAH},
+	{"setrand", 1, fn_set_seed_1, "+integer", false, BLAH},
 	{"srandom", 1, fn_set_seed_1, "+integer", false, BLAH},
 	{"set_seed", 1, fn_set_seed_1, "+integer", false, BLAH},
 	{"get_seed", 1, fn_get_seed_1, "-integer", false, BLAH},
