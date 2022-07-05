@@ -1027,13 +1027,13 @@ static bool resume_frame(query *q)
 
 #if 0
 	if (q->st.curr_clause) {
-		clause *r = &q->st.curr_clause->cl;
+		clause *cl = &q->st.curr_clause->cl;
 
 		if ((q->st.curr_frame == (q->st.fp-1))
 			&& q->pl->opt
-			&& r->is_tail_rec
+			&& cl->is_tail_rec
 			&& !any_choices(q, f)
-			&& check_slots(q, f, r))
+			&& check_slots(q, f, cl))
 			q->st.fp--;
 	}
 #endif
