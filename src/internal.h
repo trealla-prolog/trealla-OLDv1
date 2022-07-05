@@ -413,7 +413,8 @@ typedef struct {
 struct clause_ {
 	uint64_t ugen_created, ugen_erased;
 	pl_idx_t nbr_cells, cidx;
-	uint32_t nbr_vars, nbr_temporaries;
+	uint32_t nbr_vars;
+	uint16_t nbr_temporaries;
 	bool is_first_cut:1;
 	bool is_cut_only:1;
 	bool arg1_is_unique:1;
