@@ -294,8 +294,8 @@ static bool is_next_key(query *q, clause *cl)
 	cl = &next->cl;
 
 	if (q->st.arg1_is_ground && !next->next
-		&& (q->st.key->arity == 1) && is_ground(cl->cells+1)) {
-		if (compare(q, q->st.key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
+		&& (q->key->arity == 1) && is_ground(cl->cells+1)) {
+		if (compare(q, q->key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
 		}
 	}
@@ -332,8 +332,8 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
 	q->st.arg3_is_ground = false;
-	q->st.key = key;
 	q->st.iter = NULL;
+	q->key = key;
 
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
@@ -374,7 +374,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	//sl_dump(pr->idx, dump_key, q);
 
 	may_error(init_tmp_heap(q));
-	q->st.key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
+	q->key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
 
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
@@ -392,7 +392,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 			return true;
 		}
 
-		q->st.key = key = arg2;
+		q->key = key = arg2;
 		idx = pr->idx2;
 	}
 
@@ -580,7 +580,7 @@ bool try_me(query *q, unsigned nbr_vars)
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
-	f->base_slot = q->st.sp;
+	f->base = q->st.sp;
 	slot *e = GET_FIRST_SLOT(f);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
@@ -709,11 +709,9 @@ static frame *push_frame(query *q, clause *cl)
 	return f;
 }
 
-static void reuse_frame(query *q, clause *cl)
+static void reuse_frame(query *q, frame* f, clause *cl)
 {
 	const frame *newf = GET_FRAME(q->st.fp);
-	frame *f = GET_CURR_FRAME();
-
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
@@ -729,7 +727,7 @@ static void reuse_frame(query *q, clause *cl)
 	// If the new frame is smaller then the current one.
 	// I don't think this is possible at the moment...
 
-	for (unsigned i = nbr_vars; i < f->nbr_vars; i++, to++) {
+	for (unsigned i = cl->nbr_vars; i < f->nbr_vars; i++, to++) {
 		unshare_cell(&to->c);
 		to->c.tag = TAG_EMPTY;
 		to->c.attrs = NULL;
@@ -741,7 +739,7 @@ static void reuse_frame(query *q, clause *cl)
 	f->nbr_vars = cl->nbr_vars;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot + cl->nbr_vars;
+	q->st.sp = f->base + cl->nbr_vars;
 	q->tot_tcos++;
 }
 
@@ -851,7 +849,7 @@ static void commit_me(query *q, clause *cl)
 #endif
 
 	if (tco && q->pl->opt)
-		reuse_frame(q, cl);
+		reuse_frame(q, f, cl);
 	else
 		f = push_frame(q, cl);
 
@@ -1138,9 +1136,9 @@ unsigned create_vars(query *q, unsigned cnt)
 	if (!check_slot(q, var_nbr+cnt))
 		return 0;
 
-	if ((f->base_slot + f->nbr_slots) >= q->st.sp) {
+	if ((f->base + f->nbr_slots) >= q->st.sp) {
 		f->nbr_slots += cnt;
-		q->st.sp = f->base_slot + f->nbr_slots;
+		q->st.sp = f->base + f->nbr_slots;
 	} else if (!f->overflow) {
 		f->overflow = q->st.sp;
 		q->st.sp += cnt;
