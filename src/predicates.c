@@ -5859,7 +5859,7 @@ static USE_RESULT bool fn_sys_legacy_predicate_property_2(query *q)
 	return false;
 }
 
-unsigned count_bits(const uint8_t *mask, unsigned bit)
+static unsigned count_bits(const uint8_t *mask, unsigned bit)
 {
 	unsigned bits = 0;
 
