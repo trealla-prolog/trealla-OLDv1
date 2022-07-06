@@ -735,11 +735,11 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 #endif
 
 	f->cgen = newf->cgen;
-	f->nbr_slots = cl->nbr_vars;
-	f->nbr_vars = cl->nbr_vars;
+	f->nbr_slots = cl->nbr_vars - cl->nbr_temporaries;
+	f->nbr_vars = cl->nbr_vars - cl->nbr_temporaries;
 	f->overflow = 0;
 
-	q->st.sp = f->base + cl->nbr_vars;
+	q->st.sp = f->base + (cl->nbr_vars - cl->nbr_temporaries);
 	q->tot_tcos++;
 }
 
@@ -869,7 +869,7 @@ static void commit_me(query *q, clause *cl)
 	q->in_commit = false;
 }
 
-void stash_me(query *q, const clause *r, bool last_match)
+void stash_me(query *q, const clause *cl, bool last_match)
 {
 	pl_idx_t cgen = q->cgen;
 
@@ -882,7 +882,7 @@ void stash_me(query *q, const clause *r, bool last_match)
 		ch->cgen = cgen = ++q->cgen;
 	}
 
-	unsigned nbr_vars = r->nbr_vars;
+	unsigned nbr_vars = cl->nbr_vars;
 	pl_idx_t new_frame = q->st.fp++;
 	frame *f = GET_FRAME(new_frame);
 	f->prev_frame = q->st.curr_frame;
@@ -1319,8 +1319,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
-		clause *r = &q->st.curr_clause2->cl;
-		cell *c = r->cells;
+		clause *cl = &q->st.curr_clause2->cl;
+		cell *c = cl->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
 		cell *c_body = get_logical_body(c);
@@ -1331,7 +1331,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			needs_true = true;
 		}
 
-		may_error(try_me(q, r->nbr_vars));
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			int ok;
@@ -1421,16 +1421,16 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
-		clause *r = &q->st.curr_clause2->cl;
-		cell *head = get_head(r->cells);
-		cell *body = get_logical_body(r->cells);
+		clause *cl = &q->st.curr_clause2->cl;
+		cell *head = get_head(cl->cells);
+		cell *body = get_logical_body(cl->cells);
 
 		// Retract(HEAD) should ignore rules (and directives)
 
 		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
-		may_error(try_me(q, r->nbr_vars));
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
 			return true;
@@ -1495,15 +1495,15 @@ static USE_RESULT bool match_head(query *q)
 		if (!can_view(f, q->st.curr_clause))
 			continue;
 
-		clause *r = &q->st.curr_clause->cl;
-		cell *head = get_head(r->cells);
-		may_error(try_me(q, r->nbr_vars));
+		clause *cl = &q->st.curr_clause->cl;
+		cell *head = get_head(cl->cells);
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error)
 				break;
 
-			commit_me(q, r);
+			commit_me(q, cl);
 			return true;
 		}
 
@@ -1889,7 +1889,7 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (pl_idx_t i = 0; i < q->max_slots; i++, e++)
+	for (pl_idx_t i = 0; i < q->st.sp; i++, e++)
 		unshare_cell(&e->c);
 
 	mp_int_clear(&q->tmp_ival);
