@@ -1350,7 +1350,9 @@ bool unload_file(module *m, const char *filename)
 	free(savebuf);
 	free(tmpbuf);
 	filename = realbuf;
-	return unload_realfile(m, filename);
+	bool ok = unload_realfile(m, filename);
+	free(realbuf);
+	return ok;
 }
 
 module *load_fp(module *m, FILE *fp, const char *filename, bool including)

@@ -1278,13 +1278,13 @@ static bool dcg_expansion(parser *p)
 			ASTRING(s);
 			ASTRING_sprintf(s, "library/%s", lib->name);
 			module *tmp_m = load_text(p->m, src, ASTRING_cstr(s));
+			ASTRING_free(s);
 
 			if (tmp_m) {
 				p->m->used[p->m->idx_used++] = tmp_m;
 				p->m->pl->dcgs = tmp_m;
 			}
 
-			ASTRING_free(s);
 			free(src);
 			break;
 		}
