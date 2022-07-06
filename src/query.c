@@ -542,7 +542,7 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 
 static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
 {
-	if (check_trail(q) != true) {
+	if (!check_trail(q)) {
 		q->error = false;
 		return;
 	}
@@ -1135,7 +1135,7 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = f->nbr_vars;
 
-	if (check_slot(q, var_nbr+cnt) != true)
+	if (!check_slot(q, var_nbr+cnt))
 		return 0;
 
 	if ((f->base_slot + f->nbr_slots) >= q->st.sp) {
