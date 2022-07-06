@@ -1,13 +1,5 @@
 #pragma once
 
-// Defines a generic 'map' interface...
-
-#ifndef MAP_TYPE
-#define MAP_TYPE SKIPLIST
-#endif
-
-#if MAPTYPE == SKIPLIST
-
 #include "skiplist.h"
 
 #define map skiplist
@@ -36,5 +28,3 @@
 #define map_is_find sl_is_find
 #define map_done sl_done
 #define map_destroy sl_destroy
-
-#endif
