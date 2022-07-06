@@ -1009,7 +1009,8 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			cl->nbr_vars++;
 			p->nbr_vars++;
-		}
+		} else
+			cl->is_complex = true;
 	}
 
 	// Do temporaries last...

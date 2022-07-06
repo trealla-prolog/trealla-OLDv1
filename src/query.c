@@ -701,7 +701,6 @@ static frame *push_frame(query *q, clause *cl)
 	}
 
 	f->cgen = ++q->cgen;
-	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
 
@@ -857,9 +856,7 @@ static void commit_me(query *q, clause *cl)
 		f = push_frame(q, cl);
 
 	if (last_match) {
-		f->is_complex = q->st.curr_clause->cl.is_complex;
 		f->is_last = true;
-		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
 		drop_choice(q);
 		trim_trail(q);
@@ -1097,7 +1094,7 @@ static bool resume_frame(query *q)
 
 	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
 		&& q->pl->opt
-		&& !f->is_complex
+		&& !q->st.curr_clause->cl.is_complex
 		&& !any_choices(q, f)
 		&& check_slots(q, f, NULL)) {
 		//fprintf(stderr, "*** trim\n");

@@ -497,7 +497,6 @@ struct frame_ {
 	pl_idx_t prev_frame, base_slot, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	uint16_t mid;
-	bool is_complex:1;
 	bool is_last:1;
 };
 
