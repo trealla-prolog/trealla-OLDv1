@@ -1889,7 +1889,7 @@ void destroy_query(query *q)
 
 	slot *e = q->slots;
 
-	for (pl_idx_t i = 0; i < q->st.sp; i++, e++)
+	for (pl_idx_t i = 0; i < q->max_slots; i++, e++)
 		unshare_cell(&e->c);
 
 	mp_int_clear(&q->tmp_ival);
