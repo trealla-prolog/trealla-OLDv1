@@ -1247,7 +1247,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	if (q->cp && trailing)
+	if (q->cp && trailing && (c_ctx < q->st.fp))
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 
 	if (is_structure(v)) {

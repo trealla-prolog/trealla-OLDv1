@@ -1824,7 +1824,6 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 		p->tmpbuf = malloc(p->tmpbuf_size=256);
 
 	char *dst = p->tmpbuf;
-	int spaces = 0;
 
 	while (*src) {
 		if ((base == 2) && ((*src < '0') || (*src > '1')))
@@ -1838,14 +1837,6 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 
 		if ((base == 16) && !isxdigit(*src))
 			break;
-
-		if (spaces > 1) {
-			if (DUMP_ERRS || !p->do_read_term)
-				fprintf(stdout, "Error: syntax error, illegal character\n");
-			*srcptr = src;
-			p->error = true;
-			return;
-		}
 
 		*dst++ = *src++;
 
@@ -1868,13 +1859,11 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 
 			last_ch = *src++;
 
-			if (last_ch == '_')
+			if ((last_ch == '_') ||(last_ch == ' '))
 				cnt++;
-			else if (last_ch == ' ')
-				spaces++;
 		}
 
-		if (last_ch == '_') {
+		if ((last_ch == '_') || (last_ch == ' ')) {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 		}
