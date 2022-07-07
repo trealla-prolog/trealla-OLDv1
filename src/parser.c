@@ -1272,7 +1272,7 @@ static bool dcg_expansion(parser *p)
 				continue;
 
 			char *src = malloc(*lib->len+1);
-			may_ptr_error(src);
+			may_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
 			ASTRING(s);

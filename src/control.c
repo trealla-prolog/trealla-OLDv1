@@ -112,7 +112,7 @@ USE_RESULT bool fn_call_0(query *q, cell *p1)
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	q->st.curr_frame = p1_ctx;
 	return true;
@@ -166,7 +166,7 @@ USE_RESULT bool fn_iso_call_n(query *q)
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -198,7 +198,7 @@ USE_RESULT bool fn_iso_call_1(query *q)
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -229,7 +229,7 @@ USE_RESULT bool fn_iso_once_1(query *q)
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -260,7 +260,7 @@ USE_RESULT bool fn_ignore_1(query *q)
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_call_barrier(q));
+	may_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -280,7 +280,7 @@ USE_RESULT bool fn_iso_if_then_2(query *q)
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_barrier(q));
+	may_heap_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -300,7 +300,7 @@ USE_RESULT bool fn_if_2(query *q)
 	make_struct(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_barrier(q));
+	may_heap_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -324,7 +324,7 @@ static bool do_if_then_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_barrier(q));
+	may_heap_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -348,7 +348,7 @@ static bool do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 	make_struct(tmp+nbr_cells++, g_sys_soft_cut_s, fn_sys_soft_inner_cut_0, 0, 0);
 	nbr_cells += safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_barrier(q));
+	may_heap_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -399,7 +399,7 @@ USE_RESULT bool fn_iso_disjunction_2(query *q)
 	may_heap_error(tmp);
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_return(q, tmp+nbr_cells);
-	may_error(push_choice(q));
+	may_heap_error(push_choice(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -418,7 +418,7 @@ USE_RESULT bool fn_iso_negation_1(query *q)
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_barrier(q));
+	may_heap_error(push_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -462,7 +462,7 @@ USE_RESULT bool fn_sys_block_catcher_1(query *q)
 		return true;
 
 	ch->block_catcher = true;
-	may_error(push_choice(q));
+	may_heap_error(push_choice(q));
 	return true;
 }
 
@@ -487,7 +487,7 @@ USE_RESULT bool fn_iso_catch_3(query *q)
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
 		make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
-		may_error(push_catcher(q, QUERY_EXCEPTION));
+		may_heap_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return true;
 	}
@@ -504,7 +504,7 @@ USE_RESULT bool fn_iso_catch_3(query *q)
 	make_struct(tmp+nbr_cells++, g_sys_block_catcher_s, fn_sys_block_catcher_1, 1, 1);
 	make_int(tmp+nbr_cells++, cp);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_catcher(q, QUERY_RETRY));
+	may_heap_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -530,7 +530,7 @@ USE_RESULT bool fn_sys_call_cleanup_3(query *q)
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
 		make_struct(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 		make_return(q, tmp+nbr_cells);
-		may_error(push_catcher(q, QUERY_EXCEPTION));
+		may_heap_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
 		return true;
 	}
@@ -545,7 +545,7 @@ USE_RESULT bool fn_sys_call_cleanup_3(query *q)
 	pl_idx_t nbr_cells = 1+p1->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_cleanup_if_det_s, fn_sys_cleanup_if_det_0, 0, 0);
 	make_return(q, tmp+nbr_cells);
-	may_error(push_catcher(q, QUERY_RETRY));
+	may_heap_error(push_catcher(q, QUERY_RETRY));
 	q->st.curr_cell = tmp;
 	return true;
 }
@@ -568,9 +568,9 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 
 		may_heap_error(init_tmp_heap(q));
 		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
-		may_ptr_error(e2);
+		may_heap_error(e2);
 		//safe_copy_cells(e2, tmp, tmp->nbr_cells);
 		copy_cells(e2, tmp, tmp->nbr_cells);
 
@@ -622,15 +622,15 @@ USE_RESULT bool fn_iso_throw_1(query *q)
 
 	if (is_cyclic_term(q, p1, p1_ctx)) {
 		e = malloc(sizeof(cell) * p1->nbr_cells);
-		may_ptr_error(e);
+		may_heap_error(e);
 		//safe_copy_cells(e, p1, p1->nbr_cells);
 		copy_cells(e, p1, p1->nbr_cells);
 	} else {
 		may_heap_error(init_tmp_heap(q));
 		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		e = malloc(sizeof(cell) * tmp->nbr_cells);
-		may_ptr_error(e);
+		may_heap_error(e);
 		//safe_copy_cells(e, tmp, tmp->nbr_cells);
 		copy_cells(e, tmp, tmp->nbr_cells);
 	}
@@ -698,7 +698,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 		err_type = "instantiation_error";
 		//printf("error(%s,%s).\n", err_type, expected);
 		tmp = alloc_on_heap(q, 3);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 2);
 		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
@@ -707,7 +707,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 		err_type = "uninstantiation_error";
 		//printf("error(%s(%s),(%s)/%u).\n", err_type, C_STR(q, c), functor, goal->arity);
 		tmp = alloc_on_heap(q, 6+(c->nbr_cells-1));
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1+(c->nbr_cells-1));
@@ -720,7 +720,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else if (!strcmp(err_type, "type_error") && !strcmp(expected, "evaluable")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, C_STR(q, c), c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
@@ -739,7 +739,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else if (!strcmp(err_type, "permission_error") && is_structure(c) && CMP_STR_CSTR(q, c, "/") && is_variable(c+1)) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9+extra);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
@@ -776,7 +776,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else if (!strcmp(err_type, "permission_error") && (is_builtin(c) || (is_op(c) && !is_abolish))) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9+extra);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8+extra);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 4+extra);
@@ -813,7 +813,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else if (!strcmp(err_type, "instantiation_error")) {
 		//printf("error(%s,(%s)/%u).\n", err_type, functor, goal->arity);
 		tmp = alloc_on_heap(q, 5);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 4);
 		make_atom(tmp+nbr_cells++, index_from_pool(q->pl, err_type));
@@ -824,7 +824,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else if (!strcmp(err_type, "existence_error") && !strcmp(expected, "procedure")) {
 		//printf("error(%s(%s,(%s)/%u),(%s)/%u).\n", err_type, expected, tmpbuf, c->arity, functor, goal->arity);
 		tmp = alloc_on_heap(q, 9);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 8);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2, 4);
@@ -843,7 +843,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 		|| !strcmp(err_type, "resource_error")) {
 		//printf("error(%s(%s),(%s)/%u).\n", err_type, expected, functor, goal->arity);
 		tmp = alloc_on_heap(q, 6);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1);
@@ -855,7 +855,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	} else {
 		//printf("error(%s(%s,(%s)),(%s)/%u).\n", err_type, expected, C_STR(q, c), functor, goal->arity);
 		tmp = alloc_on_heap(q, 7+(c->nbr_cells-1)+extra);
-		may_ptr_error(tmp);
+		may_heap_error(tmp);
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 6+(c->nbr_cells-1)+extra);
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 2+extra, 2+(c->nbr_cells-1)+extra);
@@ -886,7 +886,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 	}
 
 	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
-	may_ptr_error(e);
+	may_heap_error(e);
 	safe_copy_cells(e, tmp, tmp->nbr_cells);
 
 	if (find_exception_handler(q, e)) {
