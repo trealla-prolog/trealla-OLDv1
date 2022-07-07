@@ -393,6 +393,7 @@ between(I,J,K) :- '$between'(I,J,K,_).
 forall(Cond, Action) :- \+ (Cond, \+ Action).
 catch(G, E, C) :- '$catch'(call(G), E, call(C)).
 throw(E) :- '$throw'(E).
+term_hash(Term, _Opts, Hash) :- term_hash(Term, Hash).
 not(G) :- G, !, fail.
 not(_).
 
