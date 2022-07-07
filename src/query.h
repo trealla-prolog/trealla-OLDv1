@@ -173,5 +173,3 @@ inline static bool make_string(cell *d, const char *s)
 	return make_stringn(d, s, strlen(s));
 }
 
-#define may_heap_error(p) if ((p) == NULL)	\
-	return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "finite_memory");
