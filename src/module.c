@@ -180,7 +180,7 @@ predicate *create_predicate(module *m, cell *c)
 	}
 
 	predicate *pr = calloc(1, sizeof(predicate));
-	ensure(pr);
+	may_error(pr);
 	pr->prev = m->tail;
 
 	if (m->tail)
@@ -949,7 +949,7 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 		}
 
 		pr = create_predicate(m, c);
-		ensure(pr);
+		may_error(pr);
 
 		if (is_check_directive(p1))
 			pr->is_check_directive = true;
@@ -1643,7 +1643,7 @@ void duplicate_module(prolog *pl, module *m, const char *name)
 module *create_module(prolog *pl, const char *name)
 {
 	module *m = calloc(1, sizeof(module));
-	ensure(m);
+	may_error(m);
 
 	m->pl = pl;
 	m->filename = set_known(m, name);
@@ -1671,7 +1671,7 @@ module *create_module(prolog *pl, const char *name)
 	m->index = map_create(predicate_cmpkey, NULL, m);
 	map_allow_dups(m->index, false);
 	m->p = create_parser(m);
-	ensure(m->p);
+	may_error(m->p);
 
 	set_multifile_in_db(m, "$predicate_property", 2);
 	set_multifile_in_db(m, ":-", 1);
