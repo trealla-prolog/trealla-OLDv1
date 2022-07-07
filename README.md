@@ -11,6 +11,7 @@ A compact, efficient Prolog interpreter with
 	Dynamic atoms are automatically garbage collected
 	Unlimited arity (system resources constrained)
 	Uses 1st & 2nd arg indexing
+	Atom garbage collection
 	DCGs
 	REPL with history
 	Compiles in <1s with *tcc*, or ~5s with *gcc* and *clang*
