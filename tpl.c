@@ -223,7 +223,7 @@ int main(int ac, char *av[])
 		} else if (!strcmp(av[i], "--library")) {
 			do_goal = 0;
 			do_lib = 1;
-		} else if (!strcmp(av[i], "-f") || !strcmp(av[i], "-l") || !strcmp(av[i], "--consult-file")) {
+		} else if (!strcmp(av[i], "-f") || !strcmp(av[i], "-l") || !strcmp(av[i], "--file") || !strcmp(av[i], "--consult-file")) {
 			if (!strcmp(av[i], "-f"))
 				no_res = true;
 
