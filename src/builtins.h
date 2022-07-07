@@ -16,10 +16,9 @@
 	if (!q->eval) {									\
 		if (q->st.m->flags.unknown == 0)			\
 			return false;							\
-		else										\
-			return throw_error(q, q->st.curr_cell, 	\
-				q->st.curr_frame, 					\
-				"existence_error", "procedure");	\
+		return throw_error(q, q->st.curr_cell, 		\
+			q->st.curr_frame, 						\
+			"existence_error", "procedure");		\
 	}
 
 void clr_accum(cell *p);
