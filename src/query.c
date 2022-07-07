@@ -294,8 +294,8 @@ static bool is_next_key(query *q, clause *cl)
 	cl = &next->cl;
 
 	if (q->st.arg1_is_ground && !next->next
-		&& (q->st.key->arity == 1) && is_ground(cl->cells+1)) {
-		if (compare(q, q->st.key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
+		&& (q->key->arity == 1) && is_ground(cl->cells+1)) {
+		if (compare(q, q->key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
 		}
 	}
@@ -332,8 +332,8 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
 	q->st.arg3_is_ground = false;
-	q->st.key = key;
 	q->st.iter = NULL;
+	q->key = key;
 
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
@@ -374,7 +374,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	//sl_dump(pr->idx, dump_key, q);
 
 	may_error(init_tmp_heap(q));
-	q->st.key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
+	q->key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
 
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
@@ -392,7 +392,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 			return true;
 		}
 
-		q->st.key = key = arg2;
+		q->key = key = arg2;
 		idx = pr->idx2;
 	}
 
@@ -542,7 +542,7 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes)
 
 static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs, pl_idx_t attrs_ctx)
 {
-	if (check_trail(q) != true) {
+	if (!check_trail(q)) {
 		q->error = false;
 		return;
 	}
@@ -580,7 +580,7 @@ bool try_me(query *q, unsigned nbr_vars)
 	may_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
-	f->base_slot = q->st.sp;
+	f->base = q->st.sp;
 	slot *e = GET_FIRST_SLOT(f);
 
 	for (unsigned i = 0; i < nbr_vars; i++, e++) {
@@ -701,7 +701,6 @@ static frame *push_frame(query *q, clause *cl)
 	}
 
 	f->cgen = ++q->cgen;
-	f->is_complex = false;
 	f->is_last = false;
 	f->overflow = 0;
 
@@ -710,11 +709,9 @@ static frame *push_frame(query *q, clause *cl)
 	return f;
 }
 
-static void reuse_frame(query *q, clause *cl)
+static void reuse_frame(query *q, frame* f, clause *cl)
 {
 	const frame *newf = GET_FRAME(q->st.fp);
-	frame *f = GET_CURR_FRAME();
-
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
@@ -730,7 +727,7 @@ static void reuse_frame(query *q, clause *cl)
 	// If the new frame is smaller then the current one.
 	// I don't think this is possible at the moment...
 
-	for (unsigned i = nbr_vars; i < f->nbr_vars; i++, to++) {
+	for (unsigned i = cl->nbr_vars; i < f->nbr_vars; i++, to++) {
 		unshare_cell(&to->c);
 		to->c.tag = TAG_EMPTY;
 		to->c.attrs = NULL;
@@ -738,11 +735,11 @@ static void reuse_frame(query *q, clause *cl)
 #endif
 
 	f->cgen = newf->cgen;
-	f->nbr_slots = cl->nbr_vars;
-	f->nbr_vars = cl->nbr_vars;
+	f->nbr_slots = cl->nbr_vars - cl->nbr_temporaries;
+	f->nbr_vars = cl->nbr_vars - cl->nbr_temporaries;
 	f->overflow = 0;
 
-	q->st.sp = f->base_slot + cl->nbr_vars;
+	q->st.sp = f->base + (cl->nbr_vars - cl->nbr_temporaries);
 	q->tot_tcos++;
 }
 
@@ -852,14 +849,12 @@ static void commit_me(query *q, clause *cl)
 #endif
 
 	if (tco && q->pl->opt)
-		reuse_frame(q, cl);
+		reuse_frame(q, f, cl);
 	else
 		f = push_frame(q, cl);
 
 	if (last_match) {
-		f->is_complex = q->st.curr_clause->cl.is_complex;
 		f->is_last = true;
-		q->st.curr_clause = NULL;
 		unshare_predicate(q, q->st.pr);
 		drop_choice(q);
 		trim_trail(q);
@@ -874,7 +869,7 @@ static void commit_me(query *q, clause *cl)
 	q->in_commit = false;
 }
 
-void stash_me(query *q, const clause *r, bool last_match)
+void stash_me(query *q, const clause *cl, bool last_match)
 {
 	pl_idx_t cgen = q->cgen;
 
@@ -887,7 +882,7 @@ void stash_me(query *q, const clause *r, bool last_match)
 		ch->cgen = cgen = ++q->cgen;
 	}
 
-	unsigned nbr_vars = r->nbr_vars;
+	unsigned nbr_vars = cl->nbr_vars;
 	pl_idx_t new_frame = q->st.fp++;
 	frame *f = GET_FRAME(new_frame);
 	f->prev_frame = q->st.curr_frame;
@@ -1097,7 +1092,7 @@ static bool resume_frame(query *q)
 
 	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
 		&& q->pl->opt
-		&& !f->is_complex
+		&& !q->st.curr_clause->cl.is_complex
 		&& !any_choices(q, f)
 		&& check_slots(q, f, NULL)) {
 		//fprintf(stderr, "*** trim\n");
@@ -1138,12 +1133,12 @@ unsigned create_vars(query *q, unsigned cnt)
 
 	unsigned var_nbr = f->nbr_vars;
 
-	if (check_slot(q, var_nbr+cnt) != true)
+	if (!check_slot(q, var_nbr+cnt))
 		return 0;
 
-	if ((f->base_slot + f->nbr_slots) >= q->st.sp) {
+	if ((f->base + f->nbr_slots) >= q->st.sp) {
 		f->nbr_slots += cnt;
-		q->st.sp = f->base_slot + f->nbr_slots;
+		q->st.sp = f->base + f->nbr_slots;
 	} else if (!f->overflow) {
 		f->overflow = q->st.sp;
 		q->st.sp += cnt;
@@ -1219,7 +1214,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	if (c_attrs)
 		q->run_hook = true;
 
-	if (q->cp || c_attrs)
+	if ((q->cp || c_attrs) && (c_ctx < q->st.fp))
 		add_trail(q, c_ctx, c->var_nbr, c_attrs, c_attrs_ctx);
 
 	if (is_structure(v)) {
@@ -1252,7 +1247,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	if (q->cp && trailing)
+	if (q->cp && trailing && (c_ctx < q->st.fp))
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
 
 	if (is_structure(v)) {
@@ -1324,8 +1319,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
-		clause *r = &q->st.curr_clause2->cl;
-		cell *c = r->cells;
+		clause *cl = &q->st.curr_clause2->cl;
+		cell *c = cl->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
 		cell *c_body = get_logical_body(c);
@@ -1336,7 +1331,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			needs_true = true;
 		}
 
-		may_error(try_me(q, r->nbr_vars));
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			int ok;
@@ -1426,16 +1421,16 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		if (!can_view(f, q->st.curr_clause2))
 			continue;
 
-		clause *r = &q->st.curr_clause2->cl;
-		cell *head = get_head(r->cells);
-		cell *body = get_logical_body(r->cells);
+		clause *cl = &q->st.curr_clause2->cl;
+		cell *head = get_head(cl->cells);
+		cell *body = get_logical_body(cl->cells);
 
 		// Retract(HEAD) should ignore rules (and directives)
 
 		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
-		may_error(try_me(q, r->nbr_vars));
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
 			return true;
@@ -1464,12 +1459,11 @@ static USE_RESULT bool match_head(query *q)
 			q->save_m = q->st.m;
 
 			if (!pr) {
-				if (!is_end(c) && !(is_interned(c) && !strcmp(C_STR(q, c), "initialization")))
+				if (!is_end(c) && !(is_interned(c) && !strcmp(C_STR(q, c), "initialization"))) {
 					if (q->st.m->flags.unknown == UNK_ERROR)
 						return throw_error(q, c, q->st.curr_frame, "existence_error", "procedure");
-					else
-						return false;
-				else
+					return false;
+				} else
 					q->error = true;
 
 				return false;
@@ -1500,15 +1494,15 @@ static USE_RESULT bool match_head(query *q)
 		if (!can_view(f, q->st.curr_clause))
 			continue;
 
-		clause *r = &q->st.curr_clause->cl;
-		cell *head = get_head(r->cells);
-		may_error(try_me(q, r->nbr_vars));
+		clause *cl = &q->st.curr_clause->cl;
+		cell *head = get_head(cl->cells);
+		may_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error)
 				break;
 
-			commit_me(q, r);
+			commit_me(q, cl);
 			return true;
 		}
 

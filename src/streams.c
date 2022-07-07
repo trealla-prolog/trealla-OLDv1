@@ -1660,6 +1660,10 @@ static USE_RESULT bool fn_iso_write_1(query *q)
 	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->numbervars = false;
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 
@@ -1683,6 +1687,10 @@ static USE_RESULT bool fn_iso_write_2(query *q)
 	q->numbervars = true;
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->numbervars = false;
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 
@@ -1704,6 +1712,10 @@ static USE_RESULT bool fn_iso_writeq_1(query *q)
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->numbervars = false;
 	q->quoted = 0;
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 
@@ -1729,6 +1741,10 @@ static USE_RESULT bool fn_iso_writeq_2(query *q)
 	print_term_to_stream(q, str, p1, p1_ctx, 1);
 	q->numbervars = false;
 	q->quoted = 0;
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 
@@ -1746,6 +1762,10 @@ static USE_RESULT bool fn_iso_write_canonical_1(query *q)
 	}
 
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 
@@ -1767,6 +1787,10 @@ static USE_RESULT bool fn_iso_write_canonical_2(query *q)
 	}
 
 	print_canonical(q, str->fp, p1, p1_ctx, 1);
+
+	if (isatty(fileno(str->fp)))
+		fflush(str->fp);
+
 	return !ferror(str->fp);
 }
 

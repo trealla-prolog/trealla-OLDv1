@@ -1161,7 +1161,7 @@ bool retract_from_db(module *m, db_entry *dbe)
 	return true;
 }
 
-static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
+static void xref_cell(module *m, clause *cl, cell *c, predicate *parent)
 {
 	const char *functor = C_STR(m, c);
 	unsigned specifier;
@@ -1186,63 +1186,36 @@ static void xref_cell(module *m, clause *r, cell *c, predicate *parent)
 	} else
 		c->fn_ptr = NULL;
 
-	if ((c+c->nbr_cells) >= (r->cells+r->cidx-1)) {
+	if ((c+c->nbr_cells) >= (cl->cells + cl->cidx-1)) {
 		if (parent && (parent->key.val_off == c->val_off) && (parent->key.arity == c->arity)) {
 			c->flags |= FLAG_TAIL_REC;
-			r->is_tail_rec = true;
+			cl->is_tail_rec = true;
 		}
 	}
 }
 
-void xref_rule(module *m, clause *r, predicate *parent)
+void xref_rule(module *m, clause *cl, predicate *parent)
 {
-	r->arg1_is_unique = false;
-	r->arg2_is_unique = false;
-	r->arg3_is_unique = false;
-	r->is_unique = false;
-	r->is_tail_rec = false;
+	cl->arg1_is_unique = false;
+	cl->arg2_is_unique = false;
+	cl->arg3_is_unique = false;
+	cl->is_unique = false;
+	cl->is_tail_rec = false;
 
-	// Check if a variable occurs more than once in the head...
-
-	cell *head = get_head(r->cells);
-	cell *c = head;
-	uint64_t mask = 0;
-
-	for (pl_idx_t i = 0; i < head->nbr_cells; i++, c++) {
-		if (!is_variable(c))
-			continue;
-
-		uint64_t mask2 = 1ULL << c->var_nbr;
-
-		if (mask & mask2) {
-			r->is_complex = true;
-			break;
-		}
-
-		mask |= mask2;
-	}
-
-	// Other stuff...
-
-	cell *body = get_body(r->cells);
-	//bool in_body = false;
-	c = r->cells;
+	cell *c = cl->cells;
 
 	if (c->val_off == g_sys_record_key_s)
 		return;
 
-	for (pl_idx_t i = 0; i < r->cidx; i++) {
-		cell *c = r->cells + i;
-
-		//if (c == body)
-		//	in_body = true;
+	for (pl_idx_t i = 0; i < cl->cidx; i++) {
+		cell *c = cl->cells + i;
 
 		c->flags &= ~FLAG_TAIL_REC;
 
 		if (!is_interned(c))
 			continue;
 
-		xref_cell(m, r, c, parent);
+		xref_cell(m, cl, c, parent);
 	}
 }
 
@@ -1377,7 +1350,9 @@ bool unload_file(module *m, const char *filename)
 	free(savebuf);
 	free(tmpbuf);
 	filename = realbuf;
-	return unload_realfile(m, filename);
+	bool ok = unload_realfile(m, filename);
+	free(realbuf);
+	return ok;
 }
 
 module *load_fp(module *m, FILE *fp, const char *filename, bool including)

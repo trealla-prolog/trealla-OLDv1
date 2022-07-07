@@ -297,12 +297,10 @@ void dump_vars(query *q, bool partial)
 		cell *c = deref(q, &e->c, e->c.var_ctx);
 		pl_idx_t c_ctx = q->latest_ctx;
 
-#if 0
 		if (is_indirect(&e->c)) {
 			c = e->c.val_ptr;
 			c_ctx = e->c.var_ctx;
 		}
-#endif
 
 		if (is_variable(c) && is_anon(c))
 			continue;

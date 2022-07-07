@@ -302,9 +302,10 @@ Slots
 =====
 
 A slot is an element in the slot stack. Each slot holds a cell plus
-it's context index (for vars and compounds). Also attribute info.
+it's context (for vars and compounds) plus attribute info.
 
-Slots are cleared on backtracking via the trailed record.
+Slots are cleared (and attributes reset) on backtracking via the
+trailed record.
 
 Since only index numbers are used to refer to slots (a *slot* number)
 the slot space can be easily resized.
@@ -323,7 +324,7 @@ A choice contains the index of the highest heap, slot & trail used at
 this point. On backtracking excess space can be freed.
 
 It also contains the index number of the frame which created it and a
-record of that frames state (nbr of vars etc) at the time the choice
+record of the frame state (nbr of vars etc) at the time the choice
 was created. On backtracking vars (slots space) can be trimmed back,
 if possible, and the frame state restored.
 
@@ -340,7 +341,7 @@ Heap
 ====
 
 A space for dynamically created terms (compounds). Heap space is
-allocated in arenas as a linked list of ever increasing size.
+allocated in pages as a linked list.
 
 A term allocated on the heap must be fully contained within one arena,
 to this end terms are first built in a temporary space and copied

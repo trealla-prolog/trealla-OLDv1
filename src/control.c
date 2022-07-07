@@ -908,6 +908,17 @@ bool throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 
 bool throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected)
 {
-	return throw_error3(q, c, c_ctx, err_type, expected, q->st.curr_cell);
+	cell top_level;
+	make_atom(&top_level, index_from_pool(q->pl, "top_level"));
+	cell *goal;
+
+	if (q->st.curr_clause && !is_builtin(q->st.curr_cell))
+		goal = get_head(q->st.curr_clause->cl.cells);
+	else if (q->last_arg == NULL)
+		goal = &top_level;
+	else
+		goal = q->st.curr_cell;
+
+	return throw_error3(q, c, c_ctx, err_type, expected, goal);
 }
 

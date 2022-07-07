@@ -15,7 +15,7 @@ struct keyval_ {
 	void *key, *val;
 };
 
-#define BUCKET_SIZE 8
+#define BUCKET_SIZE 16
 
 struct slnode_ {
 	keyval_t bkt[BUCKET_SIZE];

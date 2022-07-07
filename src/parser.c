@@ -1009,7 +1009,8 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			cl->nbr_vars++;
 			p->nbr_vars++;
-		}
+		} else
+			cl->is_complex = true;
 	}
 
 	// Do temporaries last...
@@ -1277,13 +1278,13 @@ static bool dcg_expansion(parser *p)
 			ASTRING(s);
 			ASTRING_sprintf(s, "library/%s", lib->name);
 			module *tmp_m = load_text(p->m, src, ASTRING_cstr(s));
+			ASTRING_free(s);
 
 			if (tmp_m) {
 				p->m->used[p->m->idx_used++] = tmp_m;
 				p->m->pl->dcgs = tmp_m;
 			}
 
-			ASTRING_free(s);
 			free(src);
 			break;
 		}
@@ -1869,11 +1870,14 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 
 			if (last_ch == '_')
 				cnt++;
-			else if (last_ch == ' ')
-				spaces++;
 		}
 
 		if (last_ch == '_') {
+			p->srcptr = (char*)src;
+			src = eat_space(p);
+		}
+
+		if (last_ch == ' ') {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 		}

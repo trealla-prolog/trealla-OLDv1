@@ -80,7 +80,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
-	(q->slots+(f)->base_slot+(i)) : 				\
+	(q->slots+(f)->base+(i)) : 				\
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 
@@ -491,18 +491,22 @@ struct slot_ {
 	bool mark:1;
 };
 
+// Where *nbr_slots* is the initial number allocated
+// Where *nbr_vars* is the actual number in use (some maybe created)
+// Where *base* is the offset to first slot in use
+// Where *overflow* is where new slots are allocated (nbr_vars > nbr_slots)
+
 struct frame_ {
 	cell *prev_cell;
 	uint64_t ugen, cgen;
-	pl_idx_t prev_frame, base_slot, overflow;
+	pl_idx_t prev_frame, base, overflow;
 	uint32_t nbr_slots, nbr_vars;
 	uint16_t mid;
-	bool is_complex:1;
 	bool is_last:1;
 };
 
 struct prolog_state_ {
-	cell *curr_cell, *key;
+	cell *curr_cell;
 	union { db_entry *curr_clause; db_entry *curr_clause2; };
 	union { predicate *pr; predicate *pr2; };
 	miter *iter, *f_iter;
@@ -598,7 +602,7 @@ struct query_ {
 	slot *slots;
 	choice *choices;
 	trail *trails;
-	cell *tmp_heap, *last_arg, *exception, *variable_names;
+	cell *tmp_heap, *last_arg, *exception, *variable_names, *key;
 	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
 	bool ignores[MAX_IGNORES];
 	page *pages;
@@ -841,7 +845,6 @@ enum clause_type { DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL };
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 char *slicedup(const char *s, size_t n);
 int slicecmp(const char *s1, size_t len1, const char *s2, size_t len2);
-unsigned count_bits(const uint8_t *mask, unsigned bit);
 uint64_t get_time_in_usec(void);
 uint64_t cpu_time_in_usec(void);
 char *relative_to(const char *basefile, const char *relfile);
