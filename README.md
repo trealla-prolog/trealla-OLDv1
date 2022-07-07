@@ -333,6 +333,7 @@ Non-standard predicates
 	is_list_or_partial_list/1
 	is_stream/1
 	term_hash/2
+	term_hash/3					# ignores arg2 (options)
 	time/1
 	inf/0
 	nan/0
