@@ -1,0 +1,55 @@
+{
+  "uid" : "72861e370e525ebb",
+  "name" : "dictionary_update_5_02",
+  "fullName" : "dictionary_update_5_02::tests(bintree)",
+  "historyId" : "dictionary_update_5_02::tests(bintree)",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(bintree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "222-227"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/13fa80ad67d93df07f79112e6105298ef8076b5f/library/dictionaries/tests.lgt#L222"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "72861e370e525ebb.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "222-227", "https://github.com/LogtalkDotOrg/logtalk3/tree/13fa80ad67d93df07f79112e6105298ef8076b5f/library/dictionaries/tests.lgt#L222" ]
+}
