@@ -1877,7 +1877,7 @@ void read_integer(parser *p, mp_int v2, int base, const char *src,  const char *
 			src = eat_space(p);
 		}
 
-		if (isblank(last_ch)) {
+		if (last_ch == ' ') {
 			p->srcptr = (char*)src;
 			src = eat_space(p);
 		}
