@@ -1297,7 +1297,7 @@ static bool dcg_expansion(parser *p)
 	ASTRING_sprintf(s, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1377,7 +1377,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 	ASTRING_sprintf(s, "goal_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1486,7 +1486,7 @@ static bool term_expansion(parser *p)
 	ASTRING_sprintf(s, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
