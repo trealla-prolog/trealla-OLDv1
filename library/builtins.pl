@@ -122,6 +122,14 @@ keysort_(_, _, Sorted, _) :-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Experimental native bag & setof.
+% Note: this has bugs, especially to do with disjunction in goals
+
+'$setof'(Template, Generator, Set) :-
+	'$bagof'(Template, Generator, Bag),
+	sort(Bag, Set).
+
+:- meta_predicate('$setof'(?,^,-)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
@@ -766,4 +774,3 @@ succ(X,S) :- var(X), Y=1, nonvar(Y), nonvar(S),
 	X is S - Y.
 succ(_,_) :-
 	throw(error(instantiation_error, succ/2)).
-

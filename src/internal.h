@@ -257,6 +257,7 @@ enum {
 	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
 
+	FLAG_PROCESSED=1<<5,				// used by bagof
 	FLAG_FFI=1<<6,
 	FLAG_REF=1<<7,
 	FLAG_BUILTIN=1<<8,
@@ -528,6 +529,7 @@ struct choice_ {
 	union {
 		struct { uint32_t v1, v2; };
 		uint64_t ugen;
+		uint64_t pins;
 	};
 
 	pl_idx_t overflow;
