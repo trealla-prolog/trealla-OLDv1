@@ -112,7 +112,7 @@ static bool is_more_data(query *q, list_reader_t *fmt)
 		size_t save = dst - tmpbuf;							\
 		bufsiz += len;										\
 		tmpbuf = realloc(tmpbuf, bufsiz*=2);				\
-		may_ptr_error(tmpbuf);								\
+		check_heap_error(tmpbuf);								\
 		dst = tmpbuf + save;								\
 		nbytes = bufsiz - save;								\
 	}                                                       \
@@ -132,7 +132,7 @@ bool do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx,
 
 	size_t bufsiz = 1024*8;
 	char *tmpbuf = malloc(bufsiz);
-	may_ptr_error(tmpbuf);
+	check_heap_error(tmpbuf);
 	char *dst = tmpbuf;
 	*dst = '\0';
 	size_t nbytes = bufsiz;
@@ -560,7 +560,7 @@ bool do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx,
 	} else if (is_structure(str) && !CMP_STR_CSTR(q, str, "atom")) {
 		cell *c = deref(q, str+1, str_ctx);
 		cell tmp;
-		may_error(make_cstringn(&tmp, tmpbuf, len), free(tmpbuf));
+		check_heap_error(make_cstringn(&tmp, tmpbuf, len), free(tmpbuf));
 		set_var(q, c, q->latest_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 	} else if (is_structure(str)) {
@@ -568,7 +568,7 @@ bool do_format(query *q, cell *str, pl_idx_t str_ctx, cell *p1, pl_idx_t p1_ctx,
 		cell tmp;
 
 		if (strlen(tmpbuf))
-			may_error(make_stringn(&tmp, tmpbuf, len), free(tmpbuf));
+			check_heap_error(make_stringn(&tmp, tmpbuf, len), free(tmpbuf));
 		else
 			make_atom(&tmp, g_nil_s);
 

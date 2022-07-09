@@ -373,7 +373,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 	//sl_dump(pr->idx, dump_key, q);
 
-	may_error(init_tmp_heap(q));
+	check_heap_error(init_tmp_heap(q));
 	q->key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
 
 	cell *arg1 = key->arity ? key + 1 : NULL;
@@ -577,7 +577,7 @@ void undo_me(query *q)
 
 bool try_me(query *q, unsigned nbr_vars)
 {
-	may_error(check_slot(q, MAX_ARITY));
+	check_heap_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
 	f->base = q->st.sp;
@@ -895,7 +895,7 @@ void stash_me(query *q, const clause *cl, bool last_match)
 
 bool push_choice(query *q)
 {
-	may_error(check_choice(q));
+	check_heap_error(check_choice(q));
 	const frame *f = GET_CURR_FRAME();
 	pl_idx_t curr_choice = q->cp++;
 	choice *ch = GET_CHOICE(curr_choice);
@@ -915,7 +915,7 @@ bool push_choice(query *q)
 
 bool push_barrier(query *q)
 {
-	may_error(push_choice(q));
+	check_heap_error(push_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
 	ch->cgen = f->cgen = ++q->cgen;
@@ -928,7 +928,7 @@ bool push_barrier(query *q)
 
 bool push_call_barrier(query *q)
 {
-	may_error(push_barrier(q));
+	check_heap_error(push_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->call_barrier = true;
 	return true;
@@ -936,7 +936,7 @@ bool push_call_barrier(query *q)
 
 bool push_catcher(query *q, enum q_retry retry)
 {
-	may_error(push_call_barrier(q));
+	check_heap_error(push_call_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->catcher = true;
 
@@ -1307,8 +1307,8 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		return false;
 	}
 
-	may_error(check_frame(q));
-	may_error(push_choice(q));
+	check_heap_error(check_frame(q));
+	check_heap_error(push_choice(q));
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
 	const frame *f = GET_FRAME(q->st.curr_frame);
@@ -1331,7 +1331,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			needs_true = true;
 		}
 
-		may_error(try_me(q, cl->nbr_vars));
+		check_heap_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, c, q->st.fp)) {
 			int ok;
@@ -1411,8 +1411,8 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		return false;
 	}
 
-	may_error(check_frame(q));
-	may_error(push_choice(q));
+	check_heap_error(check_frame(q));
+	check_heap_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
@@ -1430,7 +1430,7 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 		if ((is_retract == DO_RETRACT) && body)
 			continue;
 
-		may_error(try_me(q, cl->nbr_vars));
+		check_heap_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, p1, p1_ctx, head, q->st.fp))
 			return true;
@@ -1484,8 +1484,8 @@ static USE_RESULT bool match_head(query *q)
 		return false;
 	}
 
-	may_error(check_frame(q));
-	may_error(push_choice(q));
+	check_heap_error(check_frame(q));
+	check_heap_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
 
 	for (; q->st.curr_clause; next_key(q)) {
@@ -1496,7 +1496,7 @@ static USE_RESULT bool match_head(query *q)
 
 		clause *cl = &q->st.curr_clause->cl;
 		cell *head = get_head(cl->cells);
-		may_error(try_me(q, cl->nbr_vars));
+		check_heap_error(try_me(q, cl->nbr_vars));
 
 		if (unify(q, q->st.curr_cell, q->st.curr_frame, head, q->st.fp)) {
 			if (q->error)
@@ -1661,7 +1661,7 @@ bool start(query *q)
 			}
 
 			if (q->run_hook && !q->in_hook)
-				may_error(do_post_unification_hook(q, true));
+				check_heap_error(do_post_unification_hook(q, true));
 
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
@@ -1681,7 +1681,7 @@ bool start(query *q)
 			}
 
 			if (q->run_hook && !q->in_hook) {
-				may_error(do_post_unification_hook(q, false));
+				check_heap_error(do_post_unification_hook(q, false));
 			}
 		}
 
