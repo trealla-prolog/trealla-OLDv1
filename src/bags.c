@@ -3,38 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/stat.h>
 
-#include "base64.h"
 #include "heap.h"
-#include "history.h"
-#include "library.h"
 #include "module.h"
 #include "parser.h"
 #include "prolog.h"
 #include "query.h"
-#include "utf8.h"
-
-#if USE_OPENSSL
-#include "openssl/sha.h"
-#endif
-
-#ifdef _WIN32
-#include <windows.h>
-#define unsetenv(p1)
-#define setenv(p1,p2,p3) _putenv_s(p1,p2)
-#define msleep Sleep
-#define localtime_r(p1,p2) localtime(p1)
-#else
-static void msleep(int ms)
-{
-	struct timespec tv;
-	tv.tv_sec = (ms) / 1000;
-	tv.tv_nsec = ((ms) % 1000) * 1000 * 1000;
-	nanosleep(&tv, &tv);
-}
-#endif
 
 bool fn_iso_findall_3(query *q)
 {
