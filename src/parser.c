@@ -190,14 +190,14 @@ void destroy_parser(parser *p)
 parser *create_parser(module *m)
 {
 	parser *p = calloc(1, sizeof(parser));
-	may_error(p);
+	check_error(p);
 	p->pl = m->pl;
 	p->m = m;
 	p->token = calloc(1, p->token_size=INITIAL_TOKEN_SIZE+1);
-	may_error(p->token, free(p));
+	check_error(p->token, free(p));
 	pl_idx_t nbr_cells = INITIAL_NBR_CELLS;
 	p->cl = calloc(1, sizeof(clause)+(sizeof(cell)*nbr_cells));
-	may_error(p->cl, (free(p->token), free(p)));
+	check_error(p->cl, (free(p->token), free(p)));
 	p->cl->nbr_cells = nbr_cells;
 	p->start_term = true;
 	p->flags = m->flags;
@@ -1272,7 +1272,7 @@ static bool dcg_expansion(parser *p)
 				continue;
 
 			char *src = malloc(*lib->len+1);
-			may_error(src);
+			check_error(src);
 			memcpy(src, lib->start, *lib->len);
 			src[*lib->len] = '\0';
 			ASTRING(s);
@@ -1291,13 +1291,13 @@ static bool dcg_expansion(parser *p)
 	}
 
 	query *q = create_query(p->m, false);
-	may_error(q);
+	check_error(q);
 	char *dst = print_canonical_to_strbuf(q, p->cl->cells, 0, 0);
 	ASTRING(s);
 	ASTRING_sprintf(s, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	may_error(p2);
+	check_error(p2);
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1371,13 +1371,13 @@ static cell *goal_expansion(parser *p, cell *goal)
 		return goal;
 
 	query *q = create_query(p->m, false);
-	may_error(q);
+	check_error(q);
 	char *dst = print_canonical_to_strbuf(q, goal, 0, 0);
 	ASTRING(s);
 	ASTRING_sprintf(s, "goal_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	may_error(p2);
+	check_error(p2);
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1480,13 +1480,13 @@ static bool term_expansion(parser *p)
 		return false;
 
 	query *q = create_query(p->m, false);
-	may_error(q);
+	check_error(q);
 	char *dst = print_canonical_to_strbuf(q, p->cl->cells, 0, 0);
 	ASTRING(s);
 	ASTRING_sprintf(s, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	may_error(p2);
+	check_error(p2);
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1684,7 +1684,7 @@ void term_to_body(parser *p)
 bool virtual_term(parser *p, const char *src)
 {
 	parser *p2 = create_parser(p->m);
-	may_error(p2);
+	check_error(p2);
 	p2->consulting = true;
 	p2->srcptr = (char*)src;
 	tokenize(p2, false, false);
@@ -2387,7 +2387,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		if ((size_t)(src-tmpptr) >= p->token_size) {
 			size_t offset = dst - p->token;
 			p->token = realloc(p->token, p->token_size = (src-tmpptr)+1);
-			may_error(p->token);
+			check_error(p->token);
 			dst = p->token+offset;
 		}
 
@@ -2526,7 +2526,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				if (len >= p->token_size) {
 					size_t offset = dst - p->token;
 					p->token = realloc(p->token, p->token_size*=2);
-					may_error(p->token);
+					check_error(p->token);
 					dst = p->token + offset;
 				}
 
@@ -2587,7 +2587,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			if (len >= p->token_size) {
 				size_t offset = dst - p->token;
 				p->token = realloc(p->token, p->token_size*=2);
-				may_error(p->token);
+				check_error(p->token);
 				dst = p->token + offset;
 			}
 
@@ -2722,7 +2722,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		if (len >= p->token_size) {
 			size_t offset = dst - p->token;
 			p->token = realloc(p->token, p->token_size*=2);
-			may_error(p->token);
+			check_error(p->token);
 			dst = p->token + offset;
 		}
 
@@ -2982,7 +2982,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (!p->quote_char && !strcmp(p->token, "{")) {
 			save_idx = p->cl->cidx;
 			cell *c = make_a_literal(p, g_braces_s);
-			may_error(c);
+			check_error(c);
 			c->arity = 1;
 			p->start_term = true;
 			p->nesting_braces++;

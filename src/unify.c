@@ -740,7 +740,7 @@ bool fn_sys_undo_trail_1(query *q)
 	}
 
 	q->save_e = malloc(sizeof(slot)*(q->undo_hi_tp - q->undo_lo_tp));
-	may_heap_error(q->save_e);
+	check_heap_error(q->save_e);
 	bool first = true;
 
 	// Unbind our vars
@@ -774,7 +774,7 @@ bool fn_sys_undo_trail_1(query *q)
 	}
 
 	cell *tmp = end_list(q);
-	may_heap_error(tmp);
+	check_heap_error(tmp);
 	set_var(q, p1, p1_ctx, tmp, q->st.curr_frame);
 	return true;
 }
@@ -803,7 +803,7 @@ bool do_post_unification_hook(query *q, bool is_builtin)
 	q->undo_hi_tp = q->st.tp;
 
 	cell *tmp = alloc_on_heap(q, 3);
-	may_heap_error(tmp);
+	check_heap_error(tmp);
 	// Needed for follow() to work
 	*tmp = (cell){0};
 	tmp[0].tag = TAG_EMPTY;

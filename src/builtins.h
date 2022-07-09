@@ -192,6 +192,6 @@ inline static cell *get_raw_arg(const query *q, int n)
 	if (is_builtin(c) && c->fn_ptr && (c->fn_ptr->fn != fn_iso_float_1) && (c->fn_ptr->fn != fn_iso_integer_1)) \
 		return throw_error(q, c, q->st.curr_frame, "type_error", "evaluable");
 
-#define may_heap_error(expr, ...) \
+#define check_heap_error(expr, ...) \
 	CHECK_SENTINEL(expr, 0, __VA_ARGS__; \
 	return throw_error(q, q->st.curr_cell, q->st.curr_frame, "resource_error", "finite_memory"))

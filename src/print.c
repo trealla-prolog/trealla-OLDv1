@@ -1312,7 +1312,7 @@ bool print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, i
 	ssize_t len = print_canonical_to_buf(q, NULL, 0, c, c_ctx, running, false, 1);
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
-	may_heap_error(dst);
+	check_heap_error(dst);
 	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
@@ -1357,7 +1357,7 @@ bool print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	q->did_quote = false;
 
 	char *dst = malloc(len*2+1); //cehteh: why *2?
-	may_heap_error(dst);
+	check_heap_error(dst);
 	len = print_canonical_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
 
@@ -1429,7 +1429,7 @@ bool print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int ru
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
-	may_heap_error(dst);
+	check_heap_error(dst);
 	q->last_thing_was_symbol = false;
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;
@@ -1471,7 +1471,7 @@ bool print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
-	may_heap_error(dst);
+	check_heap_error(dst);
 	q->last_thing_was_symbol = false;
 	len = print_term_to_buf(q, dst, len+1, c, c_ctx, running, false, 0);
 	const char *src = dst;

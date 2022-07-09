@@ -490,7 +490,7 @@ prolog *pl_create()
 			) {
 			size_t len = *lib->len;
 			char *src = malloc(len+1);
-			may_error(src);
+			check_error(src);
 			memcpy(src, lib->start, len);
 			src[len] = '\0';
 			ASTRING(s1);

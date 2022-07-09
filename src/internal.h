@@ -183,7 +183,7 @@ typedef struct {
 
 #define SET_STR(c,s,n,off) {									\
 	strbuf *strb = malloc(sizeof(strbuf) + (n) + 1);			\
-	may_error(strb);										\
+	check_error(strb);										\
 	memcpy(strb->cstr, s, n); 									\
 	strb->cstr[n] = 0;											\
 	strb->len = n;												\
