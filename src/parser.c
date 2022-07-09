@@ -1297,7 +1297,7 @@ static bool dcg_expansion(parser *p)
 	ASTRING_sprintf(s, "dcg_translate((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1377,7 +1377,7 @@ static cell *goal_expansion(parser *p, cell *goal)
 	ASTRING_sprintf(s, "goal_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1486,7 +1486,7 @@ static bool term_expansion(parser *p)
 	ASTRING_sprintf(s, "term_expansion((%s),_TermOut).", dst);
 	free(dst);
 	parser *p2 = create_parser(p->m);
-	check_error(p2);
+	check_error(p2, destroy_query(q));
 	p2->line_nbr = p->line_nbr;
 	p2->skip = true;
 	p2->srcptr = ASTRING_cstr(s);
@@ -1692,7 +1692,7 @@ bool virtual_term(parser *p, const char *src)
 	return true;
 }
 
-static cell *make_a_literal(parser *p, pl_idx_t offset)
+static cell *make_interned(parser *p, pl_idx_t offset)
 {
 	cell *c = make_a_cell(p);
 	c->tag = TAG_INTERNED;
@@ -2954,7 +2954,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "[")) {
 			save_idx = p->cl->cidx;
-			cell *c = make_a_literal(p, g_dot_s);
+			cell *c = make_interned(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = true;
 			p->nesting_brackets++;
@@ -2963,7 +2963,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			tokenize(p, true, true);
 
 			if (!p->was_consing)
-				make_a_literal(p, g_nil_s);
+				make_interned(p, g_nil_s);
 
 			p->start_term = p->last_close = false;
 			p->was_consing = was_consing;
@@ -2981,7 +2981,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		if (!p->quote_char && !strcmp(p->token, "{")) {
 			save_idx = p->cl->cidx;
-			cell *c = make_a_literal(p, g_braces_s);
+			cell *c = make_interned(p, g_braces_s);
 			check_error(c);
 			c->arity = 1;
 			p->start_term = true;
@@ -3077,7 +3077,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			cell *c = make_a_literal(p, g_dot_s);
+			cell *c = make_interned(p, g_dot_s);
 			c->arity = 2;
 			p->start_term = last_op = true;
 			last_num = false;
