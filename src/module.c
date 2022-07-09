@@ -1241,7 +1241,7 @@ void xref_db(module *m)
 module *load_text(module *m, const char *src, const char *filename)
 {
 	parser *p = create_parser(m);
-	if (!p) return NULL;
+	check_error(p);
 	const char *save_filename = p->m->filename;
 	p->m->filename = set_known(m, filename);
 	p->consulting = true;
@@ -1644,7 +1644,6 @@ module *create_module(prolog *pl, const char *name)
 {
 	module *m = calloc(1, sizeof(module));
 	check_error(m);
-
 	m->pl = pl;
 	m->filename = set_known(m, name);
 	m->name = set_known(m, name);
@@ -1672,7 +1671,6 @@ module *create_module(prolog *pl, const char *name)
 	map_allow_dups(m->index, false);
 	m->p = create_parser(m);
 	check_error(m->p);
-
 	set_multifile_in_db(m, "$predicate_property", 2);
 	set_multifile_in_db(m, ":-", 1);
 

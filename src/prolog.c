@@ -490,14 +490,15 @@ prolog *pl_create()
 			) {
 			size_t len = *lib->len;
 			char *src = malloc(len+1);
-			check_error(src);
+			check_error(src, pl_destroy(pl));
 			memcpy(src, lib->start, len);
 			src[len] = '\0';
 			ASTRING(s1);
 			ASTRING_sprintf(s1, "library/%s", lib->name);
-			load_text(pl->user_m, src, ASTRING_cstr(s1));
+			module *m = load_text(pl->user_m, src, ASTRING_cstr(s1));
 			ASTRING_free(s1);
 			free(src);
+			check_error(m, pl_destroy(pl));
 		}
 	}
 
