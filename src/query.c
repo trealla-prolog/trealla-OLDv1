@@ -577,7 +577,7 @@ void undo_me(query *q)
 
 bool try_me(query *q, unsigned nbr_vars)
 {
-	check_heap_error(check_slot(q, MAX_ARITY));
+	check_heap_error(check_slot(q, nbr_vars));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
 	f->base = q->st.sp;
