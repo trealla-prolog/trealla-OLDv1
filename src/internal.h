@@ -605,7 +605,7 @@ struct query_ {
 	choice *choices;
 	trail *trails;
 	cell *tmp_heap, *last_arg, *exception, *variable_names, *key;
-	cell *queue[MAX_QUEUES], *tmpq[MAX_QUEUES];
+	cell *queue[MAX_QUEUES];
 	bool ignores[MAX_IGNORES];
 	page *pages;
 	slot *save_e;

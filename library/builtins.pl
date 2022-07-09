@@ -122,13 +122,7 @@ keysort_(_, _, Sorted, _) :-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%'$setof'(Template, Generator, Set) :-
-%	'$bagof'(Template, Generator, Bag),
-%	sort(Bag, Set).
-%
-%:- meta_predicate('$setof'(?,^,-)).
-%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 

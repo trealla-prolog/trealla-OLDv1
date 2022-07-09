@@ -1860,11 +1860,6 @@ static void purge_dirty_list(query *q)
 
 void destroy_query(query *q)
 {
-	while (q->st.qnbr > 0) {
-		free(q->tmpq[q->st.qnbr]);
-		q->st.qnbr--;
-	}
-
 	for (page *a = q->pages; a;) {
 		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;

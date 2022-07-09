@@ -6831,9 +6831,6 @@ static void load_properties(module *m)
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 
-	//format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	//format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "meta_predicate('$bagof'(?,^,-))"); ASTRING_strcat(pr, tmpbuf);
-
 	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
