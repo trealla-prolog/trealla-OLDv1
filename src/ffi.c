@@ -773,12 +773,12 @@ bool wrapper_for_predicate(query *q, builtins *ptr)
 				unshare_cell(&tmp);
 				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_CSTR)) {
-				may_error(make_cstring(&tmp, cells[i].val_str));
+				may_heap_error(make_cstring(&tmp, cells[i].val_str));
 				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != true) return ok;
 			} else if (ptr->types[i] == MARK_OUT(TAG_CCSTR)) {
-				may_error(make_cstring(&tmp, cells[i].val_str));
+				may_heap_error(make_cstring(&tmp, cells[i].val_str));
 				bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 				unshare_cell(&tmp);
 				if (ok != true) return ok;
@@ -828,13 +828,13 @@ bool wrapper_for_predicate(query *q, builtins *ptr)
 		unshare_cell(&tmp);
 		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_CSTR) {
-		may_error(make_cstring(&tmp, result.s));
+		may_heap_error(make_cstring(&tmp, result.s));
 		free(result.s);
 		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		if (ok != true) return ok;
 	} else if (ptr->ret_type == TAG_CCSTR) {
-		may_error(make_cstring(&tmp, result.s));
+		may_heap_error(make_cstring(&tmp, result.s));
 		bool ok = unify(q, c, c_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		if (ok != true) return ok;
