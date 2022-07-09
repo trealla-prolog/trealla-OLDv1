@@ -915,7 +915,7 @@ bool push_choice(query *q)
 
 bool push_barrier(query *q)
 {
-	check_heap_error(push_choice(q));
+	check_error(push_choice(q));
 	frame *f = GET_CURR_FRAME();
 	choice *ch = GET_CURR_CHOICE();
 	ch->cgen = f->cgen = ++q->cgen;
@@ -928,7 +928,7 @@ bool push_barrier(query *q)
 
 bool push_call_barrier(query *q)
 {
-	check_heap_error(push_barrier(q));
+	check_error(push_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->call_barrier = true;
 	return true;
@@ -936,7 +936,7 @@ bool push_call_barrier(query *q)
 
 bool push_catcher(query *q, enum q_retry retry)
 {
-	check_heap_error(push_call_barrier(q));
+	check_error(push_call_barrier(q));
 	choice *ch = GET_CURR_CHOICE();
 	ch->catcher = true;
 
