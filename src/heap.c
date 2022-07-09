@@ -376,7 +376,7 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 
 	if (cnt) {
 		if (!create_vars(q, cnt)) {
-			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "stack");
+			throw_error(q, p1, p1_ctx, "resource_error", "stack");
 			return NULL;
 		}
 	}
@@ -692,7 +692,7 @@ void append_list(query *q, const cell *c)
 	copy_cells(tmp, c, c->nbr_cells);
 }
 
-USE_RESULT cell *end_list(query *q)
+cell *end_list(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
@@ -710,7 +710,7 @@ USE_RESULT cell *end_list(query *q)
 	return tmp;
 }
 
-USE_RESULT cell *end_list_unsafe(query *q)
+cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;

@@ -35,6 +35,7 @@ LDFLAGS += -flto=$(LTO)
 endif
 
 SRCOBJECTS = tpl.o \
+	src/bags.o \
 	src/base64.o \
 	src/contrib.o \
 	src/control.o \
@@ -117,6 +118,10 @@ clean:
 
 # from [gcc|clang] -MM src/*.c src/imath/*.c src/isocline/src/isocline.c
 
+src/bags.o: src/bags.c src/heap.h src/internal.h \
+  src/trealla.h src/cdebug.h \
+  src/module.h src/parser.h src/prolog.h \
+  src/query.h src/builtins.h
 src/base64.o: src/base64.c src/base64.h
 src/contrib.o: src/contrib.c src/trealla.h src/internal.h src/map.h \
   src/skiplist.h src/cdebug.h src/imath/imath.h src/query.h \

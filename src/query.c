@@ -104,7 +104,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 	}
 }
 
-static USE_RESULT bool check_trail(query *q)
+static bool check_trail(query *q)
 {
 	if (q->st.tp > q->max_trails) {
 		if (q->st.tp >= q->trails_size) {
@@ -123,7 +123,7 @@ static USE_RESULT bool check_trail(query *q)
 	return true;
 }
 
-static USE_RESULT bool check_choice(query *q)
+static bool check_choice(query *q)
 {
 	if (q->cp > q->max_choices) {
 		if (q->cp >= q->choices_size) {
@@ -142,7 +142,7 @@ static USE_RESULT bool check_choice(query *q)
 	return true;
 }
 
-static USE_RESULT bool check_frame(query *q)
+static bool check_frame(query *q)
 {
 	if (q->st.fp > q->max_frames) {
 		if (q->st.fp >= q->frames_size) {
@@ -162,7 +162,7 @@ static USE_RESULT bool check_frame(query *q)
 	return true;
 }
 
-static USE_RESULT bool check_slot(query *q, unsigned cnt)
+static bool check_slot(query *q, unsigned cnt)
 {
 	pl_idx_t nbr = q->st.sp + cnt;
 
@@ -1264,7 +1264,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 // Match HEAD :- BODY.
 
-USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
+bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 {
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
@@ -1361,7 +1361,7 @@ USE_RESULT bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 // Match HEAD.
 // Match HEAD :- true.
 
-USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
+bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *c = p1;
@@ -1443,7 +1443,7 @@ USE_RESULT bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_ty
 	return false;
 }
 
-static USE_RESULT bool match_head(query *q)
+static bool match_head(query *q)
 {
 	if (!q->retry) {
 		cell *c = q->st.curr_cell;
@@ -1673,7 +1673,7 @@ bool start(query *q)
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
-				DISCARD_RESULT throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
+				throw_error(q, q->st.curr_cell, q->st.curr_frame, "type_error", "callable");
 			} else if ((match_head(q) != true) && !q->is_oom) {
 				q->retry = QUERY_RETRY;
 				q->tot_backtracks++;

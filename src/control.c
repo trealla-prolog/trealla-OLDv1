@@ -9,17 +9,17 @@
 #include "prolog.h"
 #include "query.h"
 
-USE_RESULT bool fn_iso_true_0(query *q)
+bool fn_iso_true_0(query *q)
 {
 	return true;
 }
 
-USE_RESULT bool fn_iso_fail_0(query *q)
+bool fn_iso_fail_0(query *q)
 {
 	return false;
 }
 
-USE_RESULT bool fn_sys_cut_if_det_0(query *q)
+bool fn_sys_cut_if_det_0(query *q)
 {
 	cut_if_det(q);
 	return true;
@@ -35,7 +35,7 @@ void do_cleanup(query *q, cell *p1)
 	q->st.curr_cell = tmp;
 }
 
-USE_RESULT bool fn_sys_cleanup_if_det_0(query *q)
+bool fn_sys_cleanup_if_det_0(query *q)
 {
 	if (!q->cp)		// redundant
 		return true;
@@ -66,7 +66,7 @@ USE_RESULT bool fn_sys_cleanup_if_det_0(query *q)
 
 // module:goal
 
-USE_RESULT bool fn_iso_invoke_2(query *q)
+bool fn_iso_invoke_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,callable);
@@ -91,7 +91,7 @@ USE_RESULT bool fn_iso_invoke_2(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_call_0(query *q, cell *p1)
+bool fn_call_0(query *q, cell *p1)
 {
 	if (q->retry)
 		return false;
@@ -118,7 +118,7 @@ USE_RESULT bool fn_call_0(query *q, cell *p1)
 	return true;
 }
 
-USE_RESULT bool fn_iso_call_n(query *q)
+bool fn_iso_call_n(query *q)
 {
 	if (q->retry)
 		return false;
@@ -171,7 +171,7 @@ USE_RESULT bool fn_iso_call_n(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_iso_call_1(query *q)
+bool fn_iso_call_1(query *q)
 {
 	if (q->retry)
 		return false;
@@ -203,7 +203,7 @@ USE_RESULT bool fn_iso_call_1(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_iso_once_1(query *q)
+bool fn_iso_once_1(query *q)
 {
 	if (q->retry)
 		return false;
@@ -234,7 +234,7 @@ USE_RESULT bool fn_iso_once_1(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_ignore_1(query *q)
+bool fn_ignore_1(query *q)
 {
 	if (q->retry)
 		return true;
@@ -267,7 +267,7 @@ USE_RESULT bool fn_ignore_1(query *q)
 
 // if -> then
 
-USE_RESULT bool fn_iso_if_then_2(query *q)
+bool fn_iso_if_then_2(query *q)
 {
 	if (q->retry)
 		return false;
@@ -287,7 +287,7 @@ USE_RESULT bool fn_iso_if_then_2(query *q)
 
 // if *-> then
 
-USE_RESULT bool fn_if_2(query *q)
+bool fn_if_2(query *q)
 {
 	if (q->retry)
 		return false;
@@ -355,7 +355,7 @@ static bool do_if_else(query *q, cell *p1, cell *p2, cell *p3)
 
 // if_(if,then,else)
 
-USE_RESULT bool fn_if_3(query *q)
+bool fn_if_3(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable);
@@ -365,7 +365,7 @@ USE_RESULT bool fn_if_3(query *q)
 
 // either ; or
 
-USE_RESULT bool fn_iso_disjunction_2(query *q)
+bool fn_iso_disjunction_2(query *q)
 {
 	cell *c = q->st.curr_cell+1;
 
@@ -406,7 +406,7 @@ USE_RESULT bool fn_iso_disjunction_2(query *q)
 
 // \+ goal
 
-USE_RESULT bool fn_iso_negation_1(query *q)
+bool fn_iso_negation_1(query *q)
 {
 	if (q->retry)
 		return true;
@@ -423,25 +423,25 @@ USE_RESULT bool fn_iso_negation_1(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_iso_cut_0(query *q)
+bool fn_iso_cut_0(query *q)
 {
 	cut_me(q, false, false);
 	return true;
 }
 
-USE_RESULT bool fn_sys_inner_cut_0(query *q)
+bool fn_sys_inner_cut_0(query *q)
 {
 	cut_me(q, true, false);
 	return true;
 }
 
-USE_RESULT bool fn_sys_soft_inner_cut_0(query *q)
+bool fn_sys_soft_inner_cut_0(query *q)
 {
 	cut_me(q, true, true);
 	return true;
 }
 
-USE_RESULT bool fn_sys_block_catcher_1(query *q)
+bool fn_sys_block_catcher_1(query *q)
 {
 	if (!q->cp)
 		return true;
@@ -466,7 +466,7 @@ USE_RESULT bool fn_sys_block_catcher_1(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_iso_catch_3(query *q)
+bool fn_iso_catch_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -509,7 +509,7 @@ USE_RESULT bool fn_iso_catch_3(query *q)
 	return true;
 }
 
-USE_RESULT bool fn_sys_call_cleanup_3(query *q)
+bool fn_sys_call_cleanup_3(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
@@ -550,7 +550,7 @@ USE_RESULT bool fn_sys_call_cleanup_3(query *q)
 	return true;
 }
 
-USE_RESULT bool find_exception_handler(query *q, cell *e)
+bool find_exception_handler(query *q, cell *e)
 {
 	pl_idx_t e_ctx = q->st.curr_frame;
 
@@ -615,7 +615,7 @@ USE_RESULT bool find_exception_handler(query *q, cell *e)
 	return false;
 }
 
-USE_RESULT bool fn_iso_throw_1(query *q)
+bool fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
 	cell *e;
