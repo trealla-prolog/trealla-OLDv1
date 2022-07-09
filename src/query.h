@@ -112,9 +112,12 @@ bool fn_sys_block_catcher_1(query *q);
 bool fn_sys_cleanup_if_det_0(query *q);
 bool fn_sys_queuen_2(query *q);
 bool fn_iso_findall_3(query *q);
-bool fn_sys_bagof_3(query *q);
 
+#if 0
+bool fn_sys_bagof_3(query *q);
 cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx);
+#endif
+
 cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells);
 void init_queuen(query *q);
 

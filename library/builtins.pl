@@ -122,15 +122,13 @@ keysort_(_, _, Sorted, _) :-
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Experimental native bag & setof.
-% Note: this has bugs, especially to do with disjunction in goals
-
-'$setof'(Template, Generator, Set) :-
-	'$bagof'(Template, Generator, Bag),
-	sort(Bag, Set).
-
-:- meta_predicate('$setof'(?,^,-)).
-
+%
+%'$setof'(Template, Generator, Set) :-
+%	'$bagof'(Template, Generator, Bag),
+%	sort(Bag, Set).
+%
+%:- meta_predicate('$setof'(?,^,-)).
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Derived from code by R.A. O'Keefe
 

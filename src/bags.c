@@ -129,6 +129,7 @@ bool fn_iso_findall_3(query *q)
 	return ok;
 }
 
+#if 0
 static int collect_local_vars(cell *p1, pl_idx_t nbr_cells, cell **slots)
 {
 	int cnt = 0;
@@ -358,4 +359,5 @@ bool fn_sys_bagof_3(query *q)
 
 	return true;
 }
+#endif
 

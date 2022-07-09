@@ -6831,8 +6831,8 @@ static void load_properties(module *m)
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 
-	format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
-	format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "meta_predicate('$bagof'(?,^,-))"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "control_construct"); ASTRING_strcat(pr, tmpbuf);
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "$bagof", 3, "meta_predicate('$bagof'(?,^,-))"); ASTRING_strcat(pr, tmpbuf);
 
 	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
@@ -7154,7 +7154,7 @@ builtins g_iso_bifs[] =
 	{"compare", 3, fn_iso_compare_3, NULL, false, BLAH},
 	{"unify_with_occurs_check", 2, fn_iso_unify_with_occurs_check_2, NULL, false, BLAH},
 
-	{"$bagof", 3, fn_sys_bagof_3, NULL, false, BLAH},
+	//{"$bagof", 3, fn_sys_bagof_3, NULL, false, BLAH},
 
 	{0}
 };
