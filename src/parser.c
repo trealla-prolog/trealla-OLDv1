@@ -605,6 +605,7 @@ static void directives(parser *p, cell *d)
 				|| !strcmp(name, "iso_ext")
 				|| !strcmp(name, "files")
 				|| !strcmp(name, "read_util")
+				|| !strcmp(name, "dcg/basics")
 				)
 				return;
 
