@@ -1,0 +1,55 @@
+{
+  "uid" : "4f88848c48ab7056",
+  "name" : "closed_world_assumption_01",
+  "fullName" : "closed_world_assumption_01::tests",
+  "historyId" : "closed_world_assumption_01::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/closed_world_assumption/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/closed_world_assumption/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/closed_world_assumption/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/closed_world_assumption/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "34-35"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/80cb37fd9c860364de298bf805981dde12efd195/examples/closed_world_assumption/tests.lgt#L34"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4f88848c48ab7056.json",
+  "parameterValues" : [ "examples/closed_world_assumption/tests.lgt", "34-35", "https://github.com/LogtalkDotOrg/logtalk3/tree/80cb37fd9c860364de298bf805981dde12efd195/examples/closed_world_assumption/tests.lgt#L34" ]
+}
