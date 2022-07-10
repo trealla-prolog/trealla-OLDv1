@@ -83,17 +83,17 @@ bool make_cstringn(cell *d, const char *s, size_t n);
 bool make_stringn(cell *d, const char *s, size_t n);
 
 #if USE_FFI
-USE_RESULT bool fn_sys_dlopen_3(query *q);
-USE_RESULT bool fn_sys_dlsym_3(query *q);
-USE_RESULT bool fn_sys_dlclose_1(query *q);
-USE_RESULT bool fn_sys_ffi_register_function_4(query *q);
-USE_RESULT bool fn_sys_ffi_register_predicate_4(query *q);
+bool fn_sys_dlopen_3(query *q);
+bool fn_sys_dlsym_3(query *q);
+bool fn_sys_dlclose_1(query *q);
+bool fn_sys_ffi_register_function_4(query *q);
+bool fn_sys_ffi_register_predicate_4(query *q);
 #endif
 
-USE_RESULT bool fn_iso_add_2(query *q);
-USE_RESULT bool fn_local_cut_0(query *q);
-USE_RESULT bool fn_iso_float_1(query *q);
-USE_RESULT bool fn_iso_integer_1(query *q);
+bool fn_iso_add_2(query *q);
+bool fn_local_cut_0(query *q);
+bool fn_iso_float_1(query *q);
+bool fn_iso_integer_1(query *q);
 
 cell *get_var(query *q, cell *c, pl_idx_t c_ctx);
 

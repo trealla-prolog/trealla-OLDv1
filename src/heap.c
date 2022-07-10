@@ -318,8 +318,6 @@ cell *deep_raw_copy_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx)
 	nlist.ctx = p1_ctx;
 	q->vars = map_create(NULL, NULL, NULL);
 	if (!q->vars) return NULL;
-	q->varno = f->nbr_vars;
-	q->tab_idx = 0;
 	cell *rec = deep_copy2_to_tmp(q, p1, p1_ctx, false, NULL, 0, NULL, 0, 0, &nlist);
 	map_destroy(q->vars);
 	q->vars = NULL;
@@ -374,9 +372,14 @@ static cell *deep_copy_to_tmp_with_replacement(query *q, cell *p1, pl_idx_t p1_c
 	if (!rec) return rec;
 	int cnt = q->varno - f->nbr_vars;
 
+#if 0
+	printf("*** f=%u, f->nbr_vars=%u, f->nbr_slots=%u, q->varno=%u, cnt=%d\n",
+		(unsigned)q->st.fp, (unsigned)f->nbr_vars, (unsigned)f->nbr_slots, (unsigned)q->varno, cnt);
+#endif
+
 	if (cnt) {
 		if (!create_vars(q, cnt)) {
-			DISCARD_RESULT throw_error(q, p1, p1_ctx, "resource_error", "stack");
+			throw_error(q, p1, p1_ctx, "resource_error", "stack");
 			return NULL;
 		}
 	}
@@ -692,7 +695,7 @@ void append_list(query *q, const cell *c)
 	copy_cells(tmp, c, c->nbr_cells);
 }
 
-USE_RESULT cell *end_list(query *q)
+cell *end_list(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;
@@ -710,7 +713,7 @@ USE_RESULT cell *end_list(query *q)
 	return tmp;
 }
 
-USE_RESULT cell *end_list_unsafe(query *q)
+cell *end_list_unsafe(query *q)
 {
 	cell *tmp = alloc_on_tmp(q, 1);
 	if (!tmp) return NULL;

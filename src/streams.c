@@ -317,7 +317,7 @@ static void del_stream_properties(query *q, int n)
 	predicate *pr = find_predicate(q->st.m, tmp);
 
 	if (!pr) {
-		DISCARD_RESULT throw_error(q, tmp, "existence_error", "procedure");
+		throw_error(q, tmp, "existence_error", "procedure");
 		return;
 	}
 #endif
@@ -505,7 +505,7 @@ static const char *s_properties =
 	"position,reposition,end_of_stream,eof_action,"				\
 	"input,output,newline";
 
-static USE_RESULT bool fn_iso_stream_property_2(query *q)
+static bool fn_iso_stream_property_2(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 	GET_NEXT_ARG(p1,any);
@@ -574,7 +574,7 @@ void convert_path(char *filename)
 }
 
 #ifndef _WIN32
-static USE_RESULT bool fn_popen_4(query *q)
+static bool fn_popen_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom);
@@ -682,7 +682,7 @@ static USE_RESULT bool fn_popen_4(query *q)
 }
 #endif
 
-static USE_RESULT bool fn_iso_open_4(query *q)
+static bool fn_iso_open_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 	GET_NEXT_ARG(p2,atom);
@@ -921,7 +921,7 @@ static USE_RESULT bool fn_iso_open_4(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_close_1(query *q)
+static bool fn_iso_close_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -955,7 +955,7 @@ static USE_RESULT bool fn_iso_close_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_close_2(query *q)
+static bool fn_iso_close_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,list_or_nil);
@@ -984,7 +984,7 @@ static USE_RESULT bool fn_iso_close_2(query *q)
 	return fn_iso_close_1(q);
 }
 
-static USE_RESULT bool fn_iso_at_end_of_stream_0(query *q)
+static bool fn_iso_at_end_of_stream_0(query *q)
 {
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
@@ -1010,7 +1010,7 @@ static USE_RESULT bool fn_iso_at_end_of_stream_0(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_at_end_of_stream_1(query *q)
+static bool fn_iso_at_end_of_stream_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1040,7 +1040,7 @@ static USE_RESULT bool fn_iso_at_end_of_stream_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_flush_output_0(query *q)
+static bool fn_iso_flush_output_0(query *q)
 {
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
@@ -1048,7 +1048,7 @@ static USE_RESULT bool fn_iso_flush_output_0(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_flush_output_1(query *q)
+static bool fn_iso_flush_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1061,7 +1061,7 @@ static USE_RESULT bool fn_iso_flush_output_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_nl_0(query *q)
+static bool fn_iso_nl_0(query *q)
 {
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
@@ -1070,7 +1070,7 @@ static USE_RESULT bool fn_iso_nl_0(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_nl_1(query *q)
+static bool fn_iso_nl_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1084,7 +1084,7 @@ static USE_RESULT bool fn_iso_nl_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_read_1(query *q)
+static bool fn_iso_read_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_input;
@@ -1102,7 +1102,7 @@ static USE_RESULT bool fn_iso_read_1(query *q)
 	return do_read_term(q, str, p1, p1_ctx, &tmp, q->st.curr_frame, NULL);
 }
 
-static USE_RESULT bool fn_iso_read_2(query *q)
+static bool fn_iso_read_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1129,7 +1129,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 	parser *p = str->p;
 
 	if (!is_structure(c)) {
-		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+		throw_error(q, c, c_ctx, "domain_error", "read_option");
 		return false;
 	}
 
@@ -1157,7 +1157,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			if (vars) *vars = c1;
 			if (vars_ctx) *vars_ctx = c1_ctx;
 		} else {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
 		}
 	} else if (!CMP_STR_CSTR(q, c, "variable_names")) {
@@ -1165,7 +1165,7 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			if (varnames) *varnames = c1;
 			if (varnames_ctx) *varnames_ctx = c1_ctx;
 		} else {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
 		}
 	} else if (!CMP_STR_CSTR(q, c, "singletons")) {
@@ -1173,14 +1173,14 @@ static bool parse_read_params(query *q, stream *str, cell *c, pl_idx_t c_ctx, ce
 			if (sings) *sings = c1;
 			if (sings_ctx) *sings_ctx = c1_ctx;
 		} else {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+			throw_error(q, c, c_ctx, "domain_error", "read_option");
 			return false;
 		}
 	} else if (!CMP_STR_CSTR(q, c, "positions") && (c->arity == 2) && str->fp) {
 		p->pos_start = ftello(str->fp);
 	} else if (!CMP_STR_CSTR(q, c, "line_counts") && (c->arity == 2)) {
 	} else {
-		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "read_option");
+		throw_error(q, c, c_ctx, "domain_error", "read_option");
 		return false;
 	}
 
@@ -1606,7 +1606,7 @@ bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl
 	return ok;
 }
 
-static USE_RESULT bool fn_iso_read_term_2(query *q)
+static bool fn_iso_read_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -1623,7 +1623,7 @@ static USE_RESULT bool fn_iso_read_term_2(query *q)
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
-static USE_RESULT bool fn_iso_read_term_3(query *q)
+static bool fn_iso_read_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1644,7 +1644,7 @@ static USE_RESULT bool fn_iso_read_term_3(query *q)
 	return do_read_term(q, str, p1, p1_ctx, p2, p2_ctx, NULL);
 }
 
-static USE_RESULT bool fn_iso_write_1(query *q)
+static bool fn_iso_write_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
@@ -1667,7 +1667,7 @@ static USE_RESULT bool fn_iso_write_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_write_2(query *q)
+static bool fn_iso_write_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1694,7 +1694,7 @@ static USE_RESULT bool fn_iso_write_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_writeq_1(query *q)
+static bool fn_iso_writeq_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
@@ -1719,7 +1719,7 @@ static USE_RESULT bool fn_iso_writeq_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_writeq_2(query *q)
+static bool fn_iso_writeq_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1748,7 +1748,7 @@ static USE_RESULT bool fn_iso_writeq_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_write_canonical_1(query *q)
+static bool fn_iso_write_canonical_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
@@ -1769,7 +1769,7 @@ static USE_RESULT bool fn_iso_write_canonical_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_write_canonical_2(query *q)
+static bool fn_iso_write_canonical_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -1797,12 +1797,12 @@ static USE_RESULT bool fn_iso_write_canonical_2(query *q)
 bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx_t *vnames_ctx)
 {
 	if (is_variable(c)) {
-		DISCARD_RESULT throw_error(q, c, c_ctx, "instantiation_error", "write_option");
+		throw_error(q, c, c_ctx, "instantiation_error", "write_option");
 		return false;
 	}
 
 	if (!is_interned(c) || !is_structure(c)) {
-		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+		throw_error(q, c, c_ctx, "domain_error", "write_option");
 		return false;
 	}
 
@@ -1811,7 +1811,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 
 	if (!CMP_STR_CSTR(q, c, "max_depth")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
@@ -1819,84 +1819,84 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			q->max_depth = get_int(&c[1]);
 	} else if (!CMP_STR_CSTR(q, c, "fullstop")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->fullstop = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "nl")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->nl = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "quoted")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->quoted = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "varnames")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->varnames = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "ignore_ops")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->ignore_ops = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "numbervars")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_interned(c1) || (CMP_STR_CSTR(q, c1, "true") && CMP_STR_CSTR(q, c1, "false"))) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		q->numbervars = !CMP_STR_CSTR(q, c1, "true");
 	} else if (!CMP_STR_CSTR(q, c, "variable_names")) {
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_list_or_nil(c1)) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
@@ -1910,17 +1910,17 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			pl_idx_t h_ctx = q->latest_ctx;
 
 			if (is_variable(h)) {
-				DISCARD_RESULT throw_error(q, h, h_ctx, "instantiation_error", "write_option");
+				throw_error(q, h, h_ctx, "instantiation_error", "write_option");
 				return false;
 			}
 
 			if (!is_structure(h)) {
-				DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+				throw_error(q, c, c_ctx, "domain_error", "write_option");
 				return false;
 			}
 
 			if (CMP_STR_CSTR(q, h, "=")) {
-				DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+				throw_error(q, c, c_ctx, "domain_error", "write_option");
 				return false;
 			}
 
@@ -1928,10 +1928,10 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 				cell *h1 = deref(q, h+1, h_ctx);
 
 				if (is_variable(h1)) {
-					DISCARD_RESULT throw_error(q, c, c_ctx, "instantiation_error", "write_option");
+					throw_error(q, c, c_ctx, "instantiation_error", "write_option");
 					return false;
 				} else if (!is_atom(h1)) {
-					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+					throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
 
@@ -1939,7 +1939,7 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 				cell *h2 = deref(q, h+2, h_ctx);
 
 				if (!is_variable(h2)) {
-					DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+					throw_error(q, c, c_ctx, "domain_error", "write_option");
 					return false;
 				}
 #endif
@@ -1951,26 +1951,26 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 		}
 
 		if (is_variable(c1)) {
-			DISCARD_RESULT throw_error(q, c1_orig, c_ctx, "instantiation_error", "write_option");
+			throw_error(q, c1_orig, c_ctx, "instantiation_error", "write_option");
 			return false;
 		}
 
 		if (!is_nil(c1)) {
-			DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+			throw_error(q, c, c_ctx, "domain_error", "write_option");
 			return false;
 		}
 
 		if (vnames) *vnames = c1_orig;
 		if (vnames_ctx) *vnames_ctx = c1_orig_ctx;
 	} else {
-		DISCARD_RESULT throw_error(q, c, c_ctx, "domain_error", "write_option");
+		throw_error(q, c, c_ctx, "domain_error", "write_option");
 		return false;
 	}
 
 	return true;
 }
 
-static USE_RESULT bool fn_iso_write_term_2(query *q)
+static bool fn_iso_write_term_2(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,list_or_nil);
@@ -2035,7 +2035,7 @@ static USE_RESULT bool fn_iso_write_term_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_write_term_3(query *q)
+static bool fn_iso_write_term_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2105,7 +2105,7 @@ static USE_RESULT bool fn_iso_write_term_3(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_char_1(query *q)
+static bool fn_iso_put_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,character);
 	int n = q->pl->current_output;
@@ -2130,7 +2130,7 @@ static USE_RESULT bool fn_iso_put_char_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_char_2(query *q)
+static bool fn_iso_put_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2159,7 +2159,7 @@ static USE_RESULT bool fn_iso_put_char_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_code_1(query *q)
+static bool fn_iso_put_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = q->pl->current_output;
@@ -2185,7 +2185,7 @@ static USE_RESULT bool fn_iso_put_code_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_code_2(query *q)
+static bool fn_iso_put_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2215,7 +2215,7 @@ static USE_RESULT bool fn_iso_put_code_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_byte_1(query *q)
+static bool fn_iso_put_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,byte);
 	int n = q->pl->current_output;
@@ -2241,7 +2241,7 @@ static USE_RESULT bool fn_iso_put_byte_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_put_byte_2(query *q)
+static bool fn_iso_put_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2267,7 +2267,7 @@ static USE_RESULT bool fn_iso_put_byte_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_iso_get_char_1(query *q)
+static bool fn_iso_get_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
@@ -2336,7 +2336,7 @@ static USE_RESULT bool fn_iso_get_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_get_char_2(query *q)
+static bool fn_iso_get_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2409,7 +2409,7 @@ static USE_RESULT bool fn_iso_get_char_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_get_code_1(query *q)
+static bool fn_iso_get_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
@@ -2480,7 +2480,7 @@ static USE_RESULT bool fn_iso_get_code_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_get_code_2(query *q)
+static bool fn_iso_get_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2554,7 +2554,7 @@ static USE_RESULT bool fn_iso_get_code_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_get_byte_1(query *q)
+static bool fn_iso_get_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->pl->current_input;
@@ -2614,7 +2614,7 @@ static USE_RESULT bool fn_iso_get_byte_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_get_byte_2(query *q)
+static bool fn_iso_get_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2677,7 +2677,7 @@ static USE_RESULT bool fn_iso_get_byte_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_char_1(query *q)
+static bool fn_iso_peek_char_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_character_or_var);
 	int n = q->pl->current_input;
@@ -2728,7 +2728,7 @@ static USE_RESULT bool fn_iso_peek_char_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_char_2(query *q)
+static bool fn_iso_peek_char_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2782,7 +2782,7 @@ static USE_RESULT bool fn_iso_peek_char_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_code_1(query *q)
+static bool fn_iso_peek_code_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer_or_var);
 	int n = q->pl->current_input;
@@ -2833,7 +2833,7 @@ static USE_RESULT bool fn_iso_peek_code_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_code_2(query *q)
+static bool fn_iso_peek_code_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -2888,7 +2888,7 @@ static USE_RESULT bool fn_iso_peek_code_2(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_byte_1(query *q)
+static bool fn_iso_peek_byte_1(query *q)
 {
 	GET_FIRST_ARG(p1,in_byte_or_var);
 	int n = q->pl->current_input;
@@ -2935,7 +2935,7 @@ static USE_RESULT bool fn_iso_peek_byte_1(query *q)
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_iso_peek_byte_2(query *q)
+static bool fn_iso_peek_byte_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -3018,7 +3018,7 @@ int get_stream(query *q, cell *p1)
 	return get_smallint(p1);
 }
 
-static USE_RESULT bool fn_iso_current_input_1(query *q)
+static bool fn_iso_current_input_1(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 
@@ -3037,7 +3037,7 @@ static USE_RESULT bool fn_iso_current_input_1(query *q)
 	return n == q->pl->current_input ? true : false;
 }
 
-static USE_RESULT bool fn_iso_current_output_1(query *q)
+static bool fn_iso_current_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,any);
 
@@ -3056,7 +3056,7 @@ static USE_RESULT bool fn_iso_current_output_1(query *q)
 	return n == q->pl->current_output ? true : false;
 }
 
-static USE_RESULT bool fn_iso_set_input_1(query *q)
+static bool fn_iso_set_input_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -3069,7 +3069,7 @@ static USE_RESULT bool fn_iso_set_input_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_set_output_1(query *q)
+static bool fn_iso_set_output_1(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -3082,7 +3082,7 @@ static USE_RESULT bool fn_iso_set_output_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_iso_set_stream_position_2(query *q)
+static bool fn_iso_set_stream_position_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -3103,7 +3103,7 @@ static USE_RESULT bool fn_iso_set_stream_position_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_read_term_from_chars_3(query *q)
+static bool fn_read_term_from_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
@@ -3180,7 +3180,7 @@ static USE_RESULT bool fn_read_term_from_chars_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_read_term_from_atom_3(query *q)
+static bool fn_read_term_from_atom_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,any);
 	GET_NEXT_ARG(p_term,any);
@@ -3220,7 +3220,7 @@ static USE_RESULT bool fn_read_term_from_atom_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_write_term_to_atom_3(query *q)
+static bool fn_write_term_to_atom_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p_term,any);
@@ -3253,7 +3253,7 @@ static USE_RESULT bool fn_write_term_to_atom_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_write_canonical_to_atom_3(query *q)
+static bool fn_write_canonical_to_atom_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p_term,any);
@@ -3284,7 +3284,7 @@ static USE_RESULT bool fn_write_canonical_to_atom_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_write_term_to_chars_3(query *q)
+static bool fn_write_term_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p_term,any);
@@ -3317,7 +3317,7 @@ static USE_RESULT bool fn_write_term_to_chars_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_write_canonical_to_chars_3(query *q)
+static bool fn_write_canonical_to_chars_3(query *q)
 {
 	GET_FIRST_ARG(p_chars,atom_or_var);
 	GET_NEXT_ARG(p_term,any);
@@ -3348,7 +3348,7 @@ static USE_RESULT bool fn_write_canonical_to_chars_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_edin_redo_1(query *q)
+static bool fn_edin_redo_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	int n = q->pl->current_input;
@@ -3377,7 +3377,7 @@ static USE_RESULT bool fn_edin_redo_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_edin_redo_2(query *q)
+static bool fn_edin_redo_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);
@@ -3407,7 +3407,7 @@ static USE_RESULT bool fn_edin_redo_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_edin_tab_1(query *q)
+static bool fn_edin_tab_1(query *q)
 {
 	GET_FIRST_ARG(p1_tmp,any);
 	cell p1 = eval(q, p1_tmp);
@@ -3424,7 +3424,7 @@ static USE_RESULT bool fn_edin_tab_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_edin_tab_2(query *q)
+static bool fn_edin_tab_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_FIRST_ARG(p1_tmp,any);
@@ -3442,7 +3442,7 @@ static USE_RESULT bool fn_edin_tab_2(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_edin_seen_0(query *q)
+static bool fn_edin_seen_0(query *q)
 {
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
@@ -3463,7 +3463,7 @@ static USE_RESULT bool fn_edin_seen_0(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_edin_told_0(query *q)
+static bool fn_edin_told_0(query *q)
 {
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
@@ -3484,7 +3484,7 @@ static USE_RESULT bool fn_edin_told_0(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_edin_seeing_1(query *q)
+static bool fn_edin_seeing_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	char *name = q->pl->current_input==0?"user":q->pl->streams[q->pl->current_input].name;
@@ -3495,7 +3495,7 @@ static USE_RESULT bool fn_edin_seeing_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_edin_telling_1(query *q)
+static bool fn_edin_telling_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	char *name =q->pl->current_output==1?"user":q->pl->streams[q->pl->current_output].name;
@@ -3506,7 +3506,7 @@ static USE_RESULT bool fn_edin_telling_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_read_line_to_string_2(query *q)
+static bool fn_read_line_to_string_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,any);
@@ -3553,7 +3553,7 @@ static USE_RESULT bool fn_read_line_to_string_2(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_read_file_to_string_3(query *q)
+static bool fn_read_file_to_string_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -3740,7 +3740,7 @@ static bool do_deconsult(query *q, cell *p1, pl_idx_t p1_ctx)
 	return true;
 }
 
-static USE_RESULT bool fn_load_files_2(query *q)
+static bool fn_load_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 
@@ -3765,7 +3765,7 @@ static USE_RESULT bool fn_load_files_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_unload_files_1(query *q)
+static bool fn_unload_files_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_structure);
 
@@ -3790,7 +3790,7 @@ static USE_RESULT bool fn_unload_files_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_savefile_2(query *q)
+static bool fn_savefile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
@@ -3815,7 +3815,7 @@ static USE_RESULT bool fn_savefile_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_loadfile_2(query *q)
+static bool fn_loadfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -3873,7 +3873,7 @@ static USE_RESULT bool fn_loadfile_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_getfile_2(query *q)
+static bool fn_getfile_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -3948,7 +3948,7 @@ static USE_RESULT bool fn_getfile_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_getlines_1(query *q)
+static bool fn_getlines_1(query *q)
 {
 	GET_NEXT_ARG(p1,variable);
 	int n = q->pl->current_input;
@@ -3997,7 +3997,7 @@ static USE_RESULT bool fn_getlines_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_getlines_2(query *q)
+static bool fn_getlines_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,variable);
@@ -4082,7 +4082,7 @@ static char *fixup(const char *srcptr)
 	return tmpbuf;
 }
 
-static USE_RESULT bool fn_absolute_file_name_3(query *q)
+static bool fn_absolute_file_name_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_var);
@@ -4218,7 +4218,7 @@ static USE_RESULT bool fn_absolute_file_name_3(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_getline_1(query *q)
+static bool fn_getline_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_input;
@@ -4256,7 +4256,7 @@ static USE_RESULT bool fn_getline_1(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_getline_2(query *q)
+static bool fn_getline_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,any);
@@ -4297,7 +4297,7 @@ static USE_RESULT bool fn_getline_2(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_access_file_2(query *q)
+static bool fn_access_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom);
@@ -4350,7 +4350,7 @@ static USE_RESULT bool fn_access_file_2(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_exists_file_1(query *q)
+static bool fn_exists_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4382,7 +4382,7 @@ static USE_RESULT bool fn_exists_file_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_directory_files_2(query *q)
+static bool fn_directory_files_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -4439,7 +4439,7 @@ static USE_RESULT bool fn_directory_files_2(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_delete_file_1(query *q)
+static bool fn_delete_file_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4467,7 +4467,7 @@ static USE_RESULT bool fn_delete_file_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_rename_file_2(query *q)
+static bool fn_rename_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
@@ -4511,7 +4511,7 @@ static USE_RESULT bool fn_rename_file_2(query *q)
 	return ok ? true : false;
 }
 
-static USE_RESULT bool fn_copy_file_2(query *q)
+static bool fn_copy_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,atom_or_list);
@@ -4581,7 +4581,7 @@ static USE_RESULT bool fn_copy_file_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_time_file_2(query *q)
+static bool fn_time_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,variable);
@@ -4611,7 +4611,7 @@ static USE_RESULT bool fn_time_file_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_size_file_2(query *q)
+static bool fn_size_file_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	GET_NEXT_ARG(p2,integer_or_var);
@@ -4641,7 +4641,7 @@ static USE_RESULT bool fn_size_file_2(query *q)
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
-static USE_RESULT bool fn_exists_directory_1(query *q)
+static bool fn_exists_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4672,7 +4672,7 @@ static USE_RESULT bool fn_exists_directory_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_make_directory_1(query *q)
+static bool fn_make_directory_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4704,7 +4704,7 @@ static USE_RESULT bool fn_make_directory_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_make_directory_path_1(query *q)
+static bool fn_make_directory_path_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4751,7 +4751,7 @@ static USE_RESULT bool fn_make_directory_path_1(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_working_directory_2(query *q)
+static bool fn_working_directory_2(query *q)
 {
 	GET_FIRST_ARG(p_old,variable);
 	GET_NEXT_ARG(p_new,atom_or_list_or_var);
@@ -4791,7 +4791,7 @@ static USE_RESULT bool fn_working_directory_2(query *q)
 	return ok;
 }
 
-static USE_RESULT bool fn_chdir_1(query *q)
+static bool fn_chdir_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom_or_list);
 	char *filename;
@@ -4832,7 +4832,7 @@ static void parse_host(const char *src, char hostname[1024], char path[4096], un
 	path[4095] = '\0';
 }
 
-static USE_RESULT bool fn_server_3(query *q)
+static bool fn_server_3(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -4949,7 +4949,7 @@ static USE_RESULT bool fn_server_3(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_accept_2(query *q)
+static bool fn_accept_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,variable);
@@ -5008,7 +5008,7 @@ static USE_RESULT bool fn_accept_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_client_5(query *q)
+static bool fn_client_5(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,variable);
@@ -5154,7 +5154,7 @@ static USE_RESULT bool fn_client_5(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_bread_3(query *q)
+static bool fn_bread_3(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,integer_or_var);
@@ -5258,7 +5258,7 @@ static USE_RESULT bool fn_bread_3(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_bwrite_2(query *q)
+static bool fn_bwrite_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	GET_NEXT_ARG(p1,atom);
@@ -5286,7 +5286,7 @@ static USE_RESULT bool fn_bwrite_2(query *q)
 	return true;
 }
 
-static USE_RESULT bool fn_sys_put_chars_1(query *q)
+static bool fn_sys_put_chars_1(query *q)
 {
 	GET_FIRST_ARG(p1,any);
 	int n = q->pl->current_output;
@@ -5309,7 +5309,7 @@ static USE_RESULT bool fn_sys_put_chars_1(query *q)
 	return !ferror(str->fp);
 }
 
-static USE_RESULT bool fn_sys_put_chars_2(query *q)
+static bool fn_sys_put_chars_2(query *q)
 {
 	GET_FIRST_ARG(pstr,stream);
 	int n = get_stream(q, pstr);

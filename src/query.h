@@ -110,11 +110,22 @@ bool fn_sys_soft_inner_cut_0(query *q);
 bool fn_iso_unify_2(query *q);
 bool fn_sys_block_catcher_1(query *q);
 bool fn_sys_cleanup_if_det_0(query *q);
+bool fn_sys_queuen_2(query *q);
+bool fn_iso_findall_3(query *q);
 
-inline static void share_predicate(predicate *pr)
-{
-	pr->ref_cnt++;
-}
+#if 0
+bool fn_sys_bagof_3(query *q);
+cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx);
+#endif
+
+cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells);
+void init_queuen(query *q);
+
+inline static pl_idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
+inline static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
+inline static cell *take_queuen(query *q) { cell *save = q->queue[q->st.qnbr]; q->queue[q->st.qnbr] = NULL; return save; }
+
+inline static void share_predicate(predicate *pr) {	pr->ref_cnt++; }
 
 inline static bool can_view(const frame *f, const db_entry *dbe)
 {
