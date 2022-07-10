@@ -49,25 +49,20 @@ bool fn_iso_findall_3(query *q)
 		q->st.qnbr--;
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
-		bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-
-		if (ok == true)
-			unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-		return ok;
+		return unify(q, xp3, xp3_ctx, &tmp, q->st.curr_frame);
 	}
 
 	// Retry takes a copy
 
 	pl_idx_t nbr_cells = queuen_used(q);
-	cell *tmp = take_queuen(q);
+	cell *solns = take_queuen(q);
 	init_queuen(q);
 
 	// Now grab matching solutions
 
 	check_heap_error(push_choice(q));
 
-	for (cell *c = tmp; nbr_cells;
+	for (cell *c = solns; nbr_cells;
 		nbr_cells -= c->nbr_cells, c += c->nbr_cells) {
 		check_heap_error(try_me(q, 64));
 
@@ -91,13 +86,8 @@ bool fn_iso_findall_3(query *q)
 
 	drop_choice(q);
 	trim_trail(q);
-	free(tmp);
+	free(solns);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	q->st.qnbr--;
-	bool ok = unify(q, p3, p3_ctx, l, q->st.curr_frame);
-
-	if (ok == true)
-		unify(q, q->st.curr_cell, q->st.curr_frame, p0, q->st.curr_frame);
-
-	return ok;
+	return unify(q, xp3, xp3_ctx, l, q->st.curr_frame);
 }
