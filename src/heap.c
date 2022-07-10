@@ -437,7 +437,14 @@ cell *deep_copy_to_heap(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs)
 
 cell *deep_copy_to_heap_with_replacement(query *q, cell *p1, pl_idx_t p1_ctx, bool copy_attrs, cell *from, pl_idx_t from_ctx, cell *to, pl_idx_t to_ctx)
 {
+	q->vars = map_create(NULL, NULL, NULL);
+	if (!q->vars) return NULL;
+	frame *f = GET_CURR_FRAME();
+	q->varno = f->nbr_vars;
+	q->tab_idx = 0;
 	cell *tmp = deep_copy_to_tmp_with_replacement(q, p1, p1_ctx, copy_attrs, from, from_ctx, to, to_ctx);
+	map_destroy(q->vars);
+	q->vars = NULL;
 	if (!tmp) return NULL;
 	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
 	if (!tmp2) return NULL;
