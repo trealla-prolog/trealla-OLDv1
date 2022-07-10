@@ -512,6 +512,7 @@ struct prolog_state_ {
 	union { predicate *pr; predicate *pr2; };
 	miter *iter, *f_iter;
 	module *m;
+	int64_t cnt;
 	float prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
@@ -529,7 +530,6 @@ struct choice_ {
 	union {
 		struct { uint32_t v1, v2; };
 		uint64_t ugen;
-		uint64_t pins;
 	};
 
 	pl_idx_t overflow;
