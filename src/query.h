@@ -119,7 +119,6 @@ cell *do_term_variables(query *q, cell *p1, pl_idx_t p1_ctx);
 #endif
 
 cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells);
-void init_queuen(query *q);
 
 inline static pl_idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
 inline static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }

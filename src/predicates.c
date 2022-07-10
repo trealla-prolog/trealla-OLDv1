@@ -218,13 +218,6 @@ static cell *pop_queue(query *q)
 	return c;
 }
 
-void init_queuen(query *q)
-{
-	free(q->queue[q->st.qnbr]);
-	q->queue[q->st.qnbr] = NULL;
-	q->qp[q->st.qnbr] = 0;
-}
-
 bool make_cstringn(cell *d, const char *s, size_t n)
 {
 	if (!n) {

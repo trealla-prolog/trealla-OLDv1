@@ -10,6 +10,25 @@
 #include "prolog.h"
 #include "query.h"
 
+static void init_queuen(query *q)
+{
+	free(q->queue[q->st.qnbr]);
+	q->queue[q->st.qnbr] = NULL;
+	q->qp[q->st.qnbr] = 0;
+}
+
+static void grab_queuen(query *q)
+{
+	q->st.qnbr++;
+	init_queuen(q);
+}
+
+static void drop_queuen(query *q)
+{
+	init_queuen(q);
+	q->st.qnbr--;
+}
+
 bool fn_iso_findall_3(query *q)
 {
 	GET_FIRST_ARG(xp1,any);
@@ -30,7 +49,7 @@ bool fn_iso_findall_3(query *q)
 	GET_NEXT_ARG(p3,list_or_nil_or_var);
 
 	if (!q->retry) {
-		q->st.qnbr++;
+		grab_queuen(q);
 		assert(q->st.qnbr < MAX_QUEUES);
 		cell *tmp = clone_to_heap(q, true, p2, 2+p1->nbr_cells+2);
 		pl_idx_t nbr_cells = 1 + p2->nbr_cells;
@@ -41,12 +60,11 @@ bool fn_iso_findall_3(query *q)
 		make_return(q, tmp+nbr_cells);
 		check_heap_error(push_barrier(q));
 		q->st.curr_cell = tmp;
-		init_queuen(q);
 		return true;
 	}
 
 	if (!queuen_used(q)) {
-		q->st.qnbr--;
+		drop_queuen(q);
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
 		return unify(q, xp3, xp3_ctx, &tmp, q->st.curr_frame);
@@ -88,7 +106,6 @@ bool fn_iso_findall_3(query *q)
 	trim_trail(q);
 	free(solns);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
-	init_queuen(q);
-	q->st.qnbr--;
+	drop_queuen(q);
 	return unify(q, xp3, xp3_ctx, l, q->st.curr_frame);
 }
