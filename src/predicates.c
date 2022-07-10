@@ -59,20 +59,6 @@ bool do_yield_0(query *q, int msecs)
 	return false;
 }
 
-static void set_params(query *q, uint32_t p1, uint32_t p2)
-{
-	choice *ch = GET_CURR_CHOICE();
-	ch->v1 = p1;
-	ch->v2 = p2;
-}
-
-static void get_params(query *q, uint32_t *p1, uint32_t *p2)
-{
-	choice *ch = GET_CURR_CHOICE();
-	*p1 = ch->v1;
-	*p2 = ch->v2;
-}
-
 static void make_ref(cell *tmp, pl_idx_t ctx, pl_idx_t off, unsigned var_nbr)
 {
 	*tmp = (cell){0};
@@ -1373,10 +1359,8 @@ static bool fn_iso_sub_atom_5(query *q)
 		if (is_variable(p3) && is_integer(p2) && is_integer(p4))
 			len = len_p1 - before - after;
 	} else {
-		uint32_t v1, v2;
-		get_params(q, &v1, &v2);
-		before = v1;
-		len = v2;
+		before = q->st.v1;
+		len = q->st.v2;
 	}
 
 	if (len > (len_p1 - before)) {
@@ -1392,7 +1376,8 @@ static bool fn_iso_sub_atom_5(query *q)
 	for (size_t i = before; i <= len_p1; i++) {
 		for (size_t j = len; j <= (len_p1 - i); j++) {
 			CHECK_INTERRUPT();
-			set_params(q, i, j + 1);
+			q->st.v1 = i;
+			q->st.v2 = j + 1;
 			check_heap_error(push_choice(q));
 			cell tmp;
 			size_t before = i;
