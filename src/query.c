@@ -715,12 +715,11 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 	const choice *ch = GET_CURR_CHOICE();
 	q->st.sp = ch->st.sp;
 
-	const slot *from = GET_FIRST_SLOT(newf);
-	slot *to = GET_FIRST_SLOT(f);
-
 	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
+		const slot *from = GET_SLOT(newf, i);
+		slot *to = GET_SLOT(f, i);
 		unshare_cell(&to->c);
-		*to++ = *from++;
+		*to = *from;
 	}
 
 #if 0
@@ -1152,9 +1151,8 @@ unsigned create_vars(query *q, unsigned cnt)
 		q->st.sp += cnt2 + cnt;
 	}
 
-	slot *e = GET_SLOT(f, f->nbr_vars);
-
-	for (unsigned i = 0; i < cnt; i++, e++) {
+	for (unsigned i = 0; i < cnt; i++) {
+		slot *e = GET_SLOT(f, f->nbr_vars+i);
 		e->c.tag = TAG_EMPTY;
 		e->c.attrs = NULL;
 		e->mark = false;
@@ -1957,9 +1955,9 @@ query *create_sub_query(query *q, cell *curr_cell)
 	frame *fsrc = GET_FRAME(q->st.curr_frame);
 	frame *fdst = subq->frames;
 	fdst->nbr_vars = fsrc->nbr_vars;
-	slot *e = GET_FIRST_SLOT(fsrc);
 
-	for (unsigned i = 0; i < fsrc->nbr_vars; i++, e++) {
+	for (unsigned i = 0; i < fsrc->nbr_vars; i++) {
+		slot *e = GET_FIRST_SLOT(fsrc+i);
 		cell *c = deref(q, &e->c, e->c.var_ctx);
 		cell tmp = (cell){0};
 		tmp.tag = TAG_VAR;
