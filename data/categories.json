@@ -5,248 +5,8 @@
     "children" : [ {
       "name" : "Non-deterministic success",
       "children" : [ {
-        "name" : "lgtdoc_file_2_01",
-        "uid" : "a06a9bfec7160e1a",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 158
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "86-88", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L86" ]
-      }, {
-        "name" : "object_property_2_59",
-        "uid" : "afbc6d1afbd68a8d",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "366-367", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L366" ]
-      }, {
-        "name" : "category_property_2_56",
-        "uid" : "dbf937fe40666a24",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "341-342", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L341" ]
-      }, {
-        "name" : "nested_dictionaries_obj_update_in_4_depth_one",
-        "uid" : "ef2a20b586f5ee6d",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 4
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "193-198", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L193" ]
-      }, {
-        "name" : "category_property_2_55",
-        "uid" : "7fa29ce7aa0063a6",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "338-339", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L338" ]
-      }, {
-        "name" : "protocol_property_2_19",
-        "uid" : "b60f7c9de9ad4ccf",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "147-148", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L147" ]
-      }, {
-        "name" : "protocol_property_2_13",
-        "uid" : "4a256a41f993bbe1",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "129-130", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L129" ]
-      }, {
-        "name" : "category_property_2_58",
-        "uid" : "53aad9cf10c2835",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "347-348", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L347" ]
-      }, {
-        "name" : "dcs_file_1_01",
-        "uid" : "e9be70669b3a8ee1",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 331
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/dead_code_scanner/tests.lgt", "215-217", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/dead_code_scanner/tests.lgt#L215" ]
-      }, {
-        "name" : "code_metrics_rdirectory",
-        "uid" : "1b515f533a112509",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 727
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "64-66", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L64" ]
-      }, {
-        "name" : "sample_coefficient_of_variation_2_02",
-        "uid" : "f3476dfa22e0e7fc",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "186-187", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L186" ]
-      }, {
-        "name" : "protocol_property_2_17",
-        "uid" : "2089b4dda47358a6",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "141-142", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L141" ]
-      }, {
-        "name" : "object_property_2_65",
-        "uid" : "5121687286d8ef09",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "384-385", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L384" ]
-      }, {
-        "name" : "object_property_2_71",
-        "uid" : "cf3788dafe10b93f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "402-403", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L402" ]
-      }, {
-        "name" : "object_property_2_78",
-        "uid" : "af7416e91b2ea997",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "427-428", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L427" ]
-      }, {
-        "name" : "nested_dictionaries_obj_update_in_4_depth_two",
-        "uid" : "a84f52b6cb7ed02c",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 5
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "200-205", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L200" ]
-      }, {
-        "name" : "nested_dictionaries_update_in_4_depth_two",
-        "uid" : "42b08a53ae84c47",
+        "name" : "nested_dictionaries_update_in_4_depth_one",
+        "uid" : "1fb11c3352ccbea6",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -258,14 +18,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "177-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L177" ]
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
       }, {
-        "name" : "protocol_property_2_16",
-        "uid" : "b239b9fad04cd7b1",
+        "name" : "code_metrics_rdirectory",
+        "uid" : "f8d61ea9af0c32ca",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 0
+          "duration" : 820
         },
         "flaky" : false,
         "newFailed" : false,
@@ -273,14 +33,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "138-139", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L138" ]
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "64-66", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L64" ]
       }, {
-        "name" : "category_property_2_57",
-        "uid" : "9021c2f29c6abc20",
+        "name" : "lgtdoc_library_1_01",
+        "uid" : "5343c179dc7c7160",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 0
+          "duration" : 258
         },
         "flaky" : false,
         "newFailed" : false,
@@ -288,14 +48,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "344-345", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L344" ]
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "77-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L77" ]
       }, {
-        "name" : "category_property_2_53",
-        "uid" : "2a5d96b13c60a03f",
+        "name" : "lgtdoc_rlibrary_1_01",
+        "uid" : "f478222547660e5c",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 0
+          "duration" : 272
         },
         "flaky" : false,
         "newFailed" : false,
@@ -303,119 +63,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "332-333", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L332" ]
-      }, {
-        "name" : "object_property_2_68",
-        "uid" : "61fc4f058befc7c7",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "393-394", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L393" ]
-      }, {
-        "name" : "category_property_2_60",
-        "uid" : "7649b1343510f066",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "353-354", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L353" ]
-      }, {
-        "name" : "object_property_2_76",
-        "uid" : "d16a053dae386dd3",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "417-418", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L417" ]
-      }, {
-        "name" : "debugger_debugging_1_01",
-        "uid" : "373b08d1d2d896f5",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/debugger/tests.lgt", "96-98", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L96" ]
-      }, {
-        "name" : "sample_standard_deviation_2_02",
-        "uid" : "f61f04372c14b528",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "93-94", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L93" ]
-      }, {
-        "name" : "code_metrics_file",
-        "uid" : "6e701dd367326bc2",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 275
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "50-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L50" ]
-      }, {
-        "name" : "size_metric_directory",
-        "uid" : "677beef395ff7562",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "59-61", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L59" ]
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L83" ]
       }, {
         "name" : "nested_dictionaries_update_in_4_depth_two",
-        "uid" : "c1ef03cabcc450bc",
+        "uid" : "f25582517ba30be1",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 5
+          "duration" : 3
         },
         "flaky" : false,
         "newFailed" : false,
@@ -425,68 +80,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ "library/nested_dictionaries/tests.lgt", "177-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L177" ]
       }, {
-        "name" : "logtalk_object_is_built_in",
-        "uid" : "4d8312d9055f49af",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/testing/tests.lgt", "77-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L77" ]
-      }, {
-        "name" : "lgtdoc_all_1_01",
-        "uid" : "e14fd5c66cf9e81c",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1828
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "68-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L68" ]
-      }, {
-        "name" : "nested_dictionaries_obj_update_in_5_nested_matching",
-        "uid" : "9e75966fcef9f310",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 4
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "234-237", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L234" ]
-      }, {
-        "name" : "lgtdoc_library_2_01",
-        "uid" : "f279435d96d52455",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 229
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "74-75", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L74" ]
-      }, {
         "name" : "object_property_2_73",
-        "uid" : "a9b5c04454b3248b",
+        "uid" : "e2a32082b71f5b1a",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -500,8 +95,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "408-409", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L408" ]
       }, {
-        "name" : "category_property_2_65",
-        "uid" : "29a62f5847636c7a",
+        "name" : "category_property_2_57",
+        "uid" : "fe37eaa4af152b61",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -513,14 +108,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "368-369", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L368" ]
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "344-345", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L344" ]
       }, {
-        "name" : "debugger_trace_0_03",
-        "uid" : "eab0bc843c242e38",
+        "name" : "lgtdoc_library_2_01",
+        "uid" : "eb1482fde992a8a8",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 3
+          "duration" : 259
         },
         "flaky" : false,
         "newFailed" : false,
@@ -528,404 +123,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tools/debugger/tests.lgt", "118-122", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L118" ]
-      }, {
-        "name" : "nested_dictionaries_update_in_5_nested_matching",
-        "uid" : "43a33cab09fe9b1c",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 4
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "225-228", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L225" ]
-      }, {
-        "name" : "protocol_property_2_18",
-        "uid" : "23486e86738b034f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "144-145", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L144" ]
-      }, {
-        "name" : "lgtdoc_directory_2_01",
-        "uid" : "d2156575a324d9aa",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 230
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "94-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L94" ]
-      }, {
-        "name" : "protocol_property_2_12",
-        "uid" : "247007d0901ab8c5",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "126-127", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L126" ]
-      }, {
-        "name" : "lgtdoc_rdirectory_1_01",
-        "uid" : "a5dc829aa159076d",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 232
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "106-108", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L106" ]
-      }, {
-        "name" : "object_property_2_66",
-        "uid" : "db878a587612cf58",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "387-388", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L387" ]
-      }, {
-        "name" : "object_property_2_72",
-        "uid" : "8b36365dcfaa59dd",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "405-406", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L405" ]
-      }, {
-        "name" : "lgtdoc_all_0_01",
-        "uid" : "f4bb1e131a8b27d8",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1811
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "71-72", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L71" ]
-      }, {
-        "name" : "object_property_2_74",
-        "uid" : "15c2d793d78eeb30",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "411-412", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L411" ]
-      }, {
-        "name" : "code_metrics_entity",
-        "uid" : "ebb9b8f6061048",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 23
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "47-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L47" ]
-      }, {
-        "name" : "lgtdoc_library_1_01",
-        "uid" : "b68b06bd25e83c82",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 228
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "77-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L77" ]
-      }, {
-        "name" : "category_property_2_62",
-        "uid" : "c4f81d49511661d3",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "359-360", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L359" ]
-      }, {
-        "name" : "object_property_2_64",
-        "uid" : "7f5b7ac2319ff087",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "381-382", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L381" ]
-      }, {
-        "name" : "category_property_2_59",
-        "uid" : "7f8d22492f91a3c9",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "350-351", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L350" ]
-      }, {
-        "name" : "object_property_2_63",
-        "uid" : "8c1bc22a134e0aa7",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "378-379", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L378" ]
-      }, {
-        "name" : "expanding_protocol_is_built_in",
-        "uid" : "9ad178009adcabcc",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/testing/tests.lgt", "98-99", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L98" ]
-      }, {
-        "name" : "sample_kurtosis_2_02",
-        "uid" : "14812ec21c3ebdc1",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "213-214", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L213" ]
-      }, {
-        "name" : "size_metric_library",
-        "uid" : "6e2bfcd2bc634801",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "53-54", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L53" ]
-      }, {
-        "name" : "code_metrics_rlibrary",
-        "uid" : "47de588cafc6f59b",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 373
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "57-58", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L57" ]
-      }, {
-        "name" : "nested_dictionaries_update_in_4_depth_two",
-        "uid" : "109b0add3e865d68",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "177-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L177" ]
-      }, {
-        "name" : "size_metric_rdirectory",
-        "uid" : "b8846bc9d0e0dec",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 5
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "63-65", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L63" ]
-      }, {
-        "name" : "lgtdoc_file_1_01",
-        "uid" : "838b166416b5d41b",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 159
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "90-92", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L90" ]
-      }, {
-        "name" : "lgtdoc_rdirectory_2_01",
-        "uid" : "4ecb87c1f95a8417",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 232
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "102-104", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L102" ]
-      }, {
-        "name" : "object_property_2_75",
-        "uid" : "79062d38ee3d734",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "414-415", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L414" ]
-      }, {
-        "name" : "population_kurtosis_2_03",
-        "uid" : "d763d1f2bde9d671",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "216-217", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L216" ]
-      }, {
-        "name" : "category_property_2_54",
-        "uid" : "94fd811feda85ea7",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "335-336", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L335" ]
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "74-75", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L74" ]
       }, {
         "name" : "lgtdoc_directory_1_01",
-        "uid" : "44cb96211c7dc152",
+        "uid" : "8fab927e33a062c2",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 227
+          "duration" : 258
         },
         "flaky" : false,
         "newFailed" : false,
@@ -935,278 +140,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tools/lgtdoc/tests.lgt", "98-100", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L98" ]
       }, {
-        "name" : "object_property_2_61",
-        "uid" : "88ef54b65a027f0",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "372-373", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L372" ]
-      }, {
-        "name" : "category_property_2_52",
-        "uid" : "c500f3d260b598cd",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "329-330", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L329" ]
-      }, {
-        "name" : "nested_dictionaries_update_in_4_depth_one",
-        "uid" : "17d82c0d1b02884a",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
-      }, {
-        "name" : "debugger_debugging_1_02",
-        "uid" : "b7785b5ad56af002",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/debugger/tests.lgt", "100-102", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L100" ]
-      }, {
-        "name" : "code_metrics_all",
-        "uid" : "8b966269b4bb30d9",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2205
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "68-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L68" ]
-      }, {
-        "name" : "size_metric_entity",
-        "uid" : "4fdf3da2925f9a0f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "46-47", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L46" ]
-      }, {
-        "name" : "debugger_leash_1_06",
-        "uid" : "9b3a0cbbab135b5f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 15
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/debugger/tests.lgt", "171-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L171" ]
-      }, {
-        "name" : "protocol_property_2_14",
-        "uid" : "7196c6c362f5633f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "132-133", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L132" ]
-      }, {
-        "name" : "code_metrics_library",
-        "uid" : "1a994cd8d9844aed",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 366
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "54-55", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L54" ]
-      }, {
-        "name" : "lgtdoc_rlibrary_2_01",
-        "uid" : "4c3d3f4b4f8f5abf",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 242
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L80" ]
-      }, {
-        "name" : "logtalk_object_source_file_lines",
-        "uid" : "b7933814352ea09f",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/testing/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L83" ]
-      }, {
-        "name" : "population_standard_deviation_2_02",
-        "uid" : "d011b18928eef3af",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "96-97", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L96" ]
-      }, {
-        "name" : "protocol_property_2_15",
-        "uid" : "b420fb2f9c5a7b57",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "135-136", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L135" ]
-      }, {
-        "name" : "sample_skewness_2_02",
-        "uid" : "853663661d56c8a3",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "202-203", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L202" ]
-      }, {
-        "name" : "current_predicate_1_23",
-        "uid" : "25fae0a364161148",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/methods/current_predicate_1/tests.lgt", "128-129", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/current_predicate_1/tests.lgt#L128" ]
-      }, {
-        "name" : "object_property_2_70",
-        "uid" : "6c5aa7f37b7106fa",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "399-400", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L399" ]
-      }, {
-        "name" : "population_skewness_2_02",
-        "uid" : "424013f81dc3885b",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/statistics/tests.lgt", "205-206", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L205" ]
-      }, {
-        "name" : "object_property_2_69",
-        "uid" : "b6ef918e28c56312",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "396-397", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L396" ]
-      }, {
         "name" : "object_property_2_60",
-        "uid" : "4cfbdd3cee3bda5e",
+        "uid" : "39192748f761c6dd",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -1220,8 +155,203 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "369-370", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L369" ]
       }, {
+        "name" : "category_property_2_62",
+        "uid" : "4a773059540da945",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "359-360", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L359" ]
+      }, {
+        "name" : "protocol_property_2_18",
+        "uid" : "6f1804401b0cd3c",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "144-145", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L144" ]
+      }, {
+        "name" : "expanding_protocol_is_built_in",
+        "uid" : "9b36a744a8400a7c",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/testing/tests.lgt", "98-99", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L98" ]
+      }, {
+        "name" : "code_metrics_entity",
+        "uid" : "c8f1b2dd7df52151",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 26
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "47-48", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L47" ]
+      }, {
+        "name" : "lgtdoc_all_0_01",
+        "uid" : "8defca13e18373df",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 2016
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "71-72", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L71" ]
+      }, {
+        "name" : "lgtdoc_file_1_01",
+        "uid" : "6c126ed7080ee3c6",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 187
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "90-92", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L90" ]
+      }, {
+        "name" : "object_property_2_59",
+        "uid" : "e6f44bac62d898e2",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "366-367", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L366" ]
+      }, {
+        "name" : "size_metric_directory",
+        "uid" : "62e42e216ab744a4",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "59-61", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L59" ]
+      }, {
+        "name" : "code_metrics_all",
+        "uid" : "c21e3ced8db9ea1e",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 2521
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "68-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L68" ]
+      }, {
+        "name" : "protocol_property_2_19",
+        "uid" : "45a6aa1d9d5fabe2",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "147-148", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L147" ]
+      }, {
+        "name" : "sample_kurtosis_2_02",
+        "uid" : "ca75414321443a97",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "213-214", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L213" ]
+      }, {
+        "name" : "object_property_2_63",
+        "uid" : "9a08c62f87c7c75f",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "378-379", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L378" ]
+      }, {
+        "name" : "protocol_property_2_14",
+        "uid" : "b93c2f117a17f3dc",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "132-133", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L132" ]
+      }, {
         "name" : "size_metric_all",
-        "uid" : "7485202330680655",
+        "uid" : "46bd75e17a0ef689",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -1235,53 +365,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "67-68", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L67" ]
       }, {
-        "name" : "object_property_2_67",
-        "uid" : "20ce949d4228fde0",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "390-391", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L390" ]
-      }, {
-        "name" : "category_property_2_64",
-        "uid" : "251ddf02d31fd2ab",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "365-366", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L365" ]
-      }, {
-        "name" : "nested_dictionaries_update_in_4_depth_one",
-        "uid" : "c48c4d2ab3a40dc0",
-        "parentUid" : "1e457c6468423f30812a59ec3665696f",
-        "status" : "failed",
-        "time" : {
-          "duration" : 4
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
-      }, {
         "name" : "object_property_2_62",
-        "uid" : "d76b720665133368",
+        "uid" : "1737a5e9fe981cc4",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -1295,12 +380,12 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "375-376", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L375" ]
       }, {
-        "name" : "nested_dictionaries_update_in_4_depth_one",
-        "uid" : "360c6e46557a72b5",
+        "name" : "object_property_2_69",
+        "uid" : "cce0933da2c4fe5e",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 2
+          "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
@@ -1308,14 +393,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "396-397", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L396" ]
       }, {
-        "name" : "lgtdoc_rlibrary_1_01",
-        "uid" : "e68e134c1b2533bb",
+        "name" : "size_metric_entity",
+        "uid" : "c5407c6ee74329d7",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
-          "duration" : 241
+          "duration" : 0
         },
         "flaky" : false,
         "newFailed" : false,
@@ -1323,10 +408,415 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtdoc/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L83" ]
+        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "46-47", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L46" ]
+      }, {
+        "name" : "category_property_2_55",
+        "uid" : "cc9a1ce3359da494",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "338-339", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L338" ]
+      }, {
+        "name" : "lgtdoc_rdirectory_2_01",
+        "uid" : "d898d4016edbae14",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 263
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "102-104", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L102" ]
+      }, {
+        "name" : "sample_standard_deviation_2_02",
+        "uid" : "14d164f7dbdcc615",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "93-94", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L93" ]
+      }, {
+        "name" : "dcs_file_1_01",
+        "uid" : "4d66ad12ad3a45f8",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 389
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/dead_code_scanner/tests.lgt", "215-217", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/dead_code_scanner/tests.lgt#L215" ]
+      }, {
+        "name" : "nested_dictionaries_update_in_4_depth_two",
+        "uid" : "f990d61df851c47d",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 6
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "177-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L177" ]
+      }, {
+        "name" : "nested_dictionaries_update_in_4_depth_two",
+        "uid" : "545ddefe6cc6b924",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 3
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "177-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L177" ]
+      }, {
+        "name" : "object_property_2_74",
+        "uid" : "41ab0fe6cea2189a",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "411-412", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L411" ]
+      }, {
+        "name" : "category_property_2_58",
+        "uid" : "5020766030da5c79",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "347-348", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L347" ]
+      }, {
+        "name" : "category_property_2_65",
+        "uid" : "abe16c5776a9495b",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "368-369", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L368" ]
+      }, {
+        "name" : "object_property_2_72",
+        "uid" : "e06a8c5d36e7b141",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "405-406", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L405" ]
+      }, {
+        "name" : "code_metrics_rlibrary",
+        "uid" : "980cbc4c5ec235f1",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 421
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "57-58", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L57" ]
+      }, {
+        "name" : "lgtdoc_all_1_01",
+        "uid" : "5e344ea6da5c1ee9",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 2025
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "68-69", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L68" ]
+      }, {
+        "name" : "size_metric_rdirectory",
+        "uid" : "c5f67a6d627534b1",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 6
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "63-65", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L63" ]
+      }, {
+        "name" : "sample_coefficient_of_variation_2_02",
+        "uid" : "3bb40d76d30bd20e",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "186-187", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L186" ]
+      }, {
+        "name" : "object_property_2_61",
+        "uid" : "18168866bdacd1b7",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "372-373", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L372" ]
+      }, {
+        "name" : "nested_dictionaries_obj_update_in_4_depth_two",
+        "uid" : "428763247e3fb368",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 5
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "200-205", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L200" ]
+      }, {
+        "name" : "protocol_property_2_13",
+        "uid" : "5012bfa4c697a191",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "129-130", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L129" ]
+      }, {
+        "name" : "object_property_2_70",
+        "uid" : "6740f3fdafaea034",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "399-400", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L399" ]
+      }, {
+        "name" : "protocol_property_2_16",
+        "uid" : "b10b07fd9ba4b6e",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "138-139", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L138" ]
+      }, {
+        "name" : "object_property_2_65",
+        "uid" : "82f6e72ea5b6e587",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "384-385", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L384" ]
+      }, {
+        "name" : "logtalk_object_is_built_in",
+        "uid" : "e45443d6e3c511d5",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/testing/tests.lgt", "77-78", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L77" ]
+      }, {
+        "name" : "logtalk_object_source_file_lines",
+        "uid" : "7995381543579cbc",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/testing/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/testing/tests.lgt#L83" ]
+      }, {
+        "name" : "category_property_2_56",
+        "uid" : "3de0708ba4c6b7bc",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "341-342", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L341" ]
+      }, {
+        "name" : "lgtdoc_file_2_01",
+        "uid" : "14570061f50d97c4",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 181
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "86-88", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L86" ]
+      }, {
+        "name" : "nested_dictionaries_obj_update_in_5_nested_matching",
+        "uid" : "9c65c24af78758e3",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 4
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "234-237", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L234" ]
+      }, {
+        "name" : "protocol_property_2_17",
+        "uid" : "18b3bd101c790905",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "141-142", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L141" ]
+      }, {
+        "name" : "object_property_2_76",
+        "uid" : "1d5df4374eb1349",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "417-418", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L417" ]
       }, {
         "name" : "size_metric_rlibrary",
-        "uid" : "660c481495fefbb2",
+        "uid" : "1d812d8f7ec599f3",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -1340,8 +830,413 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "56-57", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L56" ]
       }, {
+        "name" : "nested_dictionaries_obj_update_in_4_depth_one",
+        "uid" : "464ae0f134b9a703",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 4
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "193-198", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L193" ]
+      }, {
+        "name" : "object_property_2_64",
+        "uid" : "500c1fc550a41c56",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "381-382", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L381" ]
+      }, {
+        "name" : "lgtdoc_directory_2_01",
+        "uid" : "4cc8e0bc2193e7ca",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 261
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "94-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L94" ]
+      }, {
+        "name" : "protocol_property_2_12",
+        "uid" : "231b0e37ec7541c9",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "126-127", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L126" ]
+      }, {
+        "name" : "category_property_2_64",
+        "uid" : "209f4dc411298c6f",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "365-366", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L365" ]
+      }, {
+        "name" : "population_kurtosis_2_03",
+        "uid" : "50b0f74e92252a03",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "216-217", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L216" ]
+      }, {
+        "name" : "category_property_2_60",
+        "uid" : "d3b76802407cd181",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "353-354", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L353" ]
+      }, {
+        "name" : "category_property_2_59",
+        "uid" : "31a7463f2869c99a",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "350-351", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L350" ]
+      }, {
+        "name" : "population_skewness_2_02",
+        "uid" : "8e07e9c0d20fd819",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "205-206", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L205" ]
+      }, {
+        "name" : "nested_dictionaries_update_in_4_depth_one",
+        "uid" : "4335671280bc716a",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 5
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
+      }, {
+        "name" : "object_property_2_78",
+        "uid" : "2e0679f6d1cd9a2a",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "427-428", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L427" ]
+      }, {
+        "name" : "protocol_property_2_15",
+        "uid" : "445bf48a6e4c6b0d",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/protocol_property_2/tests.lgt", "135-136", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/protocol_property_2/tests.lgt#L135" ]
+      }, {
+        "name" : "object_property_2_66",
+        "uid" : "f24c55f75dd1aa76",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "387-388", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L387" ]
+      }, {
+        "name" : "debugger_debugging_1_02",
+        "uid" : "e04f8b1938c08f1f",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/debugger/tests.lgt", "100-102", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L100" ]
+      }, {
+        "name" : "category_property_2_53",
+        "uid" : "bce55df37c4b6a7e",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "332-333", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L332" ]
+      }, {
+        "name" : "debugger_debugging_1_01",
+        "uid" : "ef9546843a715ef3",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/debugger/tests.lgt", "96-98", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L96" ]
+      }, {
+        "name" : "population_standard_deviation_2_02",
+        "uid" : "aee37760c26b7ac",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "96-97", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L96" ]
+      }, {
+        "name" : "object_property_2_68",
+        "uid" : "3b8796642b532013",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "393-394", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L393" ]
+      }, {
+        "name" : "nested_dictionaries_update_in_5_nested_matching",
+        "uid" : "b22f9ac8047c3b6c",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 5
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "225-228", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L225" ]
+      }, {
+        "name" : "object_property_2_75",
+        "uid" : "d727136e13f131c8",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "414-415", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L414" ]
+      }, {
+        "name" : "object_property_2_67",
+        "uid" : "b2f22606f307f5a6",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "390-391", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L390" ]
+      }, {
+        "name" : "current_predicate_1_23",
+        "uid" : "34e167d71300cfb9",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/methods/current_predicate_1/tests.lgt", "128-129", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/current_predicate_1/tests.lgt#L128" ]
+      }, {
+        "name" : "lgtdoc_rdirectory_1_01",
+        "uid" : "d4e62fe23438baff",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 264
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "106-108", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L106" ]
+      }, {
+        "name" : "object_property_2_71",
+        "uid" : "a806f56e91964f40",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/object_property_2/tests.lgt", "402-403", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/object_property_2/tests.lgt#L402" ]
+      }, {
+        "name" : "category_property_2_54",
+        "uid" : "5b609052218b855",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "335-336", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L335" ]
+      }, {
+        "name" : "category_property_2_52",
+        "uid" : "10c01be94079d484",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "329-330", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L329" ]
+      }, {
+        "name" : "debugger_trace_0_03",
+        "uid" : "8fd54db96af35ecc",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 3
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/debugger/tests.lgt", "118-122", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L118" ]
+      }, {
         "name" : "category_property_2_63",
-        "uid" : "129a7ade73a91add",
+        "uid" : "ca7e6d7fbc43b310",
         "parentUid" : "1e457c6468423f30812a59ec3665696f",
         "status" : "failed",
         "time" : {
@@ -1354,62 +1249,118 @@
         "retriesCount" : 0,
         "retriesStatusChange" : false,
         "parameters" : [ "tests/logtalk/predicates/category_property_2/tests.lgt", "362-363", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/category_property_2/tests.lgt#L362" ]
+      }, {
+        "name" : "code_metrics_file",
+        "uid" : "c364084f9e9c1c3c",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 311
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "50-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L50" ]
+      }, {
+        "name" : "sample_skewness_2_02",
+        "uid" : "f09831dcae7899c4",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/statistics/tests.lgt", "202-203", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/statistics/tests.lgt#L202" ]
+      }, {
+        "name" : "debugger_leash_1_06",
+        "uid" : "125ff52f4e6e4653",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 16
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/debugger/tests.lgt", "171-182", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/debugger/tests.lgt#L171" ]
+      }, {
+        "name" : "lgtdoc_rlibrary_2_01",
+        "uid" : "37028cd964ca80bf",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 272
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtdoc/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtdoc/tests.lgt#L80" ]
+      }, {
+        "name" : "code_metrics_library",
+        "uid" : "7ebca45183e8711e",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 416
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/code_metrics_tests.lgt", "54-55", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/code_metrics_tests.lgt#L54" ]
+      }, {
+        "name" : "size_metric_library",
+        "uid" : "f89e2a3c76de4d6b",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/code_metrics/size_metric_tests.lgt", "53-54", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/code_metrics/size_metric_tests.lgt#L53" ]
+      }, {
+        "name" : "nested_dictionaries_update_in_4_depth_one",
+        "uid" : "d688ed493b33a78c",
+        "parentUid" : "1e457c6468423f30812a59ec3665696f",
+        "status" : "failed",
+        "time" : {
+          "duration" : 2
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/nested_dictionaries/tests.lgt", "170-175", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/nested_dictionaries/tests.lgt#L170" ]
       } ],
       "uid" : "1e457c6468423f30812a59ec3665696f"
     }, {
-      "name" : "Success instead of failure: flaky; test expected to fail",
-      "children" : [ {
-        "name" : "test_flaky_02",
-        "uid" : "490850360a07a781",
-        "parentUid" : "407a00cd048ca5616552841254a4340a",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtunit/tests_dialects.lgt", "170-171", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtunit/tests_dialects.lgt#L170" ]
-      } ],
-      "uid" : "407a00cd048ca5616552841254a4340a"
-    }, {
       "name" : "Error instead of success",
       "children" : [ {
-        "name" : "predicate_property_2_33",
-        "uid" : "442ca82b68bdd56e",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "160-161", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L160" ]
-      }, {
-        "name" : "logtalk_make_1_all_04",
-        "uid" : "7b929a725cd31f8e",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 2004
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt", "75-80", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L75" ]
-      }, {
         "name" : "figures_split_02",
-        "uid" : "8b416516e7af2753",
+        "uid" : "7d8d3d29dd79b2bc",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1424,7 +1375,7 @@
         "parameters" : [ "examples/figures/tests.lgt", "83-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L83" ]
       }, {
         "name" : "ports_profiler_port_5_08",
-        "uid" : "b4fb74c016eff055",
+        "uid" : "72155372922c000b",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1438,8 +1389,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ "tools/ports_profiler/tests.lgt", "73-74", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/ports_profiler/tests.lgt#L73" ]
       }, {
-        "name" : "type_checking_deterministic",
-        "uid" : "2a642ca1cdb956ce",
+        "name" : "predicate_property_2_33",
+        "uid" : "610ad561e560dde4",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1451,10 +1402,10 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "library/types/tests.lgt", "36-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/types/tests.lgt#L36" ]
+        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "160-161", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L160" ]
       }, {
-        "name" : "arbitrary_arbitrary_2_26",
-        "uid" : "de24fb6bf98a1129",
+        "name" : "predicate_property_2_32",
+        "uid" : "86482fc698f7017",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1466,100 +1417,10 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "library/arbitrary/tests.lgt", "260-266", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/arbitrary/tests.lgt#L260" ]
-      }, {
-        "name" : "figures_split_01",
-        "uid" : "9dda4b4016bc0488",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 1
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/figures/tests.lgt", "68-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L68" ]
-      }, {
-        "name" : "ports_profiler_port_5_09",
-        "uid" : "1cb0d2efe0c94e6e",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/ports_profiler/tests.lgt", "76-77", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/ports_profiler/tests.lgt#L76" ]
-      }, {
-        "name" : "predicate_property_2_31",
-        "uid" : "33cc881db85523eb",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "154-155", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L154" ]
-      }, {
-        "name" : "figures_02",
-        "uid" : "fc77d9fec2ddef59",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/figures/tests.lgt", "54-66", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L54" ]
-      }, {
-        "name" : "ports_profiler_port_5_07",
-        "uid" : "bad0621b714ee812",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tools/ports_profiler/tests.lgt", "70-71", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/ports_profiler/tests.lgt#L70" ]
-      }, {
-        "name" : "figures_01",
-        "uid" : "5d9c37c7c7bf62ed",
-        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/figures/tests.lgt", "40-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L40" ]
+        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "157-158", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L157" ]
       }, {
         "name" : "predicate_property_2_34",
-        "uid" : "1ddad00d724d26cb",
+        "uid" : "1e89bfee4348863d",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1574,7 +1435,112 @@
         "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "163-164", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L163" ]
       }, {
         "name" : "logtalk_make_1_all_03",
-        "uid" : "cad39d273c5ce900",
+        "uid" : "2b33bdbea60b765a",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 2006
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt", "66-73", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L66" ]
+      }, {
+        "name" : "type_checking_deterministic",
+        "uid" : "f613a82c39fb7134",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "library/types/tests.lgt", "36-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/types/tests.lgt#L36" ]
+      }, {
+        "name" : "predicate_property_2_31",
+        "uid" : "b9261aa81228e098",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "154-155", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L154" ]
+      }, {
+        "name" : "figures_split_01",
+        "uid" : "1e8efff173ffd615",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 1
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/figures/tests.lgt", "68-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L68" ]
+      }, {
+        "name" : "figures_01",
+        "uid" : "df8986c702dda936",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/figures/tests.lgt", "40-52", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L40" ]
+      }, {
+        "name" : "ports_profiler_port_5_09",
+        "uid" : "dac662f4260a3eab",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/ports_profiler/tests.lgt", "76-77", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/ports_profiler/tests.lgt#L76" ]
+      }, {
+        "name" : "figures_02",
+        "uid" : "d3b8715471af4f83",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "examples/figures/tests.lgt", "54-66", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/figures/tests.lgt#L54" ]
+      }, {
+        "name" : "logtalk_make_1_all_04",
+        "uid" : "f94692cf20be4964",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1586,10 +1552,10 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt", "66-73", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L66" ]
+        "parameters" : [ "tests/logtalk/predicates/logtalk_make_0_1/tests.lgt", "75-80", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/predicates/logtalk_make_0_1/tests.lgt#L75" ]
       }, {
-        "name" : "predicate_property_2_32",
-        "uid" : "9e43864b420706fb",
+        "name" : "arbitrary_arbitrary_2_26",
+        "uid" : "bec17a0d4fe4e65c",
         "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
         "status" : "failed",
         "time" : {
@@ -1601,15 +1567,30 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/methods/predicate_property_2/tests.lgt", "157-158", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/predicate_property_2/tests.lgt#L157" ]
+        "parameters" : [ "library/arbitrary/tests.lgt", "260-266", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/library/arbitrary/tests.lgt#L260" ]
+      }, {
+        "name" : "ports_profiler_port_5_07",
+        "uid" : "1fa54bac1b9ad8d",
+        "parentUid" : "aaf1d6cc5c881470cc05fb05ad941f6e",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/ports_profiler/tests.lgt", "70-71", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/ports_profiler/tests.lgt#L70" ]
       } ],
       "uid" : "aaf1d6cc5c881470cc05fb05ad941f6e"
     }, {
-      "name" : "Failure instead of error",
+      "name" : "Failure instead of success: flaky; test expected to fail",
       "children" : [ {
-        "name" : "commons_length_2_16",
-        "uid" : "911ffc3a8e3c274a",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "name" : "test_flaky_01",
+        "uid" : "64289ee044866bef",
+        "parentUid" : "45f8b469342ffb9fc7c2a6a7f159a2db",
         "status" : "failed",
         "time" : {
           "duration" : 0
@@ -1620,123 +1601,14 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L86" ]
-      }, {
-        "name" : "commons_length_2_19",
-        "uid" : "ef30f37082000f8e",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "95-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L95" ]
-      }, {
-        "name" : "commons_length_2_14",
-        "uid" : "886db83f3a46424f",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L80" ]
-      }, {
-        "name" : "commons_length_2_15",
-        "uid" : "f3adb3408976941c",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L83" ]
-      }, {
-        "name" : "commons_length_2_18",
-        "uid" : "25b93ebfdf6925a2",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L92" ]
-      }, {
-        "name" : "commons_length_2_17",
-        "uid" : "27dfb5aac7a62867",
-        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L89" ]
+        "parameters" : [ "tools/lgtunit/tests_dialects.lgt", "167-168", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtunit/tests_dialects.lgt#L167" ]
       } ],
-      "uid" : "f1d33384b55b86e6da2d391daa3c4717"
-    }, {
-      "name" : "Failure instead of success",
-      "children" : [ {
-        "name" : "cc_06",
-        "uid" : "2cf78ed8993caee7",
-        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "examples/cc/tests.lgt", "57-62", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/cc/tests.lgt#L57" ]
-      }, {
-        "name" : "setof_3_17",
-        "uid" : "3889527775e260ba",
-        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
-        "status" : "failed",
-        "time" : {
-          "duration" : 0
-        },
-        "flaky" : false,
-        "newFailed" : false,
-        "newPassed" : false,
-        "newBroken" : false,
-        "retriesCount" : 0,
-        "retriesStatusChange" : false,
-        "parameters" : [ "tests/logtalk/methods/setof_3/tests.lgt", "105-110", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/setof_3/tests.lgt#L105" ]
-      } ],
-      "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
+      "uid" : "45f8b469342ffb9fc7c2a6a7f159a2db"
     }, {
       "name" : "Crash",
       "children" : [ {
-        "name" : "bench",
-        "uid" : "458ec84a96789466",
+        "name" : "diagrams",
+        "uid" : "2465fb70c11c79e7",
         "parentUid" : "8e048ed04cce61add286093d4fc3dced",
         "status" : "failed",
         "time" : {
@@ -1750,8 +1622,8 @@
         "retriesStatusChange" : false,
         "parameters" : [ ]
       }, {
-        "name" : "diagrams",
-        "uid" : "d21fd1475535dac5",
+        "name" : "bench",
+        "uid" : "b0838bb22cb78f4d",
         "parentUid" : "8e048ed04cce61add286093d4fc3dced",
         "status" : "failed",
         "time" : {
@@ -1767,11 +1639,11 @@
       } ],
       "uid" : "8e048ed04cce61add286093d4fc3dced"
     }, {
-      "name" : "Failure instead of success: flaky; test expected to fail",
+      "name" : "Failure instead of success",
       "children" : [ {
-        "name" : "test_flaky_01",
-        "uid" : "f42cfdb907747b7b",
-        "parentUid" : "45f8b469342ffb9fc7c2a6a7f159a2db",
+        "name" : "cc_06",
+        "uid" : "57c681610f902a99",
+        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
         "status" : "failed",
         "time" : {
           "duration" : 0
@@ -1782,9 +1654,137 @@
         "newBroken" : false,
         "retriesCount" : 0,
         "retriesStatusChange" : false,
-        "parameters" : [ "tools/lgtunit/tests_dialects.lgt", "167-168", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtunit/tests_dialects.lgt#L167" ]
+        "parameters" : [ "examples/cc/tests.lgt", "57-62", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/cc/tests.lgt#L57" ]
+      }, {
+        "name" : "setof_3_17",
+        "uid" : "4606a2c89573786a",
+        "parentUid" : "7a65c89daad8cf82ce910dbf95cc8113",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/logtalk/methods/setof_3/tests.lgt", "105-110", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/logtalk/methods/setof_3/tests.lgt#L105" ]
       } ],
-      "uid" : "45f8b469342ffb9fc7c2a6a7f159a2db"
+      "uid" : "7a65c89daad8cf82ce910dbf95cc8113"
+    }, {
+      "name" : "Failure instead of error",
+      "children" : [ {
+        "name" : "commons_length_2_17",
+        "uid" : "65661428a476c02a",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "89-90", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L89" ]
+      }, {
+        "name" : "commons_length_2_18",
+        "uid" : "89d64ed784857887",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "92-93", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L92" ]
+      }, {
+        "name" : "commons_length_2_16",
+        "uid" : "2d63702c59756bbd",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "86-87", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L86" ]
+      }, {
+        "name" : "commons_length_2_14",
+        "uid" : "8027725cf329698a",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "80-81", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L80" ]
+      }, {
+        "name" : "commons_length_2_15",
+        "uid" : "99987cdc37702106",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "83-84", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L83" ]
+      }, {
+        "name" : "commons_length_2_19",
+        "uid" : "2b8fcb3991e06d11",
+        "parentUid" : "f1d33384b55b86e6da2d391daa3c4717",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tests/prolog/predicates/length_2/tests.lgt", "95-96", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tests/prolog/predicates/length_2/tests.lgt#L95" ]
+      } ],
+      "uid" : "f1d33384b55b86e6da2d391daa3c4717"
+    }, {
+      "name" : "Success instead of failure: flaky; test expected to fail",
+      "children" : [ {
+        "name" : "test_flaky_02",
+        "uid" : "d5f07e4c3f5363cd",
+        "parentUid" : "407a00cd048ca5616552841254a4340a",
+        "status" : "failed",
+        "time" : {
+          "duration" : 0
+        },
+        "flaky" : false,
+        "newFailed" : false,
+        "newPassed" : false,
+        "newBroken" : false,
+        "retriesCount" : 0,
+        "retriesStatusChange" : false,
+        "parameters" : [ "tools/lgtunit/tests_dialects.lgt", "170-171", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/tools/lgtunit/tests_dialects.lgt#L170" ]
+      } ],
+      "uid" : "407a00cd048ca5616552841254a4340a"
     } ],
     "uid" : "8fb3a91ba5aaf9de24cc8a92edc82b5d"
   } ],
