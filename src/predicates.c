@@ -218,13 +218,6 @@ static cell *pop_queue(query *q)
 	return c;
 }
 
-void init_queuen(query *q)
-{
-	free(q->queue[q->st.qnbr]);
-	q->queue[q->st.qnbr] = NULL;
-	q->qp[q->st.qnbr] = 0;
-}
-
 bool make_cstringn(cell *d, const char *s, size_t n)
 {
 	if (!n) {
@@ -4181,7 +4174,6 @@ static bool fn_between_3(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
-	GET_NEXT_ARG(p4,integer_or_var);
 
 	if (!is_integer(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
@@ -4203,23 +4195,23 @@ static bool fn_between_3(query *q)
 			return true;
 		}
 
-		reset_var(q, p4, q->st.curr_frame, p1, q->st.curr_frame, false);
-
-		if (get_int(p1) != get_int(p2))
+		if (get_int(p1) != get_int(p2)) {
+			q->st.cnt = get_int(p1);
 			check_heap_error(push_choice(q));
+		}
 
-		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
+		set_var(q, p3, p3_ctx, p1, p1_ctx);
 		return true;
 	}
 
-	pl_int_t val = get_int(p4) + 1;
-	GET_RAW_ARG(4,p4_raw);
+	int64_t cnt = q->st.cnt;
 	cell tmp;
-	make_int(&tmp, val);
-	reset_var(q, p4_raw, q->st.curr_frame, &tmp, q->st.curr_frame, false);
+	make_int(&tmp, ++cnt);
 
-	if (val != get_int(p2))
+	if (cnt != get_int(p2)) {
+		q->st.cnt = cnt;
 		check_heap_error(push_choice(q));
+	}
 
 	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return true;
@@ -7268,7 +7260,7 @@ builtins g_other_bifs[] =
 	{"$lengthchk", 2, fn_sys_lengthchk_2, NULL, false, BLAH},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false, BLAH},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false, BLAH},
-	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false, BLAH},
+	{"between", 3, fn_between_3, "+integer,+integer,-integer", false, BLAH},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false, BLAH},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false, BLAH},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false, BLAH},
