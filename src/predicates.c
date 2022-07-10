@@ -4174,7 +4174,6 @@ static bool fn_between_3(query *q)
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
-	GET_NEXT_ARG(p4,integer_or_var);
 
 	if (!is_integer(p1))
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
@@ -4196,25 +4195,23 @@ static bool fn_between_3(query *q)
 			return true;
 		}
 
-		reset_var(q, p4, q->st.curr_frame, p1, q->st.curr_frame, false);
+		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 
 		if (get_int(p1) != get_int(p2))
 			check_heap_error(push_choice(q));
 
-		set_var(q, p3, p3_ctx, p1, q->st.curr_frame);
 		return true;
 	}
 
-	pl_int_t val = get_int(p4) + 1;
-	GET_RAW_ARG(4,p4_raw);
+	pl_int_t val = get_int(p3) + 1;
+	GET_RAW_ARG(3,p3_raw);
 	cell tmp;
 	make_int(&tmp, val);
-	reset_var(q, p4_raw, q->st.curr_frame, &tmp, q->st.curr_frame, false);
+	reset_var(q, p3_raw, p3_raw_ctx, &tmp, q->st.curr_frame, false);
 
 	if (val != get_int(p2))
 		check_heap_error(push_choice(q));
 
-	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	return true;
 }
 
@@ -7248,6 +7245,7 @@ builtins g_other_bifs[] =
 	{"unifiable", 3, fn_sys_unifiable_3, NULL, false, BLAH},
 	{"kv_set", 3, fn_kv_set_3, "+atomic,+value,+list", false, BLAH},
 	{"kv_get", 3, fn_kv_get_3, "+atomic,-value,+list", false, BLAH},
+	{"between", 3, fn_between_3, "+integer,+integer,-integer", false, BLAH},
 
 	{"must_be", 4, fn_must_be_4, "+term,+atom,+term,?any", false, BLAH},
 	{"can_be", 4, fn_can_be_4, "+term,+atom,+term,?any", false, BLAH},
@@ -7261,7 +7259,6 @@ builtins g_other_bifs[] =
 	{"$lengthchk", 2, fn_sys_lengthchk_2, NULL, false, BLAH},
 	{"$undo_trail", 1, fn_sys_undo_trail_1, NULL, false, BLAH},
 	{"$redo_trail", 0, fn_sys_redo_trail_0, NULL, false, BLAH},
-	{"$between", 4, fn_between_3, "+integer,+integer,-integer", false, BLAH},
 	{"$legacy_predicate_property", 2, fn_sys_legacy_predicate_property_2, "+callable,?string", false, BLAH},
 	{"$load_properties", 0, fn_sys_load_properties_0, NULL, false, BLAH},
 	{"$load_flags", 0, fn_sys_load_flags_0, NULL, false, BLAH},
