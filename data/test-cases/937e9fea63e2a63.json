@@ -1,0 +1,55 @@
+{
+  "uid" : "937e9fea63e2a63",
+  "name" : "laptops_1",
+  "fullName" : "laptops_1::tests",
+  "historyId" : "laptops_1::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/laptops/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/laptops/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "32-35"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/laptops/tests.lgt#L32"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "937e9fea63e2a63.json",
+  "parameterValues" : [ "examples/laptops/tests.lgt", "32-35", "https://github.com/LogtalkDotOrg/logtalk3/tree/0e1469939cab942ef4a2c72ff2e0b4d18b8efd15/examples/laptops/tests.lgt#L32" ]
+}
