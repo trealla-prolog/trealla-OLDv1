@@ -480,11 +480,17 @@ typedef struct {
 	unsigned priority;
 } op_table;
 
+// Where *ctx* is the contect of the var
+// And var_nbr* is the slot within that context
+
 struct trail_ {
 	cell *attrs;
 	pl_idx_t ctx, attrs_ctx;
 	uint32_t var_nbr;
 };
+
+// It would be nice to find space in a cell to put *mgen* & *mark*
+// fields, which are used in cycle detection
 
 struct slot_ {
 	cell c;
@@ -504,6 +510,7 @@ struct frame_ {
 	uint32_t nbr_slots, nbr_vars;
 	uint16_t mid;
 	bool is_last:1;
+	bool is_active:1;
 };
 
 struct prolog_state_ {
@@ -512,7 +519,12 @@ struct prolog_state_ {
 	union { predicate *pr; predicate *pr2; };
 	miter *iter, *f_iter;
 	module *m;
-	int64_t cnt;
+
+	union {
+		int64_t cnt;
+		struct { uint32_t v1, v2; };
+	};
+
 	float prob;
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
@@ -526,12 +538,7 @@ struct prolog_state_ {
 struct choice_ {
 	prolog_state st;
 	uint64_t cgen, frame_cgen;
-
-	union {
-		struct { uint32_t v1, v2; };
-		uint64_t ugen;
-	};
-
+	uint64_t ugen;
 	pl_idx_t overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;
