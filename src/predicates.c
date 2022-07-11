@@ -2638,6 +2638,7 @@ static bool search_functor(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 
 	push_choice(q);
 	predicate *pr = NULL;
+	check_heap_error(check_slot(q, MAX_ARITY));
 
 	while (map_next(q->st.f_iter, (void*)&pr)) {
 		CHECK_INTERRUPT();

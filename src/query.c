@@ -162,7 +162,7 @@ static bool check_frame(query *q)
 	return true;
 }
 
-static bool check_slot(query *q, unsigned cnt)
+bool check_slot(query *q, unsigned cnt)
 {
 	pl_idx_t nbr = q->st.sp + cnt;
 
@@ -577,7 +577,6 @@ void undo_me(query *q)
 
 bool try_me(query *q, unsigned nbr_vars)
 {
-	check_heap_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
 	f->is_active = false;
@@ -1325,6 +1324,7 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	cell *p1_body = deref(q, get_logical_body(p1), p1_ctx);
 	cell *orig_p1 = p1;
 	const frame *f = GET_FRAME(q->st.curr_frame);
+	check_heap_error(check_slot(q, MAX_ARITY));
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 		CHECK_INTERRUPT();
@@ -1427,6 +1427,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 	check_heap_error(check_frame(q));
 	check_heap_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
+	check_heap_error(check_slot(q, MAX_ARITY));
 
 	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
 		CHECK_INTERRUPT();
@@ -1500,6 +1501,7 @@ static bool match_head(query *q)
 	check_heap_error(check_frame(q));
 	check_heap_error(push_choice(q));
 	const frame *f = GET_FRAME(q->st.curr_frame);
+	check_heap_error(check_slot(q, MAX_ARITY));
 
 	for (; q->st.curr_clause; next_key(q)) {
 		CHECK_INTERRUPT();
