@@ -1072,17 +1072,29 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-	frame *tmpf = f;
-	pl_idx_t prev_frame = f->prev_frame;
-
-	while (q->st.fp > (prev_frame+1)) {
-		if (tmpf->is_active || any_choices(q, tmpf))
-			break;
-
-		q->st.sp = tmpf->base;
+#if 0
+	if (q->st.curr_frame == (q->st.fp-1))
+		&& !f->is_active
+		&& !any_choices(q, f)
+		&& q->pl->opt) {
+		q->st.sp = f->base;
 		q->st.fp--;
-		tmpf--;
 	}
+#else
+	if (q->st.curr_frame == (q->st.fp-1)) {
+		frame *tmpf = f;
+		pl_idx_t prev_frame = f->prev_frame;
+
+		while (q->st.fp > (prev_frame+1)) {
+			if (tmpf->is_active || any_choices(q, tmpf))
+				break;
+
+			q->st.sp = tmpf->base;
+			q->st.fp--;
+			tmpf--;
+		}
+	}
+#endif
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
