@@ -1089,6 +1089,7 @@ static bool resume_frame(query *q)
 		&& !f->is_active
 		&& !any_choices(q, f)
 		&& q->pl->opt) {
+			q->st.sp = f->base;
 		q->st.fp--;
 	}
 
