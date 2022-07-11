@@ -1,0 +1,55 @@
+{
+  "uid" : "5c6e6721d65f3850",
+  "name" : "cc_metric_01",
+  "fullName" : "cc_metric_01::cc_metric_tests",
+  "historyId" : "cc_metric_01::cc_metric_tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/code_metrics/cc_metric_tests.lgt::cc_metric_tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/code_metrics/cc_metric_tests.lgt::cc_metric_tests"
+  }, {
+    "name" : "package",
+    "value" : "tools/code_metrics/cc_metric_tests.lgt::cc_metric_tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/code_metrics/cc_metric_tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "39-40"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e790887fe0b7168f283e9808699a1a1a4e9e61b6/tools/code_metrics/cc_metric_tests.lgt#L39"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5c6e6721d65f3850.json",
+  "parameterValues" : [ "tools/code_metrics/cc_metric_tests.lgt", "39-40", "https://github.com/LogtalkDotOrg/logtalk3/tree/e790887fe0b7168f283e9808699a1a1a4e9e61b6/tools/code_metrics/cc_metric_tests.lgt#L39" ]
+}

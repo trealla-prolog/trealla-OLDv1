@@ -1,0 +1,55 @@
+{
+  "uid" : "4d1343c1459f10c",
+  "name" : "cbor_fixed_length_map",
+  "fullName" : "cbor_fixed_length_map::tests_common",
+  "historyId" : "cbor_fixed_length_map::tests_common",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "testClass",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "package",
+    "value" : "library/cbor/tests_common.lgt::tests_common"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/cbor/tests_common.lgt"
+  }, {
+    "name" : "position",
+    "value" : "342-343"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/e790887fe0b7168f283e9808699a1a1a4e9e61b6/library/cbor/tests_common.lgt#L342"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "4d1343c1459f10c.json",
+  "parameterValues" : [ "library/cbor/tests_common.lgt", "342-343", "https://github.com/LogtalkDotOrg/logtalk3/tree/e790887fe0b7168f283e9808699a1a1a4e9e61b6/library/cbor/tests_common.lgt#L342" ]
+}
