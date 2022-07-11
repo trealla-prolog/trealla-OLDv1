@@ -580,6 +580,7 @@ bool try_me(query *q, unsigned nbr_vars)
 	check_heap_error(check_slot(q, MAX_ARITY));
 	frame *f = GET_FRAME(q->st.fp);
 	f->nbr_slots = f->nbr_vars = nbr_vars;
+	f->is_active = false;
 	f->base = q->st.sp;
 	slot *e = GET_FIRST_SLOT(f);
 
@@ -1089,7 +1090,8 @@ static bool resume_frame(query *q)
 	//if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last)
 	//	fprintf(stderr, "*** resume f->is_last=%d, f->is_complex=%d, any_choices=%d\n", f->is_last, f->is_complex, any_choices(q, f));
 
-	if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last
+	if ((q->st.curr_frame == (q->st.fp-1))
+		&& f->is_last
 		&& q->pl->opt
 		&& !q->st.curr_clause->cl.is_complex
 		&& !any_choices(q, f)
@@ -1098,6 +1100,15 @@ static bool resume_frame(query *q)
 		q->st.fp--;
 	}
 #endif
+
+	if ((q->st.curr_frame == (q->st.fp-1)) && 0
+		&& f->is_last && !f->is_active
+		&& !any_choices(q, f)
+		&& check_slots(q, f, NULL)
+		&& q->pl->opt) {
+		//fprintf(stderr, "*** trim\n");
+		q->st.fp--;
+	}
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
@@ -1196,7 +1207,7 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 
 void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
-	const frame *f = GET_FRAME(c_ctx);
+	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
@@ -1229,13 +1240,15 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
+	f->is_active = true;
+
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
 }
 
 void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx, bool trailing)
 {
-	const frame *f = GET_FRAME(c_ctx);
+	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
 
 	while (is_variable(&e->c)) {
@@ -1258,6 +1271,8 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		share_cell(v);
 		e->c = *v;
 	}
+
+	f->is_active = true;
 }
 
 // Match HEAD :- BODY.
