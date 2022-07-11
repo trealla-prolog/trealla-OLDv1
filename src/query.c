@@ -1085,15 +1085,10 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-	//if ((q->st.curr_frame == (q->st.fp-1)) && f->is_last)
-	//	fprintf(stderr, "*** resume f->is_last=%d, f->is_complex=%d, any_choices=%d\n", f->is_last, f->is_complex, any_choices(q, f));
-
 	if ((q->st.curr_frame == (q->st.fp-1))
 		&& !f->is_active
 		&& !any_choices(q, f)
-		&& q->pl->opt
-		) {
-		//fprintf(stderr, "*** trim\n");
+		&& q->pl->opt) {
 		q->st.fp--;
 	}
 
@@ -1227,8 +1222,11 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		e->c = *v;
 	}
 
-	frame *vf = GET_FRAME(v_ctx);
-	vf->is_active = true;
+	if (is_structure(v)) {
+		frame *vf = GET_FRAME(v_ctx);
+		vf->is_active = true;
+	}
+
 	f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
@@ -1261,8 +1259,11 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		e->c = *v;
 	}
 
-	frame *vf = GET_FRAME(v_ctx);
-	vf->is_active = true;
+	if (is_structure(v)) {
+		frame *vf = GET_FRAME(v_ctx);
+		vf->is_active = true;
+	}
+
 	f->is_active = true;
 }
 
