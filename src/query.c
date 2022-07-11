@@ -1052,35 +1052,6 @@ static bool resume_frame(query *q)
 
 	frame *f = GET_CURR_FRAME();
 
-#if 0
-	if (q->cp) {
-		const choice *ch = GET_CURR_CHOICE();
-		printf("*** resume f->cgen=%u, ch->cgen=%u\n", f->cgen, ch->cgen);
-	}
-#endif
-
-#if 0
-	if (q->st.curr_clause) {
-		clause *cl = &q->st.curr_clause->cl;
-
-		if ((q->st.curr_frame == (q->st.fp-1))
-			&& q->pl->opt
-			&& cl->is_tail_rec
-			&& !any_choices(q, f)
-			&& check_slots(q, f, cl))
-			q->st.fp--;
-	}
-#endif
-
-#if 0
-	if (q->st.curr_frame == (q->st.fp-1))
-		&& !f->is_active
-		&& !any_choices(q, f)
-		&& q->pl->opt) {
-		q->st.sp = f->base;
-		q->st.fp--;
-	}
-#else
 	if (q->st.curr_frame == (q->st.fp-1)) {
 		frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
@@ -1094,7 +1065,6 @@ static bool resume_frame(query *q)
 			tmpf--;
 		}
 	}
-#endif
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
