@@ -1004,19 +1004,6 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 			do_cleanup(q, tmp);
 			break;
 		}
-
-#if 0
-		if (ch->is_tail_rec) {
-			printf("*** here2\n");
-			frame *f_prev = GET_FRAME(f->prev_frame);
-			f->prev_frame = f_prev->prev_frame;
-			f->prev_cell = f_prev->prev_cell;
-			*f_prev = *f;
-			q->st.curr_frame--;
-			q->st.fp--;
-			q->tot_tcos++;
-		}
-#endif
 	}
 
 	if (!q->cp && !q->undo_hi_tp)
@@ -1063,7 +1050,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
-	const frame *f = GET_CURR_FRAME();
+	frame *f = GET_CURR_FRAME();
 
 #if 0
 	if (q->cp) {
@@ -1085,13 +1072,27 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-	if ((q->st.curr_frame == (q->st.fp-1))
+#if 0
+	if (q->st.curr_frame == (q->st.fp-1))
 		&& !f->is_active
 		&& !any_choices(q, f)
 		&& q->pl->opt) {
 		q->st.sp = f->base;
 		q->st.fp--;
 	}
+#else
+	frame *tmpf = f;
+	pl_idx_t prev_frame = f->prev_frame;
+
+	while (q->st.fp > (prev_frame+1)) {
+		if (tmpf->is_active || any_choices(q, tmpf))
+			break;
+
+		q->st.sp = tmpf->base;
+		q->st.fp--;
+		tmpf--;
+	}
+#endif
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
@@ -1228,7 +1229,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		vf->is_active = true;
 	}
 
-	f->is_active = true;
+	if (!is_variable(v))
+		f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
@@ -1265,7 +1267,8 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		vf->is_active = true;
 	}
 
-	f->is_active = true;
+	if (!is_variable(v))
+		f->is_active = true;
 }
 
 // Match HEAD :- BODY.
