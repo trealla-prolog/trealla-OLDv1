@@ -1072,15 +1072,6 @@ static bool resume_frame(query *q)
 	}
 #endif
 
-#if 0
-	if (q->st.curr_frame == (q->st.fp-1))
-		&& !f->is_active
-		&& !any_choices(q, f)
-		&& q->pl->opt) {
-		q->st.sp = f->base;
-		q->st.fp--;
-	}
-#else
 	frame *tmpf = f;
 	pl_idx_t prev_frame = f->prev_frame;
 
@@ -1092,7 +1083,6 @@ static bool resume_frame(query *q)
 		q->st.fp--;
 		tmpf--;
 	}
-#endif
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
