@@ -1043,10 +1043,10 @@ static void proceed(query *q)
 	}
 }
 
-void chop_frames(query *q, frame *f)
+void chop_frames(query *q, const frame *f)
 {
 	if (q->st.curr_frame == (q->st.fp-1)) {
-		frame *tmpf = f;
+		const frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
 
 		while (q->st.fp > (prev_frame+1)) {
