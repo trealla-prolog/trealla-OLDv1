@@ -722,17 +722,6 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 		*to = *from;
 	}
 
-#if 0
-	// If the new frame is smaller then the current one.
-	// I don't think this is possible at the moment...
-
-	for (unsigned i = cl->nbr_vars; i < f->nbr_vars; i++, to++) {
-		unshare_cell(&to->c);
-		to->c.tag = TAG_EMPTY;
-		to->c.attrs = NULL;
-	}
-#endif
-
 	f->cgen = newf->cgen;
 	f->nbr_slots = cl->nbr_vars - cl->nbr_temporaries;
 	f->nbr_vars = cl->nbr_vars - cl->nbr_temporaries;
