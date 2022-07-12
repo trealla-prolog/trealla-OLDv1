@@ -1042,8 +1042,9 @@ static void proceed(query *q)
 			break;
 	}
 }
+// Prune dead frames from the top down...
 
-void chop_frames(query *q, const frame *f)
+static void chop_frames(query *q, const frame *f)
 {
 	if (q->st.curr_frame == (q->st.fp-1)) {
 		const frame *tmpf = f;
