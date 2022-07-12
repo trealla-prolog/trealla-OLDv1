@@ -1043,15 +1043,8 @@ static void proceed(query *q)
 	}
 }
 
-// Resume previous frame...
-
-static bool resume_frame(query *q)
+void chop_frames(query *q, frame *f)
 {
-	if (!q->st.curr_frame)
-		return false;
-
-	frame *f = GET_CURR_FRAME();
-
 	if (q->st.curr_frame == (q->st.fp-1)) {
 		frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
@@ -1067,6 +1060,17 @@ static bool resume_frame(query *q)
 			tmpf--;
 		}
 	}
+}
+
+// Resume previous frame...
+
+static bool resume_frame(query *q)
+{
+	if (!q->st.curr_frame)
+		return false;
+
+	frame *f = GET_CURR_FRAME();
+	chop_frames(q, f);
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
