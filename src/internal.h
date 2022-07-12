@@ -622,7 +622,8 @@ struct query_ {
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
-	uint64_t tot_goals, tot_backtracks, tot_retries, tot_matches, tot_tcos;
+	uint64_t tot_goals, tot_backtracks, tot_retries, tot_matches;
+	uint64_t tot_tcos, tot_frecovs, tot_srecovs;
 	uint64_t step, qid, tmo_msecs, cgen;
 	uint64_t time_started, get_started;
 	uint64_t time_cpu_started, time_cpu_last_started;

@@ -4019,10 +4019,12 @@ static bool fn_time_1(query *q)
 static bool fn_statistics_0(query *q)
 {
 	fprintf(stdout,
-		"Goals %llu, Matches %llu, Max frames %u, choices %u, trails %u, slots %u, heap: %u. Backtracks %llu, TCOs:%llu\n",
+		"Goals %llu, Matches %llu, Max frames %u, choices %u, trails %u, slots %u, heap: %u.\nBacktracks %llu, TCOs:%llu, Recovered frames: %llu, slots: %llu\n",
 		(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
 		q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->st.hp,
-		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos);
+		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos,
+		(unsigned long long)q->tot_frecovs, (unsigned long long)q->tot_srecovs
+		);
 	return true;
 }
 

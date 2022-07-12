@@ -1060,6 +1060,8 @@ static bool resume_frame(query *q)
 			if (tmpf->is_active || any_choices(q, tmpf))
 				break;
 
+			q->tot_srecovs += q->st.sp - tmpf->base;
+			q->tot_frecovs++;
 			q->st.sp = tmpf->base;
 			q->st.fp--;
 			tmpf--;
