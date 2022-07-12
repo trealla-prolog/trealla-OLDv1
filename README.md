@@ -657,30 +657,12 @@ available in the form of light-weight coroutines that run until they
 yield control, either explicitly or implicitly (when waiting on input
 or a timer)...
 
-	fork/0                  # parent fails, child continues
 	task/[1-n]	            # concurrent form of call/1-n
-	yield/0                 # voluntarily yield control
-	wait/0                  # parent should wait for children to finish
-	await/0                 # parent should wait for a message
-	send/1                  # append term to parent queue
-	recv/1                  # pop pop from queue
 	tasklist/[2-8]          # concurrent form of maplist/1-n
 
-Note: *send/1*, *sleep/1* and *delay/1* do implied yields. As does *getline/2*,
-*bread/3*, *bwrite/2* and *accept/2*.
-
-Note: *task/n* acts as if defined as:
-
-```prolog
-	task(G) :- fork, call(G).
-	task(G,P1) :- fork, call(G,P1).
-	task(G,P1,P2) :- fork, call(G,P1,P2).
-```
-	...
-
-In practice *task* calls a special version of *fork/0* that limits
-the number of such concurrent tasks. Excess tasks will be scheduled as
-tasks finish.
+Note: *tasklist* limits the number of concurrent tasks to a small
+pool (4?) of tasks active at one time. New tasks are scheduled as prior
+ones complete.
 
 An example:
 
@@ -698,22 +680,6 @@ test54 :-
 	maplist(geturl,L),
 	writeln('Finished').
 
-% Fetch each URL in list concurrently (method 1)...
-
-test55 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	maplist(task(geturl),L),
-	wait,
-	writeln('Finished').
-
-% Fetch each URL in list concurrently (method 2)...
-
-test56 :-
-	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
-	tasklist(geturl,L),
-	writeln('Finished').
-```
-
 ```console
 $ tpl samples/test -g "time(test54),halt"
 Job [www.google.com] 200 ==> www.google.com done
@@ -722,12 +688,13 @@ Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
 Finished
 Time elapsed 0.663 secs
 
-$ tpl samples/test -g "time(test55),halt"
-Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
-Job [www.bing.com] 200 ==> www.bing.com done
-Job [www.google.com] 200 ==> www.google.com done
-Finished
-Time elapsed 0.331 secs
+% Fetch each URL in list concurrently...
+
+test56 :-
+	L = ['www.google.com','www.bing.com','www.duckduckgo.com'],
+	tasklist(geturl,L),
+	writeln('Finished').
+```
 
 $ tpl samples/test -g "time(test56),halt"
 Job [www.duckduckgo.com] 200 ==> https://duckduckgo.com done
