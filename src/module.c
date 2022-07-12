@@ -1459,7 +1459,7 @@ module *load_file(module *m, const char *filename, bool including)
 		}
 	}
 
-		size_t len = strlen(filename);
+	size_t len = strlen(filename);
 	char *tmpbuf = malloc(len + 20);
 	memcpy(tmpbuf, filename, len+1);
 
