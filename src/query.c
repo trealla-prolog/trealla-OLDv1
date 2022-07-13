@@ -860,9 +860,6 @@ static void commit_me(query *q, clause *cl)
 	bool choices = any_choices(q, f);
 	bool tco;
 
-	if (!cl->nbr_vars)
-		tco = true;
-
 	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
 	else
@@ -873,7 +870,7 @@ static void commit_me(query *q, clause *cl)
 		tco, q->no_tco, last_match, recursive, choices, slots_ok, cl->nbr_vars, cl->nbr_temporaries);
 #endif
 
-	if (tco && q->pl->opt)
+	if ((tco || !cl->nbr_vars) && q->pl->opt)
 		reuse_frame(q, f, cl);
 	else
 		f = push_frame(q, cl);
