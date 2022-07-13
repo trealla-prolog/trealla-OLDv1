@@ -38,6 +38,8 @@ int g_tpl_interrupt = 0;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
+#define TRACE_MEM 0
+
 // Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '1' ...
 
@@ -120,6 +122,14 @@ static bool check_trail(query *q)
 		q->max_trails = q->st.tp;
 	}
 
+	if ((q->trails_size > INITIAL_NBR_TRAILS) && (q->st.tp < (q->trails_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.tp=%u, q->trails_size=%u\n", (unsigned)q->st.tp, (unsigned)q->trails_size);
+#endif
+		q->trails_size = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size / 2);
+		q->max_trails = q->st.tp;
+	}
+
 	return true;
 }
 
@@ -136,6 +146,14 @@ static bool check_choice(query *q)
 			q->choices_size = new_choicessize;
 		}
 
+		q->max_choices = q->cp;
+	}
+
+	if ((q->choices_size > INITIAL_NBR_CHOICES) && (q->cp < (q->choices_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.cp=%u, q->choices_size=%u\n", (unsigned)q->cp, (unsigned)q->choices_size);
+#endif
+		q->choices_size = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size / 2);
 		q->max_choices = q->cp;
 	}
 
@@ -159,6 +177,14 @@ static bool check_frame(query *q)
 		q->max_frames = q->st.fp;
 	}
 
+	if ((q->frames_size > INITIAL_NBR_GOALS) && (q->st.fp < (q->frames_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.fp=%u, q->frames_size=%u\n", (unsigned)q->st.fp, (unsigned)q->frames_size);
+#endif
+		q->frames_size = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size / 2);
+		q->max_frames = q->st.fp;
+	}
+
 	return true;
 }
 
@@ -178,6 +204,14 @@ bool check_slot(query *q, unsigned cnt)
 			q->slots_size = new_slotssize;
 		}
 
+		q->max_slots = nbr;
+	}
+
+	if ((q->slots_size > INITIAL_NBR_SLOTS) && (q->st.sp < (q->slots_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.sp=%u, q->slots_size=%u\n", (unsigned)q->st.sp, (unsigned)q->slots_size);
+#endif
+		q->slots_size = alloc_grow((void**)&q->slots, sizeof(slot), q->st.sp, q->slots_size / 2);
 		q->max_slots = nbr;
 	}
 
@@ -826,6 +860,9 @@ static void commit_me(query *q, clause *cl)
 	bool choices = any_choices(q, f);
 	bool tco;
 
+	if (!cl->nbr_vars)
+		tco = true;
+
 	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
 	else
@@ -1031,6 +1068,7 @@ static void proceed(query *q)
 			break;
 	}
 }
+
 // Prune dead frames from the top down...
 
 static void chop_frames(query *q, const frame *f)

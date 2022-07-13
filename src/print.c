@@ -1135,7 +1135,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		bool space = (c->val_off == g_minus_s) && (is_number(rhs) || search_op(q->st.m, C_STR(q, rhs), NULL, true));
 		if ((c->val_off == g_plus_s) && search_op(q->st.m, C_STR(q, rhs), NULL, true) && rhs->arity) space = true;
 		if (isalpha(*src)) space = true;
-		if (is_op(rhs)) space = true;
+		if (is_op(rhs) || is_negative(rhs)) space = true;
 
 		bool parens = false; //is_op(rhs);
 		if (strcmp(src, "+") && (is_infix(rhs) || is_postfix(rhs))) parens = true;
@@ -1247,11 +1247,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
-	space = false;
-
-	if (!*src) space = false;
-	space += is_smallint(rhs) && is_negative(rhs);
-
+	space = is_number(rhs) && is_negative(rhs);
 	bool rhs_parens = rhs_pri_1 >= my_priority;
 
 	if ((rhs_pri_1 == my_priority) && is_xfy(c)) rhs_parens = false;
