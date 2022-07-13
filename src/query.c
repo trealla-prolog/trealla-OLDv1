@@ -870,7 +870,7 @@ static void commit_me(query *q, clause *cl)
 		tco, q->no_tco, last_match, recursive, choices, slots_ok, cl->nbr_vars, cl->nbr_temporaries);
 #endif
 
-	if ((tco || !cl->nbr_vars) && q->pl->opt)
+	if (tco && q->pl->opt)
 		reuse_frame(q, f, cl);
 	else
 		f = push_frame(q, cl);
