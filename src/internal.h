@@ -480,8 +480,8 @@ typedef struct {
 	unsigned priority;
 } op_table;
 
-// Where *ctx* is the contect of the var
-// And var_nbr* is the slot within that context
+// Where *ctx* is the context of the var
+// And *var_nbr* is the slot within that context
 
 struct trail_ {
 	cell *attrs;
