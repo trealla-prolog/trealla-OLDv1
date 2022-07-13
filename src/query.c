@@ -633,17 +633,15 @@ bool try_me(query *q, unsigned nbr_vars)
 	return true;
 }
 
-static void trim_heap(query *q, const choice *ch)
+static void trim_heap(query *q)
 {
 	for (page *a = q->pages; a;) {
-		if (a->nbr < ch->st.curr_page)
+		if (a->nbr < q->st.curr_page)
 			break;
 
 		for (pl_idx_t i = 0; i < a->max_hp_used; i++) {
 			cell *c = a->heap + i;
 			unshare_cell(c);
-			c->tag = TAG_EMPTY;
-			c->attrs = NULL;
 		}
 
 		page *save = a;
@@ -698,9 +696,9 @@ LOOP:
 	if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
 		goto LOOP;
 
-	trim_heap(q, ch);
 	q->st = ch->st;
 	q->save_m = NULL;
+	trim_heap(q);
 
 	frame *f = GET_CURR_FRAME();
 	f->ugen = ch->ugen;
