@@ -38,6 +38,8 @@ int g_tpl_interrupt = 0;
 
 typedef enum { CALL, EXIT, REDO, NEXT, FAIL } box_t;
 
+#define TRACE_MEM 0
+
 // Note: when in commit there is a provisional choice point
 // that we should skip over, hence the '1' ...
 
@@ -120,6 +122,14 @@ static bool check_trail(query *q)
 		q->max_trails = q->st.tp;
 	}
 
+	if ((q->trails_size > INITIAL_NBR_TRAILS) && (q->st.tp < (q->trails_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.tp=%u, q->trails_size=%u\n", (unsigned)q->st.tp, (unsigned)q->trails_size);
+#endif
+		q->trails_size = alloc_grow((void**)&q->trails, sizeof(trail), q->st.tp, q->trails_size / 2);
+		q->max_trails = q->st.tp;
+	}
+
 	return true;
 }
 
@@ -136,6 +146,14 @@ static bool check_choice(query *q)
 			q->choices_size = new_choicessize;
 		}
 
+		q->max_choices = q->cp;
+	}
+
+	if ((q->choices_size > INITIAL_NBR_CHOICES) && (q->cp < (q->choices_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.cp=%u, q->choices_size=%u\n", (unsigned)q->cp, (unsigned)q->choices_size);
+#endif
+		q->choices_size = alloc_grow((void**)&q->choices, sizeof(choice), q->cp, q->choices_size / 2);
 		q->max_choices = q->cp;
 	}
 
@@ -159,6 +177,14 @@ static bool check_frame(query *q)
 		q->max_frames = q->st.fp;
 	}
 
+	if ((q->frames_size > INITIAL_NBR_GOALS) && (q->st.fp < (q->frames_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.fp=%u, q->frames_size=%u\n", (unsigned)q->st.fp, (unsigned)q->frames_size);
+#endif
+		q->frames_size = alloc_grow((void**)&q->frames, sizeof(frame), q->st.fp, q->frames_size / 2);
+		q->max_frames = q->st.fp;
+	}
+
 	return true;
 }
 
@@ -178,6 +204,14 @@ bool check_slot(query *q, unsigned cnt)
 			q->slots_size = new_slotssize;
 		}
 
+		q->max_slots = nbr;
+	}
+
+	if ((q->slots_size > INITIAL_NBR_SLOTS) && (q->st.sp < (q->slots_size / 3))) {
+#if TRACE_MEM
+		printf("*** q->st.sp=%u, q->slots_size=%u\n", (unsigned)q->st.sp, (unsigned)q->slots_size);
+#endif
+		q->slots_size = alloc_grow((void**)&q->slots, sizeof(slot), q->st.sp, q->slots_size / 2);
 		q->max_slots = nbr;
 	}
 
@@ -722,17 +756,6 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 		*to = *from;
 	}
 
-#if 0
-	// If the new frame is smaller then the current one.
-	// I don't think this is possible at the moment...
-
-	for (unsigned i = cl->nbr_vars; i < f->nbr_vars; i++, to++) {
-		unshare_cell(&to->c);
-		to->c.tag = TAG_EMPTY;
-		to->c.attrs = NULL;
-	}
-#endif
-
 	f->cgen = newf->cgen;
 	f->nbr_slots = cl->nbr_vars - cl->nbr_temporaries;
 	f->nbr_vars = cl->nbr_vars - cl->nbr_temporaries;
@@ -836,6 +859,9 @@ static void commit_me(query *q, clause *cl)
 	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
 	bool tco;
+
+	if (!cl->nbr_vars)
+		tco = true;
 
 	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
@@ -1043,6 +1069,27 @@ static void proceed(query *q)
 	}
 }
 
+// Prune dead frames from the top down...
+
+static void chop_frames(query *q, const frame *f)
+{
+	if (q->st.curr_frame == (q->st.fp-1)) {
+		const frame *tmpf = f;
+		pl_idx_t prev_frame = f->prev_frame;
+
+		while (q->st.fp > (prev_frame+1)) {
+			if (tmpf->is_active || any_choices(q, tmpf))
+				break;
+
+			q->tot_srecovs += q->st.sp - tmpf->base;
+			q->tot_frecovs++;
+			q->st.sp = tmpf->base;
+			q->st.fp--;
+			tmpf--;
+		}
+	}
+}
+
 // Resume previous frame...
 
 static bool resume_frame(query *q)
@@ -1051,20 +1098,7 @@ static bool resume_frame(query *q)
 		return false;
 
 	frame *f = GET_CURR_FRAME();
-
-	if (q->st.curr_frame == (q->st.fp-1)) {
-		frame *tmpf = f;
-		pl_idx_t prev_frame = f->prev_frame;
-
-		while (q->st.fp > (prev_frame+1)) {
-			if (tmpf->is_active || any_choices(q, tmpf))
-				break;
-
-			q->st.sp = tmpf->base;
-			q->st.fp--;
-			tmpf--;
-		}
-	}
+	chop_frames(q, f);
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
@@ -1898,10 +1932,10 @@ query *create_query(module *m, bool is_task)
 
 	// Allocate these now...
 
-	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
-	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
-	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
-	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
+	q->frames_size = is_task ? INITIAL_NBR_GOALS/4 : INITIAL_NBR_GOALS;
+	q->slots_size = is_task ? INITIAL_NBR_SLOTS/4 : INITIAL_NBR_SLOTS;
+	q->choices_size = is_task ? INITIAL_NBR_CHOICES/4 : INITIAL_NBR_CHOICES;
+	q->trails_size = is_task ? INITIAL_NBR_TRAILS/4 : INITIAL_NBR_TRAILS;
 
 	bool error = false;
 	CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
@@ -1911,11 +1945,11 @@ query *create_query(module *m, bool is_task)
 
 	// Allocate these later as needed...
 
-	q->h_size = is_task ? INITIAL_NBR_HEAP_CELLS/10 : INITIAL_NBR_HEAP_CELLS;
+	q->h_size = is_task ? INITIAL_NBR_HEAP_CELLS/4 : INITIAL_NBR_HEAP_CELLS;
 	q->tmph_size = INITIAL_NBR_CELLS;
 
 	for (int i = 0; i < MAX_QUEUES; i++)
-		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE_CELLS/10 : INITIAL_NBR_QUEUE_CELLS;
+		q->q_size[i] = is_task ? INITIAL_NBR_QUEUE_CELLS/4 : INITIAL_NBR_QUEUE_CELLS;
 
 	if (error) {
 		destroy_query (q);
@@ -1932,6 +1966,7 @@ query *create_sub_query(query *q, cell *curr_cell)
 	subq->parent = q;
 	subq->st.fp = 1;
 	subq->is_task = true;
+	subq->p = q->p;
 
 	cell *tmp = clone_to_heap(subq, 0, curr_cell, 1);
 	pl_idx_t nbr_cells = tmp->nbr_cells;
