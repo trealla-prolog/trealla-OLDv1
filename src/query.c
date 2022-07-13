@@ -853,15 +853,14 @@ static void commit_me(query *q, clause *cl)
 	frame *f = GET_CURR_FRAME();
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
+	cell *body = get_body(cl->cells);
 	bool implied_first_cut = q->check_unique && !q->has_vars && cl->is_unique;
 	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q, cl);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
+	//bool dummy = !body && !cl->nbr_vars;
 	bool tco;
-
-	if (!cl->nbr_vars)
-		tco = true;
 
 	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
 		tco = false;
@@ -890,7 +889,7 @@ static void commit_me(query *q, clause *cl)
 	}
 
 	q->st.iter = NULL;
-	q->st.curr_cell = get_body(cl->cells);
+	q->st.curr_cell = body;
 	q->in_commit = false;
 }
 

@@ -1155,7 +1155,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 				space = 1;
 		}
 
-
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
