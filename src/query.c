@@ -1246,9 +1246,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		f->is_active = true;
 	}
 
-	if (!is_variable(v) && !is_atomic(v))
-		f->is_active = true;
-
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
 }
@@ -1282,10 +1279,8 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 	if (is_structure(v)) {
 		frame *vf = GET_FRAME(v_ctx);
 		vf->is_active = true;
-	}
-
-	if (!is_variable(v) && !is_atomic(v))
 		f->is_active = true;
+	}
 }
 
 // Match HEAD :- BODY.
