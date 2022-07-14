@@ -596,7 +596,7 @@ static void add_trail(query *q, pl_idx_t c_ctx, unsigned c_var_nbr, cell *attrs,
 	}
 
 	trail *tr = q->trails + q->st.tp++;
-	tr->ctx = c_ctx;
+	tr->var_ctx = c_ctx;
 	tr->var_nbr = c_var_nbr;
 	tr->attrs = attrs;
 	tr->attrs_ctx = attrs_ctx;
@@ -606,7 +606,7 @@ static void unwind_trail(query *q, const choice *ch)
 {
 	while (q->st.tp > ch->st.tp) {
 		const trail *tr = q->trails + --q->st.tp;
-		const frame *f = GET_FRAME(tr->ctx);
+		const frame *f = GET_FRAME(tr->var_ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
 		unshare_cell(&e->c);
 		e->c.tag = TAG_EMPTY;
@@ -793,7 +793,7 @@ void trim_trail(query *q)
 	while (q->st.tp > tp) {
 		const trail *tr = q->trails + q->st.tp - 1;
 
-		if (tr->ctx != q->st.curr_frame)
+		if (tr->var_ctx != q->st.curr_frame)
 			break;
 
 		q->st.tp--;

@@ -485,7 +485,7 @@ typedef struct {
 
 struct trail_ {
 	cell *attrs;
-	pl_idx_t ctx, attrs_ctx;
+	pl_idx_t var_ctx, attrs_ctx;
 	uint32_t var_nbr;
 };
 

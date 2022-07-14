@@ -6065,7 +6065,7 @@ static bool fn_sys_unifiable_3(query *q)
 
 	while (before_hook_tp < q->st.tp) {
 		const trail *tr = q->trails + before_hook_tp;
-		const frame *f = GET_FRAME(tr->ctx);
+		const frame *f = GET_FRAME(tr->var_ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
 		cell *c = deref(q, &e->c, e->c.var_ctx);
 
