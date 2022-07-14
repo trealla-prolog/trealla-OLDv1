@@ -75,7 +75,9 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		return;
 #endif
 
-	fprintf(stderr, " [%llu:f%u:cp%u] ", (unsigned long long)q->step++, q->st.curr_frame, q->cp);
+	fprintf(stderr, " [%llu:f%u:fp:%u:cp%u:sp%u:hp%u] ",
+		(unsigned long long)q->step++,
+		q->st.curr_frame, q->st.fp, q->cp, q->st.sp, q->st.hp);
 
 	fprintf(stderr, "%s ",
 		box == CALL ? "CALL" :
@@ -84,13 +86,6 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 		box == NEXT ? "NEXT" :
 		box == FAIL ? "FAIL":
 		"????");
-
-#if DEBUG
-	frame *f = GET_CURR_FRAME();
-	fprintf(stderr, "{ch%u:tp%u:fp%u:sp%u:hp%u} ",
-		any_choices(q, f),
-		q->st.tp, q->st.fp, q->st.sp, q->st.hp);
-#endif
 
 	int save_depth = q->max_depth;
 	q->max_depth = 10;
@@ -1085,10 +1080,13 @@ static void proceed(query *q)
 static void chop_frames(query *q, const frame *f)
 {
 	if (q->st.curr_frame == (q->st.fp-1)) {
+		//printf("*** chop %u\n", (unsigned)(f-q->frames));
 		const frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
 
 		while (q->st.fp > (prev_frame+1)) {
+			//printf("*** chop2 is_active=%d, any_choices=%d\n", tmpf->is_active, any_choices(q, tmpf));
+
 			if (tmpf->is_active || any_choices(q, tmpf))
 				break;
 
@@ -1246,7 +1244,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		vf->is_active = true;
 	}
 
-	if (!is_variable(v))
+	if (!is_variable(v) && !is_atomic(v))
 		f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
