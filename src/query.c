@@ -1243,7 +1243,9 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 	if (is_structure(v)) {
 		frame *vf = GET_FRAME(v_ctx);
 		vf->is_active = true;
-		f->is_active = true;
+
+		if (c_ctx > q->st.curr_frame)
+			f->is_active = true;
 	}
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
