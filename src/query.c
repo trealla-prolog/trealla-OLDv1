@@ -28,10 +28,10 @@ static void msleep(int ms)
 
 static const unsigned INITIAL_NBR_HEAP_CELLS = 16000;
 static const unsigned INITIAL_NBR_QUEUE_CELLS = 1000;
-static const unsigned INITIAL_NBR_GOALS = 1000;
-static const unsigned INITIAL_NBR_SLOTS = 1000;
-static const unsigned INITIAL_NBR_CHOICES = 1000;
-static const unsigned INITIAL_NBR_TRAILS = 1000;
+static const unsigned INITIAL_NBR_GOALS = 4000;
+static const unsigned INITIAL_NBR_SLOTS = 4000;
+static const unsigned INITIAL_NBR_CHOICES = 4000;
+static const unsigned INITIAL_NBR_TRAILS = 4000;
 
 unsigned g_string_cnt = 0, g_interned_cnt = 0;
 int g_tpl_interrupt = 0;
@@ -1943,10 +1943,10 @@ query *create_query(module *m, bool is_task)
 
 	// Allocate these now...
 
-	q->frames_size = is_task ? INITIAL_NBR_GOALS/4 : INITIAL_NBR_GOALS;
-	q->slots_size = is_task ? INITIAL_NBR_SLOTS/4 : INITIAL_NBR_SLOTS;
-	q->choices_size = is_task ? INITIAL_NBR_CHOICES/4 : INITIAL_NBR_CHOICES;
-	q->trails_size = is_task ? INITIAL_NBR_TRAILS/4 : INITIAL_NBR_TRAILS;
+	q->frames_size = is_task ? INITIAL_NBR_GOALS/10 : INITIAL_NBR_GOALS;
+	q->slots_size = is_task ? INITIAL_NBR_SLOTS/10 : INITIAL_NBR_SLOTS;
+	q->choices_size = is_task ? INITIAL_NBR_CHOICES/10 : INITIAL_NBR_CHOICES;
+	q->trails_size = is_task ? INITIAL_NBR_TRAILS/10 : INITIAL_NBR_TRAILS;
 
 	bool error = false;
 	CHECK_SENTINEL(q->frames = calloc(q->frames_size, sizeof(frame)), NULL);
