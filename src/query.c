@@ -1246,10 +1246,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 		f->is_active = true;
 	}
 
-	if (!is_variable(v)
-		&& !is_atomic(v)
-		&& (c_ctx <= q->st.curr_frame)
-		)
+	if (!is_variable(v) && !is_atomic(v))
 		f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
@@ -1287,7 +1284,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 		vf->is_active = true;
 	}
 
-	if (!is_variable(v))
+	if (!is_variable(v) && !is_atomic(v))
 		f->is_active = true;
 }
 
