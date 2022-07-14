@@ -54,7 +54,7 @@ static bool any_choices(const query *q, const frame *f)
 
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 {
-	if (!c || !c->fn_ptr || is_empty(c))
+	if (!c || is_empty(c))
 		return;
 
 	if (c->fn_ptr && !c->fn_ptr->fn)
@@ -66,7 +66,7 @@ static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 #endif
 
 	if (box == CALL)
-		box = q->retry?REDO:q->resume?NEXT:CALL;
+		box = q->retry?REDO:CALL;
 
 #if 1
 	const char *src = C_STR(q, c);
@@ -1106,6 +1106,7 @@ static bool resume_frame(query *q)
 	if (!q->st.curr_frame)
 		return false;
 
+	Trace(q, get_head(q->st.curr_clause->cl.cells), q->st.curr_frame, EXIT);
 	frame *f = GET_CURR_FRAME();
 	chop_frames(q, f);
 
@@ -1690,6 +1691,7 @@ bool start(query *q)
 			if (q->run_hook && !q->in_hook)
 				check_heap_error(do_post_unification_hook(q, true));
 
+			Trace(q, save_cell, save_ctx, EXIT);
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
 			if (consultall(q, q->st.curr_cell, q->st.curr_frame) != true) {
@@ -1697,6 +1699,7 @@ bool start(query *q)
 				continue;
 			}
 
+			Trace(q, save_cell, save_ctx, EXIT);
 			proceed(q);
 		} else {
 			if (!is_callable(q->st.curr_cell)) {
@@ -1710,6 +1713,8 @@ bool start(query *q)
 			if (q->run_hook && !q->in_hook) {
 				check_heap_error(do_post_unification_hook(q, false));
 			}
+
+			//Trace(q, save_cell, save_ctx, EXIT);
 		}
 
 		q->run_hook = false;
@@ -1727,7 +1732,6 @@ bool start(query *q)
 		//if (g_tpl_interrupt)
 		//	continue;
 
-		Trace(q, save_cell, save_ctx, EXIT);
 		q->resume = false;
 		q->retry = QUERY_OK;
 
