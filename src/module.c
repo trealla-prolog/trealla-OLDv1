@@ -1152,7 +1152,15 @@ bool retract_from_db(module *m, db_entry *dbe)
 	if (dbe->cl.ugen_erased)
 		return false;
 
-	dbe->owner->cnt--;
+	predicate *pr = dbe->owner;
+	pr->cnt--;
+
+	if (pr->cnt < m->indexing_threshold) {
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
+		pr->idx2 = pr->idx = NULL;
+	}
+
 	dbe->cl.ugen_erased = ++m->pl->ugen;
 	dbe->filename = NULL;
 	return true;
