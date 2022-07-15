@@ -156,6 +156,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
+#define is_in_body(c) ((c)->flags & FLAG_VAR_IN_BODY)
 #define is_ref(c) ((c)->flags & FLAG_REF)
 #define is_op(c) (c->flags & 0xE000)
 #define is_callable(c) (is_interned(c) || is_cstring(c))
@@ -253,6 +254,7 @@ enum {
 	FLAG_VAR_ANON=1<<0,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<1,				// used with TAG_VAR
 	FLAG_VAR_TEMPORARY=1<<2,			// used with TAG_VAR
+	FLAG_VAR_IN_BODY=1<<3,				// used with TAG_VAR
 
 	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
@@ -690,6 +692,7 @@ struct query_ {
 struct parser_ {
 	struct {
 		char var_pool[MAX_VAR_POOL_SIZE];
+		bool var_in_body[MAX_ARITY];
 		unsigned var_used[MAX_ARITY];
 		const char *var_name[MAX_ARITY];
 	} vartab;
