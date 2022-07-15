@@ -242,10 +242,13 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (is_nil(c))
 		return true;
 
-	if (is_variable(c))
-		*is_partial = true;
-	else
-		*is_partial = false;
+	if (is_variable(c)) {
+		if (is_partial)
+			*is_partial = true;
+	} else {
+		if (is_partial)
+			*is_partial = false;
+	}
 
 	return false;
 }

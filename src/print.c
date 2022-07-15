@@ -700,16 +700,12 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
-		if (q->max_depth && (cnt++ >= q->max_depth)) {
+		cell *save_c = c;
+		pl_idx_t save_c_ctx = c_ctx;
+
+		if (q->max_depth && (print_list >= q->max_depth)) {
 			dst--;
 			dst += snprintf(dst, dstlen, "%s", ",...]");
-			q->last_thing_was_symbol = false;
-			return dst - save_dst;
-		}
-
-		if (q->max_depth && (depth >= q->max_depth)) {
-			dst--;
-			dst += snprintf(dst, dstlen, "%s", "...]");
 			q->last_thing_was_symbol = false;
 			return dst - save_dst;
 		}
@@ -744,6 +740,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
 
 		cell *tail = LIST_TAIL(c);
+		cell *save_tail = tail;
 		tail = running ? deref(q, tail, c_ctx) : tail;
 		c_ctx = q->latest_ctx;
 		size_t tmp_len = 0;
@@ -758,6 +755,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 				dst += res;
 			}
 		} else if (q->st.m->flags.double_quote_chars && running
+			&& !is_cyclic_term(q, c, c_ctx)
 			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
 			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
 
@@ -773,11 +771,19 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 			free(tmp_src);
 			print_list++;
 		} else if (is_iso_list(tail)) {
-			dst += snprintf(dst, dstlen, "%s", ",");
-			c = tail;
-			print_list++;
-			cons = 1;
-			continue;
+			if ((tail == save_c) && (c_ctx == save_c_ctx) && running) {
+				dst += snprintf(dst, dstlen, "%s", "|");
+				if (true)
+					dst += snprintf(dst, dstlen, "%s", C_STR(q, save_tail));
+				else
+					dst += print_variable(q, dst, dstlen, save_tail, c_ctx, true);
+			} else {
+				dst += snprintf(dst, dstlen, "%s", ",");
+				c = tail;
+				print_list++;
+				cons = 1;
+				continue;
+			}
 		} else if (is_string(tail)) {
 			dst+= snprintf(dst, dstlen, "%s", "|\"");
 			dst += formatted(dst, dstlen, C_STR(q, tail), C_STRLEN(q, tail), true);
@@ -900,7 +906,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	int is_chars_list = is_string(c);
 
-	if (!is_chars_list && running)
+	if (!is_chars_list && running
+		&& !is_cyclic_term(q, c, c_ctx))
 		is_chars_list += q->st.m->flags.double_quote_chars && scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_string(c)) {
