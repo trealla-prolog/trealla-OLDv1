@@ -738,6 +738,10 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 		if (res < 0) return -1;
 		dst += res;
 		if (parens) dst += snprintf(dst, dstlen, "%s", ")");
+		bool possible_chars = false;
+
+		if (is_interned(head) && (C_STRLEN_UTF8(head) == 1))
+			possible_chars = true;
 
 		cell *tail = LIST_TAIL(c);
 		cell *save_tail = tail;
@@ -755,7 +759,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 				dst += res;
 			}
 		} else if (q->st.m->flags.double_quote_chars && running
-			&& !is_cyclic_term(q, c, c_ctx)
+			&& possible_chars && !is_cyclic_term(q, c, c_ctx)
 			&& (tmp_len = scan_is_chars_list(q, tail, c_ctx, false)) > 0) {
 			char *tmp_src = chars_list_to_string(q, tail, c_ctx, tmp_len);
 
@@ -902,9 +906,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	}
 
 	int is_chars_list = is_string(c);
+	bool possible_chars = false;
+
+	if (is_interned(c) && (C_STRLEN_UTF8(c) == 1))
+		possible_chars = true;
 
 	if (!is_chars_list && running
-		&& !is_cyclic_term(q, c, c_ctx))
+		&& possible_chars && !is_cyclic_term(q, c, c_ctx))
 		is_chars_list += q->st.m->flags.double_quote_chars && scan_is_chars_list(q, c, c_ctx, false);
 
 	if (is_string(c)) {
