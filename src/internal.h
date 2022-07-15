@@ -521,8 +521,8 @@ struct frame_ {
 
 struct prolog_state_ {
 	cell *curr_cell;
-	union { db_entry *curr_clause; db_entry *curr_clause2; };
-	union { predicate *pr; predicate *pr2; };
+	predicate *pr;
+	db_entry *curr_clause;
 	miter *iter, *f_iter;
 	module *m;
 

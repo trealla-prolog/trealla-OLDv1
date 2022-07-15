@@ -2098,7 +2098,7 @@ static bool fn_iso_clause_2(query *q)
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == true) {
 		if (q->did_throw) return true;
 		CHECK_INTERRUPT();
-		clause *r = &q->st.curr_clause2->cl;
+		clause *r = &q->st.curr_clause->cl;
 		cell *body = get_body(r->cells);
 		bool ok;
 
@@ -2111,7 +2111,7 @@ static bool fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause2;
+			db_entry *dbe = q->st.curr_clause;
 			bool last_match = !more_data(q, dbe);
 			stash_me(q, r, last_match);
 			return true;
@@ -2145,7 +2145,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	if ((match != true) || q->did_throw)
 		return match;
 
-	db_entry *dbe = q->st.curr_clause2;
+	db_entry *dbe = q->st.curr_clause;
 	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
 	stash_me(q, &dbe->cl, last_match);
 
@@ -3578,7 +3578,7 @@ static bool fn_clause_3(query *q)
 			if (!dbe || (!u.u1 && !u.u2))
 				break;
 
-			q->st.curr_clause2 = dbe;
+			q->st.curr_clause = dbe;
 			r = &dbe->cl;
 			cell *head = get_head(r->cells);
 
@@ -3589,12 +3589,12 @@ static bool fn_clause_3(query *q)
 				break;
 
 			char tmpbuf[128];
-			uuid_to_buf(&q->st.curr_clause2->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
 			cell tmp;
 			check_heap_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			r = &q->st.curr_clause2->cl;
+			r = &q->st.curr_clause->cl;
 		}
 
 		cell *body = get_body(r->cells);
@@ -3610,11 +3610,11 @@ static bool fn_clause_3(query *q)
 
 		if (ok) {
 			if (is_variable(p3)) {
-				db_entry *dbe = q->st.curr_clause2;
+				db_entry *dbe = q->st.curr_clause;
 				bool last_match = !more_data(q, dbe);
 				stash_me(q, r, last_match);
 			} else {
-				unshare_predicate(q, q->st.pr2);
+				unshare_predicate(q, q->st.pr);
 				drop_choice(q);
 			}
 

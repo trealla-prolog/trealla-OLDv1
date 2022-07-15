@@ -924,11 +924,11 @@ void stash_me(query *q, const clause *cl, bool last_match)
 	pl_idx_t cgen = q->cgen;
 
 	if (last_match) {
-		unshare_predicate(q, q->st.pr2);
+		unshare_predicate(q, q->st.pr);
 		drop_choice(q);
 	} else {
 		choice *ch = GET_CURR_CHOICE();
-		ch->st.curr_clause2 = q->st.curr_clause2;
+		ch->st.curr_clause = q->st.curr_clause;
 		ch->cgen = cgen = ++q->cgen;
 	}
 
@@ -1329,23 +1329,23 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			if (get_builtin(q->pl, C_STR(q, head), head->arity, &found, NULL), found)
 				return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
-			q->st.curr_clause2 = NULL;
+			q->st.curr_clause = NULL;
 			return false;
 		}
 
 		if (!pr->is_dynamic)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
-		q->st.curr_clause2 = pr->head;
-		share_predicate(q->st.pr2 = pr);
+		find_key(q, pr, c);
+		share_predicate(q->st.pr = pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
-		q->st.curr_clause2 = q->st.curr_clause2->next;
+		next_key(q);
 	}
 
-	if (!q->st.curr_clause2) {
-		unshare_predicate(q, q->st.pr2);
+	if (!q->st.curr_clause) {
+		unshare_predicate(q, q->st.pr);
 		return false;
 	}
 
@@ -1356,13 +1356,13 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	const frame *f = GET_FRAME(q->st.curr_frame);
 	check_heap_error(check_slot(q, MAX_ARITY));
 
-	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		CHECK_INTERRUPT();
 
-		if (!can_view(f, q->st.curr_clause2))
+		if (!can_view(f, q->st.curr_clause))
 			continue;
 
-		clause *cl = &q->st.curr_clause2->cl;
+		clause *cl = &q->st.curr_clause->cl;
 		cell *c = cl->cells;
 		bool needs_true = false;
 		p1 = orig_p1;
@@ -1397,7 +1397,7 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	}
 
 	drop_choice(q);
-	unshare_predicate(q, q->st.pr2);
+	unshare_predicate(q, q->st.pr);
 	return false;
 }
 
@@ -1430,7 +1430,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 					return throw_error(q, p1, p1_ctx, "permission_error", "access,private_procedure");
 			}
 
-			q->st.curr_clause2 = NULL;
+			q->st.curr_clause = NULL;
 			return false;
 		}
 
@@ -1483,7 +1483,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 	}
 
 	drop_choice(q);
-	unshare_predicate(q, q->st.pr2);
+	unshare_predicate(q, q->st.pr);
 	return false;
 }
 
