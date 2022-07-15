@@ -352,9 +352,6 @@ bool is_next_key(query *q, clause *cl)
 	if (q->st.arg3_is_ground && cl->arg3_is_unique)
 		return false;
 
-	if (!next)
-		return false;
-
 	// Attempt look-ahead on 1st arg...
 
 	cl = &next->cl;
