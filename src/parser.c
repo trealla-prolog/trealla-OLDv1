@@ -978,10 +978,8 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 		if (!in_body)
 			c->flags |= FLAG_VAR_TEMPORARY;
-		else {
+		else
 			c->flags &= ~FLAG_VAR_TEMPORARY;
-			c->flags |= FLAG_VAR_IN_BODY;
-		}
 	}
 
 	// Don't assign temporaries yet...
@@ -1008,7 +1006,6 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 
 		p->vartab.var_name[c->var_nbr] = C_STR(p, c);
-		p->vartab.var_in_body[c->var_nbr] |= is_in_body(c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			cl->nbr_vars++;
@@ -1041,23 +1038,12 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 		}
 
 		p->vartab.var_name[c->var_nbr] = C_STR(p, c);
-		p->vartab.var_in_body[c->var_nbr] |= is_in_body(c);
 
 		if (p->vartab.var_used[c->var_nbr]++ == 0) {
 			cl->nbr_temporaries++;
 			cl->nbr_vars++;
 			p->nbr_vars++;
 		}
-	}
-
-	for (pl_idx_t i = 0; i < cl->cidx; i++) {
-		cell *c = cl->cells + i;
-
-		if (!is_variable(c))
-			continue;
-
-		if (p->vartab.var_in_body[c->var_nbr])
-			c->flags |= FLAG_VAR_IN_BODY;
 	}
 
 	for (pl_idx_t i = 0; i < cl->nbr_vars; i++) {
