@@ -773,10 +773,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 		} else if (is_iso_list(tail)) {
 			if ((tail == save_c) && (c_ctx == save_c_ctx) && running) {
 				dst += snprintf(dst, dstlen, "%s", "|");
-				if (true)
-					dst += snprintf(dst, dstlen, "%s", C_STR(q, save_tail));
-				else
-					dst += print_variable(q, dst, dstlen, save_tail, c_ctx, true);
+				dst += snprintf(dst, dstlen, "%s", C_STR(q, save_tail));
 			} else {
 				dst += snprintf(dst, dstlen, "%s", ",");
 				c = tail;
