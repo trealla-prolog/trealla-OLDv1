@@ -863,6 +863,13 @@ void unshare_predicate(query *q, predicate *pr)
 	//if (cnt) printf("*** unshare_predicate cnt = %u\n", cnt);
 
 	pr->dirty_list = NULL;
+
+	if (!-pr->cnt) {
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
+		pr->idx2 = pr->idx = NULL;
+	}
+
 	//purge_dirty_list(q);
 }
 

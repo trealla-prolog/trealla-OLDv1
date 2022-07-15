@@ -1015,9 +1015,6 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	//if (!pr->idx && pr->is_multifile && pr->is_dynamic)
-	//	return;
-
 	if (!pr->idx && (pr->cnt < m->indexing_threshold))
 		return;
 
