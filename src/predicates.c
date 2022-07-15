@@ -2146,7 +2146,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_clause2;
-	bool last_match = !more_data(q, dbe) && (is_retract == DO_RETRACT);
+	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)

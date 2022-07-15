@@ -1441,16 +1441,16 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 				return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 		}
 
-		q->st.curr_clause2 = pr->head;
-		share_predicate(q->st.pr2=pr);
+		find_key(q, pr, c);
+		share_predicate(q->st.pr=pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
-		q->st.curr_clause2 = q->st.curr_clause2->next;
+		next_key(q);
 	}
 
-	if (!q->st.curr_clause2) {
-		unshare_predicate(q, q->st.pr2);
+	if (!q->st.curr_clause) {
+		unshare_predicate(q, q->st.pr);
 		return false;
 	}
 
@@ -1459,13 +1459,13 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 	const frame *f = GET_FRAME(q->st.curr_frame);
 	check_heap_error(check_slot(q, MAX_ARITY));
 
-	for (; q->st.curr_clause2; q->st.curr_clause2 = q->st.curr_clause2->next) {
+	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		CHECK_INTERRUPT();
 
-		if (!can_view(f, q->st.curr_clause2))
+		if (!can_view(f, q->st.curr_clause))
 			continue;
 
-		clause *cl = &q->st.curr_clause2->cl;
+		clause *cl = &q->st.curr_clause->cl;
 		cell *head = get_head(cl->cells);
 		cell *body = get_logical_body(cl->cells);
 
