@@ -1269,7 +1269,8 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 		if (c_ctx > q->st.curr_frame)
 			f->is_active = true;
-	}
+	} else if (!is_variable(v))
+		f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
 		e->mark = true;
