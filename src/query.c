@@ -239,7 +239,7 @@ bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t 
 	if (skip_)
 		*skip_ = skip;
 
-	if (!strcmp(C_STR(q, c), "[]"))
+	if (is_nil(c))
 		return true;
 
 	if (is_variable(c))
@@ -306,11 +306,34 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
-static bool is_next_key(query *q, clause *cl)
+static void next_key(query *q)
 {
 	if (q->st.iter) {
-		if (map_is_next(q->st.iter, NULL))
+		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
+			q->st.curr_clause = NULL;
+			map_done(q->st.iter);
+			q->st.iter = NULL;
+		}
+	} else if (!q->st.definite)
+		q->st.curr_clause = q->st.curr_clause->next;
+	else
+		q->st.curr_clause = NULL;
+}
+
+bool is_next_key(query *q, clause *cl)
+{
+	if (q->st.iter) {
+		db_entry *dbe;
+		const frame *f = GET_CURR_FRAME();
+
+		while (map_is_next(q->st.iter, (void**)&dbe)) {
+			if (!can_view(f, dbe)) {
+				next_key(q);
+				continue;
+			}
+
 			return true;
+		}
 
 		return false;
 	}
@@ -344,20 +367,6 @@ static bool is_next_key(query *q, clause *cl)
 	}
 
 	return true;
-}
-
-static void next_key(query *q)
-{
-	if (q->st.iter) {
-		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
-			q->st.curr_clause = NULL;
-			map_done(q->st.iter);
-			q->st.iter = NULL;
-		}
-	} else if (!q->st.definite)
-		q->st.curr_clause = q->st.curr_clause->next;
-	else
-		q->st.curr_clause = NULL;
 }
 
 const char *dump_id(const void *k, const void *v, const void *p)
@@ -1872,7 +1881,7 @@ bool execute(query *q, cell *cells, unsigned nbr_vars)
 	return start(q);
 }
 
-static void purge_dirty_list(query *q)
+void purge_dirty_list(query *q)
 {
 	int cnt = 0;
 
