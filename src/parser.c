@@ -978,10 +978,8 @@ void term_assign_vars(parser *p, unsigned start, bool rebase)
 
 		if (!in_body)
 			c->flags |= FLAG_VAR_TEMPORARY;
-		else {
+		else
 			c->flags &= ~FLAG_VAR_TEMPORARY;
-			c->flags |= FLAG_VAR_IN_BODY;
-		}
 	}
 
 	// Don't assign temporaries yet...
