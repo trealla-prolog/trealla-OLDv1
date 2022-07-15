@@ -2098,7 +2098,7 @@ static bool fn_iso_clause_2(query *q)
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == true) {
 		if (q->did_throw) return true;
 		CHECK_INTERRUPT();
-		clause *r = &q->st.curr_clause2->cl;
+		clause *r = &q->st.curr_clause->cl;
 		cell *body = get_body(r->cells);
 		bool ok;
 
@@ -2111,7 +2111,7 @@ static bool fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause2;
+			db_entry *dbe = q->st.curr_clause;
 			bool last_match = !more_data(q, dbe);
 			stash_me(q, r, last_match);
 			return true;
@@ -2145,8 +2145,8 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	if ((match != true) || q->did_throw)
 		return match;
 
-	db_entry *dbe = q->st.curr_clause2;
-	bool last_match = !more_data(q, dbe) && (is_retract == DO_RETRACT);
+	db_entry *dbe = q->st.curr_clause;
+	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
@@ -3578,7 +3578,7 @@ static bool fn_clause_3(query *q)
 			if (!dbe || (!u.u1 && !u.u2))
 				break;
 
-			q->st.curr_clause2 = dbe;
+			q->st.curr_clause = dbe;
 			r = &dbe->cl;
 			cell *head = get_head(r->cells);
 
@@ -3589,12 +3589,12 @@ static bool fn_clause_3(query *q)
 				break;
 
 			char tmpbuf[128];
-			uuid_to_buf(&q->st.curr_clause2->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
 			cell tmp;
 			check_heap_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			r = &q->st.curr_clause2->cl;
+			r = &q->st.curr_clause->cl;
 		}
 
 		cell *body = get_body(r->cells);
@@ -3610,11 +3610,11 @@ static bool fn_clause_3(query *q)
 
 		if (ok) {
 			if (is_variable(p3)) {
-				db_entry *dbe = q->st.curr_clause2;
+				db_entry *dbe = q->st.curr_clause;
 				bool last_match = !more_data(q, dbe);
 				stash_me(q, r, last_match);
 			} else {
-				unshare_predicate(q, q->st.pr2);
+				unshare_predicate(q, q->st.pr);
 				drop_choice(q);
 			}
 
@@ -3994,7 +3994,7 @@ static bool fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stdout, "Time elapsed %.03g secs\n", (double)elapsed/1000/1000);
+	fprintf(stdout, "Time elapsed %.03g s\n", (double)elapsed/1000/1000);
 	return true;
 }
 
@@ -4021,7 +4021,7 @@ static bool fn_statistics_0(query *q)
 	fprintf(stdout,
 		"Goals %llu, Matches %llu, Max frames %u, choices %u, trails %u, slots %u, heap: %u.\nBacktracks %llu, TCOs:%llu, Recovered frames: %llu, slots: %llu\n",
 		(unsigned long long)q->tot_goals, (unsigned long long)q->tot_matches,
-		q->max_frames, q->max_choices, q->max_trails, q->max_slots, q->st.hp,
+		q->hw_frames, q->hw_choices, q->hw_trails, q->hw_slots, q->st.hp,
 		(unsigned long long)q->tot_retries, (unsigned long long)q->tot_tcos,
 		(unsigned long long)q->tot_frecovs, (unsigned long long)q->tot_srecovs
 		);
@@ -6065,7 +6065,7 @@ static bool fn_sys_unifiable_3(query *q)
 
 	while (before_hook_tp < q->st.tp) {
 		const trail *tr = q->trails + before_hook_tp;
-		const frame *f = GET_FRAME(tr->ctx);
+		const frame *f = GET_FRAME(tr->var_ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
 		cell *c = deref(q, &e->c, e->c.var_ctx);
 

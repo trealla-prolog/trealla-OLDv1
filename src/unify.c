@@ -747,13 +747,13 @@ bool fn_sys_undo_trail_1(query *q)
 
 	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
-		const frame *f = GET_FRAME(tr->ctx);
+		const frame *f = GET_FRAME(tr->var_ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** unbind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		//printf("*** unbind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->var_ctx, tr->var_nbr);
 		q->save_e[j] = *e;
 
 		cell lhs, rhs;
-		make_new_var(q, &lhs, tr->var_nbr, tr->ctx);
+		make_new_var(q, &lhs, tr->var_nbr, tr->var_ctx);
 		set_new_var(q, &rhs, &e->c, e->c.var_ctx);
 
 		cell tmp[3];
@@ -783,9 +783,9 @@ bool fn_sys_redo_trail_0(query * q)
 {
 	for (pl_idx_t i = q->undo_lo_tp, j = 0; i < q->undo_hi_tp; i++, j++) {
 		const trail *tr = q->trails + i;
-		const frame *f = GET_FRAME(tr->ctx);
+		const frame *f = GET_FRAME(tr->var_ctx);
 		slot *e = GET_SLOT(f, tr->var_nbr);
-		//printf("*** rebind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->ctx, tr->var_nbr);
+		//printf("*** rebind [%u:%u] hi_tp=%u, ctx=%u, var=%u\n", j, i, q->undo_hi_tp, tr->var_ctx, tr->var_nbr);
 		*e = q->save_e[j];
 	}
 

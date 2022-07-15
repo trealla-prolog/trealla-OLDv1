@@ -156,6 +156,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define is_function(c) ((c)->flags & FLAG_FUNCTION)
 #define is_tail_recursive(c) ((c)->flags & FLAG_TAIL_REC)
 #define is_temporary(c) ((c)->flags & FLAG_VAR_TEMPORARY)
+#define is_in_body(c) ((c)->flags & FLAG_VAR_IN_BODY)
 #define is_ref(c) ((c)->flags & FLAG_REF)
 #define is_op(c) (c->flags & 0xE000)
 #define is_callable(c) (is_interned(c) || is_cstring(c))
@@ -253,6 +254,7 @@ enum {
 	FLAG_VAR_ANON=1<<0,					// used with TAG_VAR
 	FLAG_VAR_FRESH=1<<1,				// used with TAG_VAR
 	FLAG_VAR_TEMPORARY=1<<2,			// used with TAG_VAR
+	FLAG_VAR_IN_BODY=1<<3,				// used with TAG_VAR
 
 	FLAG_HANDLE_DLL=1<<0,				// used with TAG_INT_HANDLE
 	FLAG_HANDLE_FUNC=1<<1,				// used with TAG_INT_HANDLE
@@ -425,14 +427,20 @@ struct clause_ {
 	bool is_fact:1;
 	bool is_complex:1;
 	bool is_tail_rec:1;
+	bool is_deleted:1;
 	cell cells[];
 };
 
 struct db_entry_ {
 	predicate *owner;
-	db_entry *prev, *next, *dirty;
+	db_entry *prev, *next;
 	const char *filename;
-	uint64_t db_id;
+
+	union {
+		db_entry *dirty;
+		uint64_t db_id;
+	};
+
 	uuid u;
 	clause cl;
 };
@@ -480,12 +488,12 @@ typedef struct {
 	unsigned priority;
 } op_table;
 
-// Where *ctx* is the contect of the var
-// And var_nbr* is the slot within that context
+// Where *ctx* is the context of the var
+// And *var_nbr* is the slot within that context
 
 struct trail_ {
 	cell *attrs;
-	pl_idx_t ctx, attrs_ctx;
+	pl_idx_t var_ctx, attrs_ctx;
 	uint32_t var_nbr;
 };
 
@@ -515,8 +523,8 @@ struct frame_ {
 
 struct prolog_state_ {
 	cell *curr_cell;
-	union { db_entry *curr_clause; db_entry *curr_clause2; };
-	union { predicate *pr; predicate *pr2; };
+	predicate *pr;
+	db_entry *curr_clause;
 	miter *iter, *f_iter;
 	module *m;
 
@@ -629,9 +637,11 @@ struct query_ {
 	uint64_t time_cpu_started, time_cpu_last_started;
 	unsigned max_depth, print_idx, tab_idx, varno, tab0_varno;
 	int nv_start;
-	pl_idx_t cp, tmphp, latest_ctx, popp, variable_names_ctx;
+	pl_idx_t tmphp, latest_ctx, popp, variable_names_ctx;
 	pl_idx_t frames_size, slots_size, trails_size, choices_size;
-	pl_idx_t max_choices, max_frames, max_slots, max_trails, before_hook_tp;
+	pl_idx_t max_choices, max_frames, max_slots, max_trails;
+	pl_idx_t hw_choices, hw_frames, hw_slots, hw_trails;
+	pl_idx_t cp, before_hook_tp;
 	pl_idx_t h_size, tmph_size, tot_heaps, tot_heapsize, undo_lo_tp, undo_hi_tp;
 	pl_idx_t q_size[MAX_QUEUES], tmpq_size[MAX_QUEUES], qp[MAX_QUEUES];
 	uint32_t mgen;
@@ -682,6 +692,7 @@ struct query_ {
 struct parser_ {
 	struct {
 		char var_pool[MAX_VAR_POOL_SIZE];
+		bool var_in_body[MAX_ARITY];
 		unsigned var_used[MAX_ARITY];
 		const char *var_name[MAX_ARITY];
 	} vartab;

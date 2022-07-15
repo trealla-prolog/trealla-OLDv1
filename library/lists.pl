@@ -71,15 +71,6 @@ nth1_(N,[_|T],Item) :-
     nth1_(M,T,Item),
     N is M + 1.
 
-nth0(N, List, Head) :-
-    nonvar(N),
-    must_be(N, integer, nth0/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
-    nth0_(N, List, Head),
-    !.
-nth0(N, List, Head) :-
-	nth0_(N, List, Head).
-
 nth0_(0, [Head|_], Head).
 nth0_(N, [_|Tail], Elem) :-
     nonvar(N),
@@ -92,10 +83,20 @@ nth0_(N,[_|T],Item) :-
     nth0_(M,T,Item),
     N is M + 1.
 
-last_([], Last, Last).
-last_([X|Xs], _, Last) :- last_(Xs, X, Last).
+nth0(N, Es0, E) :-
+	nonvar(N),
+    must_be(N, integer, nth0/3, _),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
+	'$skip_max_list'(N, N, Es0,Es),
+	!,
+	Es = [E|_].
+nth0(N, Es, E) :-
+	nth0_(N, Es, E).
 
 last([X|Xs], Last) :- last_(Xs, X, Last).
+
+last_([], Last, Last).
+last_([X|Xs], _, Last) :- last_(Xs, X, Last).
 
 flatten(List, FlatList) :-
     flatten_(List, [], FlatList0),
