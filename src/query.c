@@ -339,10 +339,6 @@ bool is_next_key(query *q, clause *cl)
 	}
 
 	db_entry *next = q->st.curr_clause->next;
-	const frame *f = GET_CURR_FRAME();
-
-	while (next && !can_view(f, next))
-		next = next->next;
 
 	if (!next || q->st.definite)
 		return false;
@@ -363,7 +359,7 @@ bool is_next_key(query *q, clause *cl)
 
 	cl = &next->cl;
 
-	if (q->st.arg1_is_ground /*&& !next->next*/
+	if (q->st.arg1_is_ground && !next->next
 		&& (q->key->arity == 1) && is_ground(cl->cells+1)) {
 		if (compare(q, q->key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
