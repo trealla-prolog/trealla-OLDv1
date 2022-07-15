@@ -338,7 +338,13 @@ bool is_next_key(query *q, clause *cl)
 		return false;
 	}
 
-	if (!q->st.curr_clause->next || q->st.definite)
+	db_entry *next = q->st.curr_clause->next;
+	const frame *f = GET_CURR_FRAME();
+
+	while (next && !can_view(f, next))
+		next = next->next;
+
+	if (!next || q->st.definite)
 		return false;
 
 	if (q->st.arg1_is_ground && cl->arg1_is_unique)
@@ -350,8 +356,6 @@ bool is_next_key(query *q, clause *cl)
 	if (q->st.arg3_is_ground && cl->arg3_is_unique)
 		return false;
 
-	db_entry *next = q->st.curr_clause->next;
-
 	if (!next)
 		return false;
 
@@ -359,7 +363,7 @@ bool is_next_key(query *q, clause *cl)
 
 	cl = &next->cl;
 
-	if (q->st.arg1_is_ground && !next->next
+	if (q->st.arg1_is_ground /*&& !next->next*/
 		&& (q->key->arity == 1) && is_ground(cl->cells+1)) {
 		if (compare(q, q->key, q->st.curr_frame, cl->cells, q->st.curr_frame)) {
 			return false;
@@ -836,6 +840,7 @@ void unshare_predicate(query *q, predicate *pr)
 		return;
 
 	db_entry *dbe = pr->dirty_list;
+	unsigned cnt = 0;
 
 	while (dbe) {
 		// First unlink it from the predicate
@@ -854,13 +859,18 @@ void unshare_predicate(query *q, predicate *pr)
 
 		// Now move it to query dirtylist
 
+		dbe->cl.is_deleted = true;
 		db_entry *save = dbe->dirty;
 		dbe->dirty = q->dirty_list;
 		q->dirty_list = dbe;
 		dbe = save;
+		cnt++;
 	}
 
+	//if (cnt) printf("*** unshare_predicate cnt = %u\n", cnt);
+
 	pr->dirty_list = NULL;
+	//purge_dirty_list(q);
 }
 
 static void commit_me(query *q, clause *cl)

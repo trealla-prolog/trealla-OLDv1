@@ -425,14 +425,20 @@ struct clause_ {
 	bool is_fact:1;
 	bool is_complex:1;
 	bool is_tail_rec:1;
+	bool is_deleted:1;
 	cell cells[];
 };
 
 struct db_entry_ {
 	predicate *owner;
-	db_entry *prev, *next, *dirty;
+	db_entry *prev, *next;
 	const char *filename;
-	uint64_t db_id;
+
+	union {
+		db_entry *dirty;
+		uint64_t db_id;
+	};
+
 	uuid u;
 	clause cl;
 };

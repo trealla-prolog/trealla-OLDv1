@@ -131,6 +131,9 @@ inline static void share_predicate(predicate *pr) {	pr->ref_cnt++; }
 
 inline static bool can_view(const frame *f, const db_entry *dbe)
 {
+	if (dbe->cl.is_deleted)
+		return false;
+
 	if (dbe->cl.ugen_created > f->ugen)
 		return false;
 
