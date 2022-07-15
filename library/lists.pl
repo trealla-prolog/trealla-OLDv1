@@ -50,14 +50,26 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth1(N1, Es0, E) :-
-	nonvar(N1),
-	N is N1 - 1,
-	'$skip_max_list'(N, N, Es0,Es),
-	!,
-	Es = [E|_].
-nth1(N, Es, E) :-
-	nth0_(N, Es, E).
+nth1(N, List, Head) :-
+    nonvar(N),
+    must_be(N, integer, nth1/3, _),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
+    nth1_(N, List, Head),
+    !.
+nth1(N, List, Head) :-
+	nth1_(N, List, Head).
+
+nth1_(1, [Head|_], Head).
+nth1_(N, [_|Tail], Elem) :-
+    nonvar(N),
+    N > 0,
+    M is N-1,
+    nth1_(M, Tail, Elem),
+    !.
+nth1_(N,[_|T],Item) :-
+    var(N),
+    nth1_(M,T,Item),
+    N is M + 1.
 
 nth0_(0, [Head|_], Head).
 nth0_(N, [_|Tail], Elem) :-
@@ -73,6 +85,8 @@ nth0_(N,[_|T],Item) :-
 
 nth0(N, Es0, E) :-
 	nonvar(N),
+    must_be(N, integer, nth0/3, _),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
 	'$skip_max_list'(N, N, Es0,Es),
 	!,
 	Es = [E|_].

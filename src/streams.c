@@ -3009,6 +3009,9 @@ int get_stream(query *q, cell *p1)
 		return n;
 	}
 
+	if (!is_integer(p1))
+		return -1;
+
 	if (!(p1->flags&FLAG_INT_STREAM))
 		return -1;
 
