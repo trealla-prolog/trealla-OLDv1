@@ -343,6 +343,9 @@ bool is_next_key(query *q, clause *cl)
 
 	db_entry *next = q->st.curr_clause->next;
 
+	//printf("*** q->st.def=%d, q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
+	//	q->st.definite, q->st.arg1_is_ground, cl->arg1_is_unique);
+
 	if (!next || q->st.definite)
 		return false;
 
@@ -390,7 +393,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity || pr->is_multifile || pr->is_dynamic)
+		if (!key->arity || pr->is_multifile /*|| pr->is_dynamic*/)
 			return true;
 
 		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
