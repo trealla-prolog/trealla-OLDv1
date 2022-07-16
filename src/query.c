@@ -839,8 +839,6 @@ void unshare_predicate(query *q, predicate *pr)
 	unsigned cnt = 0;
 
 	while (dbe) {
-		// First unlink it from the predicate
-
 		if (dbe->prev)
 			dbe->prev->next = dbe->next;
 
@@ -853,8 +851,6 @@ void unshare_predicate(query *q, predicate *pr)
 		if (pr->tail == dbe)
 			pr->tail = dbe->prev;
 
-		// Now move it to query dirtylist
-
 		dbe->cl.is_deleted = true;
 		db_entry *save = dbe->dirty;
 		dbe->dirty = q->dirty_list;
@@ -862,8 +858,6 @@ void unshare_predicate(query *q, predicate *pr)
 		dbe = save;
 		cnt++;
 	}
-
-	//if (cnt) printf("*** unshare_predicate cnt = %u\n", cnt);
 
 	pr->dirty_list = NULL;
 
