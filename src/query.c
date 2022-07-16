@@ -1100,13 +1100,10 @@ static void proceed(query *q)
 static void chop_frames(query *q, const frame *f)
 {
 	if (q->st.curr_frame == (q->st.fp-1)) {
-		//printf("*** chop %u\n", (unsigned)(f-q->frames));
 		const frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
 
 		while (q->st.fp > (prev_frame+1)) {
-			//printf("*** chop2 is_active=%d, any_choices=%d\n", tmpf->is_active, any_choices(q, tmpf));
-
 			if (tmpf->is_active || any_choices(q, tmpf))
 				break;
 
