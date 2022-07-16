@@ -2274,6 +2274,12 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return false;
 
 	const char *src = p->srcptr;
+
+	if (strlen(src) >= p->token_size) {
+		p->token = realloc(p->token, p->token_size = strlen(src)+1);
+		check_error(p->token);
+	}
+
 	char *dst = p->token;
 	*dst = '\0';
 	bool neg = false;
