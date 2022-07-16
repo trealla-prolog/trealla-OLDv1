@@ -1015,7 +1015,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && (pr->cnt < m->indexing_threshold))
+	if (!pr->idx && (pr->cnt < m->indexing_threshold) /*&& !pr->is_dynamic*/)
 		return;
 
 	if (!pr->idx) {
@@ -1083,7 +1083,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 			map_destroy(pr->idx_save);
 			map_destroy(pr->idx2);
 			map_destroy(pr->idx);
-			pr->idx_save = pr->idx = NULL;
+			pr->idx_save = pr->idx2 = pr->idx = NULL;
 			pr->head = pr->tail = NULL;
 			dbe->owner->cnt = 0;
 			return false;
@@ -1315,7 +1315,7 @@ static bool unload_realfile(module *m, const char *filename)
 		map_destroy(pr->idx_save);
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
-		pr->idx_save = pr->idx = NULL;
+		pr->idx_save = pr->idx2 = pr->idx = NULL;
 
 		if (!pr->cnt) {
 			if (!pr->is_multifile && !pr->is_dynamic)

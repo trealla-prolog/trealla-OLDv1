@@ -2212,8 +2212,10 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(q->st.m, dbe);
 	}
 
+	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
-	pr->idx = NULL;
+	pr->idx2 = pr->idx = NULL;
+	q->st.iter = NULL;
 
 	if (hard) {
 		pr->is_abolished = true;
