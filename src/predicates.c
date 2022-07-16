@@ -2142,7 +2142,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
 
-	if ((match != true) || q->did_throw)
+	if (!match || q->did_throw)
 		return match;
 
 	db_entry *dbe = q->st.curr_clause;
