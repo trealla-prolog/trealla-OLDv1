@@ -2188,7 +2188,14 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 		cnt++;
 	}
 
-	//printf("*** purge %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
+	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
+
+	if (!pr->cnt) {
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
+		pr->idx2 = pr->idx = NULL;
+		q->st.iter = NULL;
+	}
 
 	return true;
 }
