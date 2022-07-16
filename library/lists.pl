@@ -53,7 +53,7 @@ intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 nth1(N, List, Head) :-
     nonvar(N),
     must_be(N, integer, nth1/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero,N))) ; true),
     nth1_(N, List, Head),
     !.
 nth1(N, List, Head) :-
@@ -86,7 +86,7 @@ nth0_(N,[_|T],Item) :-
 nth0(N, Es0, E) :-
 	nonvar(N),
     must_be(N, integer, nth0/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero,N))) ; true),
 	'$skip_max_list'(N, N, Es0,Es),
 	!,
 	Es = [E|_].
