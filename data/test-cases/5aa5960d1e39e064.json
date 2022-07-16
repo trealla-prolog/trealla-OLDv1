@@ -1,0 +1,61 @@
+{
+  "uid" : "5aa5960d1e39e064",
+  "name" : "points_1",
+  "fullName" : "points_1::tests",
+  "historyId" : "points_1::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "error(existence_error(predicate_definition,process_init_option/1),logtalk(process_init_option(position-(1,3)),c(object,initialization,r(object,p1,[],[]))))",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/points/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/points/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/points/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/points/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "37-39"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/46ba218255095e975c38ff8b8496acd0dfded4af/examples/points/tests.lgt#L37"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "5aa5960d1e39e064.json",
+  "parameterValues" : [ "examples/points/tests.lgt", "37-39", "https://github.com/LogtalkDotOrg/logtalk3/tree/46ba218255095e975c38ff8b8496acd0dfded4af/examples/points/tests.lgt#L37" ]
+}
