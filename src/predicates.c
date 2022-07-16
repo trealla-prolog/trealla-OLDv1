@@ -2127,13 +2127,15 @@ static bool fn_iso_clause_2(query *q)
 
 bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
-	cell *head = deref(q, get_head(p1), p1_ctx);
+	if (!q->retry) {
+		cell *head = deref(q, get_head(p1), p1_ctx);
 
-	if (is_variable(head))
-		return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
+		if (is_variable(head))
+			return throw_error(q, head, q->latest_ctx, "instantiation_error", "not_sufficiently_instantiated");
 
-	if (!is_callable(head))
-		return throw_error(q, head, q->latest_ctx, "type_error", "callable");
+		if (!is_callable(head))
+			return throw_error(q, head, q->latest_ctx, "type_error", "callable");
+	}
 
 	bool match;
 
@@ -2212,8 +2214,10 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(q->st.m, dbe);
 	}
 
+	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
-	pr->idx = NULL;
+	pr->idx2 = pr->idx = NULL;
+	q->st.iter = NULL;
 
 	if (hard) {
 		pr->is_abolished = true;
