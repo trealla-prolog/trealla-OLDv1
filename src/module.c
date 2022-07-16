@@ -1116,7 +1116,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, false);
 
-	if (!consulting && !pr->idx)
+	if (!consulting && !pr->idx && (pr->cnt > 1))
 		check_rule(m, dbe);
 
 	return dbe;
@@ -1144,10 +1144,6 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 		pr->head = dbe;
 
 	assert_commit(m, dbe, pr, true);
-
-	if (!consulting && !pr->idx)
-		check_rule(m, dbe);
-
 	return dbe;
 }
 
