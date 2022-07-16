@@ -2142,7 +2142,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	else
 		match = match_clause(q, p1, p1_ctx, is_retract);
 
-	if ((match != true) || q->did_throw)
+	if (!match || q->did_throw)
 		return match;
 
 	db_entry *dbe = q->st.curr_clause;
@@ -3994,7 +3994,7 @@ static bool fn_sys_elapsed_0(query *q)
 {
 	uint64_t elapsed = get_time_in_usec();
 	elapsed -= q->time_started;
-	fprintf(stdout, "Time elapsed %.03g s\n", (double)elapsed/1000/1000);
+	fprintf(stdout, "Time elapsed %.03gs\n", (double)elapsed/1000/1000);
 	return true;
 }
 

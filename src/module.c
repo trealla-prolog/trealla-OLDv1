@@ -1116,7 +1116,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, false);
 
-	if (!consulting && (pr->cnt > 1) && !pr->idx)
+	if (!consulting && !pr->idx)
 		check_rule(m, dbe);
 
 	return dbe;
@@ -1144,6 +1144,10 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 		pr->head = dbe;
 
 	assert_commit(m, dbe, pr, true);
+
+	if (!consulting && !pr->idx)
+		check_rule(m, dbe);
+
 	return dbe;
 }
 
@@ -1155,11 +1159,13 @@ bool retract_from_db(module *m, db_entry *dbe)
 	predicate *pr = dbe->owner;
 	pr->cnt--;
 
+#if 0
 	if (pr->cnt < m->indexing_threshold) {
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
 		pr->idx2 = pr->idx = NULL;
 	}
+#endif
 
 	dbe->cl.ugen_erased = ++m->pl->ugen;
 	dbe->filename = NULL;

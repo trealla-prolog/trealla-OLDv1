@@ -343,6 +343,9 @@ bool is_next_key(query *q, clause *cl)
 
 	db_entry *next = q->st.curr_clause->next;
 
+	//printf("*** q->st.def=%d, q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
+	//	q->st.definite, q->st.arg1_is_ground, cl->arg1_is_unique);
+
 	if (!next || q->st.definite)
 		return false;
 
@@ -390,7 +393,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	if (!pr->idx) {
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity || pr->is_multifile || pr->is_dynamic)
+		if (!key->arity || pr->is_multifile /*|| pr->is_dynamic*/)
 			return true;
 
 		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
@@ -839,8 +842,6 @@ void unshare_predicate(query *q, predicate *pr)
 	unsigned cnt = 0;
 
 	while (dbe) {
-		// First unlink it from the predicate
-
 		if (dbe->prev)
 			dbe->prev->next = dbe->next;
 
@@ -853,8 +854,6 @@ void unshare_predicate(query *q, predicate *pr)
 		if (pr->tail == dbe)
 			pr->tail = dbe->prev;
 
-		// Now move it to query dirtylist
-
 		dbe->cl.is_deleted = true;
 		db_entry *save = dbe->dirty;
 		dbe->dirty = q->dirty_list;
@@ -862,8 +861,6 @@ void unshare_predicate(query *q, predicate *pr)
 		dbe = save;
 		cnt++;
 	}
-
-	//if (cnt) printf("*** unshare_predicate cnt = %u\n", cnt);
 
 	pr->dirty_list = NULL;
 
@@ -1269,7 +1266,7 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 
 		if (c_ctx > q->st.curr_frame)
 			f->is_active = true;
-	} else if (!is_variable(v))
+	} else if (!is_temporary(c))
 		f->is_active = true;
 
 	if (q->flags.occurs_check != OCCURS_CHECK_FALSE)
