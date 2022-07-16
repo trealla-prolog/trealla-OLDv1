@@ -79,40 +79,64 @@ maplist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], [E7|T7], G) :-
 :- meta_predicate(tasklist(6, ?, ?, ?, ?, ?, ?)).
 :- meta_predicate(tasklist(7, ?, ?, ?, ?, ?, ?, ?)).
 
-tasklist(_, []) :- wait.
-tasklist(G, [X1|X1s]) :-
-	task(G, X1),
-	tasklist(G, X1s).
+tasklist(G, L) :-
+	tasklist_(L, G).
 
-tasklist(_, [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s]) :-
-	task(G, X1, X2),
-	tasklist(G, X1s, X2s).
+tasklist_([], _) :- wait.
+tasklist_([E|T], G) :-
+	task(G, E),
+	tasklist_(T, G).
 
-tasklist(_, [], [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s], [X3|X3s]) :-
-	task(G, X1, X2, X3),
-	tasklist(G, X1s, X2s, X3s).
+tasklist(G, L1, L2) :-
+	tasklist_(L1, L2, G).
 
-tasklist(_, [], [], [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
-	task(G, X1, X2, X3, X4),
-	tasklist(G, X1s, X2s, X3s, X4s).
+tasklist_([], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], G) :-
+	task(G, E1, E2),
+	tasklist_(T1, T2, G).
 
-tasklist(_, [], [], [], [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s]) :-
-	task(G, X1, X2, X3, X4, X5),
-	tasklist(G, X1s, X2s, X3s, X4s, X5s).
+tasklist(G, L1, L2, L3) :-
+	tasklist_(L1, L2, L3, G).
 
-tasklist(_, [], [], [], [], [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s]) :-
-	task(G, X1, X2, X3, X4, X5, X6),
-	tasklist(G, X1s, X2s, X3s, X4s, X5s, X6s).
+tasklist_([], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], G) :-
+	task(G, E1, E2, E3),
+	tasklist_(T1, T2, T3, G).
 
-tasklist(_, [], [], [], [], [], [], []) :- wait.
-tasklist(G, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7s]) :-
-	task(G, X1, X2, X3, X4, X5, X6, X7),
-	tasklist(G, X1s, X2s, X3s, X4s, X5s, X6s, X7s).
+tasklist(G, L1, L2, L3, L4) :-
+	tasklist_(L1, L2, L3, L4, G).
+
+tasklist_([], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], G) :-
+	task(G, E1, E2, E3, E4),
+	tasklist_(T1, T2, T3, T4, G).
+
+tasklist(G, L1, L2, L3, L4, L5) :-
+	tasklist_(L1, L2, L3, L4, L5, G).
+
+tasklist_([], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], G) :-
+	task(G, E1, E2, E3, E4, E5),
+	tasklist_(T1, T2, T3, T4, T5, G).
+
+tasklist(G, L1, L2, L3, L4, L5, L6) :-
+	tasklist_(L1, L2, L3, L4, L5, L6, G).
+
+tasklist_([], [], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], G) :-
+	task(G, E1, E2, E3, E4, E5, E6),
+	tasklist_(T1, T2, T3, T4, T5, T6, G).
+
+tasklist(G, L1, L2, L3, L4, L5, L6, L7) :-
+	tasklist_(L1, L2, L3, L4, L5, L6, L7, G).
+
+tasklist_([], [], [], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], [E7|T7], G) :-
+	task(G, E1, E2, E3, E4, E5, E6, E7),
+	tasklist_(T1, T2, T3, T4, T5, T6, T7, G).
+
+
+
 
 foldl(G, L, V0, V) :-
 	foldl_(L, G, V0, V).
