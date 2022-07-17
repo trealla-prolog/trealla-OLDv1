@@ -1198,6 +1198,15 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		// Infix...
 
+		if (is_infix(rhs) && !rhs->arity) {
+			if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
+
+			p->error_desc = "operator_clash";
+			p->error = true;
+			return false;
+		}
+
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
 		bool nolhs = (last_idx == (unsigned)-1);
 		if (i == start_idx) nolhs = true;
