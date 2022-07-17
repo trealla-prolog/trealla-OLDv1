@@ -2,7 +2,7 @@
 		member/2, memberchk/2,
 		select/3, selectchk/3,
 		append/2, append/3,
-		subtract/3, union/3, intersection/3,
+		subtract/3, union/3, intersection/3, is_set/1,
 		nth1/3, nth0/3,
 		last/2, flatten/2, same_length/2,
 		sum_list/2, prod_list/2, max_list/2, min_list/2,
@@ -172,6 +172,12 @@ numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
 
+is_set(Set) :-
+	'$skip_list'(Len, Set, Tail),
+	Tail == [],
+	sort(Set, Sorted),
+	length(Sorted, Len)
+  .
 length(Xs0, N) :-
    '$skip_max_list'(M, N, Xs0, Xs),
    !,
