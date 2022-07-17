@@ -66,8 +66,10 @@ nth1_(N, [_|Tail], Elem) :-
     M is N-1,
     nth1_(M, Tail, Elem),
 		!.
-nth1_(N,[_|T],Item) :-
+%nth1_(N,[_|T],Item) :-		%Seems to be a bug in unification here
+nth1_(N,Tail,Item) :-
     var(N),
+	Tail = [_|T],           % Work-around
     nth1_(M,T,Item),
     N is M + 1.
 
@@ -75,7 +77,7 @@ nth0_(0, [Head|_], Head).
 %nth0_(N, [_|T], Item) :-   %Seems to be a bug in unification here
 nth0_(N, Tail, Item) :-
 	Tail = [_|T],           % Work-around
-    nth0_(M, T,Item),
+    nth0_(M, T, Item),
     N is M + 1.
 
 nth0(N, Es0, E) :-
