@@ -1263,7 +1263,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 	dst += plain(dst, dstlen, src, srclen);
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
-	//if (space) dst += snprintf(dst, dstlen, "%s", " ");
+	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	// Print RHS...
 
