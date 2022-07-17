@@ -28,7 +28,8 @@ bool needs_quoting(module *m, const char *src, int srclen)
 
 	if (!strcmp(src, "{}") || !strcmp(src, "[]")
 		|| !strcmp(src, "!") || !strcmp(src, ";")
-		|| !strcmp(src, "\\"))
+		|| !strcmp(src, "\\")	// ???????
+		)
 		return false;
 
 	if ((src[0] == '/') && (src[1] == '*'))
@@ -1199,6 +1200,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	unsigned rhs_pri_2 = is_interned(rhs) && !rhs->arity ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
 	unsigned my_priority = search_op(q->st.m, src, NULL, false);
 
+	// Print LHS...
+
 	bool lhs_parens = lhs_pri_1 >= my_priority;
 	if ((lhs_pri_1 == my_priority) && is_yfx(c)) lhs_parens = false;
 	if (lhs_pri_2 > 0) lhs_parens = true;
@@ -1250,6 +1253,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (!*src || (q->last_thing_was_symbol && is_symbol && !lhs_parens && !space && !q->parens))
 		dst += snprintf(dst, dstlen, "%s", " ");
 
+	// Print OP...
+
 	q->last_thing_was_symbol = is_symbol;
 	space = iswalpha(*src);
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
@@ -1258,10 +1263,18 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 	dst += plain(dst, dstlen, src, srclen);
 	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
-	if (space) dst += snprintf(dst, dstlen, "%s", " ");
+	//if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
-	space = is_number(rhs) && is_negative(rhs);
+	// Print RHS...
+
 	bool rhs_parens = rhs_pri_1 >= my_priority;
+	space = is_number(rhs) && is_negative(rhs);
+
+	bool rhs_is_symbol = is_interned(rhs) && !rhs->arity
+		&& !iswalpha(*C_STR(q, rhs)) && !needs_quoting(q->st.m, C_STR(q, rhs), C_STRLEN(q, rhs))
+		&& !rhs_parens;
+
+	if (rhs_is_symbol) { space = true; }
 
 	if ((rhs_pri_1 == my_priority) && is_xfy(c)) rhs_parens = false;
 	if (rhs_pri_2 > 0) rhs_parens = true;
@@ -1271,12 +1284,13 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", "(");
-	q->parens = rhs_parens;
+	q->parens = rhs_parens || space;
 	res = print_term_to_buf(q, dst, dstlen, rhs, rhs_ctx, running, 0, depth+1);
 	q->parens = false;
 	if (res < 0) return -1;
 	dst += res;
 	if (rhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
+	if (rhs_is_symbol) { q->last_thing_was_symbol = true; }
 	return dst - save_dst;
 }
 
