@@ -80,7 +80,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
-	(q->slots+(f)->base+(i)) : 				\
+	(q->slots+(f)->base+(i)) : 							\
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 

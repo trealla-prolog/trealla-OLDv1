@@ -1207,20 +1207,22 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	if (is_empty(&e->c))
-		return q->latest_ctx = c_ctx, c;
+	if (is_empty(&e->c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
 
 	if (is_indirect(&e->c)) {
 		q->latest_ctx = e->c.var_ctx;
 		return e->c.val_ptr;
 	}
 
-	if (!is_variable(&e->c)) {
-		q->latest_ctx = c_ctx;
+	if (is_variable(&e->c)) {
+		q->latest_ctx = e->c.var_ctx;
 		return &e->c;
 	}
 
-	q->latest_ctx = e->c.var_ctx;
+	q->latest_ctx = c_ctx;
 	return &e->c;
 }
 
@@ -1228,13 +1230,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-
-	while (is_variable(&e->c)) {
-		c = &e->c;
-		c_ctx = e->c.var_ctx;
-		f = GET_FRAME(c_ctx);
-		e = GET_SLOT(f, c->var_nbr);
-	}
 
 	cell *c_attrs = is_empty(&e->c) ? e->c.attrs : NULL;
 	pl_idx_t c_attrs_ctx = e->c.attrs_ctx;
@@ -1276,13 +1271,6 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-
-	while (is_variable(&e->c)) {
-		c = &e->c;
-		c_ctx = e->c.var_ctx;
-		f = GET_FRAME(c_ctx);
-		e = GET_SLOT(f, c->var_nbr);
-	}
 
 	if (q->cp && trailing && (c_ctx < q->st.fp))
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);
