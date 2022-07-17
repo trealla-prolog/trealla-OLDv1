@@ -2622,12 +2622,14 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return true;
 	}
 
+#if 0
 	if (!*src) {
 		p->toklen = dst - p->token;
 		p->is_op = search_op(p->m, p->token, NULL, false);
 		p->srcptr = (char*)src;
 		return true;
 	}
+#endif
 
 	ch = get_char_utf8(&src);
 	int next_ch = peek_char_utf8(src);
@@ -2700,6 +2702,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return false;
 	}
 
+#if 0
 	if (was_space) {
 		dst += put_char_utf8(dst, ch);
 		p->toklen = dst - p->token;
@@ -2722,6 +2725,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		return true;
 	}
+#endif
 
 	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
@@ -2758,6 +2762,12 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	p->toklen = dst - p->token;
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
+
+	ch = peek_char_utf8(src);
+
+	if (strcmp(p->token, "(") && !check_space_before_function(p, ch, src))
+		return false;
+
 	return true;
 }
 
