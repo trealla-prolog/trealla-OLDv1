@@ -1125,7 +1125,9 @@ static bool resume_frame(query *q)
 
 	Trace(q, get_head(q->st.curr_clause->cl.cells), q->st.curr_frame, EXIT);
 	frame *f = GET_CURR_FRAME();
-	chop_frames(q, f);
+
+	if (q->pl->opt)
+		chop_frames(q, f);
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;

@@ -65,33 +65,29 @@ nth1_(N, [_|Tail], Elem) :-
     N > 0,
     M is N-1,
     nth1_(M, Tail, Elem),
-    !.
+		!.
 nth1_(N,[_|T],Item) :-
     var(N),
     nth1_(M,T,Item),
     N is M + 1.
 
 nth0_(0, [Head|_], Head).
-nth0_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth0_(M, Tail, Elem),
-    !.
-nth0_(N,[_|T],Item) :-
-    var(N),
-    nth0_(M,T,Item),
+%nth0_(N, [_|T], Item) :-   %Seems to be a bug in unification here
+nth0_(N, Tail, Item) :-
+	Tail = [_|T],           % Work-around
+    nth0_(M, T,Item),
     N is M + 1.
 
 nth0(N, Es0, E) :-
 	nonvar(N),
     must_be(N, integer, nth0/3, _),
     (N < 0 -> throw(error(domain_error(not_less_than_zero,N),nth0/3)) ; true),
-	'$skip_max_list'(N, N, Es0, Es),
+	('$skip_max_list'(N, N, Es0, Es) -> true ; Es = Es0),
 	!,
 	Es = [E|_].
 nth0(N, Es, E) :-
 	nth0_(N, Es, E).
+
 
 last([X|Xs], Last) :- last_(Xs, X, Last).
 
