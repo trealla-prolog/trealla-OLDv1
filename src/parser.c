@@ -1183,6 +1183,15 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			return false;
 		}
 
+		if (is_prefix(rhs) && !rhs->arity && (rhs->priority > c->priority)) {
+			if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
+
+			p->error_desc = "operator_clash";
+			p->error = true;
+			return false;
+		}
+
 		if (is_xf(c) || is_yf(c)) {
 			cell *lhs = p->cl->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
