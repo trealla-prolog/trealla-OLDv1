@@ -2631,7 +2631,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return true;
 	}
 
-#if 1
+#if 0
 	if (!*src) {
 		p->toklen = dst - p->token;
 		p->is_op = search_op(p->m, p->token, NULL, false);
@@ -2711,7 +2711,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return false;
 	}
 
-#if 1
+#if 0
 	if (was_space) {
 		dst += put_char_utf8(dst, ch);
 		p->toklen = dst - p->token;

@@ -1218,21 +1218,6 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (lhs_parens) dst += snprintf(dst, dstlen, "%s", ")");
 	bool space = false;
 
-#if 0
-	space = iswalpha(peek_char_utf8(src))
-		|| iswspace(*src)
-		//|| !strcmp(src, ":-")
-		//|| !strcmp(src, "-->")
-		//|| !strcmp(src, "->")
-		//|| !strcmp(src, "*->")
-		|| !strcmp(src, "=~=")
-		|| !strcmp(src, "=..")
-		|| !strcmp(src, "=>")
-		|| !strcmp(src, "?=")
-//		|| (*src == '#')
-		|| !*src;
-#endif
-
 	if (is_interned(lhs) && !lhs->arity && !lhs_parens) {
 		const char *lhs_src = C_STR(q, lhs);
 		if (!isalpha(*lhs_src) && !isdigit(*lhs_src) && (*lhs_src != '$')
