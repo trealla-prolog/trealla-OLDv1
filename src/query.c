@@ -816,11 +816,12 @@ static bool check_slots(const query *q, const frame *f, const clause *cl)
 
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
+		const cell *c = &e->c;
 
-		if (is_indirect(&e->c) && (e->c.var_ctx != q->st.curr_frame))
+		if (is_indirect(c) && (c->var_ctx != q->st.curr_frame))
 			return false;
 
-		if (is_managed(&e->c))
+		if (is_managed(c) || is_variable(c))
 			return false;
 	}
 
