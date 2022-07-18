@@ -1095,8 +1095,10 @@ static bool unify_internal(query *q, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
 		else if (p2_ctx < p1_ctx)
 			set_var(q, p1, p1_ctx, p2, p2_ctx);
-		else if (p2->var_nbr != p1->var_nbr)
+		else if (p2->var_nbr > p1->var_nbr)
 			set_var(q, p2, p2_ctx, p1, p1_ctx);
+		else if (p2->var_nbr < p1->var_nbr)
+			set_var(q, p1, p1_ctx, p2, p2_ctx);
 
 		return true;
 	}
