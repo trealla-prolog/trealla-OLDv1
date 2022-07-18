@@ -51,9 +51,7 @@ intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
 nth1_(1, [Head|_], Head).
-%nth1_(N, [_|T], Item) :-   %Seems to be a bug in unification here
-nth1_(N, Tail, Item) :-
-	Tail = [_|T],           % Work-around
+nth1_(N, [_|T], Item) :-   %Seems to be a bug in unification here
     nth1_(M, T, Item),
     N is M + 1.
 
@@ -69,9 +67,7 @@ nth1(N, Es, E) :-
 	nth1_(N, Es, E).
 
 nth0_(0, [Head|_], Head).
-%nth0_(N, [_|T], Item) :-   %Seems to be a bug in unification here
-nth0_(N, Tail, Item) :-
-	Tail = [_|T],           % Work-around
+nth0_(N, [_|T], Item) :-   %Seems to be a bug in unification here
     nth0_(M, T, Item),
     N is M + 1.
 
