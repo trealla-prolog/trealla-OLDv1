@@ -1714,7 +1714,7 @@ static bool fn_iso_arg_3(query *q)
 		if (i == arg_nbr) {
 			cell *c = deref(q, p2, p2_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
-			return unify(q, c, c_ctx, p3, p3_ctx);
+			return unify(q, p3, p3_ctx, c, c_ctx);
 		}
 
 		p2 += p2->nbr_cells;
