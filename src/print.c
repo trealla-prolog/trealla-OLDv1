@@ -1423,6 +1423,11 @@ char *print_term_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running)
 
 	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+
+	if ((len < 0) || q->cycle_error) {
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 0);
+	}
+
 	q->did_quote = false;
 
 	char *buf = malloc(len+10);
@@ -1449,6 +1454,11 @@ bool print_term_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int ru
 
 	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+
+	if ((len < 0) || q->cycle_error) {
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 0);
+	}
+
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
@@ -1491,6 +1501,11 @@ bool print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 
 	q->last_thing_was_symbol = false;
 	ssize_t len = print_term_to_buf(q, NULL, 0, c, c_ctx, running, false, 0);
+
+	if ((len < 0) || q->cycle_error) {
+		len = print_term_to_buf(q, NULL, 0, c, c_ctx, running=0, false, 0);
+	}
+
 	q->did_quote = false;
 
 	char *dst = malloc(len+10);
