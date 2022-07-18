@@ -1152,7 +1152,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			}
 		}
 
-		if (is_fx(c) || is_fy(c)) {
+		if (is_prefix(c)) {
 			cell *rhs = c + 1;
 			c->nbr_cells += rhs->nbr_cells;
 			pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
@@ -1192,7 +1192,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			return false;
 		}
 
-		if (is_xf(c) || is_yf(c)) {
+		if (is_postfix(c)) {
 			cell *lhs = p->cl->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
 			pl_idx_t cells_to_move = lhs->nbr_cells;
