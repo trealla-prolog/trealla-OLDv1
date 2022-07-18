@@ -19,9 +19,9 @@ bool fn_iso_fail_0(query *q)
 	return false;
 }
 
-bool fn_sys_cut_if_det_0(query *q)
+bool fn_sys_drop_call_barrier(query *q)
 {
-	cut_if_det(q);
+	drop_call_barrier(q);
 	return true;
 }
 
@@ -110,7 +110,7 @@ bool fn_call_0(query *q, cell *p1)
 	cell *tmp = clone_to_heap(q, false, p1, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -164,7 +164,7 @@ bool fn_iso_call_n(query *q)
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -199,7 +199,7 @@ bool fn_iso_call_1(query *q)
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -469,7 +469,7 @@ bool fn_sys_block_catcher_1(query *q)
 		return false;
 	}
 
-	if (cut_if_det(q))
+	if (drop_call_barrier(q))
 		return true;
 
 	ch->block_catcher = true;
@@ -496,7 +496,7 @@ bool fn_iso_catch_3(query *q)
 		cell *tmp = clone_to_heap(q, true, p3, 2);
 		check_heap_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_struct(tmp+nbr_cells++, g_sys_cut_if_det_s, fn_sys_cut_if_det_0, 0, 0);
+		make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		check_heap_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;

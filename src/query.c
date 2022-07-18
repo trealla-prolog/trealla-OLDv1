@@ -975,7 +975,7 @@ bool push_barrier(query *q)
 	return true;
 }
 
-// Set a special flag so that '$cut_if_det' knows to also
+// Set a special flag so that '$drop_call_barrier' knows to also
 // remove the barrier if it needs to...
 
 bool push_call_barrier(query *q)
@@ -1065,7 +1065,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 // If the call is det then the barrier can be dropped...
 
-bool cut_if_det(query *q)
+bool drop_call_barrier(query *q)
 {
 	const frame *f = GET_CURR_FRAME();
 	const choice *ch = GET_CURR_CHOICE();
