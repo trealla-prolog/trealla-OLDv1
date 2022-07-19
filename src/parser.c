@@ -2711,8 +2711,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		is_matching_pair(ch, next_ch, '}','(') ||
 		is_matching_pair(ch, next_ch, '}','(') ||
 		is_matching_pair(ch, next_ch, '(',',') ||
-		is_matching_pair(ch, next_ch, '[',',') ||
-		is_matching_pair(ch, next_ch, ',',')')) {
+		is_matching_pair(ch, next_ch, '[',',')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s\n", p->line_nbr, p->token);
 
@@ -3124,6 +3123,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			((args && !strcmp(p->token, ",")) ||
 			(consing && !p->was_consing && !p->start_term && (!strcmp(p->token, ",") || !strcmp(p->token, "|")))
 			)) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			analyze(p, arg_idx, last_op);
 			arg_idx = p->cl->cidx;
 
@@ -3198,6 +3206,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
 			p->last_close = true;
 			p->nesting_parens--;
 			analyze(p, arg_idx, last_op=false);
@@ -3205,6 +3221,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			p->last_close = true;
 			p->nesting_brackets--;
 			analyze(p, arg_idx, last_op=false);
@@ -3212,6 +3237,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			p->last_close = true;
 			p->nesting_braces--;
 			analyze(p, arg_idx, last_op=false);
