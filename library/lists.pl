@@ -3,7 +3,7 @@
 		select/3, selectchk/3,
 		append/2, append/3,
 		subtract/3, union/3, intersection/3, is_set/1,
-		nth1/3, nth0/3,
+		nth1/3, nth0/3, nth1/4, nth0/4,
 		last/2, flatten/2, same_length/2,
 		sum_list/2, prod_list/2, max_list/2, min_list/2,
 		toconjunction/2, numlist/3,
@@ -55,12 +55,13 @@ nth1_(N, [_|T], Item) :-
     nth1_(M, T, Item),
     N is M + 1.
 
-nth1(N1, Es0, E) :-
-	nonvar(N1),
-    must_be(N1, integer, nth1/3, _),
-    (N1 < 1 -> throw(error(domain_error(not_less_than_one,N1),nth1/3)) ; true),
-    N is N1 - 1,
-	('$skip_max_list'(_, N, Es0, Es) -> true ; Es = Es0),
+nth1(N, Es0, E) :-
+	nonvar(N),
+    must_be(N, integer, nth1/3, _),
+    N \== 0,
+    (N < 0 -> throw(error(domain_error(not_less_than_zero,N),nth1/3)) ; true),
+    N1 is N - 1,
+	('$skip_max_list'(_, N1, Es0, Es) -> true ; Es = Es0),
 	!,
 	Es = [E|_].
 nth1(N, Es, E) :-
@@ -81,6 +82,25 @@ nth0(N, Es0, E) :-
 nth0(N, Es, E) :-
 	nth0_(N, Es, E).
 
+nth1(Nth, List, Element, Rest) :-
+	nth(Element, List, 1, Nth, Rest).
+
+nth0(Nth, List, Element, Rest) :-
+	nth(Element, List, 0, Nth, Rest).
+
+nth(Element, List, Acc, Nth, Rest) :-
+	(	integer(Nth),
+		Nth >= Acc,
+		nth_aux(NthElement, List, Acc, Nth, Rest) ->
+		Element = NthElement
+	;	var(Nth),
+		nth_aux(Element, List, Acc, Nth, Rest)
+	).
+
+nth_aux(Element, [Element| Rest], Position, Position, Rest).
+nth_aux(Element, [Head| Tail], Position0, Position, [Head| Rest]) :-
+	Position1 is Position0 + 1,
+	nth_aux(Element, Tail, Position1, Position, Rest).
 
 last([X|Xs], Last) :- last_(Xs, X, Last).
 
