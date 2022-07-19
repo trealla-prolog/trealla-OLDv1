@@ -3,7 +3,7 @@
 		select/3, selectchk/3,
 		append/2, append/3,
 		subtract/3, union/3, intersection/3, is_set/1,
-		nth1/3, nth0/3, nth1/4, nth0/4, fastnth0/3,
+		nth1/3, nth0/3, nth1/4, nth0/4,
 		last/2, flatten/2, same_length/2,
 		sum_list/2, prod_list/2, max_list/2, min_list/2,
 		toconjunction/2, numlist/3,
@@ -51,17 +51,18 @@ intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
 
-nth1(N, Es, E) :-
+nth1_orig(N, Es, E) :-
 	can_be(integer, N),
 	can_be(list_or_partial_list, Es),
 	(   integer(N) ->
 		must_be(N, not_less_than_zero, nth0/3, _),
 		N1 is N - 1,
 		nth0_index(N1, Es, E)
-	;   nth0_search(N1, Es, E)
+	;   nth0_search(N1, Es, E),
+		N is N1 + 1
 	).
 
-nth0(N, Es, E) :-
+nth0_orig(N, Es, E) :-
 	can_be(integer, N),
 	can_be(list_or_partial_list, Es),
 	(   integer(N) ->
@@ -84,13 +85,23 @@ nth0_search(N0, N, [_|Es], E) :-
         N1 is N0 + 1,
         nth0_search(N1, N, Es, E).
 
-fastnth0(N, Es0, E) :-
+nth1(N, Es0, E) :-
+	nonvar(N),
+	N > 0,
+	N1 is N - 1,
+	'$skip_max_list'(N1, N1, Es0,Es),
+	!,
+	Es = [E|_].
+nth1(N, Es, E) :-
+	nth1_orig(N, Es, E).
+
+nth0(N, Es0, E) :-
 	nonvar(N),
 	'$skip_max_list'(N, N, Es0,Es),
 	!,
 	Es = [E|_].
-fastnth0(N, Es, E) :-
-	nth0(N, Es, E).
+nth0(N, Es, E) :-
+	nth0_orig(N, Es, E).
 
 nth1(Nth, List, Element, Rest) :-
 	nth(Element, List, 1, Nth, Rest).
