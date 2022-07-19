@@ -50,47 +50,39 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth1(N, List, Head) :-
-    nonvar(N),
-    must_be(integer, N),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
-    nth1_(N, List, Head),
-    !.
-nth1(N, List, Head) :-
-	nth1_(N, List, Head).
 
-nth1_(1, [Head|_], Head).
-nth1_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth1_(M, Tail, Elem),
-    !.
-nth1_(N,[_|T],Item) :-
-    var(N),
-    nth1_(M,T,Item),
-    N is M + 1.
+nth1(N, Es, E) :-
+	can_be(integer, N),
+	can_be(list_or_partial_list, Es),
+	(   integer(N) ->
+		must_be(N, not_less_than_zero, nth0/3, _),
+		N1 is N - 1,
+		nth0_index(N1, Es, E)
+	;   nth0_search(N1, Es, E)
+	).
 
-nth0(N, List, Head) :-
-    nonvar(N),
-    must_be(integer, N),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
-    nth0_(N, List, Head),
-    !.
-nth0(N, List, Head) :-
-	nth0_(N, List, Head).
+nth0(N, Es, E) :-
+	can_be(integer, N),
+	can_be(list_or_partial_list, Es),
+	(   integer(N) ->
+		must_be(N, not_less_than_zero, nth0/3, _),
+		nth0_index(N, Es, E)
+	;   nth0_search(N, Es, E)
+	).
 
-nth0_(0, [Head|_], Head).
-nth0_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth0_(M, Tail, Elem),
-    !.
-nth0_(N,[_|T],Item) :-
-    var(N),
-    nth0_(M,T,Item),
-    N is M + 1.
+nth0_index(0, [E|_], E) :- !.
+nth0_index(N, [_|Es], E) :-
+	N > 0,
+	N1 is N - 1,
+	nth0_index(N1, Es, E).
+
+nth0_search(N, Es, E) :-
+        nth0_search(0, N, Es, E).
+
+nth0_search(N, N, [E|_], E).
+nth0_search(N0, N, [_|Es], E) :-
+        N1 is N0 + 1,
+        nth0_search(N1, N, Es, E).
 
 fastnth0(N, Es0, E) :-
 	nonvar(N),
