@@ -55,7 +55,7 @@ nth1_orig(N, Es, E) :-
 	can_be(integer, N),
 	can_be(list_or_partial_list, Es),
 	(   integer(N) ->
-		must_be(N, not_less_than_zero, nth0/3, _),
+		must_be(N, not_less_than_zero, nth1/3, _),
 		N1 is N - 1,
 		nth0_index(N1, Es, E)
 	;   nth0_search(N1, Es, E),
