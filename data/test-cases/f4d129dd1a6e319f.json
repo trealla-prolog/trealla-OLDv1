@@ -1,0 +1,55 @@
+{
+  "uid" : "f4d129dd1a6e319f",
+  "name" : "metapredicates_compiled_19",
+  "fullName" : "metapredicates_compiled_19::tests",
+  "historyId" : "metapredicates_compiled_19::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/metapredicates_compiled/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/metapredicates_compiled/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/metapredicates_compiled/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/metapredicates_compiled/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "260-261"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/examples/metapredicates_compiled/tests.lgt#L260"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "f4d129dd1a6e319f.json",
+  "parameterValues" : [ "examples/metapredicates_compiled/tests.lgt", "260-261", "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/examples/metapredicates_compiled/tests.lgt#L260" ]
+}

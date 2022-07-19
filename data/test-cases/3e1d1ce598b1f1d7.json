@@ -1,0 +1,55 @@
+{
+  "uid" : "3e1d1ce598b1f1d7",
+  "name" : "closed_input_stream_2_01",
+  "fullName" : "closed_input_stream_2_01::tests_io_predicates",
+  "historyId" : "closed_input_stream_2_01::tests_io_predicates",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tools/lgtunit/tests_io_predicates.lgt::tests_io_predicates"
+  }, {
+    "name" : "testClass",
+    "value" : "tools/lgtunit/tests_io_predicates.lgt::tests_io_predicates"
+  }, {
+    "name" : "package",
+    "value" : "tools/lgtunit/tests_io_predicates.lgt::tests_io_predicates"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tools/lgtunit/tests_io_predicates.lgt"
+  }, {
+    "name" : "position",
+    "value" : "287-288"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/tools/lgtunit/tests_io_predicates.lgt#L287"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3e1d1ce598b1f1d7.json",
+  "parameterValues" : [ "tools/lgtunit/tests_io_predicates.lgt", "287-288", "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/tools/lgtunit/tests_io_predicates.lgt#L287" ]
+}

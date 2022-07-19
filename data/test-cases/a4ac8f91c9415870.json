@@ -1,0 +1,55 @@
+{
+  "uid" : "a4ac8f91c9415870",
+  "name" : "dictionary_values_2_02",
+  "fullName" : "dictionary_values_2_02::tests(rbtree)",
+  "historyId" : "dictionary_values_2_02::tests(rbtree)",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(rbtree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "373-376"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/library/dictionaries/tests.lgt#L373"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "a4ac8f91c9415870.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "373-376", "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/library/dictionaries/tests.lgt#L373" ]
+}

@@ -1,0 +1,60 @@
+{
+  "uid" : "62f491c2a53e5c9e",
+  "name" : "nested_dictionaries_obj_update_in_4_depth_two",
+  "fullName" : "nested_dictionaries_obj_update_in_4_depth_two::tests(nrbtree)",
+  "historyId" : "nested_dictionaries_obj_update_in_4_depth_two::tests(nrbtree)",
+  "time" : {
+    "duration" : 5
+  },
+  "status" : "failed",
+  "statusMessage" : "Non-deterministic success",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(nrbtree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(nrbtree)"
+  }, {
+    "name" : "package",
+    "value" : "library/nested_dictionaries/tests.lgt::tests(nrbtree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/nested_dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "200-205"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/library/nested_dictionaries/tests.lgt#L200"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "62f491c2a53e5c9e.json",
+  "parameterValues" : [ "library/nested_dictionaries/tests.lgt", "200-205", "https://github.com/LogtalkDotOrg/logtalk3/tree/653564c2da5c37d05dfedf69c48a74d0cf6228a4/library/nested_dictionaries/tests.lgt#L200" ]
+}
