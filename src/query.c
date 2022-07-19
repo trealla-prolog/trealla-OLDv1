@@ -816,11 +816,12 @@ static bool check_slots(const query *q, const frame *f, const clause *cl)
 
 	for (unsigned i = 0; i < f->nbr_vars; i++) {
 		const slot *e = GET_SLOT(f, i);
+		const cell *c = &e->c;
 
-		if (is_indirect(&e->c) && (e->c.var_ctx != q->st.curr_frame))
+		if (is_indirect(c) && (c->var_ctx != q->st.curr_frame))
 			return false;
 
-		if (is_managed(&e->c))
+		if (is_managed(c) || is_variable(c))
 			return false;
 	}
 
@@ -974,7 +975,7 @@ bool push_barrier(query *q)
 	return true;
 }
 
-// Set a special flag so that '$cut_if_det' knows to also
+// Set a special flag so that '$drop_call_barrier' knows to also
 // remove the barrier if it needs to...
 
 bool push_call_barrier(query *q)
@@ -1064,7 +1065,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 // If the call is det then the barrier can be dropped...
 
-bool cut_if_det(query *q)
+bool drop_call_barrier(query *q)
 {
 	const frame *f = GET_CURR_FRAME();
 	const choice *ch = GET_CURR_CHOICE();
@@ -1100,13 +1101,10 @@ static void proceed(query *q)
 static void chop_frames(query *q, const frame *f)
 {
 	if (q->st.curr_frame == (q->st.fp-1)) {
-		//printf("*** chop %u\n", (unsigned)(f-q->frames));
 		const frame *tmpf = f;
 		pl_idx_t prev_frame = f->prev_frame;
 
 		while (q->st.fp > (prev_frame+1)) {
-			//printf("*** chop2 is_active=%d, any_choices=%d\n", tmpf->is_active, any_choices(q, tmpf));
-
 			if (tmpf->is_active || any_choices(q, tmpf))
 				break;
 
@@ -1128,7 +1126,9 @@ static bool resume_frame(query *q)
 
 	Trace(q, get_head(q->st.curr_clause->cl.cells), q->st.curr_frame, EXIT);
 	frame *f = GET_CURR_FRAME();
-	chop_frames(q, f);
+
+	if (q->pl->opt)
+		chop_frames(q, f);
 
 	q->st.curr_cell = f->prev_cell;
 	q->st.curr_frame = f->prev_frame;
@@ -1208,20 +1208,22 @@ cell *get_var(query *q, cell *c, pl_idx_t c_ctx)
 		e = GET_SLOT(f, c->var_nbr);
 	}
 
-	if (is_empty(&e->c))
-		return q->latest_ctx = c_ctx, c;
+	if (is_empty(&e->c)) {
+		q->latest_ctx = c_ctx;
+		return c;
+	}
 
 	if (is_indirect(&e->c)) {
 		q->latest_ctx = e->c.var_ctx;
 		return e->c.val_ptr;
 	}
 
-	if (!is_variable(&e->c)) {
-		q->latest_ctx = c_ctx;
+	if (is_variable(&e->c)) {
+		q->latest_ctx = e->c.var_ctx;
 		return &e->c;
 	}
 
-	q->latest_ctx = e->c.var_ctx;
+	q->latest_ctx = c_ctx;
 	return &e->c;
 }
 
@@ -1229,13 +1231,6 @@ void set_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx)
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-
-	while (is_variable(&e->c)) {
-		c = &e->c;
-		c_ctx = e->c.var_ctx;
-		f = GET_FRAME(c_ctx);
-		e = GET_SLOT(f, c->var_nbr);
-	}
 
 	cell *c_attrs = is_empty(&e->c) ? e->c.attrs : NULL;
 	pl_idx_t c_attrs_ctx = e->c.attrs_ctx;
@@ -1277,13 +1272,6 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 {
 	frame *f = GET_FRAME(c_ctx);
 	slot *e = GET_SLOT(f, c->var_nbr);
-
-	while (is_variable(&e->c)) {
-		c = &e->c;
-		c_ctx = e->c.var_ctx;
-		f = GET_FRAME(c_ctx);
-		e = GET_SLOT(f, c->var_nbr);
-	}
 
 	if (q->cp && trailing && (c_ctx < q->st.fp))
 		add_trail(q, c_ctx, c->var_nbr, NULL, 0);

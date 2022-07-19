@@ -1714,7 +1714,7 @@ static bool fn_iso_arg_3(query *q)
 		if (i == arg_nbr) {
 			cell *c = deref(q, p2, p2_ctx);
 			pl_idx_t c_ctx = q->latest_ctx;
-			return unify(q, c, c_ctx, p3, p3_ctx);
+			return unify(q, p3, p3_ctx, c, c_ctx);
 		}
 
 		p2 += p2->nbr_cells;
@@ -2188,7 +2188,14 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 		cnt++;
 	}
 
-	//printf("*** purge %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
+	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
+
+	if (!pr->cnt) {
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
+		pr->idx2 = pr->idx = NULL;
+		q->st.iter = NULL;
+	}
 
 	return true;
 }
@@ -7072,7 +7079,7 @@ builtins g_iso_bifs[] =
 	{"$cleanup_if_det", 0, fn_sys_cleanup_if_det_0, NULL, false, BLAH},
 	{"$soft_inner_cut", 0, fn_sys_soft_inner_cut_0, NULL, false, BLAH},
 	{"$inner_cut", 0, fn_sys_inner_cut_0, NULL, false, BLAH},
-	{"$cut_if_det", 0, fn_sys_cut_if_det_0, NULL, false, BLAH},
+	{"$drop_call_barrier", 0, fn_sys_drop_call_barrier, NULL, false, BLAH},
 	{"$elapsed", 0, fn_sys_elapsed_0, NULL, false, BLAH},
 	{"$lt", 2, fn_sys_lt_2, NULL, false, BLAH},
 	{"$gt", 2, fn_sys_gt_2, NULL, false, BLAH},

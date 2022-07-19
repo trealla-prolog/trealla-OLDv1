@@ -2,7 +2,7 @@
 		member/2, memberchk/2,
 		select/3, selectchk/3,
 		append/2, append/3,
-		subtract/3, union/3, intersection/3,
+		subtract/3, union/3, intersection/3, is_set/1,
 		nth1/3, nth0/3,
 		last/2, flatten/2, same_length/2,
 		sum_list/2, prod_list/2, max_list/2, min_list/2,
@@ -50,48 +50,37 @@ intersection([], _, []).
 intersection([H|T], Y, [H|Z]) :- member(H, Y), !, intersection(T, Y, Z).
 intersection([_|T], Y, Z) :- intersection(T, Y, Z).
 
-nth1(N, List, Head) :-
-    nonvar(N),
-    must_be(N, integer, nth1/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth1/3)) ; true),
-    nth1_(N, List, Head),
-    !.
-nth1(N, List, Head) :-
-	nth1_(N, List, Head).
-
 nth1_(1, [Head|_], Head).
-nth1_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth1_(M, Tail, Elem),
-    !.
-nth1_(N,[_|T],Item) :-
-    var(N),
-    nth1_(M,T,Item),
+nth1_(N, [_|T], Item) :-
+    nth1_(M, T, Item),
     N is M + 1.
 
+nth1(N1, Es0, E) :-
+	nonvar(N1),
+    must_be(N1, integer, nth1/3, _),
+    (N1 < 1 -> throw(error(domain_error(not_less_than_one,N1),nth1/3)) ; true),
+    N is N1 - 1,
+	('$skip_max_list'(_, N, Es0, Es) -> true ; Es = Es0),
+	!,
+	Es = [E|_].
+nth1(N, Es, E) :-
+	nth1_(N, Es, E).
+
 nth0_(0, [Head|_], Head).
-nth0_(N, [_|Tail], Elem) :-
-    nonvar(N),
-    N > 0,
-    M is N-1,
-    nth0_(M, Tail, Elem),
-    !.
-nth0_(N,[_|T],Item) :-
-    var(N),
-    nth0_(M,T,Item),
+nth0_(N, [_|T], Item) :-
+    nth0_(M, T, Item),
     N is M + 1.
 
 nth0(N, Es0, E) :-
 	nonvar(N),
     must_be(N, integer, nth0/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero), nth0/3)) ; true),
-	'$skip_max_list'(N, N, Es0,Es),
+    (N < 0 -> throw(error(domain_error(not_less_than_zero,N),nth0/3)) ; true),
+	('$skip_max_list'(_, N, Es0, Es) -> true ; Es = Es0),
 	!,
 	Es = [E|_].
 nth0(N, Es, E) :-
 	nth0_(N, Es, E).
+
 
 last([X|Xs], Last) :- last_(Xs, X, Last).
 
@@ -179,8 +168,14 @@ numlist_(L, U, [L|Ns]) :-
 	L2 is L+1,
 	numlist_(L2, U, Ns).
 
+is_set(Set) :-
+	'$skip_list'(Len, Set, Tail),
+	Tail == [],
+	sort(Set, Sorted),
+	length(Sorted, Len)
+  .
 length(Xs0, N) :-
-   '$skip_max_list'(M, N, Xs0,Xs),
+   '$skip_max_list'(M, N, Xs0, Xs),
    !,
    (  Xs == [] -> N = M
    ;  nonvar(Xs) -> var(N), Xs = [_|_], throw(error(resource_error(finite_memory),length/2))

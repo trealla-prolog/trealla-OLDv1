@@ -1152,7 +1152,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			}
 		}
 
-		if (is_fx(c) || is_fy(c)) {
+		if (is_prefix(c)) {
 			cell *rhs = c + 1;
 			c->nbr_cells += rhs->nbr_cells;
 			pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
@@ -1183,7 +1183,16 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 			return false;
 		}
 
-		if (is_xf(c) || is_yf(c)) {
+		if (is_prefix(rhs) && !rhs->arity && (rhs->priority > c->priority)) {
+			if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
+
+			p->error_desc = "operator_clash";
+			p->error = true;
+			return false;
+		}
+
+		if (is_postfix(c)) {
 			cell *lhs = p->cl->cells + last_idx;
 			save.nbr_cells += lhs->nbr_cells;
 			pl_idx_t cells_to_move = lhs->nbr_cells;
@@ -1197,6 +1206,15 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		}
 
 		// Infix...
+
+		if (is_infix(rhs) && !rhs->arity) {
+			if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
+
+			p->error_desc = "operator_clash";
+			p->error = true;
+			return false;
+		}
 
 		pl_idx_t off = (pl_idx_t)(rhs - p->cl->cells);
 		bool nolhs = (last_idx == (unsigned)-1);
@@ -2274,6 +2292,12 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return false;
 
 	const char *src = p->srcptr;
+
+	if (!p->token || (strlen(src) >= p->token_size)) {
+		p->token = realloc(p->token, p->token_size = strlen(src)+1);
+		check_error(p->token);
+	}
+
 	char *dst = p->token;
 	*dst = '\0';
 	bool neg = false;
@@ -2616,12 +2640,14 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return true;
 	}
 
+#if 0
 	if (!*src) {
 		p->toklen = dst - p->token;
 		p->is_op = search_op(p->m, p->token, NULL, false);
 		p->srcptr = (char*)src;
 		return true;
 	}
+#endif
 
 	ch = get_char_utf8(&src);
 	int next_ch = peek_char_utf8(src);
@@ -2671,8 +2697,10 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->srcptr = (char*)src;
 			return true;
 		}
-	} else
+	} else {
+		src = eat_space(p);
 		next_ch = peek_char_utf8(src);
+	}
 
 	// Symbols...
 
@@ -2683,8 +2711,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		is_matching_pair(ch, next_ch, '}','(') ||
 		is_matching_pair(ch, next_ch, '}','(') ||
 		is_matching_pair(ch, next_ch, '(',',') ||
-		is_matching_pair(ch, next_ch, '[',',') ||
-		is_matching_pair(ch, next_ch, ',',')')) {
+		is_matching_pair(ch, next_ch, '[',',')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s\n", p->line_nbr, p->token);
 
@@ -2752,6 +2779,12 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	p->toklen = dst - p->token;
 	p->is_op = search_op(p->m, p->token, NULL, false);
 	p->srcptr = (char*)src;
+
+	ch = peek_char_utf8(src);
+
+	if (strcmp(p->token, "(") && !check_space_before_function(p, ch, src))
+		return false;
+
 	return true;
 }
 
@@ -3090,6 +3123,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			((args && !strcmp(p->token, ",")) ||
 			(consing && !p->was_consing && !p->start_term && (!strcmp(p->token, ",") || !strcmp(p->token, "|")))
 			)) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			analyze(p, arg_idx, last_op);
 			arg_idx = p->cl->cidx;
 
@@ -3164,6 +3206,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, ")")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
 			p->last_close = true;
 			p->nesting_parens--;
 			analyze(p, arg_idx, last_op=false);
@@ -3171,6 +3221,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "]")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			p->last_close = true;
 			p->nesting_brackets--;
 			analyze(p, arg_idx, last_op=false);
@@ -3178,6 +3237,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && !strcmp(p->token, "}")) {
+			if (arg_idx == p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			p->last_close = true;
 			p->nesting_braces--;
 			analyze(p, arg_idx, last_op=false);

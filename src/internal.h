@@ -80,7 +80,7 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define GET_CURR_FRAME() GET_FRAME(q->st.curr_frame)
 
 #define GET_SLOT(f,i) ((i) < (f)->nbr_slots ? 			\
-	(q->slots+(f)->base+(i)) : 				\
+	(q->slots+(f)->base+(i)) : 							\
 	(q->slots+(f)->overflow+((i)-(f)->nbr_slots)) 		\
 	)
 
@@ -543,8 +543,7 @@ struct prolog_state_ {
 
 struct choice_ {
 	prolog_state st;
-	uint64_t cgen, frame_cgen;
-	uint64_t ugen;
+	uint64_t cgen, frame_cgen, ugen;
 	pl_idx_t overflow;
 	uint32_t nbr_slots, nbr_vars;
 	bool is_tail_rec:1;

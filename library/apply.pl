@@ -15,40 +15,61 @@ partition([], _, [], []).
 :- meta_predicate(maplist(6, ?, ?, ?, ?, ?, ?)).
 :- meta_predicate(maplist(7, ?, ?, ?, ?, ?, ?, ?)).
 
-maplist(_, []).
-maplist(Goal, [X1|X1s]) :-
-	call(Goal, X1),
-	maplist(Goal, X1s).
+maplist(G, L) :-
+	maplist_(L, G).
 
-maplist(_, [], []).
-maplist(Goal, [X1|X1s], [X2|X2s]) :-
-	call(Goal, X1, X2),
-	maplist(Goal, X1s, X2s).
+maplist_([], _).
+maplist_([E|T], G) :-
+	call(G, E),
+	maplist_(T, G).
 
-maplist(_, [], [], []).
-maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
-	call(Goal, X1, X2, X3),
-	maplist(Goal, X1s, X2s, X3s).
+maplist(G, L1, L2) :-
+	maplist_(L1, L2, G).
 
-maplist(_, [], [], [], []).
-maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
-	call(Goal, X1, X2, X3, X4),
-	maplist(Goal, X1s, X2s, X3s, X4s).
+maplist_([], [], _).
+maplist_([E1|T1], [E2|T2], G) :-
+	call(G, E1, E2),
+	maplist_(T1, T2, G).
 
-maplist(_, [], [], [], [], []).
-maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s]) :-
-	call(Goal, X1, X2, X3, X4, X5),
-	maplist(Goal, X1s, X2s, X3s, X4s, X5s).
+maplist(G, L1, L2, L3) :-
+	maplist_(L1, L2, L3, G).
 
-maplist(_, [], [], [], [], [], []).
-maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s]) :-
-	call(Goal, X1, X2, X3, X4, X5, X6),
-	maplist(Goal, X1s, X2s, X3s, X4s, X5s, X6s).
+maplist_([], [], [], _).
+maplist_([E1|T1], [E2|T2], [E3|T3], G) :-
+	call(G, E1, E2, E3),
+	maplist_(T1, T2, T3, G).
 
-maplist(_, [], [], [], [], [], [], []).
-maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7s]) :-
-	call(Goal, X1, X2, X3, X4, X5, X6, X7),
-	maplist(Goal, X1s, X2s, X3s, X4s, X5s, X6s, X7s).
+maplist(G, L1, L2, L3, L4) :-
+	maplist_(L1, L2, L3, L4, G).
+
+maplist_([], [], [], [], _).
+maplist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], G) :-
+	call(G, E1, E2, E3, E4),
+	maplist_(T1, T2, T3, T4, G).
+
+maplist(G, L1, L2, L3, L4, L5) :-
+	maplist_(L1, L2, L3, L4, L5, G).
+
+maplist_([], [], [], [], [], _).
+maplist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], G) :-
+	call(G, E1, E2, E3, E4, E5),
+	maplist_(T1, T2, T3, T4, T5, G).
+
+maplist(G, L1, L2, L3, L4, L5, L6) :-
+	maplist_(L1, L2, L3, L4, L5, L6, G).
+
+maplist_([], [], [], [], [], [], _).
+maplist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], G) :-
+	call(G, E1, E2, E3, E4, E5, E6),
+	maplist_(T1, T2, T3, T4, T5, T6, G).
+
+maplist(G, L1, L2, L3, L4, L5, L6, L7) :-
+	maplist_(L1, L2, L3, L4, L5, L6, L7, G).
+
+maplist_([], [], [], [], [], [], [], _).
+maplist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], [E7|T7], G) :-
+	call(G, E1, E2, E3, E4, E5, E6, E7),
+	maplist_(T1, T2, T3, T4, T5, T6, T7, G).
 
 :- meta_predicate(tasklist(1, ?)).
 :- meta_predicate(tasklist(2, ?, ?)).
@@ -58,75 +79,99 @@ maplist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7
 :- meta_predicate(tasklist(6, ?, ?, ?, ?, ?, ?)).
 :- meta_predicate(tasklist(7, ?, ?, ?, ?, ?, ?, ?)).
 
-tasklist(_, []) :- wait.
-tasklist(Goal, [X1|X1s]) :-
-	task(Goal, X1),
-	tasklist(Goal, X1s).
+tasklist(G, L) :-
+	tasklist_(L, G).
 
-tasklist(_, [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s]) :-
-	task(Goal, X1, X2),
-	tasklist(Goal, X1s, X2s).
+tasklist_([], _) :- wait.
+tasklist_([E|T], G) :-
+	task(G, E),
+	tasklist_(T, G).
 
-tasklist(_, [], [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s]) :-
-	task(Goal, X1, X2, X3),
-	tasklist(Goal, X1s, X2s, X3s).
+tasklist(G, L1, L2) :-
+	tasklist_(L1, L2, G).
 
-tasklist(_, [], [], [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s]) :-
-	task(Goal, X1, X2, X3, X4),
-	tasklist(Goal, X1s, X2s, X3s, X4s).
+tasklist_([], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], G) :-
+	task(G, E1, E2),
+	tasklist_(T1, T2, G).
 
-tasklist(_, [], [], [], [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s]) :-
-	task(Goal, X1, X2, X3, X4, X5),
-	tasklist(Goal, X1s, X2s, X3s, X4s, X5s).
+tasklist(G, L1, L2, L3) :-
+	tasklist_(L1, L2, L3, G).
 
-tasklist(_, [], [], [], [], [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s]) :-
-	task(Goal, X1, X2, X3, X4, X5, X6),
-	tasklist(Goal, X1s, X2s, X3s, X4s, X5s, X6s).
+tasklist_([], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], G) :-
+	task(G, E1, E2, E3),
+	tasklist_(T1, T2, T3, G).
 
-tasklist(_, [], [], [], [], [], [], []) :- wait.
-tasklist(Goal, [X1|X1s], [X2|X2s], [X3|X3s], [X4|X4s], [X5|X5s], [X6|X6s], [X7|X7s]) :-
-	task(Goal, X1, X2, X3, X4, X5, X6, X7),
-	tasklist(Goal, X1s, X2s, X3s, X4s, X5s, X6s, X7s).
+tasklist(G, L1, L2, L3, L4) :-
+	tasklist_(L1, L2, L3, L4, G).
 
-foldl(Goal, List, V0, V) :-
-	foldl_(List, Goal, V0, V).
+tasklist_([], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], G) :-
+	task(G, E1, E2, E3, E4),
+	tasklist_(T1, T2, T3, T4, G).
+
+tasklist(G, L1, L2, L3, L4, L5) :-
+	tasklist_(L1, L2, L3, L4, L5, G).
+
+tasklist_([], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], G) :-
+	task(G, E1, E2, E3, E4, E5),
+	tasklist_(T1, T2, T3, T4, T5, G).
+
+tasklist(G, L1, L2, L3, L4, L5, L6) :-
+	tasklist_(L1, L2, L3, L4, L5, L6, G).
+
+tasklist_([], [], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], G) :-
+	task(G, E1, E2, E3, E4, E5, E6),
+	tasklist_(T1, T2, T3, T4, T5, T6, G).
+
+tasklist(G, L1, L2, L3, L4, L5, L6, L7) :-
+	tasklist_(L1, L2, L3, L4, L5, L6, L7, G).
+
+tasklist_([], [], [], [], [], [], [], _) :- wait.
+tasklist_([E1|T1], [E2|T2], [E3|T3], [E4|T4], [E5|T5], [E6|T6], [E7|T7], G) :-
+	task(G, E1, E2, E3, E4, E5, E6, E7),
+	tasklist_(T1, T2, T3, T4, T5, T6, T7, G).
+
+
+
+
+foldl(G, L, V0, V) :-
+	foldl_(L, G, V0, V).
 
 foldl_([], _, V, V).
-foldl_([H|T], Goal, V0, V) :-
-	call(Goal, H, V0, V1),
-	foldl_(T, Goal, V1, V).
+foldl_([H|T], G, V0, V) :-
+	call(G, H, V0, V1),
+	foldl_(T, G, V1, V).
 
-foldl(Goal, List1, List2, V0, V) :-
-	foldl_(List1, List2, Goal, V0, V).
+foldl(G, L1, L2, V0, V) :-
+	foldl_(L1, L2, G, V0, V).
 
 foldl_([], [], _, V, V).
-foldl_([H1|T1], [H2|T2], Goal, V0, V) :-
-	call(Goal, H1, H2, V0, V1),
-	foldl_(T1, T2, Goal, V1, V).
+foldl_([H1|T1], [H2|T2], G, V0, V) :-
+	call(G, H1, H2, V0, V1),
+	foldl_(T1, T2, G, V1, V).
 
-foldl(Goal, List1, List2, List3, V0, V) :-
-	foldl_(List1, List2, List3, Goal, V0, V).
+foldl(G, L1, L2, L3, V0, V) :-
+	foldl_(L1, L2, L3, G, V0, V).
 
 foldl_([], [], [], _, V, V).
-foldl_([H1|T1], [H2|T2], [H3|T3], Goal, V0, V) :-
-	call(Goal, H1, H2, H3, V0, V1),
-	foldl_(T1, T2, T3, Goal, V1, V).
+foldl_([H1|T1], [H2|T2], [H3|T3], G, V0, V) :-
+	call(G, H1, H2, H3, V0, V1),
+	foldl_(T1, T2, T3, G, V1, V).
 
-foldl(Goal, List1, List2, List3, List4, V0, V) :-
-	foldl_(List1, List2, List3, List4, Goal, V0, V).
+foldl(G, L1, L2, L3, L4, V0, V) :-
+	foldl_(L1, L2, L3, L4, G, V0, V).
 
 foldl_([], [], [], [], _, V, V).
-foldl_([H1|T1], [H2|T2], [H3|T3], [H4|T4], Goal, V0, V) :-
-	call(Goal, H1, H2, H3, H4, V0, V1),
-	foldl_(T1, T2, T3, T4, Goal, V1, V).
+foldl_([H1|T1], [H2|T2], [H3|T3], [H4|T4], G, V0, V) :-
+	call(G, H1, H2, H3, H4, V0, V1),
+	foldl_(T1, T2, T3, T4, G, V1, V).
 
-include(Goal, List, Included) :-
-	include_(List, Goal, Included).
+include(G, L, Included) :-
+	include_(L, G, Included).
 
 	include_([], _, []).
 	include_([X1|Xs1], P, Included) :-
@@ -135,8 +180,8 @@ include(Goal, List, Included) :-
 		),
 		include_(Xs1, P, Included1).
 
-exclude(Goal, List, Included) :-
-	exclude_(List, Goal, Included).
+exclude(G, L, Included) :-
+	exclude_(L, G, Included).
 
 exclude_([], _, []).
 exclude_([X1|Xs1], P, Included) :-
