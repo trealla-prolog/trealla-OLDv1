@@ -2708,7 +2708,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		is_matching_pair(ch, next_ch, ']','(') ||
 		is_matching_pair(ch, next_ch, '}','(') ||
 		is_matching_pair(ch, next_ch, '}','(') ||
-		is_matching_pair(ch, next_ch, '(',',') ||
 		is_matching_pair(ch, next_ch, '[',',')) {
 		if (DUMP_ERRS || !p->do_read_term)
 			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s\n", p->line_nbr, p->token);
