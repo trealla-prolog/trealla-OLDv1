@@ -4429,6 +4429,10 @@ static bool fn_must_be_4(query *q)
 		return throw_error2(q, p1, p1_ctx, "type_error", "atom", p3);
 	else if (!strcmp(src, "atomic") && !is_atomic(p1))
 		return throw_error2(q, p1, p1_ctx, "type_error", "atomic", p3);
+	else if (!strcmp(src, "not_less_than_zero") && !is_integer(p1))
+		return throw_error2(q, p1, p1_ctx, "type_error", "integer", p3);
+	else if (!strcmp(src, "not_less_than_zero") && is_negative(p1))
+		return throw_error2(q, p1, p1_ctx, "domain_error", "not_less_than_zero", p3);
 	else if (!strcmp(src, "integer") && !is_integer(p1))
 		return throw_error2(q, p1, p1_ctx, "type_error", "integer", p3);
 	else if (!strcmp(src, "float") && !is_float(p1))

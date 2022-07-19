@@ -59,7 +59,7 @@ nth1(N, Es0, E) :-
 	nonvar(N),
     must_be(N, integer, nth1/3, _),
     N \== 0,
-    (N < 0 -> throw(error(domain_error(not_less_than_zero,N),nth1/3)) ; true),
+    must_be(N, not_less_than_zero, nth1/3, _),
     N1 is N - 1,
 	('$skip_max_list'(_, N1, Es0, Es) -> true ; Es = Es0),
 	!,
@@ -75,7 +75,7 @@ nth0_(N, [_|T], Item) :-
 nth0(N, Es0, E) :-
 	nonvar(N),
     must_be(N, integer, nth0/3, _),
-    (N < 0 -> throw(error(domain_error(not_less_than_zero,N),nth0/3)) ; true),
+    must_be(N, not_less_than_zero, nth0/3, _),
 	('$skip_max_list'(_, N, Es0, Es) -> true ; Es = Es0),
 	!,
 	Es = [E|_].
