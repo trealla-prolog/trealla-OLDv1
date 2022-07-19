@@ -2697,8 +2697,10 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 			p->srcptr = (char*)src;
 			return true;
 		}
-	} else
+	} else {
+		src = eat_space(p);
 		next_ch = peek_char_utf8(src);
+	}
 
 	// Symbols...
 
@@ -2719,7 +2721,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return false;
 	}
 
-#if 0
 	if (was_space) {
 		dst += put_char_utf8(dst, ch);
 		p->toklen = dst - p->token;
@@ -2742,7 +2743,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 		return true;
 	}
-#endif
 
 	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
