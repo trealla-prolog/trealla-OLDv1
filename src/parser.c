@@ -1130,7 +1130,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		if (is_fx(c)) {
 			cell *rhs = c + 1;
 
-			if (is_fx(rhs) && !rhs->arity && (rhs->priority == c->priority)) {
+			if (is_fx(rhs) && !rhs->arity && (rhs->priority == c->priority) && !is_quoted(rhs)) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
@@ -1174,7 +1174,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		cell *rhs = c + 1;
 		cell save = *c;
 
-		if (is_xf(rhs) && (rhs->priority == c->priority)) {
+		if (is_xf(rhs) && (rhs->priority == c->priority) && !is_quoted(rhs)) {
 			if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
@@ -1207,7 +1207,7 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 
 		// Infix...
 
-		if (is_infix(rhs) && !rhs->arity) {
+		if (is_infix(rhs) && !rhs->arity && !is_quoted(rhs)) {
 			if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
 
@@ -1230,6 +1230,16 @@ static bool reduce(parser *p, pl_idx_t start_idx, bool last_op)
 		}
 
 		cell *lhs = p->cl->cells + last_idx;
+
+		if (is_infix(lhs) && !lhs->arity && !is_quoted(lhs)) {
+			if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, operator clash, line %u\n", p->line_nbr);
+
+			p->error_desc = "operator_clash";
+			p->error = true;
+			return false;
+		}
+
 		save.nbr_cells += lhs->nbr_cells;
 		pl_idx_t cells_to_move = lhs->nbr_cells;
 		lhs = c - 1;
