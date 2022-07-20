@@ -641,7 +641,7 @@ LOOP:
 			share_cell(tmp);
 		}
 
-		*skip += offset ? offset + 1 : offset;
+		*skip += offset;
 		return tmp;
 	}
 
@@ -678,6 +678,7 @@ LOOP:
 		if (is_string(fast)) {
 			head = fast;
 			max -= cnt + 1;
+			max += 1;
 			offset = cnt;
 			goto LOOP;
 		}
