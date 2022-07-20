@@ -955,8 +955,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		return print_iso_list(q, save_dst, dst, dstlen, c, c_ctx, running, cons, depth+1);
 	}
 
-	const char *src = C_STR(q, c);
-	size_t src_len = C_STRLEN(q, c);
+	const char *src = !is_ref(c) ? C_STR(q, c) : "_";
+	size_t src_len = !is_ref(c) ? C_STRLEN(q, c) : 1;
 	int optype = GET_OP(c);
 	unsigned specifier = 0, pri = 0;
 
