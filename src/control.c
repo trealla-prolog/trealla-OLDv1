@@ -19,7 +19,7 @@ bool fn_iso_fail_0(query *q)
 	return false;
 }
 
-bool fn_sys_drop_call_barrier(query *q)
+bool fn_sys_drop_barrier(query *q)
 {
 	drop_call_barrier(q);
 	return true;
@@ -110,7 +110,7 @@ bool fn_call_0(query *q, cell *p1)
 	cell *tmp = clone_to_heap(q, false, p1, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 0 + tmp->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_barrier, fn_sys_drop_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -164,7 +164,7 @@ bool fn_iso_call_n(query *q)
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_barrier, fn_sys_drop_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -180,7 +180,6 @@ bool fn_iso_call_1(query *q)
 	check_heap_error(init_tmp_heap(q));
 	cell *tmp2 = deep_clone_to_tmp(q, p1, p1_ctx);
 	check_heap_error(tmp2);
-
 	const char *functor = C_STR(q, tmp2);
 
 	if (!p1->match) {
@@ -199,7 +198,7 @@ bool fn_iso_call_1(query *q)
 	cell *tmp = clone_to_heap(q, true, tmp2, 2);
 	check_heap_error(tmp);
 	pl_idx_t nbr_cells = 1+tmp2->nbr_cells;
-	make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
+	make_struct(tmp+nbr_cells++, g_sys_drop_barrier, fn_sys_drop_barrier, 0, 0);
 	make_return(q, tmp+nbr_cells);
 	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
@@ -482,10 +481,8 @@ bool fn_iso_catch_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (q->retry && q->exception) {
-		cell *tmp = deep_clone_to_heap(q, q->exception, q->st.curr_frame);
-		check_heap_error(tmp);
-		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
+	if (q->retry && q->ball) {
+		return unify(q, p2, p2_ctx, q->ball, q->st.curr_frame);
 	}
 
 	// Second time through? Try the recover goal...
@@ -496,7 +493,7 @@ bool fn_iso_catch_3(query *q)
 		cell *tmp = clone_to_heap(q, true, p3, 2);
 		check_heap_error(tmp);
 		pl_idx_t nbr_cells = 1+p3->nbr_cells;
-		make_struct(tmp+nbr_cells++, g_sys_drop_call_barrier, fn_sys_drop_call_barrier, 0, 0);
+		make_struct(tmp+nbr_cells++, g_sys_drop_barrier, fn_sys_drop_barrier, 0, 0);
 		make_return(q, tmp+nbr_cells);
 		check_heap_error(push_catcher(q, QUERY_EXCEPTION));
 		q->st.curr_cell = tmp;
@@ -525,8 +522,8 @@ bool fn_sys_call_cleanup_3(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,any);
 
-	if (q->retry && q->exception) {
-		cell *tmp = deep_clone_to_heap(q, q->exception, q->st.curr_frame);
+	if (q->retry && q->ball) {
+		cell *tmp = deep_clone_to_heap(q, q->ball, q->st.curr_frame);
 		check_heap_error(tmp);
 		return unify(q, p2, p2_ctx, tmp, q->st.curr_frame);
 	}
@@ -561,10 +558,8 @@ bool fn_sys_call_cleanup_3(query *q)
 	return true;
 }
 
-bool find_exception_handler(query *q, cell *e)
+bool find_exception_handler(query *q, char *ball)
 {
-	pl_idx_t e_ctx = q->st.curr_frame;
-
 	while (retry_choice(q)) {
 		choice *ch = GET_CHOICE(q->cp);
 
@@ -577,27 +572,64 @@ bool find_exception_handler(query *q, cell *e)
 		if (!ch->catchme_retry)
 			continue;
 
-		check_heap_error(init_tmp_heap(q));
-		cell *tmp = deep_copy_to_tmp(q, e, e_ctx, false);
-		check_heap_error(tmp);
-		cell *e2 = malloc(sizeof(cell) * tmp->nbr_cells);
-		check_heap_error(e2);
-		//safe_copy_cells(e2, tmp, tmp->nbr_cells);
-		copy_cells(e2, tmp, tmp->nbr_cells);
+		ASTRING(s);
+		ASTRING_sprintf(s, "%s.", ball);
+		parser *p2 = create_parser(q->st.m);
+		check_error(p2);
+		frame *f = GET_CURR_FRAME();
+		p2->read_term = f->nbr_vars;
+		p2->skip = true;
+		p2->srcptr = ASTRING_cstr(s);
+		tokenize(p2, false, false);
+		xref_rule(p2->m, p2->cl, NULL);
+		p2->read_term = 0;
+		ASTRING_free(s);
 
-		q->exception = e2;
+		if (p2->nbr_vars) {
+			if (!create_vars(q, p2->nbr_vars))
+				return false;
+		}
+
+		cell *tmp = deep_clone_to_heap(q, p2->cl->cells, q->st.curr_frame);
+		check_heap_error(tmp);
+		destroy_parser(p2);
+
+		q->ball = tmp;
 		q->retry = QUERY_EXCEPTION;
 
 		if (fn_iso_catch_3(q) != true) {
-			free(e2);
-			q->exception = NULL;
+			q->ball = NULL;
 			continue;
 		}
 
-		free(e2);
-		q->exception = NULL;
+		q->ball = NULL;
 		return true;
 	}
+
+	ASTRING(s);
+	ASTRING_sprintf(s, "%s.", ball);
+	parser *p2 = create_parser(q->st.m);
+	check_error(p2);
+	frame *f = GET_CURR_FRAME();
+	p2->read_term = f->nbr_vars;
+	p2->skip = true;
+	p2->srcptr = ASTRING_cstr(s);
+	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
+	p2->read_term = 0;
+	ASTRING_free(s);
+
+	if (p2->nbr_vars) {
+		if (!create_vars(q, p2->nbr_vars))
+			return false;
+	}
+
+	cell *tmp = deep_clone_to_heap(q, p2->cl->cells, q->st.curr_frame);
+	check_heap_error(tmp);
+	destroy_parser(p2);
+
+	cell *e = tmp;
+	pl_idx_t e_ctx = q->st.curr_frame;
 
 	if (!q->is_redo)
 		fprintf(stdout, "   ");
@@ -621,7 +653,7 @@ bool find_exception_handler(query *q, cell *e)
 	fprintf(stdout, ".\n");
 	q->quoted = 0;
 	q->pl->did_dump_vars = true;
-	q->exception = NULL;
+	q->ball = NULL;
 	q->error = true;
 	return false;
 }
@@ -629,29 +661,17 @@ bool find_exception_handler(query *q, cell *e)
 bool fn_iso_throw_1(query *q)
 {
 	GET_FIRST_ARG(p1,nonvar);
-	cell *e;
+	q->parens = q->numbervars = true;
+	q->quoted = true;
+	char *ball = print_term_to_strbuf(q, p1, p1_ctx, 1);
+	clear_write_options(q);
 
-	if (is_cyclic_term(q, p1, p1_ctx)) {
-		e = malloc(sizeof(cell) * p1->nbr_cells);
-		check_heap_error(e);
-		//safe_copy_cells(e, p1, p1->nbr_cells);
-		copy_cells(e, p1, p1->nbr_cells);
-	} else {
-		check_heap_error(init_tmp_heap(q));
-		cell *tmp = deep_copy_to_tmp(q, p1, p1_ctx, false);
-		check_heap_error(tmp);
-		e = malloc(sizeof(cell) * tmp->nbr_cells);
-		check_heap_error(e);
-		//safe_copy_cells(e, tmp, tmp->nbr_cells);
-		copy_cells(e, tmp, tmp->nbr_cells);
-	}
-
-	if (!find_exception_handler(q, e)) {
-		free(e);
+	if (!find_exception_handler(q, ball)) {
+		free(ball);
 		return false;
 	}
 
-	free(e);
+	free(ball);
 	return fn_iso_catch_3(q);
 }
 
@@ -896,16 +916,17 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 		make_int(tmp+nbr_cells, !is_string(goal)?goal->arity:0);
 	}
 
-	cell *e = malloc(sizeof(cell) * tmp->nbr_cells);
-	check_heap_error(e);
-	safe_copy_cells(e, tmp, tmp->nbr_cells);
+	q->parens = q->numbervars = true;
+	q->quoted = true;
+	char *ball = print_term_to_strbuf(q, tmp, c_ctx, 1);
+	clear_write_options(q);
 
-	if (find_exception_handler(q, e)) {
-		free(e);
+	if (find_exception_handler(q, ball)) {
+		free(ball);
 		return fn_iso_catch_3(q);
 	}
 
-	free(e);
+	free(ball);
 	return false;
 }
 

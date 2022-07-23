@@ -52,6 +52,26 @@ static bool any_choices(const query *q, const frame *f)
 	return ch->cgen > f->cgen;
 }
 
+void dump_term(query *q, const char *s, const cell *c)
+{
+	unsigned nbr_cells = c->nbr_cells;
+	printf("*** %s\n", s);
+
+	for (unsigned i = 0; i < nbr_cells; i++, c++) {
+		printf("    ");
+		printf("[%u] tag=%u ", i, c->tag);
+
+		if (is_atom(c))
+			printf("%s ", C_STR(q, c));
+		else if (is_variable(c))
+			printf("_%u ", c->var_nbr);
+		else if (is_structure(c))
+			printf("%s/%u ", C_STR(q, c), c->arity);
+
+		printf("\n");
+	}
+}
+
 static void trace_call(query *q, cell *c, pl_idx_t c_ctx, box_t box)
 {
 	if (!c || is_empty(c))

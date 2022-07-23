@@ -391,7 +391,6 @@ atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
 forall(Cond, Action) :- \+ (Cond, \+ Action).
 catch(G, E, C) :- '$catch'(call(G), E, call(C)).
-throw(E) :- '$throw'(E).
 term_hash(Term, _Opts, Hash) :- term_hash(Term, Hash).
 not(G) :- G, !, fail.
 not(_).

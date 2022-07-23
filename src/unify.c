@@ -614,6 +614,10 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		return head;
 	}
 
+	pl_int_t offset = 0;
+
+LOOP:
+
 	// Keep string code separate for now...
 
 	if (is_string(head)) {
@@ -637,6 +641,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 			share_cell(tmp);
 		}
 
+		*skip += offset;
 		return tmp;
 	}
 
@@ -669,6 +674,15 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		}
 
 		fast = term_next(q, fast, &fast_ctx, &done);
+
+		if (is_string(fast)) {
+			head = fast;
+			max -= cnt + 1;
+			max += 1;
+			offset = cnt;
+			goto LOOP;
+		}
+
 		++length;
 	}
 
