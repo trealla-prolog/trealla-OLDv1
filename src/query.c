@@ -1718,7 +1718,7 @@ bool start(query *q)
 			}
 
 			if (q->run_hook && !q->in_hook)
-				check_heap_error(do_post_unification_hook(q, true));
+				do_post_unification_hook(q, true);
 
 			Trace(q, save_cell, save_ctx, EXIT);
 			proceed(q);
@@ -1739,9 +1739,8 @@ bool start(query *q)
 				continue;
 			}
 
-			if (q->run_hook && !q->in_hook) {
-				check_heap_error(do_post_unification_hook(q, false));
-			}
+			if (q->run_hook && !q->in_hook)
+				do_post_unification_hook(q, false);
 
 			//Trace(q, save_cell, save_ctx, EXIT);
 		}
