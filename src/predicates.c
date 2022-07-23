@@ -6817,6 +6817,7 @@ static void load_properties(module *m)
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,?,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
@@ -7065,9 +7066,7 @@ builtins g_iso_bifs[] =
 	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
 	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
 
-	{"throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"$catch", 3, fn_iso_catch_3, NULL, false, BLAH},
-
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false, BLAH},
 	{"$block_catcher", 1, fn_sys_block_catcher_1, NULL, false, BLAH},
 	{"$queuen", 2, fn_sys_queuen_2, NULL, false, BLAH},
@@ -7090,6 +7089,7 @@ builtins g_iso_bifs[] =
 	{"call", 7, fn_iso_call_n, NULL, false, BLAH},
 	{"call", 8, fn_iso_call_n, NULL, false, BLAH},
 
+	{"throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"once", 1, fn_iso_once_1, NULL, false, BLAH},
 	{"repeat", 0, fn_iso_repeat_0, NULL, false, BLAH},
 	{"true", 0, fn_iso_true_0, NULL, false, BLAH},
