@@ -2650,15 +2650,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		return true;
 	}
 
-#if 0
-	if (!*src) {
-		p->toklen = dst - p->token;
-		p->is_op = search_op(p->m, p->token, NULL, false);
-		p->srcptr = (char*)src;
-		return true;
-	}
-#endif
-
 	ch = get_char_utf8(&src);
 	int next_ch = peek_char_utf8(src);
 	bool was_space = iswspace(next_ch);
@@ -2726,31 +2717,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 		p->srcptr = (char*)src;
 		return false;
 	}
-
-#if 0
-	if (was_space) {
-		dst += put_char_utf8(dst, ch);
-		p->toklen = dst - p->token;
-		unsigned specifier;
-		p->is_op = search_op(p->m, p->token, &specifier, false);
-
-		//if (IS_INFIX(specifier) && last_op)
-		//	p->is_op = false;
-
-		p->srcptr = (char*)src;
-
-		if (strcmp(p->token, "(") && strcmp(p->token, "-") && strcmp(p->token, "+")) {
-			int ch = peek_char_utf8(src);
-
-			if (!check_space_before_function(p, ch, src))
-				return false;
-
-			src = p->srcptr;
-		}
-
-		return true;
-	}
-#endif
 
 	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
@@ -2833,7 +2799,7 @@ static bool process_term(parser *p, cell *p1)
 
 	if (!assertz_to_db(p->m, p->cl->nbr_vars, p->cl->nbr_temporaries, p1, 1)) {
 		if (DUMP_ERRS || !p->do_read_term)
-			printf("Error: '%s', line %u\n", p->token, p->line_nbr);
+			printf("Error: '%s', line %u, '%s'\n", p->token, p->line_nbr, p->srcptr);
 
 		p->error = true;
 		return false;

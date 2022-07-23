@@ -616,9 +616,8 @@ struct query_ {
 	slot *slots;
 	choice *choices;
 	trail *trails;
-	cell *tmp_heap, *last_arg, *exception, *variable_names, *key;
+	cell *tmp_heap, *last_arg, *variable_names, *key, *ball;
 	cell *queue[MAX_QUEUES];
-	bool ignores[MAX_IGNORES];
 	page *pages;
 	slot *save_e;
 	db_entry *dirty_list;
@@ -627,6 +626,7 @@ struct query_ {
 	cell accum;
 	mpz_t tmp_ival;
 	prolog_state st;
+	bool ignores[MAX_IGNORES];
 	uint64_t tot_goals, tot_backtracks, tot_retries, tot_matches;
 	uint64_t tot_tcos, tot_frecovs, tot_srecovs;
 	uint64_t step, qid, tmo_msecs, cgen;

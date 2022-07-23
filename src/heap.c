@@ -9,10 +9,10 @@
 
 static int accum_slot(const query *q, pl_idx_t slot_nbr, unsigned var_nbr)
 {
-	const void *v;
+	const void *vnbr;
 
-	if (map_get(q->vars, (void*)(size_t)slot_nbr, &v))
-		return (unsigned)(size_t)v;
+	if (map_get(q->vars, (void*)(size_t)slot_nbr, &vnbr))
+		return (unsigned)(size_t)vnbr;
 
 	map_set(q->vars, (void*)(size_t)slot_nbr, (void*)(size_t)var_nbr);
 	return -1;
@@ -512,6 +512,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, re
 			}
 
 			p1 = LIST_TAIL(p1);
+			cell *tmp_p1 = p1;
 			p1 = deref(q, p1, p1_ctx);
 			p1_ctx = q->latest_ctx;
 
@@ -523,7 +524,7 @@ cell *deep_clone2_to_tmp(query *q, cell *p1, pl_idx_t p1_ctx, unsigned depth, re
 			if (is_in_ref_list2(p1, p1_ctx, &nlist)) {
 				cell *tmp = alloc_on_tmp(q, 1);
 				if (!tmp) return NULL;
-				*tmp = *save_p1;
+				*tmp = *tmp_p1;
 				cyclic = true;
 				break;
 			}
@@ -652,6 +653,45 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 
 	return tmp;
 }
+
+// TODO: rewrite one universal replacement copying...
+
+#if 0
+static cell *copy_term_internal(query *q, cell *c, cell *c_ctx, bool copy, bool copy_attrs)
+{
+	return c;
+}
+
+cell *copy_term_to_tmp(query *q, cell *c, cell *c_ctx, bool copy_attrs)
+{
+	return copy_term_internal(q, c, c_ctx, true, copy_attrs);
+}
+
+cell *clone_term_to_tmp(query *q, cell *c, cell *c_ctx, bool copy_attrs)
+{
+	cell *tmp = copy_term_internal(q, c, c_ctx, false, false);
+	if (!tmp) return NULL;
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
+	if (!tmp2) return NULL;
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return tmp;
+}
+
+cell *copy_term(query *q, cell *c, cell *c_ctx, bool copy_attrs)
+{
+	cell *tmp = copy_term_internal(q, c, c_ctx, true, copy_attrs);
+	if (!tmp) return NULL;
+	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
+	if (!tmp2) return NULL;
+	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
+	return tmp;
+}
+
+cell *clone_term(query *q, cell *c, cell *c_ctx, bool copy_attrs)
+{
+	cell *tmp = copy_term_internal(q, c, c_ctx, false, false);
+}
+#endif
 
 cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 {

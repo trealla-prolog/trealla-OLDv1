@@ -40,7 +40,7 @@ void dump_vars(query *q, bool partial);
 int check_interrupt(query *q);
 bool more_data(query *q, db_entry *dbe);
 
-bool find_exception_handler(query *q, cell *e);
+bool find_exception_handler(query *q, char *e);
 bool throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected);
 bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
 bool throw_error2(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const char *expected, cell *goal);
@@ -87,7 +87,9 @@ bool print_canonical(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running);
 char *print_canonical_to_strbuf(query *q, cell *c, pl_idx_t c_ctx, int running);
 bool print_canonical_to_stream(query *q, stream *str, cell *c, pl_idx_t c_ctx, int running);
 
-bool fn_sys_drop_call_barrier(query *q);
+void dump_term(query *q, const char *s, const cell *c);
+
+bool fn_sys_drop_barrier(query *q);
 bool fn_iso_throw_1(query *q);
 bool fn_sys_call_cleanup_3(query *q);
 bool fn_iso_catch_3(query *q);

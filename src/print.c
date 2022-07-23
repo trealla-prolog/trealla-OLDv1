@@ -456,6 +456,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		LIST_HANDLER(l);
 
 		while (is_iso_list(l)) {
+			CHECK_INTERRUPT();
 			cell *h = LIST_HEAD(l);
 			h = deref(q, h, l_ctx);
 			pl_idx_t h_ctx = q->latest_ctx;
@@ -546,12 +547,17 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 		unsigned cnt = 0;
 
 		while (is_iso_list(c)) {
+			CHECK_INTERRUPT();
+			cell *save_c = c;
+			pl_idx_t save_c_ctx = c_ctx;
+
 			if (q->max_depth && (cnt >= q->max_depth)) {
 				dst += snprintf(dst, dstlen, ",...");
 				break;
 			}
 
 			dst += snprintf(dst, dstlen, "'.'(");
+			cnt++;
 
 			cell *h = LIST_HEAD(c);
 			h = deref(q, h, c_ctx);
@@ -561,12 +567,23 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 			if (res < 0) return -1;
 			dst += res;
 
-			dst += snprintf(dst, dstlen, ",");
-
 			c = LIST_TAIL(c);
 			c = deref(q, c, c_ctx);
 			c_ctx = q->latest_ctx;
-			cnt++;
+
+			if (is_iso_list(c)) {
+				if ((c == save_c) && (c_ctx == save_c_ctx) /*&& running*/) {
+					dst += snprintf(dst, dstlen, ",");
+					dst += snprintf(dst, dstlen, "%s", running ? C_STR(q, save_c) : "_");
+
+					while (cnt--)
+						dst += snprintf(dst, dstlen, ")");
+
+					return dst - save_dst;
+				}
+			}
+
+			dst += snprintf(dst, dstlen, ",");
 		}
 
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, c, c_ctx, running, cons, depth+1);
@@ -602,6 +619,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 	unsigned cnt = 0;
 
 	for (c++; arity--; c += c->nbr_cells, cnt++) {
+		CHECK_INTERRUPT();
 		cell *tmp = running ? deref(q, c, c_ctx) : c;
 		ssize_t res = print_canonical_to_buf(q, dst, dstlen, tmp, q->latest_ctx, running, cons, depth+1);
 		if (res < 0) return -1;
@@ -686,13 +704,13 @@ ssize_t print_variable(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t c_c
 	slot *e = GET_SLOT(f, c->var_nbr);
 	pl_idx_t slot_idx = e - q->slots;
 
-	if (q->varnames && !is_fresh(c) && !is_anon(c) && c->val_off && !e->c.attrs) {
+	if (q->varnames && !is_fresh(c) && !is_anon(c) /*&& c->val_off*/ && !e->c.attrs && !is_ref(c)) {
 		dst += snprintf(dst, dstlen, "%s", C_STR(q, c));
 	} if (q->varnames && !is_fresh(c) && !is_anon(c)) {
 		dst += snprintf(dst, dstlen, "%s", q->p->vartab.var_name[c->var_nbr]);
 	} else if (q->is_dump_vars) {
 		dst += snprintf(dst, dstlen, "_%s", get_slot_name(q, slot_idx));
-	} else if (!running) {
+	} else if (!running && !is_ref(c)) {
 		dst += snprintf(dst, dstlen, "%s", C_STR(q, c));
 	} else
 		dst += snprintf(dst, dstlen, "_%u", (unsigned)slot_idx);
@@ -705,6 +723,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 	unsigned print_list = 0, cnt = 0;
 
 	while (is_iso_list(c)) {
+		CHECK_INTERRUPT();
 		cell *save_c = c;
 		pl_idx_t save_c_ctx = c_ctx;
 
@@ -730,6 +749,7 @@ static ssize_t print_iso_list(query *q, char *save_dst, char *dst, size_t dstlen
 				!strcmp(C_STR(q, head), ",")
 				|| !strcmp(C_STR(q, head), "|")
 				|| !strcmp(C_STR(q, head), ";")
+				|| !strcmp(C_STR(q, head), ":-")
 				|| !strcmp(C_STR(q, head), "->")
 				|| !strcmp(C_STR(q, head), "*->")
 				|| !strcmp(C_STR(q, head), "-->"));
@@ -955,8 +975,8 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		return print_iso_list(q, save_dst, dst, dstlen, c, c_ctx, running, cons, depth+1);
 	}
 
-	const char *src = !is_ref(c) ? C_STR(q, c) : "_";
-	size_t src_len = !is_ref(c) ? C_STRLEN(q, c) : 1;
+	const char *src = C_STR(q, c);
+	size_t src_len = C_STRLEN(q, c);
 	int optype = GET_OP(c);
 	unsigned specifier = 0, pri = 0;
 
@@ -1066,6 +1086,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 #endif
 
 			for (c++; arity--; c += c->nbr_cells) {
+				CHECK_INTERRUPT();
 				cell *tmp = running ? deref(q, c, c_ctx) : c;
 				pl_idx_t tmp_ctx = q->latest_ctx;
 
@@ -1521,7 +1542,8 @@ bool print_term(query *q, FILE *fp, cell *c, pl_idx_t c_ctx, int running)
 void clear_write_options(query *q)
 {
 	q->max_depth = q->quoted = 0;
-	q->nl = q->fullstop = q->varnames = q->ignore_ops = q->numbervars = false;
+	q->nl = q->fullstop = q->varnames = q->ignore_ops = false;
+	q->parens = q->numbervars = false;
 	q->last_thing_was_symbol = false;
 	q->variable_names = NULL;
 }

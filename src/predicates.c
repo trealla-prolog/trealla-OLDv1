@@ -230,15 +230,6 @@ bool make_stringn(cell *d, const char *s, size_t n)
 		return true;
 	}
 
-#if 0
-	if (n < MAX_SMALL_STRING) {
-		make_smalln(d, s, n);
-		d->flags = FLAG_CSTR_STRING;
-		d->arity = 2;
-		return true;
-	}
-#endif
-
 	*d = (cell){0};
 	d->tag = TAG_CSTR;
 	d->flags = FLAG_CSTR_STRING;
@@ -7074,7 +7065,7 @@ builtins g_iso_bifs[] =
 	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
 	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
 
-	{"$throw", 1, fn_iso_throw_1, NULL, false, BLAH},
+	{"throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"$catch", 3, fn_iso_catch_3, NULL, false, BLAH},
 
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false, BLAH},
@@ -7083,7 +7074,7 @@ builtins g_iso_bifs[] =
 	{"$cleanup_if_det", 0, fn_sys_cleanup_if_det_0, NULL, false, BLAH},
 	{"$soft_inner_cut", 0, fn_sys_soft_inner_cut_0, NULL, false, BLAH},
 	{"$inner_cut", 0, fn_sys_inner_cut_0, NULL, false, BLAH},
-	{"$drop_call_barrier", 0, fn_sys_drop_call_barrier, NULL, false, BLAH},
+	{"$drop_call_barrier", 0, fn_sys_drop_barrier, NULL, false, BLAH},
 	{"$elapsed", 0, fn_sys_elapsed_0, NULL, false, BLAH},
 	{"$lt", 2, fn_sys_lt_2, NULL, false, BLAH},
 	{"$gt", 2, fn_sys_gt_2, NULL, false, BLAH},
