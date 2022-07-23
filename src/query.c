@@ -983,7 +983,7 @@ bool push_choice(query *q)
 
 // A barrier is used when making a call, it sets a
 // new choice generation so that normal cuts are contained.
-// A '$inner_cut' though will also remove the barrier...
+// An '$inner_cut' though will also remove the barrier...
 
 bool push_barrier(query *q)
 {
@@ -995,8 +995,10 @@ bool push_barrier(query *q)
 	return true;
 }
 
-// Set a special flag so that '$drop_call_barrier' knows to also
-// remove the barrier if it needs to...
+// Note: since there is no separate control stack a call will
+// create a choice on the stack. This sets a special flag so
+// that '$drop_barrier' knows to also remove the barrier (choice)
+// if the call is det.
 
 bool push_call_barrier(query *q)
 {
