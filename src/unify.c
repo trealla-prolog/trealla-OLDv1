@@ -744,6 +744,7 @@ static void set_new_var(query *q, cell *tmp, cell *v, pl_idx_t ctx)
 bool fn_sys_undo_trail_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
+	q->in_hook = true;
 
 	if (((q->undo_hi_tp - q->undo_lo_tp) == 0) ||
 		(q->undo_lo_tp > q->undo_hi_tp)) {
@@ -811,7 +812,6 @@ bool fn_sys_redo_trail_0(query * q)
 
 bool do_post_unification_hook(query *q, bool is_builtin)
 {
-	q->in_hook = true;
 	q->run_hook = false;
 	q->undo_lo_tp = q->before_hook_tp;
 	q->undo_hi_tp = q->st.tp;
