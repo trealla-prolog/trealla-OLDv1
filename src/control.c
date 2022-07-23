@@ -558,6 +558,34 @@ bool fn_sys_call_cleanup_3(query *q)
 	return true;
 }
 
+static cell *parse_to_heap(query *q, const char *src)
+{
+	ASTRING(s);
+	ASTRING_sprintf(s, "%s.", src);
+	parser *p2 = create_parser(q->st.m);
+	check_error(p2);
+	frame *f = GET_CURR_FRAME();
+	p2->read_term = f->nbr_vars;
+	p2->skip = true;
+	p2->srcptr = ASTRING_cstr(s);
+	tokenize(p2, false, false);
+	xref_rule(p2->m, p2->cl, NULL);
+	p2->read_term = 0;
+	ASTRING_free(s);
+
+	if (p2->nbr_vars) {
+		if (!create_vars(q, p2->nbr_vars)) {
+			destroy_parser(p2);
+			return false;
+		}
+	}
+
+	cell *tmp = deep_clone_to_heap(q, p2->cl->cells, q->st.curr_frame);
+	check_error(tmp, destroy_parser(p2));
+	destroy_parser(p2);
+	return tmp;
+}
+
 bool find_exception_handler(query *q, char *ball)
 {
 	while (retry_choice(q)) {
@@ -572,29 +600,7 @@ bool find_exception_handler(query *q, char *ball)
 		if (!ch->catchme_retry)
 			continue;
 
-		ASTRING(s);
-		ASTRING_sprintf(s, "%s.", ball);
-		parser *p2 = create_parser(q->st.m);
-		check_error(p2);
-		frame *f = GET_CURR_FRAME();
-		p2->read_term = f->nbr_vars;
-		p2->skip = true;
-		p2->srcptr = ASTRING_cstr(s);
-		tokenize(p2, false, false);
-		xref_rule(p2->m, p2->cl, NULL);
-		p2->read_term = 0;
-		ASTRING_free(s);
-
-		if (p2->nbr_vars) {
-			if (!create_vars(q, p2->nbr_vars))
-				return false;
-		}
-
-		cell *tmp = deep_clone_to_heap(q, p2->cl->cells, q->st.curr_frame);
-		check_heap_error(tmp);
-		destroy_parser(p2);
-
-		q->ball = tmp;
+		q->ball = parse_to_heap(q, ball);
 		q->retry = QUERY_EXCEPTION;
 
 		if (fn_iso_catch_3(q) != true) {
@@ -606,29 +612,7 @@ bool find_exception_handler(query *q, char *ball)
 		return true;
 	}
 
-	ASTRING(s);
-	ASTRING_sprintf(s, "%s.", ball);
-	parser *p2 = create_parser(q->st.m);
-	check_error(p2);
-	frame *f = GET_CURR_FRAME();
-	p2->read_term = f->nbr_vars;
-	p2->skip = true;
-	p2->srcptr = ASTRING_cstr(s);
-	tokenize(p2, false, false);
-	xref_rule(p2->m, p2->cl, NULL);
-	p2->read_term = 0;
-	ASTRING_free(s);
-
-	if (p2->nbr_vars) {
-		if (!create_vars(q, p2->nbr_vars))
-			return false;
-	}
-
-	cell *tmp = deep_clone_to_heap(q, p2->cl->cells, q->st.curr_frame);
-	check_heap_error(tmp);
-	destroy_parser(p2);
-
-	cell *e = tmp;
+	cell *e = parse_to_heap(q, ball);
 	pl_idx_t e_ctx = q->st.curr_frame;
 
 	if (!q->is_redo)
