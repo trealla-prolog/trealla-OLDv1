@@ -1086,7 +1086,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 // If the call is det then the barrier can be dropped...
 
-bool drop_call_barrier(query *q)
+bool drop_barrier(query *q)
 {
 	const frame *f = GET_CURR_FRAME();
 	const choice *ch = GET_CURR_CHOICE();

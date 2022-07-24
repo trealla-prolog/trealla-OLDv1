@@ -21,7 +21,7 @@ bool fn_iso_fail_0(query *q)
 
 bool fn_sys_drop_barrier(query *q)
 {
-	drop_call_barrier(q);
+	drop_barrier(q);
 	return true;
 }
 
@@ -468,7 +468,7 @@ bool fn_sys_block_catcher_1(query *q)
 		return false;
 	}
 
-	if (drop_call_barrier(q))
+	if (drop_barrier(q))
 		return true;
 
 	ch->block_catcher = true;

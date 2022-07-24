@@ -7073,7 +7073,7 @@ builtins g_iso_bifs[] =
 	{"$cleanup_if_det", 0, fn_sys_cleanup_if_det_0, NULL, false, BLAH},
 	{"$soft_inner_cut", 0, fn_sys_soft_inner_cut_0, NULL, false, BLAH},
 	{"$inner_cut", 0, fn_sys_inner_cut_0, NULL, false, BLAH},
-	{"$drop_call_barrier", 0, fn_sys_drop_barrier, NULL, false, BLAH},
+	{"$drop_barrier", 0, fn_sys_drop_barrier, NULL, false, BLAH},
 	{"$elapsed", 0, fn_sys_elapsed_0, NULL, false, BLAH},
 	{"$lt", 2, fn_sys_lt_2, NULL, false, BLAH},
 	{"$gt", 2, fn_sys_gt_2, NULL, false, BLAH},

@@ -60,7 +60,7 @@ int get_stream(query *q, cell *p1);
 void call_builtin(query *q, cell *c, pl_idx_t c_ctx);
 bool call_userfun(query *q, cell *c, pl_idx_t c_ctx);
 void do_cleanup(query *q, cell *p1);
-bool drop_call_barrier(query *q);
+bool drop_barrier(query *q);
 bool is_in_ref_list(cell *c, pl_idx_t c_ctx, reflist *rlist);
 void collect_vars(query *q, cell *p1, pl_idx_t p1_ctx);
 bool check_list(query *q, cell *p1, pl_idx_t p1_ctx, bool *is_partial, pl_int_t *skip);
