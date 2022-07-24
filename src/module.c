@@ -1015,7 +1015,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && (pr->cnt < m->indexing_threshold) /*&& !pr->is_dynamic*/)
+	if (!pr->idx && (pr->cnt < m->indexing_threshold))
 		return;
 
 	if (!pr->idx) {
