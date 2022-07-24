@@ -1015,10 +1015,10 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && (pr->cnt < m->indexing_threshold))
-		return;
-
 	if (!pr->idx) {
+		if (pr->cnt < m->indexing_threshold)
+			return;
+
 		pr->idx = map_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		map_allow_dups(pr->idx, true);
