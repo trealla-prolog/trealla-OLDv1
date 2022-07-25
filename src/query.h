@@ -15,6 +15,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src);
 bool do_yield_0(query *q, int msecs);
 
+void setup_key(query *q);
 bool is_next_key(query *q, clause *cl);
 void purge_dirty_list(query *q);
 bool check_slot(query *q, unsigned cnt);

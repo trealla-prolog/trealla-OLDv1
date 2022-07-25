@@ -329,6 +329,36 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
+void setup_key(query *q)
+{
+	cell *arg1 = q->key + 1, *arg2 = NULL, *arg3 = NULL;
+
+	if (q->key->arity > 1) {
+		arg2 = arg1 + arg1->nbr_cells;
+
+		if (q->key->arity > 2)
+			arg3 = arg2 + arg2->nbr_cells;
+	}
+
+	arg1 = deref(q, arg1, q->st.curr_frame);
+
+	if (arg2) {
+		arg2 = deref(q, arg2, q->st.curr_frame);
+
+		if (arg3)
+			arg3 = deref(q, arg3, q->st.curr_frame);
+	}
+
+	if (q->pl->opt && is_ground(arg1))
+		q->st.arg1_is_ground = true;
+
+	if (q->pl->opt && arg2 && is_ground(arg2))
+		q->st.arg2_is_ground = true;
+
+	if (q->pl->opt && arg3 && is_ground(arg3))
+		q->st.arg3_is_ground = true;
+}
+
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -337,10 +367,8 @@ static void next_key(query *q)
 			map_done(q->st.iter);
 			q->st.iter = NULL;
 		}
-	} else if (!q->st.definite)
+	} else
 		q->st.curr_clause = q->st.curr_clause->next;
-	else
-		q->st.curr_clause = NULL;
 }
 
 bool is_next_key(query *q, clause *cl)
@@ -366,7 +394,7 @@ bool is_next_key(query *q, clause *cl)
 	//printf("*** q->st.def=%d, q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
 	//	q->st.definite, q->st.arg1_is_ground, cl->arg1_is_unique);
 
-	if (!next || q->st.definite)
+	if (!next)
 		return false;
 
 	if (q->st.arg1_is_ground && cl->arg1_is_unique)
@@ -403,11 +431,10 @@ const char *dump_id(const void *k, const void *v, const void *p)
 
 static bool find_key(query *q, predicate *pr, cell *key)
 {
-	q->st.definite = false;
+	q->st.iter = NULL;
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
 	q->st.arg3_is_ground = false;
-	q->st.iter = NULL;
 	q->key = key;
 
 	if (!pr->idx) {
@@ -419,33 +446,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
 			return true;
 
-		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
-
-		if (key->arity > 1) {
-			arg2 = arg1 + arg1->nbr_cells;
-
-			if (key->arity > 2)
-				arg3 = arg2 + arg2->nbr_cells;
-		}
-
-		arg1 = deref(q, arg1, q->st.curr_frame);
-
-		if (arg2) {
-			arg2 = deref(q, arg2, q->st.curr_frame);
-
-			if (arg3)
-				arg3 = deref(q, arg3, q->st.curr_frame);
-		}
-
-		if (q->pl->opt && is_ground(arg1))
-			q->st.arg1_is_ground = true;
-
-		if (q->pl->opt && arg2 && is_ground(arg2))
-			q->st.arg2_is_ground = true;
-
-		if (q->pl->opt && arg3 && is_ground(arg3))
-			q->st.arg3_is_ground = true;
-
+		setup_key(q);
 		return true;
 	}
 
@@ -958,14 +959,16 @@ void stash_me(query *q, const clause *cl, bool last_match)
 	}
 
 	unsigned nbr_vars = cl->nbr_vars;
-	pl_idx_t new_frame = q->st.fp++;
-	frame *f = GET_FRAME(new_frame);
-	f->prev_frame = q->st.curr_frame;
-	f->prev_cell = NULL;
-	f->cgen = cgen;
-	f->overflow = 0;
 
-	q->st.sp += nbr_vars;
+	if (nbr_vars) {
+		pl_idx_t new_frame = q->st.fp++;
+		frame *f = GET_FRAME(new_frame);
+		f->prev_frame = q->st.curr_frame;
+		f->prev_cell = NULL;
+		f->cgen = cgen;
+		f->overflow = 0;
+		q->st.sp += nbr_vars;
+	}
 }
 
 bool push_choice(query *q)

@@ -535,7 +535,6 @@ struct prolog_state_ {
 	pl_idx_t curr_frame, fp, hp, tp, sp;
 	uint32_t curr_page;
 	uint8_t qnbr;
-	bool definite:1;
 	bool arg1_is_ground:1;
 	bool arg2_is_ground:1;
 	bool arg3_is_ground:1;

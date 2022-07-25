@@ -2139,13 +2139,13 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_clause;
+	add_to_dirty_list(q->st.m, dbe);
 	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ERASE);
 
-	add_to_dirty_list(q->st.m, dbe);
 	return true;
 }
 
