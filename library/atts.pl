@@ -4,9 +4,10 @@
 :- use_module(library(lists), [append/3]).
 
 '$post_unify_hook' :-
-	'$undo_trail'(Vars),
-	ignore(process_vars_(Vars, [], Goals)),  % why ignore?
-	'$redo_trail',
+	setup_call_cleanup(
+		'$undo_trail'(Vars),
+		process_vars_(Vars, [], Goals),
+		'$redo_trail'),
 	maplist(call, Goals).
 
 process_vars_([], Goals, Goals) :- !.

@@ -38,6 +38,16 @@ subsumes_term(G, S) :-
 	 V2 == V1
 	).
 
+forall(Cond, Action) :-
+	\+ (Cond, \+ Action).
+
+:- meta_predicate(forall(0,0)).
+
+catch(G, E, C) :-
+	'$catch'(call(G), E, call(C)).
+
+:- meta_predicate(catch(0,?,0)).
+
 call_cleanup(G, C) :-
 	'$register_cleanup'(ignore(C)),
 	'$call_cleanup'(
@@ -389,8 +399,6 @@ read_from_chars(S,T) :- read_term_from_chars(S,T,[]).
 ?=(X,Y) :- \+ unifiable(X,Y,[_|_]).
 atom_number(A,N) :- atom_codes(A,Codes), number_codes(N,Codes).
 '$skip_list'(Skip,Xs0,Xs) :- '$skip_max_list'(Skip,_,Xs0,Xs).
-forall(Cond, Action) :- \+ (Cond, \+ Action).
-catch(G, E, C) :- '$catch'(call(G), E, call(C)).
 term_hash(Term, _Opts, Hash) :- term_hash(Term, Hash).
 not(G) :- G, !, fail.
 not(_).
@@ -403,8 +411,6 @@ iso_dif(X, Y) :-
 	).
 
 :- meta_predicate(not(0)).
-:- meta_predicate(forall(0,0)).
-:- meta_predicate(catch(0,?,0)).
 
 numbervars(Term, N0, N) :-
    must_be(N0, integer, numbervars/3, _),

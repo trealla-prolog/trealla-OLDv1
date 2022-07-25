@@ -2139,13 +2139,13 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_clause;
+	add_to_dirty_list(q->st.m, dbe);
 	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ERASE);
 
-	add_to_dirty_list(q->st.m, dbe);
 	return true;
 }
 
@@ -6817,6 +6817,7 @@ static void load_properties(module *m)
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "findall", 4, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 	//format_property(m, tmpbuf, sizeof(tmpbuf), "forall", 2, "control_construct"); ASTRING_strcat(pr, tmpbuf);
 
+	//format_property(m, tmpbuf, sizeof(tmpbuf), "catch", 3, "meta_predicate(catch(0,?,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ",", 2, "meta_predicate((0,0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), ";", 2, "meta_predicate((0;0))"); ASTRING_strcat(pr, tmpbuf);
 	format_property(m, tmpbuf, sizeof(tmpbuf), "->", 2, "meta_predicate((0->0))"); ASTRING_strcat(pr, tmpbuf);
@@ -7065,16 +7066,14 @@ builtins g_iso_bifs[] =
 	{"\\=", 2, fn_iso_notunify_2, NULL, false, BLAH},
 	{"-->", 2, fn_dcgs_2, NULL, false, BLAH},
 
-	{"throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"$catch", 3, fn_iso_catch_3, NULL, false, BLAH},
-
 	{"$call_cleanup", 3, fn_sys_call_cleanup_3, NULL, false, BLAH},
 	{"$block_catcher", 1, fn_sys_block_catcher_1, NULL, false, BLAH},
 	{"$queuen", 2, fn_sys_queuen_2, NULL, false, BLAH},
 	{"$cleanup_if_det", 0, fn_sys_cleanup_if_det_0, NULL, false, BLAH},
 	{"$soft_inner_cut", 0, fn_sys_soft_inner_cut_0, NULL, false, BLAH},
 	{"$inner_cut", 0, fn_sys_inner_cut_0, NULL, false, BLAH},
-	{"$drop_call_barrier", 0, fn_sys_drop_barrier, NULL, false, BLAH},
+	{"$drop_barrier", 0, fn_sys_drop_barrier, NULL, false, BLAH},
 	{"$elapsed", 0, fn_sys_elapsed_0, NULL, false, BLAH},
 	{"$lt", 2, fn_sys_lt_2, NULL, false, BLAH},
 	{"$gt", 2, fn_sys_gt_2, NULL, false, BLAH},
@@ -7090,6 +7089,7 @@ builtins g_iso_bifs[] =
 	{"call", 7, fn_iso_call_n, NULL, false, BLAH},
 	{"call", 8, fn_iso_call_n, NULL, false, BLAH},
 
+	{"throw", 1, fn_iso_throw_1, NULL, false, BLAH},
 	{"once", 1, fn_iso_once_1, NULL, false, BLAH},
 	{"repeat", 0, fn_iso_repeat_0, NULL, false, BLAH},
 	{"true", 0, fn_iso_true_0, NULL, false, BLAH},

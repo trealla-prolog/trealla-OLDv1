@@ -329,6 +329,36 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
+void setup_key(query *q)
+{
+	cell *arg1 = q->key + 1, *arg2 = NULL, *arg3 = NULL;
+
+	if (q->key->arity > 1) {
+		arg2 = arg1 + arg1->nbr_cells;
+
+		if (q->key->arity > 2)
+			arg3 = arg2 + arg2->nbr_cells;
+	}
+
+	arg1 = deref(q, arg1, q->st.curr_frame);
+
+	if (arg2) {
+		arg2 = deref(q, arg2, q->st.curr_frame);
+
+		if (arg3)
+			arg3 = deref(q, arg3, q->st.curr_frame);
+	}
+
+	if (q->pl->opt && is_ground(arg1))
+		q->st.arg1_is_ground = true;
+
+	if (q->pl->opt && arg2 && is_ground(arg2))
+		q->st.arg2_is_ground = true;
+
+	if (q->pl->opt && arg3 && is_ground(arg3))
+		q->st.arg3_is_ground = true;
+}
+
 static void next_key(query *q)
 {
 	if (q->st.iter) {
@@ -337,10 +367,8 @@ static void next_key(query *q)
 			map_done(q->st.iter);
 			q->st.iter = NULL;
 		}
-	} else if (!q->st.definite)
+	} else
 		q->st.curr_clause = q->st.curr_clause->next;
-	else
-		q->st.curr_clause = NULL;
 }
 
 bool is_next_key(query *q, clause *cl)
@@ -366,7 +394,7 @@ bool is_next_key(query *q, clause *cl)
 	//printf("*** q->st.def=%d, q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
 	//	q->st.definite, q->st.arg1_is_ground, cl->arg1_is_unique);
 
-	if (!next || q->st.definite)
+	if (!next)
 		return false;
 
 	if (q->st.arg1_is_ground && cl->arg1_is_unique)
@@ -403,46 +431,22 @@ const char *dump_id(const void *k, const void *v, const void *p)
 
 static bool find_key(query *q, predicate *pr, cell *key)
 {
-	q->st.definite = false;
+	q->st.iter = NULL;
 	q->st.arg1_is_ground = false;
 	q->st.arg2_is_ground = false;
 	q->st.arg3_is_ground = false;
-	q->st.iter = NULL;
 	q->key = key;
 
 	if (!pr->idx) {
+		if (!pr->is_processed)
+			just_in_time_rebuild(pr);
+
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity || pr->is_multifile || pr->is_dynamic)
+		if (!key->arity || pr->is_multifile)
 			return true;
 
-		cell *arg1 = key + 1, *arg2 = NULL, *arg3 = NULL;
-
-		if (key->arity > 1) {
-			arg2 = arg1 + arg1->nbr_cells;
-
-			if (key->arity > 2)
-				arg3 = arg2 + arg2->nbr_cells;
-		}
-
-		arg1 = deref(q, arg1, q->st.curr_frame);
-
-		if (arg2) {
-			arg2 = deref(q, arg2, q->st.curr_frame);
-
-			if (arg3)
-				arg3 = deref(q, arg3, q->st.curr_frame);
-		}
-
-		if (q->pl->opt && is_ground(arg1))
-			q->st.arg1_is_ground = true;
-
-		if (q->pl->opt && arg2 && is_ground(arg2))
-			q->st.arg2_is_ground = true;
-
-		if (q->pl->opt && arg3 && is_ground(arg3))
-			q->st.arg3_is_ground = true;
-
+		setup_key(q);
 		return true;
 	}
 
@@ -943,7 +947,7 @@ static void commit_me(query *q, clause *cl)
 
 void stash_me(query *q, const clause *cl, bool last_match)
 {
-	pl_idx_t cgen = q->cgen;
+	pl_idx_t cgen = ++q->cgen;
 
 	if (last_match) {
 		unshare_predicate(q, q->st.pr);
@@ -951,18 +955,20 @@ void stash_me(query *q, const clause *cl, bool last_match)
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause = q->st.curr_clause;
-		ch->cgen = cgen = ++q->cgen;
+		ch->cgen = cgen;
 	}
 
 	unsigned nbr_vars = cl->nbr_vars;
-	pl_idx_t new_frame = q->st.fp++;
-	frame *f = GET_FRAME(new_frame);
-	f->prev_frame = q->st.curr_frame;
-	f->prev_cell = NULL;
-	f->cgen = cgen;
-	f->overflow = 0;
 
-	q->st.sp += nbr_vars;
+	if (nbr_vars) {
+		pl_idx_t new_frame = q->st.fp++;
+		frame *f = GET_FRAME(new_frame);
+		f->prev_frame = q->st.curr_frame;
+		f->prev_cell = NULL;
+		f->cgen = cgen;
+		f->overflow = 0;
+		q->st.sp += nbr_vars;
+	}
 }
 
 bool push_choice(query *q)
@@ -983,7 +989,7 @@ bool push_choice(query *q)
 
 // A barrier is used when making a call, it sets a
 // new choice generation so that normal cuts are contained.
-// A '$inner_cut' though will also remove the barrier...
+// An '$inner_cut' though will also remove the barrier...
 
 bool push_barrier(query *q)
 {
@@ -995,8 +1001,10 @@ bool push_barrier(query *q)
 	return true;
 }
 
-// Set a special flag so that '$drop_call_barrier' knows to also
-// remove the barrier if it needs to...
+// Note: since there is no separate control stack a call will
+// create a choice on the stack. This sets a special flag so
+// that '$drop_barrier' knows to also remove the barrier (choice)
+// if the call is det.
 
 bool push_call_barrier(query *q)
 {
@@ -1069,8 +1077,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 		if (ch->register_cleanup && !ch->did_cleanup) {
 			ch->did_cleanup = true;
 			cell *c = ch->st.curr_cell;
-			c = deref(q, c, ch->st.curr_frame);
-			pl_idx_t c_ctx = q->latest_ctx;
+			pl_idx_t c_ctx = ch->st.curr_frame;
 			c = deref(q, c+1, c_ctx);
 			c_ctx = q->latest_ctx;
 			cell *tmp = deep_clone_to_heap(q, c, c_ctx);
@@ -1085,7 +1092,7 @@ void cut_me(query *q, bool inner_cut, bool soft_cut)
 
 // If the call is det then the barrier can be dropped...
 
-bool drop_call_barrier(query *q)
+bool drop_barrier(query *q)
 {
 	const frame *f = GET_CURR_FRAME();
 	const choice *ch = GET_CURR_CHOICE();
@@ -1716,7 +1723,7 @@ bool start(query *q)
 			}
 
 			if (q->run_hook && !q->in_hook)
-				check_heap_error(do_post_unification_hook(q, true));
+				do_post_unification_hook(q, true);
 
 			Trace(q, save_cell, save_ctx, EXIT);
 			proceed(q);
@@ -1737,9 +1744,8 @@ bool start(query *q)
 				continue;
 			}
 
-			if (q->run_hook && !q->in_hook) {
-				check_heap_error(do_post_unification_hook(q, false));
-			}
+			if (q->run_hook && !q->in_hook)
+				do_post_unification_hook(q, false);
 
 			//Trace(q, save_cell, save_ctx, EXIT);
 		}

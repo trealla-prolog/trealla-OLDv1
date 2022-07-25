@@ -854,14 +854,44 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
-static void check_rule(module *m, db_entry *dbe)
+static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 {
-	predicate *pr = dbe->owner;
-	clause *r = &dbe->cl;
-	bool matched = false, me = false;
+	if (pr->head && !pr->is_multifile && !pr->is_dynamic
+		&& (C_STR(m, &pr->key)[0] != '$')) {
+		if (dbe->filename != pr->head->filename) {
+			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+				add_to_dirty_list(m, dbe);
+				pr->is_processed = false;
+			}
+
+			if (dbe->owner->cnt)
+				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
+
+			map_destroy(pr->idx_save);
+			map_destroy(pr->idx2);
+			map_destroy(pr->idx);
+			pr->idx_save = pr->idx2 = pr->idx = NULL;
+			pr->head = pr->tail = NULL;
+			dbe->owner->cnt = 0;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static void check_rule(module *m, db_entry *dbe_orig)
+{
+	predicate *pr = dbe_orig->owner;
+	clause *r = &dbe_orig->cl;
+	bool matched = false;
 	bool p1_matched = false, p2_matched = false, p3_matched = false;
 	cell *head = get_head(r->cells);
 	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
+	r->is_unique = false;
+	r->arg1_is_unique = false;
+	r->arg2_is_unique = false;
+	r->arg3_is_unique = false;
 
 	if (pr->key.arity > 1)
 		p2 = p1 + p1->nbr_cells;
@@ -869,16 +899,9 @@ static void check_rule(module *m, db_entry *dbe)
 	if (pr->key.arity > 2)
 		p3 = p2 + p2->nbr_cells;
 
-	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+	for (db_entry *dbe = dbe_orig->next; dbe; dbe = dbe->next) {
 		if (dbe->cl.ugen_erased)
 			continue;
-
-		if (!me) {
-			if (&dbe->cl == r)
-				me = true;
-
-			continue;
-		}
 
 		cell *head2 = get_head(dbe->cl.cells);
 		cell *h21 = head2 + 1, *h22 = NULL, *h23 = NULL;
@@ -908,20 +931,28 @@ static void check_rule(module *m, db_entry *dbe)
 		}
 	}
 
-	if (!matched) {
+	if (!matched)
 		r->is_unique = true;
-	}
 
-	if (!p1_matched && r->is_unique) {
+	if (!p1_matched && r->is_unique)
 		r->arg1_is_unique = true;
-	}
 
-	if (!p2_matched && r->is_unique) {
+	if (!p2_matched && r->is_unique)
 		r->arg2_is_unique = true;
-	}
 
-	if (!p3_matched && r->is_unique) {
+	if (!p3_matched && r->is_unique)
 		r->arg3_is_unique = true;
+}
+
+void just_in_time_rebuild(predicate *pr)
+{
+	pr->is_processed = true;
+
+	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+		if (dbe->cl.ugen_erased)
+			continue;
+
+		check_rule(pr->m, dbe);
 	}
 }
 
@@ -1015,10 +1046,10 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (pr->is_noindex)
 		return;
 
-	if (!pr->idx && (pr->cnt < m->indexing_threshold) /*&& !pr->is_dynamic*/)
-		return;
-
 	if (!pr->idx) {
+		if (pr->cnt < m->indexing_threshold)
+			return;
+
 		pr->idx = map_create(index_cmpkey, NULL, m);
 		ensure(pr->idx);
 		map_allow_dups(pr->idx, true);
@@ -1065,32 +1096,6 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		if (pr->idx2 && arg2)
 			map_app(pr->idx2, arg2, dbe);
 	}
-}
-
-static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
-{
-	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (C_STR(m, &pr->key)[0] != '$')) {
-		if (dbe->filename != pr->head->filename) {
-			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				add_to_dirty_list(m, dbe);
-				pr->is_processed = false;
-			}
-
-			if (dbe->owner->cnt)
-				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
-
-			map_destroy(pr->idx_save);
-			map_destroy(pr->idx2);
-			map_destroy(pr->idx);
-			pr->idx_save = pr->idx2 = pr->idx = NULL;
-			pr->head = pr->tail = NULL;
-			dbe->owner->cnt = 0;
-			return false;
-		}
-	}
-
-	return true;
 }
 
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting)
@@ -1144,6 +1149,10 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 		pr->head = dbe;
 
 	assert_commit(m, dbe, pr, true);
+
+	if (!consulting && !pr->idx && (pr->cnt > 1))
+		pr->is_processed = false;
+
 	return dbe;
 }
 
@@ -1659,7 +1668,7 @@ module *create_module(prolog *pl, const char *name)
 	m->id = ++pl->next_mod_id;
 	m->defops = map_create((void*)strcmp, NULL, NULL);
 	map_allow_dups(m->defops, false);
-	m->indexing_threshold = 4096;
+	m->indexing_threshold = 1500;
 	pl->modmap[m->id] = m;
 
 	if (strcmp(name, "system")) {
