@@ -854,6 +854,32 @@ unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_p
 	return 0;
 }
 
+static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
+{
+	if (pr->head && !pr->is_multifile && !pr->is_dynamic
+		&& (C_STR(m, &pr->key)[0] != '$')) {
+		if (dbe->filename != pr->head->filename) {
+			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
+				add_to_dirty_list(m, dbe);
+				pr->is_processed = false;
+			}
+
+			if (dbe->owner->cnt)
+				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
+
+			map_destroy(pr->idx_save);
+			map_destroy(pr->idx2);
+			map_destroy(pr->idx);
+			pr->idx_save = pr->idx2 = pr->idx = NULL;
+			pr->head = pr->tail = NULL;
+			dbe->owner->cnt = 0;
+			return false;
+		}
+	}
+
+	return true;
+}
+
 static void check_rule(module *m, db_entry *dbe)
 {
 	predicate *pr = dbe->owner;
@@ -1065,32 +1091,6 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		if (pr->idx2 && arg2)
 			map_app(pr->idx2, arg2, dbe);
 	}
-}
-
-static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
-{
-	if (pr->head && !pr->is_multifile && !pr->is_dynamic
-		&& (C_STR(m, &pr->key)[0] != '$')) {
-		if (dbe->filename != pr->head->filename) {
-			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				add_to_dirty_list(m, dbe);
-				pr->is_processed = false;
-			}
-
-			if (dbe->owner->cnt)
-				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
-
-			map_destroy(pr->idx_save);
-			map_destroy(pr->idx2);
-			map_destroy(pr->idx);
-			pr->idx_save = pr->idx2 = pr->idx = NULL;
-			pr->head = pr->tail = NULL;
-			dbe->owner->cnt = 0;
-			return false;
-		}
-	}
-
-	return true;
 }
 
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting)
