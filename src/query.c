@@ -443,7 +443,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 
 		q->st.curr_clause = pr->head;
 
-		if (!key->arity || pr->is_multifile || pr->is_dynamic)
+		if (!key->arity || pr->is_multifile)
 			return true;
 
 		setup_key(q);
@@ -947,7 +947,7 @@ static void commit_me(query *q, clause *cl)
 
 void stash_me(query *q, const clause *cl, bool last_match)
 {
-	pl_idx_t cgen = q->cgen;
+	pl_idx_t cgen = ++q->cgen;
 
 	if (last_match) {
 		unshare_predicate(q, q->st.pr);
@@ -955,7 +955,7 @@ void stash_me(query *q, const clause *cl, bool last_match)
 	} else {
 		choice *ch = GET_CURR_CHOICE();
 		ch->st.curr_clause = q->st.curr_clause;
-		ch->cgen = cgen = ++q->cgen;
+		ch->cgen = cgen;
 	}
 
 	unsigned nbr_vars = cl->nbr_vars;
