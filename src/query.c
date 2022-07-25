@@ -411,6 +411,9 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	q->key = key;
 
 	if (!pr->idx) {
+		if (!pr->is_processed)
+			just_in_time_rebuild(pr);
+
 		q->st.curr_clause = pr->head;
 
 		if (!key->arity || pr->is_multifile || pr->is_dynamic)
