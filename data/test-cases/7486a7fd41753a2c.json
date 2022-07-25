@@ -1,0 +1,55 @@
+{
+  "uid" : "7486a7fd41753a2c",
+  "name" : "rule_c",
+  "fullName" : "rule_c::tests",
+  "historyId" : "rule_c::tests",
+  "time" : {
+    "duration" : 3
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/securemp/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/securemp/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/securemp/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/securemp/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "87-89"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/92fc40859236dd4556405951971af22d127fae11/examples/securemp/tests.lgt#L87"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "7486a7fd41753a2c.json",
+  "parameterValues" : [ "examples/securemp/tests.lgt", "87-89", "https://github.com/LogtalkDotOrg/logtalk3/tree/92fc40859236dd4556405951971af22d127fae11/examples/securemp/tests.lgt#L87" ]
+}

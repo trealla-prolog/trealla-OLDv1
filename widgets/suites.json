@@ -1,5 +1,5 @@
 {
-  "total" : 478,
+  "total" : 480,
   "items" : [ {
     "uid" : "8a55ebe9f2ae22af4df47cec4a85b876",
     "name" : "tools/diagrams/tests.lgt::tests",
@@ -37,10 +37,10 @@
     "uid" : "989b09abb7fb900a0e7ed980a1e19859",
     "name" : "tools/lgtdoc/tests.lgt::tests",
     "statistic" : {
-      "failed" : 12,
+      "failed" : 11,
       "broken" : 0,
       "skipped" : 0,
-      "passed" : 0,
+      "passed" : 1,
       "unknown" : 0,
       "total" : 12
     }
