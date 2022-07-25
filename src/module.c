@@ -1668,7 +1668,7 @@ module *create_module(prolog *pl, const char *name)
 	m->id = ++pl->next_mod_id;
 	m->defops = map_create((void*)strcmp, NULL, NULL);
 	map_allow_dups(m->defops, false);
-	m->indexing_threshold = 1500;
+	m->indexing_threshold = 4096;
 	pl->modmap[m->id] = m;
 
 	if (strcmp(name, "system")) {
