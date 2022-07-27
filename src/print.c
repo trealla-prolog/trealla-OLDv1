@@ -1278,6 +1278,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	bool rhs_parens = rhs_pri_1 >= my_priority;
 	space = is_number(rhs) && is_negative(rhs);
 
+	if (is_prefix(rhs) && strcmp(src, "|"))
+		space = true;
+
 	bool rhs_is_symbol = is_interned(rhs) && !rhs->arity
 		&& !iswalpha(*C_STR(q, rhs)) && !needs_quoting(q->st.m, C_STR(q, rhs), C_STRLEN(q, rhs))
 		&& !rhs_parens;

@@ -17,6 +17,7 @@ bool do_yield_0(query *q, int msecs);
 
 void setup_key(query *q);
 bool is_next_key(query *q, clause *cl);
+void next_key(query *q);
 void purge_dirty_list(query *q);
 bool check_slot(query *q, unsigned cnt);
 void cut_me(query *q, bool inner_cut, bool soft_cut);
@@ -132,15 +133,15 @@ inline static cell *take_queuen(query *q) { cell *save = q->queue[q->st.qnbr]; q
 
 inline static void share_predicate(predicate *pr) {	pr->ref_cnt++; }
 
-inline static bool can_view(const frame *f, const db_entry *dbe)
+inline static bool can_view(uint64_t ugen, const db_entry *dbe)
 {
 	if (dbe->cl.is_deleted)
 		return false;
 
-	if (dbe->cl.ugen_created > f->ugen)
+	if (dbe->cl.ugen_created > ugen)
 		return false;
 
-	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= f->ugen))
+	if (dbe->cl.ugen_erased && (dbe->cl.ugen_erased <= ugen))
 		return false;
 
 	return true;
