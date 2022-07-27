@@ -1,0 +1,55 @@
+{
+  "uid" : "2acfac86e5cfe0d5",
+  "name" : "lgt_catch_3_10",
+  "fullName" : "lgt_catch_3_10::tests",
+  "historyId" : "lgt_catch_3_10::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "tests/prolog/control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "tests/prolog/control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "tests/prolog/control/catch_3/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "tests/prolog/control/catch_3/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "95-99"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/tests/prolog/control/catch_3/tests.lgt#L95"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "2acfac86e5cfe0d5.json",
+  "parameterValues" : [ "tests/prolog/control/catch_3/tests.lgt", "95-99", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/tests/prolog/control/catch_3/tests.lgt#L95" ]
+}

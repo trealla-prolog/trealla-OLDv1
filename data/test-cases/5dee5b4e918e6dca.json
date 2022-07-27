@@ -1,0 +1,55 @@
+{
+  "uid" : "5dee5b4e918e6dca",
+  "name" : "dictionary_map_2_02",
+  "fullName" : "dictionary_map_2_02::tests(avltree)",
+  "historyId" : "dictionary_map_2_02::tests(avltree)",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "testClass",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "package",
+    "value" : "library/dictionaries/tests.lgt::tests(avltree)"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/dictionaries/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "384-386"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/library/dictionaries/tests.lgt#L384"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5dee5b4e918e6dca.json",
+  "parameterValues" : [ "library/dictionaries/tests.lgt", "384-386", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/library/dictionaries/tests.lgt#L384" ]
+}

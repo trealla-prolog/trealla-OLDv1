@@ -1,0 +1,55 @@
+{
+  "uid" : "5ca51982028cd2bf",
+  "name" : "genint_reset_genint_0_02",
+  "fullName" : "genint_reset_genint_0_02::tests",
+  "historyId" : "genint_reset_genint_0_02::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "library/genint/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "library/genint/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "library/genint/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "library/genint/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "62-65"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/library/genint/tests.lgt#L62"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "5ca51982028cd2bf.json",
+  "parameterValues" : [ "library/genint/tests.lgt", "62-65", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/library/genint/tests.lgt#L62" ]
+}
