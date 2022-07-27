@@ -206,17 +206,6 @@ predicate *create_predicate(module *m, cell *c)
 	return pr;
 }
 
-bool add_to_dirty_list(module *m, db_entry *dbe)
-{
-	if (!retract_from_db(m, dbe))
-		return false;
-
-	predicate *pr = dbe->owner;
-	dbe->dirty = pr->dirty_list;
-	pr->dirty_list = dbe;
-	return true;
-}
-
 static void destroy_predicate(module *m, predicate *pr)
 {
 	map_del(m->index, &pr->key);
@@ -1043,6 +1032,11 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	pr->db_id++;
 	pr->cnt++;
 
+	clause *cl = &dbe->cl;
+	cl->arg1_is_unique = false;
+	cl->arg2_is_unique = false;
+	cl->arg3_is_unique = false;
+
 	if (pr->is_noindex)
 		return;
 
@@ -1121,8 +1115,8 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, false);
 
-	if (!consulting && !pr->idx && (pr->cnt > 1))
-		check_rule(m, dbe);
+	if (!consulting && !pr->idx)
+		pr->is_processed = false;
 
 	return dbe;
 }
@@ -1150,17 +1144,19 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 
 	assert_commit(m, dbe, pr, true);
 
-	if (!consulting && !pr->idx && (pr->cnt > 1))
+	if (!consulting && !pr->idx)
 		pr->is_processed = false;
 
 	return dbe;
 }
 
-bool retract_from_db(module *m, db_entry *dbe)
+static bool retract_from_db(module *m, db_entry *dbe)
 {
 	if (dbe->cl.ugen_erased)
 		return false;
 
+	dbe->cl.ugen_erased = ++m->pl->ugen;
+	dbe->filename = NULL;
 	predicate *pr = dbe->owner;
 	pr->cnt--;
 
@@ -1170,9 +1166,17 @@ bool retract_from_db(module *m, db_entry *dbe)
 		pr->idx2 = pr->idx = NULL;
 	}
 
-	dbe->cl.ugen_erased = ++m->pl->ugen;
-	dbe->filename = NULL;
 	return true;
+}
+
+void add_to_dirty_list(module *m, db_entry *dbe)
+{
+	if (!retract_from_db(m, dbe))
+		return;
+
+	predicate *pr = dbe->owner;
+	dbe->dirty = pr->dirty_list;
+	pr->dirty_list = dbe;
 }
 
 static void xref_cell(module *m, clause *cl, cell *c, predicate *parent)

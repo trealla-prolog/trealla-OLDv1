@@ -2086,11 +2086,10 @@ static bool fn_iso_clause_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,callable_or_var);
 
-	while (match_clause(q, p1, p1_ctx, DO_CLAUSE) == true) {
+	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
 		if (q->did_throw) return true;
-		CHECK_INTERRUPT();
-		clause *r = &q->st.curr_clause->cl;
-		cell *body = get_body(r->cells);
+		clause *cl = &q->st.curr_clause->cl;
+		cell *body = get_body(cl->cells);
 		bool ok;
 
 		if (body)
@@ -2104,13 +2103,13 @@ static bool fn_iso_clause_2(query *q)
 		if (ok) {
 			db_entry *dbe = q->st.curr_clause;
 			bool last_match = !more_data(q, dbe);
-			stash_me(q, r, last_match);
+			stash_me(q, cl, last_match);
 			return true;
 		}
 
-		undo_me(q);
-		drop_choice(q);
 		q->retry = QUERY_RETRY;
+		q->tot_backtracks++;
+		retry_choice(q);
 	}
 
 	return false;
@@ -2130,17 +2129,19 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 
 	bool match;
 
-	if (check_if_rule(p1))
+	if (is_a_rule(p1) && get_logical_body(p1)) {
 		match = match_rule(q, p1, p1_ctx);
-	else
+	} else {
+		p1 = get_head(p1);
 		match = match_clause(q, p1, p1_ctx, is_retract);
+	}
 
 	if (!match || q->did_throw)
 		return match;
 
 	db_entry *dbe = q->st.curr_clause;
 	add_to_dirty_list(q->st.m, dbe);
-	bool last_match = !is_next_key(q, &dbe->cl) && (is_retract == DO_RETRACT);
+	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q, &dbe->cl);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
@@ -2173,8 +2174,8 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	while (do_retract(q, p1, p1_ctx, DO_RETRACTALL)) {
 		if (q->did_throw) return true;
-		CHECK_INTERRUPT();
 		q->retry = QUERY_RETRY;
+		q->tot_backtracks++;
 		retry_choice(q);
 		cnt++;
 	}
@@ -3570,7 +3571,7 @@ static bool fn_clause_3(query *q)
 
 	for (;;) {
 		CHECK_INTERRUPT();
-		clause *r;
+		clause *cl;
 
 		if (!is_variable(p3)) {
 			uuid u;
@@ -3581,8 +3582,8 @@ static bool fn_clause_3(query *q)
 				break;
 
 			q->st.curr_clause = dbe;
-			r = &dbe->cl;
-			cell *head = get_head(r->cells);
+			cl = &dbe->cl;
+			cell *head = get_head(cl->cells);
 
 			if (!unify(q, p1, p1_ctx, head, q->st.fp))
 				break;
@@ -3596,10 +3597,10 @@ static bool fn_clause_3(query *q)
 			check_heap_error(make_cstring(&tmp, tmpbuf));
 			set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			r = &q->st.curr_clause->cl;
+			cl = &q->st.curr_clause->cl;
 		}
 
-		cell *body = get_body(r->cells);
+		cell *body = get_body(cl->cells);
 		bool ok;
 
 		if (body)
@@ -3614,7 +3615,7 @@ static bool fn_clause_3(query *q)
 			if (is_variable(p3)) {
 				db_entry *dbe = q->st.curr_clause;
 				bool last_match = !more_data(q, dbe);
-				stash_me(q, r, last_match);
+				stash_me(q, cl, last_match);
 			} else {
 				unshare_predicate(q, q->st.pr);
 				drop_choice(q);
@@ -3626,9 +3627,9 @@ static bool fn_clause_3(query *q)
 		if (!is_variable(p3))
 			break;
 
-		undo_me(q);
-		drop_choice(q);
 		q->retry = QUERY_RETRY;
+		q->tot_backtracks++;
+		retry_choice(q);
 	}
 
 	return false;

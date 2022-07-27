@@ -22,7 +22,7 @@ void do_reduce(cell *n);
 cell *get_body(cell *c);
 cell *get_logical_body(cell *c);
 
-inline static bool check_if_rule(const cell *c)
+inline static bool is_a_rule(const cell *c)
 {
 	if (is_structure(c) && (c->val_off == g_neck_s) && (c->arity == 2))
 		return true;
@@ -32,7 +32,7 @@ inline static bool check_if_rule(const cell *c)
 
 inline static cell *get_head(cell *c)
 {
-	if (check_if_rule(c))
+	if (is_a_rule(c))
 		return c + 1;
 
 	return c;

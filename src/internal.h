@@ -861,7 +861,7 @@ inline static void chk_cells(const cell *src, pl_idx_t nbr_cells)
 cell *list_head(cell *l, cell *tmp);
 cell *list_tail(cell *l, cell *tmp);
 
-enum clause_type { DO_CLAUSE, DO_RETRACT, DO_STREAM_RETRACT, DO_RETRACTALL };
+enum clause_type { DO_CLAUSE, DO_RETRACT, DO_RETRACTALL };
 
 size_t formatted(char *dst, size_t dstlen, const char *src, int srclen, bool dq);
 char *slicedup(const char *s, size_t n);

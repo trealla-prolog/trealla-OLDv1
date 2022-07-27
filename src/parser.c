@@ -107,7 +107,7 @@ cell *list_tail(cell *l, cell *tmp)
 
 cell *get_body(cell *c)
 {
-	if (check_if_rule(c)) {
+	if (is_a_rule(c)) {
 		c = c + 1;
 		c += c->nbr_cells;
 

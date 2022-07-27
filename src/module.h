@@ -11,7 +11,7 @@ module *load_file(module *m, const char *filename, bool including);
 module *load_fp(module *m, FILE *fp, const char *filename, bool including);
 module *load_text(module *m, const char *src, const char *filename);
 
-bool add_to_dirty_list(module *m, db_entry *r);
+void add_to_dirty_list(module *m, db_entry *r);
 void convert_to_literal(module *m, cell *c);
 unsigned find_op(module *m, const char *name, unsigned specifier);
 unsigned search_op(module *m, const char *name, unsigned *specifier, bool hint_prefix);
@@ -30,7 +30,6 @@ void just_in_time_rebuild(predicate *pr);
 
 db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting);
 db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, cell *p1, bool consulting);
-bool retract_from_db(module *m, db_entry *dbe);
 db_entry *find_in_db(module *m, uuid *ref);
 db_entry *erase_from_db(module *m, uuid *ref);
 

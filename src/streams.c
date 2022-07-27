@@ -313,19 +313,8 @@ static void del_stream_properties(query *q, int n)
 	tmp->arity = 2;
 	q->retry = QUERY_OK;
 
-#if 0
-	predicate *pr = find_predicate(q->st.m, tmp);
-
-	if (!pr) {
-		throw_error(q, tmp, "existence_error", "procedure");
-		return;
-	}
-#endif
-
-	while (do_retract(q, tmp, q->st.curr_frame, DO_STREAM_RETRACT)) {
-		if (q->did_throw)
-			return;
-
+	while (do_retract(q, tmp, q->st.curr_frame, DO_RETRACTALL)) {
+		if (q->did_throw) return;
 		q->retry = QUERY_RETRY;
 		retry_choice(q);
 	}
@@ -554,10 +543,10 @@ static bool fn_iso_stream_property_2(query *q)
 		return false;
 	}
 
-	clause *r = &q->st.curr_clause->cl;
+	clause *cl = &q->st.curr_clause->cl;
 	GET_FIRST_ARG(pstrx,smallint);
 	pstrx->flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	stash_me(q, r, false);
+	stash_me(q, cl, false);
 	return true;
 }
 

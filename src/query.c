@@ -305,16 +305,34 @@ char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t
 
 bool more_data(query *q, db_entry *dbe)
 {
-	if (!dbe->next)
+	if (q->st.iter) {
+		db_entry *dbe;
+		const frame *f = GET_CURR_FRAME();
+
+		while (map_is_next(q->st.iter, (void**)&dbe)) {
+			if (!can_view(f->ugen, dbe)) {
+				db_entry *save_dbe = q->st.curr_clause;
+				next_key(q);
+				q->st.curr_clause = save_dbe;
+				continue;
+			}
+
+			return true;
+		}
+
 		return false;
+	}
 
 	const frame *f = GET_CURR_FRAME();
 	const db_entry *next = dbe->next;
 
-	while (next && !can_view(f, next))
+	while (next && !can_view(f->ugen, next))
 		next = next->next;
 
-	return next ? true : false;
+	if (!next)
+		return false;
+
+	return true;
 }
 
 static bool is_ground(const cell *c)
@@ -359,7 +377,7 @@ void setup_key(query *q)
 		q->st.arg3_is_ground = true;
 }
 
-static void next_key(query *q)
+void next_key(query *q)
 {
 	if (q->st.iter) {
 		if (!map_next(q->st.iter, (void*)&q->st.curr_clause)) {
@@ -378,8 +396,10 @@ bool is_next_key(query *q, clause *cl)
 		const frame *f = GET_CURR_FRAME();
 
 		while (map_is_next(q->st.iter, (void**)&dbe)) {
-			if (!can_view(f, dbe)) {
+			if (!can_view(f->ugen, dbe)) {
+				db_entry *save_dbe = q->st.curr_clause;
 				next_key(q);
+				q->st.curr_clause = save_dbe;
 				continue;
 			}
 
@@ -389,13 +409,8 @@ bool is_next_key(query *q, clause *cl)
 		return false;
 	}
 
-	db_entry *next = q->st.curr_clause->next;
-
-	//printf("*** q->st.def=%d, q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
-	//	q->st.definite, q->st.arg1_is_ground, cl->arg1_is_unique);
-
-	if (!next)
-		return false;
+	//printf("*** q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
+	//	q->st.arg1_is_ground, cl->arg1_is_unique);
 
 	if (q->st.arg1_is_ground && cl->arg1_is_unique)
 		return false;
@@ -404,6 +419,11 @@ bool is_next_key(query *q, clause *cl)
 		return false;
 
 	if (q->st.arg3_is_ground && cl->arg3_is_unique)
+		return false;
+
+	db_entry *next = q->st.curr_clause->next;
+
+	if (!next)
 		return false;
 
 	// Attempt look-ahead on 1st arg...
@@ -906,12 +926,11 @@ static void commit_me(query *q, clause *cl)
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
 	cell *body = get_body(cl->cells);
-	bool implied_first_cut = q->check_unique && !q->has_vars && cl->is_unique;
+	bool implied_first_cut = q->check_unique && !q->has_vars && (cl->is_unique && !q->st.iter);
 	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q, cl);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
-	//bool dummy = !body && !cl->nbr_vars;
 	bool tco;
 
 	if (q->no_tco && (cl->nbr_vars != cl->nbr_temporaries))
@@ -1376,7 +1395,7 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		CHECK_INTERRUPT();
 
-		if (!can_view(f, q->st.curr_clause))
+		if (!can_view(f->ugen, q->st.curr_clause))
 			continue;
 
 		clause *cl = &q->st.curr_clause->cl;
@@ -1479,7 +1498,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 	for (; q->st.curr_clause; q->st.curr_clause = q->st.curr_clause->next) {
 		CHECK_INTERRUPT();
 
-		if (!can_view(f, q->st.curr_clause))
+		if (!can_view(f->ugen, q->st.curr_clause))
 			continue;
 
 		clause *cl = &q->st.curr_clause->cl;
@@ -1553,7 +1572,7 @@ static bool match_head(query *q)
 	for (; q->st.curr_clause; next_key(q)) {
 		CHECK_INTERRUPT();
 
-		if (!can_view(f, q->st.curr_clause))
+		if (!can_view(f->ugen, q->st.curr_clause))
 			continue;
 
 		clause *cl = &q->st.curr_clause->cl;
@@ -1729,7 +1748,8 @@ bool start(query *q)
 			proceed(q);
 		} else if (is_list(q->st.curr_cell)) {
 			if (consultall(q, q->st.curr_cell, q->st.curr_frame) != true) {
-				q->retry = true;
+				q->retry = QUERY_RETRY;
+				q->tot_backtracks++;
 				continue;
 			}
 
