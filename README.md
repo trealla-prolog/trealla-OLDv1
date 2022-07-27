@@ -166,6 +166,15 @@ whereby printing large numbers becomes exponentially slower (100K+ digits)
 and will require a switch to *libtomath* at some point to remedy.
 
 
+Contributions
+=============
+
+Contributions are welcome. Trealla coding style is snake-case (like
+original K&R). I consider camelCase to be an anti-pattern, probably
+because i'm dyslexic and it takes me twice as long to read and 4 times
+as long to write.
+
+
 Cross-compile for Windows
 =========================
 
