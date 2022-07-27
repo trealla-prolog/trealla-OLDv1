@@ -1219,7 +1219,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 	unsigned lhs_pri_1 = is_interned(lhs) ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
 	unsigned lhs_pri_2 = is_interned(lhs) && !lhs->arity ? search_op(q->st.m, C_STR(q, lhs), NULL, false) : 0;
-	unsigned rhs_pri_1 = is_interned(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
+	unsigned rhs_pri_1 = is_interned(rhs) ? search_op(q->st.m, C_STR(q, rhs), NULL, is_prefix(rhs)) : 0;
 	unsigned rhs_pri_2 = is_interned(rhs) && !rhs->arity ? search_op(q->st.m, C_STR(q, rhs), NULL, false) : 0;
 	unsigned my_priority = search_op(q->st.m, src, NULL, false);
 
