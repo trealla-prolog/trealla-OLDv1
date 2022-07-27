@@ -27,6 +27,9 @@ Trealla is not WAM-based. It uses tree-walking, structure-sharing and
 deep-binding. Source is compiled to an AST that is interpreted at
 runtime.
 
+The name Trealla comes from the Liaden Universe books by Lee & Miller.
+It is also a nod to the Trealla region of Western Australia.
+
 
 Logo
 ====
