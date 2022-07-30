@@ -333,8 +333,8 @@ prolog *pl_create()
 	if (!pl->pool) return NULL;
 	bool error = false;
 
-	CHECK_SENTINEL(pl->symtab = map_create((void*)strcmp, (void*)free, NULL), NULL);
-	CHECK_SENTINEL(pl->keyval = map_create((void*)strcmp, (void*)keyvalfree, NULL), NULL);
+	CHECK_SENTINEL(pl->symtab = map_create((void*)fake_strcmp, (void*)free, NULL), NULL);
+	CHECK_SENTINEL(pl->keyval = map_create((void*)fake_strcmp, (void*)keyvalfree, NULL), NULL);
 	map_allow_dups(pl->symtab, false);
 	map_allow_dups(pl->keyval, false);
 
@@ -416,7 +416,7 @@ prolog *pl_create()
 
 	pl->streams[3].ignore = true;;
 
-	pl->biftab = map_create((void*)strcmp, NULL, NULL);
+	pl->biftab = map_create((void*)fake_strcmp, NULL, NULL);
 	map_allow_dups(pl->biftab, false);
 
 	if (pl->biftab)
