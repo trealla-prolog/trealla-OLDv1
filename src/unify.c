@@ -614,12 +614,13 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		return head;
 	}
 
+#if 0
 	pl_int_t offset = 0;
+#endif
 
 LOOP:
 
-	// Keep string code separate for now...
-
+#if 0
 	if (is_string(head)) {
 		const char *src = C_STR(q, head);
 		size_t len_src = C_STRLEN(q, head);
@@ -632,18 +633,20 @@ LOOP:
 			*skip += 1;
 		}
 
+		unshare_cell(tmp);
+
 		if (C_STRLEN(q, head) == (size_t)(src-save_src)) {
 			make_atom(tmp, g_nil_s);
 		} else if (src == save_src) {
 			tmp = head;
 		} else {
 			make_stringn(tmp, src, C_STRLEN(q, head) - (src-save_src));
-			share_cell(tmp);
 		}
 
 		*skip += offset;
 		return tmp;
 	}
+#endif
 
 	// Handle ISO lists...
 
@@ -679,7 +682,9 @@ LOOP:
 			head = fast;
 			max -= cnt + 1;
 			max += 1;
+#if 0
 			offset = cnt;
+#endif
 			goto LOOP;
 		}
 

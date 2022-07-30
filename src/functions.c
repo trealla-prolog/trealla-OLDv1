@@ -246,9 +246,9 @@ static bool fn_iso_is_2(query *q)
 	p2.nbr_cells = 1;
 
 	if (is_variable(p1) && is_number(&p2)) {
-		set_var(q, p1, p1_ctx, &p2, q->st.curr_frame);
+		bool ok = unify(q, p1, p1_ctx, &p2, q->st.curr_frame);
 		clr_accum(&q->accum);
-		return true;
+		return ok;
 	}
 
 	if (is_smallint(p1) && is_smallint(&p2))
@@ -2392,8 +2392,7 @@ static bool fn_get_seed_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, g_seed);
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_random_between_3(query *q)
@@ -2419,8 +2418,7 @@ static bool fn_random_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_float(&tmp, rnd());
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_random_integer_0(query *q)
@@ -2452,8 +2450,7 @@ static bool fn_rand_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_int(&tmp, rnd() * ((int64_t)RAND_MAX+1));
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_sys_set_prob_1(query *q)
@@ -2495,9 +2492,9 @@ static bool fn_sys_get_prob_1(query *q)
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
 	make_float(&tmp, q->st.prob);
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	q->st.prob = 1.0;
-	return true;
+	return ok;
 }
 
 static pl_int_t gcd(pl_int_t num, pl_int_t remainder)

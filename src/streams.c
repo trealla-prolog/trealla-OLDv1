@@ -666,8 +666,7 @@ static bool fn_popen_4(query *q)
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 #endif
 
@@ -899,15 +898,14 @@ static bool fn_iso_open_4(query *q)
 		tmp.arity = 2;
 		tmp.val_str = addr;
 		tmp.str_len = len;
-		set_var(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
+		unify(q, mmap_var, mmap_ctx, &tmp, q->st.curr_frame);
 	}
 #endif
 
 	cell tmp ;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_iso_close_1(query *q)
@@ -1263,19 +1261,19 @@ bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl
 				if (vars) {
 					cell tmp;
 					make_atom(&tmp, g_nil_s);
-					set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+					unify(q, vars, vars_ctx, &tmp, q->st.curr_frame);
 				}
 
 				if (varnames) {
 					cell tmp;
 					make_atom(&tmp, g_nil_s);
-					set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+					unify(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
 				}
 
 				if (sings) {
 					cell tmp;
 					make_atom(&tmp, g_nil_s);
-					set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+					unify(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 				}
 
 				cell *p22 = p2;
@@ -1461,11 +1459,11 @@ bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl
 			check_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
-			set_var(q, vars, vars_ctx, tmp, q->st.curr_frame);
+			unify(q, vars, vars_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
 			make_atom(&tmp, g_nil_s);
-			set_var(q, vars, vars_ctx, &tmp, q->st.curr_frame);
+			unify(q, vars, vars_ctx, &tmp, q->st.curr_frame);
 		}
 	}
 
@@ -1517,11 +1515,11 @@ bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl
 			check_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
-			set_var(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
+			unify(q, varnames, varnames_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
 			make_atom(&tmp, g_nil_s);
-			set_var(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
+			unify(q, varnames, varnames_ctx, &tmp, q->st.curr_frame);
 		}
 	}
 
@@ -1579,11 +1577,11 @@ bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl
 			check_heap_error(tmp);
 			safe_copy_cells(tmp, save, idx);
 			tmp->nbr_cells = idx;
-			set_var(q, sings, sings_ctx, tmp, q->st.curr_frame);
+			unify(q, sings, sings_ctx, tmp, q->st.curr_frame);
 		} else {
 			cell tmp;
 			make_atom(&tmp, g_nil_s);
-			set_var(q, sings, sings_ctx, &tmp, q->st.curr_frame);
+			unify(q, sings, sings_ctx, &tmp, q->st.curr_frame);
 		}
 	}
 
@@ -3018,8 +3016,7 @@ static bool fn_iso_current_input_1(query *q)
 		cell tmp;
 		make_int(&tmp, q->pl->current_input);
 		tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-		return true;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!is_stream(pstr))
@@ -3037,8 +3034,7 @@ static bool fn_iso_current_output_1(query *q)
 		cell tmp;
 		make_int(&tmp, q->pl->current_output);
 		tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-		set_var(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
-		return true;
+		return unify(q, pstr, pstr_ctx, &tmp, q->st.curr_frame);
 	}
 
 	if (!is_stream(pstr))
@@ -3482,9 +3478,9 @@ static bool fn_edin_seeing_1(query *q)
 	char *name = q->pl->current_input==0?"user":q->pl->streams[q->pl->current_input].name;
 	cell tmp;
 	check_heap_error(make_cstring(&tmp, name));
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	return true;
+	return ok;
 }
 
 static bool fn_edin_telling_1(query *q)
@@ -3493,9 +3489,9 @@ static bool fn_edin_telling_1(query *q)
 	char *name =q->pl->current_output==1?"user":q->pl->streams[q->pl->current_output].name;
 	cell tmp;
 	check_heap_error(make_cstring(&tmp, name));
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
-	return true;
+	return ok;
 }
 
 static bool fn_read_line_to_string_2(query *q)
@@ -3645,10 +3641,10 @@ static bool fn_read_file_to_string_3(query *q)
 	fclose(fp);
 	cell tmp;
 	check_heap_error(make_stringn(&tmp, s, len), free(s));
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	free(s);
-	return true;
+	return ok;
 }
 
 static bool do_consult(query *q, cell *p1, pl_idx_t p1_ctx)
@@ -3859,10 +3855,10 @@ static bool fn_loadfile_2(query *q)
 	fclose(fp);
 	cell tmp;
 	check_heap_error(make_stringn(&tmp, s, len), free(s));
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	free(s);
-	return true;
+	return ok;
 }
 
 static bool fn_getfile_2(query *q)
@@ -3930,11 +3926,11 @@ static bool fn_getfile_2(query *q)
 	if (!in_list) {
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
 		check_heap_error(l);
-		set_var(q, p2, p2_ctx, l, q->st.curr_frame);
+		unify(q, p2, p2_ctx, l, q->st.curr_frame);
 	}
 
 	return true;
@@ -3979,11 +3975,11 @@ static bool fn_getlines_1(query *q)
 	if (!in_list) {
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
 		check_heap_error(l);
-		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+		unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	}
 
 	return true;
@@ -4029,11 +4025,11 @@ static bool fn_getlines_2(query *q)
 	if (!in_list) {
 		cell tmp;
 		make_atom(&tmp, g_nil_s);
-		set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
+		unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 	} else {
 		cell *l = end_list(q);
 		check_heap_error(l);
-		set_var(q, p1, p1_ctx, l, q->st.curr_frame);
+		unify(q, p1, p1_ctx, l, q->st.curr_frame);
 	}
 
 	return true;
@@ -4937,8 +4933,7 @@ static bool fn_server_3(query *q)
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_accept_2(query *q)
@@ -4996,8 +4991,7 @@ static bool fn_accept_2(query *q)
 	cell tmp;
 	make_int(&tmp, n);
 	tmp.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	set_var(q, p1, p1_ctx, &tmp, q->st.curr_frame);
-	return true;
+	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
 static bool fn_client_5(query *q)
@@ -5134,16 +5128,15 @@ static bool fn_client_5(query *q)
 
 	cell tmp;
 	check_heap_error(make_string(&tmp, hostname));
-	set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+	unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	check_heap_error(make_string(&tmp, path));
-	set_var(q, p3, p3_ctx, &tmp, q->st.curr_frame);
+	unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
 	cell tmp2;
 	make_int(&tmp2, n);
 	tmp2.flags |= FLAG_INT_STREAM | FLAG_INT_HEX;
-	set_var(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
-	return true;
+	return unify(q, p4, p4_ctx, &tmp2, q->st.curr_frame);
 }
 
 static bool fn_bread_3(query *q)
@@ -5185,11 +5178,11 @@ static bool fn_bread_3(query *q)
 
 		cell tmp;
 		check_heap_error(make_stringn(&tmp, str->data, str->data_len), free(str->data));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		free(str->data);
 		str->data = NULL;
-		return true;
+		return ok;
 	}
 
 	if (is_integer(p1)) {
@@ -5205,11 +5198,11 @@ static bool fn_bread_3(query *q)
 		check_heap_error(str->data);
 		cell tmp;
 		check_heap_error(make_stringn(&tmp, str->data, nbytes), free(str->data));
-		set_var(q, p2, p2_ctx, &tmp, q->st.curr_frame);
+		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		free(str->data);
 		str->data = NULL;
-		return true;
+		return ok;
 	}
 
 	if (!str->data) {
@@ -5235,7 +5228,7 @@ static bool fn_bread_3(query *q)
 
 	cell tmp1;
 	make_int(&tmp1, str->data_len);
-	set_var(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
+	unify(q, p1, p1_ctx, &tmp1, q->st.curr_frame);
 	cell tmp2;
 
 	if (str->data_len)
@@ -5243,11 +5236,11 @@ static bool fn_bread_3(query *q)
 	else
 		make_atom(&tmp2, g_nil_s);
 
-	set_var(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
+	bool ok = unify(q, p2, p2_ctx, &tmp2, q->st.curr_frame);
 	unshare_cell(&tmp2);
 	free(str->data);
 	str->data = NULL;
-	return true;
+	return ok;
 }
 
 static bool fn_bwrite_2(query *q)
