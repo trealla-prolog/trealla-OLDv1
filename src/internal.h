@@ -875,6 +875,10 @@ const char *dump_key(const void *k, const void *v, const void *p);
 
 #define slicecmp2(s1,l1,s2) slicecmp(s1,l1,s2,strlen(s2))
 
+inline static int fake_strcmp(const void *ptr1, const void *ptr2, const void *param, void *l) {
+	return strcmp(ptr1, ptr2);
+}
+
 // A string builder...
 
 typedef struct {

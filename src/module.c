@@ -1670,7 +1670,7 @@ module *create_module(prolog *pl, const char *name)
 	m->flags.character_escapes = true;
 	m->error = false;
 	m->id = ++pl->next_mod_id;
-	m->defops = map_create((void*)strcmp, NULL, NULL);
+	m->defops = map_create((void*)fake_strcmp, NULL, NULL);
 	map_allow_dups(m->defops, false);
 	m->indexing_threshold = 1500;
 	pl->modmap[m->id] = m;
@@ -1683,7 +1683,7 @@ module *create_module(prolog *pl, const char *name)
 		}
 	}
 
-	m->ops = map_create((void*)strcmp, NULL, NULL);
+	m->ops = map_create((void*)fake_strcmp, NULL, NULL);
 	map_allow_dups(m->ops, false);
 	m->index = map_create(predicate_cmpkey, NULL, m);
 	map_allow_dups(m->index, false);

@@ -614,6 +614,8 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 		return head;
 	}
 
+	cell *slow;
+
 #if 0
 	pl_int_t offset = 0;
 #endif
@@ -650,7 +652,7 @@ LOOP:
 
 	// Handle ISO lists...
 
-	cell *slow = head;
+	slow = head;
 	pl_idx_t slow_ctx = *head_ctx, fast_ctx = *head_ctx;
 	bool done = false;
 	cell *fast = term_next(q, head, &fast_ctx, &done);
