@@ -2102,7 +2102,7 @@ static bool fn_iso_clause_2(query *q)
 
 		if (ok) {
 			db_entry *dbe = q->st.curr_clause;
-			bool last_match = !more_data(q, dbe);
+			bool last_match = !is_next_key(q, &dbe->cl);
 			stash_me(q, cl, last_match);
 			return true;
 		}
@@ -3612,15 +3612,16 @@ static bool fn_clause_3(query *q)
 		}
 
 		if (ok) {
+			db_entry *dbe = q->st.curr_clause;
+			bool last_match;
+
 			if (is_variable(p3)) {
-				db_entry *dbe = q->st.curr_clause;
-				bool last_match = !more_data(q, dbe);
-				stash_me(q, cl, last_match);
+				last_match = !is_next_key(q, &dbe->cl);
 			} else {
-				unshare_predicate(q, q->st.pr);
-				drop_choice(q);
+				last_match = true;
 			}
 
+			stash_me(q, cl, last_match);
 			return true;
 		}
 
