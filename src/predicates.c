@@ -314,9 +314,9 @@ static bool fn_iso_notunify_2(query *q)
 	pl_idx_t nbr_cells = 1;
 	tmp[nbr_cells].nbr_cells += p1->nbr_cells+p2->nbr_cells;
 	nbr_cells++;
-	copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
+	safe_copy_cells(tmp+nbr_cells, p1, p1->nbr_cells);
 	nbr_cells += p1->nbr_cells;
-	copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
+	safe_copy_cells(tmp+nbr_cells, p2, p2->nbr_cells);
 	nbr_cells += p2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_cut_s, fn_sys_inner_cut_0, 0, 0);
 	make_struct(tmp+nbr_cells++, g_fail_s, fn_iso_fail_0, 0, 0);
@@ -1506,7 +1506,7 @@ static bool fn_iso_atom_concat_3(query *q)
 		ASTRING_strcatn(pr, C_STR(q, p1), C_STRLEN(q, p1));
 		ASTRING_strcatn(pr, C_STR(q, p2), C_STRLEN(q, p2));
 		cell tmp;
-		check_heap_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+		check_heap_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 		ASTRING_free(pr);
 		bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
@@ -5573,7 +5573,7 @@ static bool fn_atomic_list_concat_3(query *q)
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atomic_list_concat/3");
 
 	cell tmp;
-	check_heap_error(make_cstringn(&tmp, ASTRING_cstr(pr), ASTRING_strlen(pr)), ASTRING_free(pr));
+	check_heap_error(make_cstring(&tmp, ASTRING_cstr(pr)), ASTRING_free(pr));
 	ASTRING_free(pr);
 	bool ok = unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 	unshare_cell(&tmp);
@@ -6826,7 +6826,7 @@ static void load_properties(module *m)
 	format_property(m, tmpbuf, sizeof(tmpbuf), "clause", 3, "meta_predicate(db_entry(:,?,?))"); ASTRING_strcat(pr, tmpbuf);
 
 	for (int i = 2; i <= 7; i++) {
-		char metabuf[256];
+		char metabuf[1024];
 		char *dst2 = metabuf;
 		dst2 += snprintf(dst2, sizeof(metabuf), "meta_predicate(call(%d", i-1);
 
@@ -6839,7 +6839,7 @@ static void load_properties(module *m)
 	}
 
 	for (int i = 2; i <= 7; i++) {
-		char metabuf[256];
+		char metabuf[1024];
 		char *dst2 = metabuf;
 		dst2 += snprintf(dst2, sizeof(metabuf), "meta_predicate(task(%d", i-1);
 

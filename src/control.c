@@ -726,7 +726,7 @@ bool throw_error3(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const
 		pl_idx_t nbr_cells = 0;
 		make_struct(tmp+nbr_cells++, g_error_s, NULL, 2, 5+(c->nbr_cells-1));
 		make_struct(tmp+nbr_cells++, index_from_pool(q->pl, err_type), NULL, 1, 1+(c->nbr_cells-1));
-		copy_cells(tmp+nbr_cells, c, c->nbr_cells);
+		safe_copy_cells(tmp+nbr_cells, c, c->nbr_cells);
 		nbr_cells += c->nbr_cells;
 		make_struct(tmp+nbr_cells, g_slash_s, NULL, 2, 2);
 		SET_OP(tmp+nbr_cells, OP_YFX); nbr_cells++;

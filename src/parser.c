@@ -387,8 +387,8 @@ static void directives(parser *p, cell *d)
 			return;
 		}
 
-		p->line_nbr = save_line_nbr;
 		free(filename);
+		p->line_nbr = save_line_nbr;
 		return;
 	}
 
@@ -408,8 +408,8 @@ static void directives(parser *p, cell *d)
 			return;
 		}
 
-		p->line_nbr = save_line_nbr;
 		free(filename);
+		p->line_nbr = save_line_nbr;
 		return;
 	}
 
@@ -618,8 +618,8 @@ static void directives(parser *p, cell *d)
 				ASTRING(s1);
 				ASTRING_sprintf(s1, "library/%s", lib->name);
 				m = load_text(p->m, ASTRING_cstr(src), ASTRING_cstr(s1));
-				ASTRING_free(src);
 				ASTRING_free(s1);
+				ASTRING_free(src);
 
 				if (m != p->m)
 					do_db_load(m);

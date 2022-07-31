@@ -478,8 +478,8 @@ void set_meta_predicate_in_db(module *m, cell *c)
 		char *dst = print_canonical_to_strbuf(&q, c, 0, 0);
 		char tmpbuf[1024];
 		snprintf(tmpbuf, sizeof(tmpbuf), "meta_predicate(%s)", dst);
-		push_property(m, name, arity, tmpbuf);
 		free(dst);
+		push_property(m, name, arity, tmpbuf);
 		pr->is_meta_predicate = true;
 	} else
 		m->error = true;
