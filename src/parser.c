@@ -2665,7 +2665,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 	ch = get_char_utf8(&src);
 	int next_ch = peek_char_utf8(src);
-	bool was_space = iswspace(next_ch);
 
 	if ((ch == '.') && iswspace(next_ch)) {
 		dst += put_char_utf8(dst, ch);
@@ -2677,7 +2676,8 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 	p->srcptr = (char*)src;
 
-	if ((ch == '[') || (ch == '{')) {
+	if ((ch == '(') || (ch == '[') || (ch == '{') || (ch == ',')
+		|| (ch == '}') || (ch == ']') || (ch == ')')) {
 		src = eat_space(p);
 
 		if (!src || !*src) {
@@ -2717,20 +2717,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 	// Symbols...
 
 	p->symbol = true;
-
-	if (is_matching_pair(ch, next_ch, ')','(') ||
-		is_matching_pair(ch, next_ch, ']','(') ||
-		is_matching_pair(ch, next_ch, '}','(') ||
-		is_matching_pair(ch, next_ch, ',',',') ||
-		is_matching_pair(ch, next_ch, '[',',')) {
-		if (DUMP_ERRS || !p->do_read_term)
-			fprintf(stdout, "Error: syntax error, operator expected special char, line %d: %s\n", p->line_nbr, p->token);
-
-		p->error_desc = "operator_expected";
-		p->error = true;
-		p->srcptr = (char*)src;
-		return false;
-	}
 
 	do {
 		size_t len = (dst + put_len_utf8(ch) + 1) - p->token;
