@@ -2102,7 +2102,7 @@ static bool fn_iso_clause_2(query *q)
 
 		if (ok) {
 			db_entry *dbe = q->st.curr_clause;
-			bool last_match = !more_data(q, dbe);
+			bool last_match = !is_next_key(q, &dbe->cl);
 			stash_me(q, cl, last_match);
 			return true;
 		}
@@ -3616,7 +3616,7 @@ static bool fn_clause_3(query *q)
 			bool last_match;
 
 			if (is_variable(p3)) {
-				last_match = !more_data(q, dbe);
+				last_match = !is_next_key(q, &dbe->cl);
 			} else {
 				last_match = true;
 			}
