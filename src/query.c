@@ -982,12 +982,15 @@ void stash_me(query *q, const clause *cl, bool last_match)
 	if (nbr_vars) {
 		pl_idx_t new_frame = q->st.fp++;
 		frame *f = GET_FRAME(new_frame);
+		f->is_last = last_match;
 		f->prev_frame = q->st.curr_frame;
 		f->prev_cell = NULL;
 		f->cgen = cgen;
 		f->overflow = 0;
 		q->st.sp += nbr_vars;
 	}
+
+	q->st.iter = NULL;
 }
 
 bool push_choice(query *q)
