@@ -303,38 +303,6 @@ char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t
 	return tmp;
 }
 
-bool more_data(query *q, db_entry *dbe)
-{
-	if (q->st.iter) {
-		db_entry *dbe;
-		const frame *f = GET_CURR_FRAME();
-
-		while (map_is_next(q->st.iter, (void**)&dbe)) {
-			if (!can_view(f->ugen, dbe)) {
-				db_entry *save_dbe = q->st.curr_clause;
-				next_key(q);
-				q->st.curr_clause = save_dbe;
-				continue;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	const frame *f = GET_CURR_FRAME();
-	const db_entry *next = dbe->next;
-
-	while (next && !can_view(f->ugen, next))
-		next = next->next;
-
-	if (!next)
-		return false;
-
-	return true;
-}
-
 static bool is_ground(const cell *c)
 {
 	pl_idx_t nbr_cells = c->nbr_cells;
