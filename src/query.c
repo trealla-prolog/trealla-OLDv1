@@ -712,30 +712,29 @@ void drop_choice(query *q)
 
 bool retry_choice(query *q)
 {
-LOOP:
+	while (q->cp) {
+		pl_idx_t curr_choice = --q->cp;
+		const choice *ch = GET_CHOICE(curr_choice);
+		unwind_trail(q, ch);
 
-	if (!q->cp)
-		return false;
+		if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
+			continue;
 
-	pl_idx_t curr_choice = --q->cp;
-	const choice *ch = GET_CHOICE(curr_choice);
-	unwind_trail(q, ch);
+		q->st = ch->st;
+		q->save_m = NULL;
+		trim_heap(q);
 
-	if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
-		goto LOOP;
+		frame *f = GET_CURR_FRAME();
+		f->ugen = ch->ugen;
+		f->cgen = ch->frame_cgen;
+		f->nbr_vars = ch->nbr_vars;
+		f->nbr_slots = ch->nbr_slots;
+		f->overflow = ch->overflow;
 
-	q->st = ch->st;
-	q->save_m = NULL;
-	trim_heap(q);
+		return true;
+	}
 
-	frame *f = GET_CURR_FRAME();
-	f->ugen = ch->ugen;
-	f->cgen = ch->frame_cgen;
-	f->nbr_vars = ch->nbr_vars;
-	f->nbr_slots = ch->nbr_slots;
-	f->overflow = ch->overflow;
-
-	return true;
+	return false;
 }
 
 static frame *push_frame(query *q, clause *cl)
