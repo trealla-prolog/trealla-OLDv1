@@ -717,9 +717,6 @@ bool retry_choice(query *q)
 		const choice *ch = GET_CHOICE(curr_choice);
 		unwind_trail(q, ch);
 
-		if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
-			continue;
-
 		q->st = ch->st;
 		q->save_m = NULL;
 		trim_heap(q);
@@ -730,6 +727,9 @@ bool retry_choice(query *q)
 		f->nbr_vars = ch->nbr_vars;
 		f->nbr_slots = ch->nbr_slots;
 		f->overflow = ch->overflow;
+
+		if (ch->catchme_exception || ch->soft_cut || ch->did_cleanup)
+			continue;
 
 		return true;
 	}
