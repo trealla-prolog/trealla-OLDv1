@@ -710,11 +710,6 @@ void drop_choice(query *q)
 	--q->cp;
 }
 
-inline static pl_idx_t redo_choice(query *q)
-{
-	return q->cp ? --q->cp : 0;
-}
-
 bool retry_choice(query *q)
 {
 LOOP:
@@ -722,7 +717,7 @@ LOOP:
 	if (!q->cp)
 		return false;
 
-	pl_idx_t curr_choice = redo_choice(q);
+	pl_idx_t curr_choice = q->cp ? --q->cp : 0;
 	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
