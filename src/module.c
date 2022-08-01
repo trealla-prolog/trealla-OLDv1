@@ -869,7 +869,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 	return true;
 }
 
-static void check_rule(module *m, db_entry *dbe_orig, bool once)
+static void check_rule(module *m, db_entry *dbe_orig)
 {
 	predicate *pr = dbe_orig->owner;
 	clause *r = &dbe_orig->cl;
@@ -918,9 +918,6 @@ static void check_rule(module *m, db_entry *dbe_orig, bool once)
 			matched = true;
 			break;
 		}
-
-		if (once)
-			break;
 	}
 
 	if (!matched)
@@ -944,7 +941,7 @@ void just_in_time_rebuild(predicate *pr)
 		if (dbe->cl.ugen_erased)
 			continue;
 
-		check_rule(pr->m, dbe, false);
+		check_rule(pr->m, dbe);
 	}
 }
 
@@ -1121,7 +1118,7 @@ db_entry *asserta_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 	assert_commit(m, dbe, pr, false);
 
 	if (!consulting && !pr->idx)
-		check_rule(m, dbe, true);
+		pr->is_processed = false;
 
 	return dbe;
 }
@@ -1257,7 +1254,7 @@ void xref_db(module *m)
 			continue;
 
 		for (db_entry *dbe = pr->head; dbe; dbe = dbe->next)
-			check_rule(m, dbe, false);
+			check_rule(m, dbe);
 	}
 }
 
