@@ -1591,7 +1591,7 @@ static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 
 #define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
 
-static void uuid_gen(prolog *pl, uuid *u)
+void uuid_gen(prolog *pl, uuid *u)
 {
 	if (!pl->seed)
 		pl->seed = (uint64_t)time(0) & MASK_FINAL;
@@ -2088,7 +2088,7 @@ static bool fn_iso_clause_2(query *q)
 
 	while (match_clause(q, p1, p1_ctx, DO_CLAUSE)) {
 		if (q->did_throw) return true;
-		clause *cl = &q->st.curr_clause->cl;
+		clause *cl = &q->st.curr_dbe->cl;
 		cell *body = get_body(cl->cells);
 		bool ok;
 
@@ -2101,8 +2101,7 @@ static bool fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause;
-			bool last_match = !is_next_key(q, &dbe->cl);
+			bool last_match = !is_next_key(q);
 			stash_me(q, cl, last_match);
 			return true;
 		}
@@ -2139,9 +2138,9 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	if (!match || q->did_throw)
 		return match;
 
-	db_entry *dbe = q->st.curr_clause;
+	db_entry *dbe = q->st.curr_dbe;
 	add_to_dirty_list(q->st.m, dbe);
-	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q, &dbe->cl);
+	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
@@ -2426,7 +2425,6 @@ static bool fn_iso_asserta_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTA);
@@ -2490,7 +2488,6 @@ static bool fn_iso_assertz_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTZ);
@@ -3581,7 +3578,7 @@ static bool fn_clause_3(query *q)
 			if (!dbe || (!u.u1 && !u.u2))
 				break;
 
-			q->st.curr_clause = dbe;
+			q->st.curr_dbe = dbe;
 			cl = &dbe->cl;
 			cell *head = get_head(cl->cells);
 
@@ -3592,12 +3589,12 @@ static bool fn_clause_3(query *q)
 				break;
 
 			char tmpbuf[128];
-			uuid_to_buf(&q->st.curr_clause->u, tmpbuf, sizeof(tmpbuf));
+			uuid_to_buf(&q->st.curr_dbe->u, tmpbuf, sizeof(tmpbuf));
 			cell tmp;
 			check_heap_error(make_cstring(&tmp, tmpbuf));
 			unify(q, p3, p3_ctx, &tmp, q->st.curr_frame);
 			unshare_cell(&tmp);
-			cl = &q->st.curr_clause->cl;
+			cl = &q->st.curr_dbe->cl;
 		}
 
 		cell *body = get_body(cl->cells);
@@ -3612,11 +3609,10 @@ static bool fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause;
 			bool last_match;
 
 			if (is_variable(p3)) {
-				last_match = !is_next_key(q, &dbe->cl);
+				last_match = !is_next_key(q);
 			} else {
 				last_match = true;
 			}
@@ -3887,7 +3883,7 @@ static bool fn_listing_0(query *q)
 
 static void save_name(FILE *fp, query *q, pl_idx_t name, unsigned arity)
 {
-	module *m = q->st.curr_clause ? q->st.curr_clause->owner->m : q->st.m;
+	module *m = q->st.curr_dbe ? q->st.curr_dbe->owner->m : q->st.m;
 
 	for (predicate *pr = m->head; pr; pr = pr->next) {
 		if (pr->is_prebuilt && (arity == -1U))

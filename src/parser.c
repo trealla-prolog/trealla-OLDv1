@@ -3067,6 +3067,15 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		}
 
 		if (!p->quote_char && consing && !strcmp(p->token, ",")) {
+			if ((arg_idx == p->cl->cidx) || !p->cl->cidx) {
+				if (DUMP_ERRS || !p->do_read_term)
+					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
+
+				p->error_desc = "args";
+				p->error = true;
+				break;
+			}
+
 			if ((*p->srcptr == ',') && !p->flags.double_quote_codes) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, missing element '%s'\n", p->save_line?p->save_line:"");
@@ -3097,7 +3106,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			((args && !strcmp(p->token, ",")) ||
 			(consing && !p->was_consing && !p->start_term && (!strcmp(p->token, ",") || !strcmp(p->token, "|")))
 			)) {
-			if (arg_idx == p->cl->cidx) {
+			if ((arg_idx == p->cl->cidx) || !p->cl->cidx) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, missing arg '%s'\n", p->save_line?p->save_line:"");
 

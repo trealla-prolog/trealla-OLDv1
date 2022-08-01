@@ -928,8 +928,8 @@ bool throw_error(query *q, cell *c, pl_idx_t c_ctx, const char *err_type, const 
 	make_atom(&top_level, index_from_pool(q->pl, "top_level"));
 	cell *goal;
 
-	if (q->st.curr_clause && !is_builtin(q->st.curr_cell))
-		goal = get_head(q->st.curr_clause->cl.cells);
+	if (q->st.curr_dbe && !is_builtin(q->st.curr_cell))
+		goal = get_head(q->st.curr_dbe->cl.cells);
 	else if (!q->last_arg)
 		goal = &top_level;
 	else

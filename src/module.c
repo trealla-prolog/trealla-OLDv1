@@ -236,9 +236,9 @@ static void destroy_predicate(module *m, predicate *pr)
 
 static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param, void *l)
 {
+	const module *m = (const module*)param;
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
-	const module *m = (const module*)param;
 
 	if (p1->arity < p2->arity)
 		return -1;
@@ -254,9 +254,9 @@ static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *para
 
 static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, void *l, unsigned depth)
 {
+	const module *m = (const module*)param;
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
-	const module *m = (const module*)param;
 
 	if (is_smallint(p1)) {
 		if (is_smallint(p2)) {
@@ -872,15 +872,15 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 static void check_rule(module *m, db_entry *dbe_orig)
 {
 	predicate *pr = dbe_orig->owner;
-	clause *r = &dbe_orig->cl;
+	clause *cl = &dbe_orig->cl;
 	bool matched = false;
 	bool p1_matched = false, p2_matched = false, p3_matched = false;
-	cell *head = get_head(r->cells);
+	cell *head = get_head(cl->cells);
 	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
-	r->is_unique = false;
-	r->arg1_is_unique = false;
-	r->arg2_is_unique = false;
-	r->arg3_is_unique = false;
+	cl->arg1_is_unique = false;
+	cl->arg2_is_unique = false;
+	cl->arg3_is_unique = false;
+	cl->is_unique = false;
 
 	if (pr->key.arity > 1)
 		p2 = p1 + p1->nbr_cells;
@@ -921,16 +921,16 @@ static void check_rule(module *m, db_entry *dbe_orig)
 	}
 
 	if (!matched)
-		r->is_unique = true;
+		cl->is_unique = true;
 
-	if (!p1_matched && r->is_unique)
-		r->arg1_is_unique = true;
+	if (!p1_matched && cl->is_unique)
+		cl->arg1_is_unique = true;
 
-	if (!p2_matched && r->is_unique)
-		r->arg2_is_unique = true;
+	if (!p2_matched && cl->is_unique)
+		cl->arg2_is_unique = true;
 
-	if (!p3_matched && r->is_unique)
-		r->arg3_is_unique = true;
+	if (!p3_matched && cl->is_unique)
+		cl->arg3_is_unique = true;
 }
 
 void just_in_time_rebuild(predicate *pr)
@@ -1036,6 +1036,8 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	cl->arg1_is_unique = false;
 	cl->arg2_is_unique = false;
 	cl->arg3_is_unique = false;
+
+	uuid_gen(m->pl, &dbe->u);
 
 	if (pr->is_noindex)
 		return;
