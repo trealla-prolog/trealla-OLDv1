@@ -717,7 +717,7 @@ LOOP:
 	if (!q->cp)
 		return false;
 
-	pl_idx_t curr_choice = q->cp ? --q->cp : 0;
+	pl_idx_t curr_choice = --q->cp;
 	const choice *ch = GET_CHOICE(curr_choice);
 	unwind_trail(q, ch);
 
