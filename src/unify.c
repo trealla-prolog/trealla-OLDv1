@@ -620,7 +620,7 @@ cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_i
 	pl_int_t offset = 0;
 #endif
 
-LOOP:
+LOOP: ;
 
 #if 0
 	if (is_string(head)) {

@@ -7,12 +7,13 @@
 
 #ifdef USE_ISOCLINE
 #include "isocline/include/isocline.h"
-#else
+#endif
+#if !defined(USE_ISOCLINE) && !defined(__wasi__)
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 #include <termios.h>
 #endif
 
@@ -22,7 +23,7 @@
 
 int history_getch(void)
 {
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	struct termios oldattr, newattr;
 	tcgetattr(STDIN_FILENO, &oldattr);
 	newattr = oldattr;
@@ -30,7 +31,7 @@ int history_getch(void)
 	tcsetattr(STDIN_FILENO, TCSANOW, &newattr);
 #endif
 	int ch = fgetc_utf8(stdin);
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldattr);
 #endif
 	return ch;
@@ -38,7 +39,7 @@ int history_getch(void)
 
 int history_getch_fd(int fd)
 {
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	struct termios oldattr, newattr;
 	tcgetattr(fd, &oldattr);
 	newattr = oldattr;
@@ -46,7 +47,7 @@ int history_getch_fd(int fd)
 	tcsetattr(fd, TCSANOW, &newattr);
 #endif
 	int ch = fgetc_utf8(stdin);
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	tcsetattr(fd, TCSANOW, &oldattr);
 #endif
 	return ch;
@@ -55,7 +56,7 @@ int history_getch_fd(int fd)
 static char g_filename[1024];
 
 
-#if !USE_ISOCLINE
+#if !USE_ISOCLINE && !defined(__wasi__)
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
@@ -116,7 +117,9 @@ void history_save(void)
 	//rl_clear_history();
 	clear_history();
 }
-#else
+#endif
+
+#if USE_ISOCLINE && !defined(__wasi__)
 char *history_readline_eol(const char *prompt, char eol)
 {
 	char *cmd = NULL;
@@ -178,6 +181,29 @@ void history_load(const char *filename)
 	ic_set_default_highlighter(NULL, NULL);
 
 	ic_set_prompt_marker("", "");
+}
+
+void history_save(void)
+{
+}
+#endif
+
+#ifdef __wasi__
+char *history_readline_eol(const char *prompt, char eol)
+{
+	fprintf(stdout, "%s", prompt);
+	fflush(stdout);
+
+	size_t len = 0;
+	char *line = NULL;
+	if (!(getline(&line, &len, stdin)))
+		return NULL;
+
+	return line;
+}
+
+void history_load(const char *filename)
+{
 }
 
 void history_save(void)

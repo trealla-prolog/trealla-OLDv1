@@ -38,7 +38,9 @@ int check_interrupt(query *q)
 
 		fflush(stdout);
 		int ch = history_getch();
+#ifndef __wasi__
 		printf("%c\n", ch);
+#endif
 
 		if (ch == 'h') {
 			printf("Action (a)ll, (e)nd, e(x)it, (r)etry, (c)ontinue, (t)race, cree(p): ");
@@ -59,8 +61,10 @@ int check_interrupt(query *q)
 			break;
 		}
 
+#ifndef __wasi__
 		if (ch == '\n')
 			return -1;
+#endif
 
 		if (ch == 'e') {
 			q->abort = true;
@@ -120,6 +124,10 @@ bool check_redo(query *q)
 			continue;
 		}
 
+#ifdef __wasi__
+	printf(" ");
+#endif
+
 		if (ch == 'a') {
 			printf(" ");
 			fflush(stdout);
@@ -139,7 +147,12 @@ bool check_redo(query *q)
 			break;
 		}
 
+#ifndef __wasi__
 		if ((ch == '\n') || (ch == 'e')) {
+#else
+		// WASI always sends buffered input with a linebreak, so use '.' instead
+		if ((ch == '.') || (ch == 'e')) {
+#endif
 			//printf(";  ... .\n");
 			printf("  ... .\n");
 			q->pl->did_dump_vars = true;

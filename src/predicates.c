@@ -4841,7 +4841,11 @@ static bool fn_pid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
+#ifndef __wasi__
 	make_int(&tmp, getpid());
+#else
+	make_int(&tmp, 42);
+#endif
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -4910,6 +4914,7 @@ static bool fn_date_time_6(query *q)
 	return true;
 }
 
+#ifndef __wasi__
 static bool fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -4929,6 +4934,17 @@ static bool fn_shell_2(query *q)
 	make_int(&tmp, status);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
+#else
+static bool fn_shell_1(query *q)
+{
+	return false;
+}
+
+static bool fn_shell_2(query *q)
+{
+	return false;
+}
+#endif
 
 static bool fn_format_2(query *q)
 {
@@ -6653,7 +6669,7 @@ static bool fn_sys_register_term_1(query *q)
 
 static bool fn_sys_alarm_1(query *q)
 {
-#ifdef _WIN32
+#if defined(_WIN32) || !defined(ITIMER_REAL)
 	return false;
 #else
 	GET_FIRST_ARG(p1,number);
