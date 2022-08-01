@@ -236,9 +236,9 @@ static void destroy_predicate(module *m, predicate *pr)
 
 static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *param, void *l)
 {
+	const module *m = (const module*)param;
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
-	const module *m = (const module*)param;
 
 	if (p1->arity < p2->arity)
 		return -1;
@@ -254,9 +254,9 @@ static int predicate_cmpkey(const void *ptr1, const void *ptr2, const void *para
 
 static int index_cmpkey_(const void *ptr1, const void *ptr2, const void *param, void *l, unsigned depth)
 {
+	const module *m = (const module*)param;
 	const cell *p1 = (const cell*)ptr1;
 	const cell *p2 = (const cell*)ptr2;
-	const module *m = (const module*)param;
 
 	if (is_smallint(p1)) {
 		if (is_smallint(p2)) {
