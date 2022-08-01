@@ -877,10 +877,10 @@ static void check_rule(module *m, db_entry *dbe_orig)
 	bool p1_matched = false, p2_matched = false, p3_matched = false;
 	cell *head = get_head(cl->cells);
 	cell *p1 = head + 1, *p2 = NULL, *p3 = NULL;
-	cl->is_unique = false;
 	cl->arg1_is_unique = false;
 	cl->arg2_is_unique = false;
 	cl->arg3_is_unique = false;
+	cl->is_unique = false;
 
 	if (pr->key.arity > 1)
 		p2 = p1 + p1->nbr_cells;
