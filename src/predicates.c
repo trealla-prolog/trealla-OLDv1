@@ -2101,8 +2101,7 @@ static bool fn_iso_clause_2(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause;
-			bool last_match = !is_next_key(q, &dbe->cl);
+			bool last_match = !is_next_key(q);
 			stash_me(q, cl, last_match);
 			return true;
 		}
@@ -2141,7 +2140,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 
 	db_entry *dbe = q->st.curr_clause;
 	add_to_dirty_list(q->st.m, dbe);
-	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q, &dbe->cl);
+	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q);
 	stash_me(q, &dbe->cl, last_match);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
@@ -3610,11 +3609,10 @@ static bool fn_clause_3(query *q)
 		}
 
 		if (ok) {
-			db_entry *dbe = q->st.curr_clause;
 			bool last_match;
 
 			if (is_variable(p3)) {
-				last_match = !is_next_key(q, &dbe->cl);
+				last_match = !is_next_key(q);
 			} else {
 				last_match = true;
 			}

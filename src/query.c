@@ -357,7 +357,7 @@ void next_key(query *q)
 		q->st.curr_clause = q->st.curr_clause->next;
 }
 
-bool is_next_key(query *q, clause *cl)
+bool is_next_key(query *q)
 {
 	if (q->st.iter) {
 		db_entry *dbe;
@@ -376,6 +376,8 @@ bool is_next_key(query *q, clause *cl)
 
 		return false;
 	}
+
+	clause *cl = &q->st.curr_clause->cl;
 
 	//printf("*** q->st.arg1_is_ground=%d, cl->arg1_is_unique=%d\n",
 	//	q->st.arg1_is_ground, cl->arg1_is_unique);
@@ -876,15 +878,16 @@ void unshare_predicate(query *q, predicate *pr)
 	//purge_dirty_list(q);
 }
 
-static void commit_me(query *q, clause *cl)
+static void commit_me(query *q)
 {
+	clause *cl = &q->st.curr_clause->cl;
 	q->in_commit = true;
 	frame *f = GET_CURR_FRAME();
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_clause->owner->m;
 	cell *body = get_body(cl->cells);
 	bool implied_first_cut = q->check_unique && !q->has_vars && (cl->is_unique && !q->st.iter);
-	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q, cl);
+	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool slots_ok = !q->retry && check_slots(q, f, cl);
 	bool choices = any_choices(q, f);
@@ -1543,7 +1546,7 @@ static bool match_head(query *q)
 			if (q->error)
 				break;
 
-			commit_me(q, cl);
+			commit_me(q);
 			return true;
 		}
 
