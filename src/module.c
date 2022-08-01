@@ -1037,6 +1037,8 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	cl->arg2_is_unique = false;
 	cl->arg3_is_unique = false;
 
+	uuid_gen(m->pl, &dbe->u);
+
 	if (pr->is_noindex)
 		return;
 

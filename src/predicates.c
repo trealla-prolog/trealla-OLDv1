@@ -1591,7 +1591,7 @@ static void compare_and_zero(uint64_t v1, uint64_t *v2, uint64_t *v)
 
 #define MASK_FINAL 0x0000FFFFFFFFFFFF // Final 48 bits
 
-static void uuid_gen(prolog *pl, uuid *u)
+void uuid_gen(prolog *pl, uuid *u)
 {
 	if (!pl->seed)
 		pl->seed = (uint64_t)time(0) & MASK_FINAL;
@@ -2426,7 +2426,6 @@ static bool fn_iso_asserta_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTA);
@@ -2490,7 +2489,6 @@ static bool fn_iso_assertz_1(query *q)
 		return throw_error(q, h, q->st.curr_frame, "permission_error", "modify_static_procedure");
 
 	p->cl->cidx = 0;
-	uuid_gen(q->pl, &dbe->u);
 
 	if (!q->st.m->loading && dbe->owner->is_persist)
 		db_log(q, dbe, LOG_ASSERTZ);
