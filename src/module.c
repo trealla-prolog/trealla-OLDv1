@@ -997,9 +997,6 @@ static db_entry *assert_begin(module *m, unsigned nbr_vars, unsigned nbr_tempora
 		}
 	}
 
-	if (!pr->is_dynamic)
-		pr->is_processed = false;
-
 	if (m->prebuilt)
 		pr->is_prebuilt = true;
 
@@ -1162,10 +1159,20 @@ static bool retract_from_db(module *m, db_entry *dbe)
 	predicate *pr = dbe->owner;
 	pr->cnt--;
 
-	if (!pr->cnt) {
+	if (pr->idx && !pr->cnt) {
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
-		pr->idx2 = pr->idx = NULL;
+		pr->idx2 = NULL;
+
+		pr->idx = map_create(index_cmpkey, NULL, m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
 	}
 
 	return true;
