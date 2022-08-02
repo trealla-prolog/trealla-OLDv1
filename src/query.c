@@ -886,7 +886,7 @@ static void commit_me(query *q)
 	f->mid = q->st.m->id;
 	q->st.m = q->st.curr_dbe->owner->m;
 	cell *body = get_body(cl->cells);
-	bool implied_first_cut = q->check_unique && !q->has_vars && (cl->is_unique && !q->st.iter);
+	bool implied_first_cut = q->check_unique && !q->has_vars && cl->is_unique && !q->st.iter;
 	bool last_match = implied_first_cut || cl->is_first_cut || !is_next_key(q);
 	bool recursive = is_tail_recursive(q->st.curr_cell);
 	bool slots_ok = !q->retry && check_slots(q, f, cl);
