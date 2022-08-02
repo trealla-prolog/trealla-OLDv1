@@ -693,10 +693,12 @@ static bool fn_iso_truncate_1(query *q)
 	if (is_float(&p1)) {
 		q->accum.val_int = (pl_int_t)p1.val_float;
 
+#ifdef FE_INVALID
 		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
 		} else
+#endif
 			q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
@@ -718,17 +720,23 @@ static bool fn_iso_round_1(query *q)
 	if (is_float(&p1)) {
 		double f = fabs(p1.val_float);
 
+#ifdef FE_UPWARD
 		if ((f - floor(f)) > 0.5)
 			fesetround(FE_TONEAREST);
 		else
 			fesetround(FE_UPWARD);
+#else
+		fesetround(FE_TONEAREST);
+#endif
 
 		q->accum.val_int = llrint(p1.val_float);
 
+#ifdef FE_INVALID
 		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
 		} else
+#endif
 			q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
@@ -750,10 +758,12 @@ static bool fn_iso_ceiling_1(query *q)
 	if (is_float(&p1)) {
 		q->accum.val_int = (pl_int_t)ceil(p1.val_float);
 
+#ifdef FE_INVALID
 		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
 		} else
+#endif
 			q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");
@@ -819,10 +829,12 @@ static bool fn_iso_floor_1(query *q)
 	if (is_float(&p1)) {
 		q->accum.val_int = (pl_int_t)floor(p1.val_float);
 
+#ifdef FE_INVALID
 		if (fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW)) {
 			mp_int_set_double(&q->tmp_ival, p1.val_float);
 			SET_ACCUM();
 		} else
+#endif
 			q->accum.tag = TAG_INTEGER;
 	} else if (is_variable(&p1)) {
 		return throw_error(q, &p1, q->st.curr_frame, "instantiation_error", "not_sufficiently_instantiated");

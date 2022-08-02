@@ -141,7 +141,12 @@ static void g_destroy()
 	free(g_tpl_lib);
 }
 
-static void keyvalfree(const void *key, const void *val)
+static void keyfree(const void *key, const void *val, const void *p)
+{
+	free((void*)key);
+}
+
+static void keyvalfree(const void *key, const void *val, const void *p)
 {
 	free((void*)key);
 	free((void*)val);
@@ -333,7 +338,7 @@ prolog *pl_create()
 	if (!pl->pool) return NULL;
 	bool error = false;
 
-	CHECK_SENTINEL(pl->symtab = map_create((void*)fake_strcmp, (void*)free, NULL), NULL);
+	CHECK_SENTINEL(pl->symtab = map_create((void*)fake_strcmp, (void*)keyfree, NULL), NULL);
 	CHECK_SENTINEL(pl->keyval = map_create((void*)fake_strcmp, (void*)keyvalfree, NULL), NULL);
 	map_allow_dups(pl->symtab, false);
 	map_allow_dups(pl->keyval, false);
