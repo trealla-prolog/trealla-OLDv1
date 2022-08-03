@@ -228,8 +228,6 @@ static void destroy_predicate(module *m, predicate *pr)
 		dbe = save;
 	}
 
-	map_destroy(pr->idx2_save);
-	map_destroy(pr->idx_save);
 	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
 	free(pr);
@@ -857,11 +855,9 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 			if (dbe->owner->cnt)
 				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
 
-			map_destroy(pr->idx2_save);
-			map_destroy(pr->idx_save);
 			map_destroy(pr->idx2);
 			map_destroy(pr->idx);
-			pr->idx_save = pr->idx2 = pr->idx = NULL;
+			pr->idx2 = pr->idx = NULL;
 			pr->head = pr->tail = NULL;
 			dbe->owner->cnt = 0;
 			return false;
@@ -1163,10 +1159,8 @@ static bool retract_from_db(db_entry *dbe)
 	pr->cnt--;
 
 	if (pr->idx && !pr->cnt) {
-		map_destroy(pr->idx2_save);
-		map_destroy(pr->idx_save);
-		pr->idx2_save = pr->idx2;
-		pr->idx_save = pr->idx;
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
 		pr->idx2 = NULL;
 
 		pr->idx = map_create(index_cmpkey, NULL, m);
@@ -1333,10 +1327,9 @@ static bool unload_realfile(module *m, const char *filename)
 			}
 		}
 
-		map_destroy(pr->idx_save);
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
-		pr->idx_save = pr->idx2 = pr->idx = NULL;
+		pr->idx2 = pr->idx = NULL;
 
 		if (!pr->cnt) {
 			if (!pr->is_multifile && !pr->is_dynamic)

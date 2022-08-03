@@ -880,10 +880,8 @@ void unshare_predicate(query *q, predicate *pr)
 	pr->dirty_list = NULL;
 
 	if (pr->idx && !pr->cnt) {
-		map_destroy(pr->idx2_save);
-		map_destroy(pr->idx_save);
-		pr->idx2_save = pr->idx2;
-		pr->idx_save = pr->idx;
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
 		pr->idx2 = NULL;
 
 		pr->idx = map_create(index_cmpkey, NULL, pr->m);

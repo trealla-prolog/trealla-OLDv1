@@ -2182,10 +2182,8 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
 	if (pr->idx && !pr->cnt) {
-		map_destroy(pr->idx2_save);
-		map_destroy(pr->idx_save);
-		pr->idx2_save = pr->idx2;
-		pr->idx_save = pr->idx;
+		map_destroy(pr->idx2);
+		map_destroy(pr->idx);
 		pr->idx2 = NULL;
 
 		pr->idx = map_create(index_cmpkey, NULL, pr->m);
@@ -2225,10 +2223,8 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(dbe);
 	}
 
-	map_destroy(pr->idx2_save);
-	map_destroy(pr->idx_save);
-	pr->idx2_save = pr->idx2;
-	pr->idx_save = pr->idx;
+	map_destroy(pr->idx2);
+	map_destroy(pr->idx);
 	pr->idx2 = pr->idx = NULL;
 	q->st.iter = NULL;
 
