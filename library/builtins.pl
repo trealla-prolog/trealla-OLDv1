@@ -570,7 +570,7 @@ bb_del(_).
 current_op(A, B, C) :- var(A), var(B), var(C),
 	!,
 	'$load_ops',
-	'$current_op'(A, B, C).
+	'$current_op'(C, B, A).
 current_op(_, _, C) :- nonvar(C), \+ atom(C),
 	!, throw(error(type_error(atom,C), current_op/3)).
 current_op(_, B, _) :- nonvar(B), \+ atom(B),
@@ -590,11 +590,11 @@ current_op(A, _, _) :- nonvar(A),
 current_op(A, B, C) :- nonvar(A), nonvar(B), nonvar(C),
 	!,
 	'$load_ops',
-	'$current_op'(A, B, C),
+	'$current_op'(C, B, A),
 	!.
 current_op(A, B, C) :-
 	'$load_ops',
-	'$current_op'(A, B, C).
+	'$current_op'(C, B, A).
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
