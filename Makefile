@@ -11,7 +11,9 @@ LDFLAGS = -L/usr/local/lib -lm
 ifdef ISOCLINE
 CFLAGS += -DUSE_ISOCLINE=1
 else
+ifndef WASI
 LDFLAGS += -lreadline
+endif
 endif
 
 ifndef NOFFI
@@ -32,6 +34,11 @@ endif
 ifdef LTO
 CFLAGS += -flto=$(LTO)
 LDFLAGS += -flto=$(LTO)
+endif
+
+ifdef WASI
+CFLAGS += -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -O0
+LDFLAGS += -lwasi-emulated-mman -lwasi-emulated-signal
 endif
 
 SRCOBJECTS = tpl.o \

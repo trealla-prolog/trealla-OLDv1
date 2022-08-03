@@ -40,6 +40,8 @@ extern sliter *sl_find_key(skiplist *l, const void *k);
 extern bool sl_is_next_key(sliter *i);
 extern bool sl_next_key(sliter *i, void **v);
 
+extern void sl_remove(skiplist *l, const void *v);
+
 extern sliter *sl_first(skiplist *l);
 extern bool sl_is_next(sliter *i, void **v);
 extern bool sl_next(sliter *i, void **v);

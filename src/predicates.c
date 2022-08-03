@@ -2139,7 +2139,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_dbe;
-	add_to_dirty_list(q->st.m, dbe);
+	add_to_dirty_list(dbe);
 	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q);
 	stash_me(q, &dbe->cl, last_match);
 
@@ -2181,10 +2181,21 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
-	if (!pr->cnt) {
+	if (pr->idx && !pr->cnt) {
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
-		pr->idx2 = pr->idx = NULL;
+		pr->idx2 = NULL;
+
+		pr->idx = map_create(index_cmpkey, NULL, pr->m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, pr->m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
+
 		q->st.iter = NULL;
 	}
 
@@ -2209,20 +2220,27 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
 			db_log(q, dbe, LOG_ERASE);
 
-		add_to_dirty_list(q->st.m, dbe);
+		add_to_dirty_list(dbe);
 	}
 
 	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
 	pr->idx2 = pr->idx = NULL;
+	pr->is_processed = false;
 	q->st.iter = NULL;
 
 	if (hard) {
 		pr->is_abolished = true;
 	} else {
-		//pr->idx = map_create(index_cmpkey, NULL, q->st.m);
-		//ensure(pr->idx);
-		//map_allow_dups(pr->idx, true);
+		pr->idx = map_create(index_cmpkey, NULL, pr->m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, pr->m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
 	}
 
 	pr->head = pr->tail = NULL;
@@ -4841,7 +4859,11 @@ static bool fn_pid_1(query *q)
 {
 	GET_FIRST_ARG(p1,variable);
 	cell tmp;
+#ifndef __wasi__
 	make_int(&tmp, getpid());
+#else
+	make_int(&tmp, 42);
+#endif
 	return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
 }
 
@@ -4910,6 +4932,7 @@ static bool fn_date_time_6(query *q)
 	return true;
 }
 
+#ifndef __wasi__
 static bool fn_shell_1(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -4929,6 +4952,17 @@ static bool fn_shell_2(query *q)
 	make_int(&tmp, status);
 	return unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 }
+#else
+static bool fn_shell_1(query *q)
+{
+	return false;
+}
+
+static bool fn_shell_2(query *q)
+{
+	return false;
+}
+#endif
 
 static bool fn_format_2(query *q)
 {
@@ -6653,7 +6687,7 @@ static bool fn_sys_register_term_1(query *q)
 
 static bool fn_sys_alarm_1(query *q)
 {
-#ifdef _WIN32
+#if defined(_WIN32) || !defined(ITIMER_REAL)
 	return false;
 #else
 	GET_FIRST_ARG(p1,number);

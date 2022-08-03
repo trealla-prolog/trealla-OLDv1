@@ -43,7 +43,7 @@ typedef uint32_t pl_idx_t;
 #include "cdebug.h"
 #include "imath/imath.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__wasi__)
 char *realpath(const char *path, char resolved_path[PATH_MAX]);
 #endif
 
@@ -447,7 +447,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	db_entry *head, *tail;
 	module *m;
-	map *idx, *idx2, *idx_save;
+	map *idx, *idx2;
 	db_entry *dirty_list;
 	cell key;
 	uint64_t cnt, ref_cnt, db_id;

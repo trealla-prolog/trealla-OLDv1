@@ -29,6 +29,30 @@
 #include "query.h"
 #include "utf8.h"
 
+#ifdef __wasi__
+char *realpath(const char *path, char resolved_path[PATH_MAX])
+{
+	if (!path) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	struct stat st = {0};
+	if (stat(path, &st)) {
+		// errno set by stat
+		return NULL;
+	}
+
+	if (!resolved_path) {
+		resolved_path = malloc(PATH_MAX);
+		ensure(resolved_path);
+	}
+
+	strcpy(resolved_path, path);
+	return resolved_path;
+}
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 
@@ -481,7 +505,7 @@ static void clear_streams_properties(query *q)
 		for (db_entry *dbe = pr->head; dbe;) {
 			db_entry *save = dbe;
 			dbe = dbe->next;
-			add_to_dirty_list(q->st.m, save);
+			add_to_dirty_list(save);
 		}
 
 		pr->head = pr->tail = NULL;
@@ -562,7 +586,7 @@ void convert_path(char *filename)
 	}
 }
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 static bool fn_popen_4(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
@@ -5421,7 +5445,7 @@ builtins g_files_bifs[] =
 	{"bwrite", 2, fn_bwrite_2, "+stream,-string", false, BLAH},
 
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	{"popen", 4, fn_popen_4, "+atom,+atom,-stream,+list", false, BLAH},
 #endif
 

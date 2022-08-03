@@ -20,7 +20,9 @@
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef __wasi__
 #include <sys/wait.h>
+#endif
 #define msleep(ms)                                                     \
 {                                                                      \
 	struct timespec tv;                                                \
@@ -36,6 +38,7 @@ void sigfn(int s)
 	g_tpl_interrupt = s;
 }
 
+#ifndef __wasi__
 static int daemonize(int argc, char *argv[])
 {
 	char path[1024];
@@ -132,6 +135,7 @@ static int daemonize(int argc, char *argv[])
 	return 1;
 #endif
 }
+#endif
 
 int main(int ac, char *av[])
 {
@@ -182,6 +186,7 @@ int main(int ac, char *av[])
 			daemon = 1;
 	}
 
+#ifndef __wasi__
 	if (daemon) {
 		if (!daemonize(ac, av)) {
 			pl_destroy(pl);
@@ -193,8 +198,9 @@ int main(int ac, char *av[])
 		signal(SIGALRM, &sigfn);
 #endif
 	}
+#endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__wasi__)
 	signal(SIGPIPE, SIG_IGN);
 #endif
 	const char *goal = NULL;
