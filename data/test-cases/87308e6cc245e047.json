@@ -1,0 +1,61 @@
+{
+  "uid" : "87308e6cc245e047",
+  "name" : "fib_01",
+  "fullName" : "fib_01::tests",
+  "historyId" : "fib_01::tests",
+  "time" : {
+    "duration" : 1
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "assertion_failure(A==8)",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "ports/toychr/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "45-46"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/ports/toychr/tests.lgt#L45"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "87308e6cc245e047.json",
+  "parameterValues" : [ "ports/toychr/tests.lgt", "45-46", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/ports/toychr/tests.lgt#L45" ]
+}

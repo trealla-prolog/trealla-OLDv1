@@ -1,0 +1,55 @@
+{
+  "uid" : "8f1a303e51fa6c4f",
+  "name" : "serialization_02",
+  "fullName" : "serialization_02::tests",
+  "historyId" : "serialization_02::tests",
+  "time" : {
+    "duration" : 6
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/serialization/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/serialization/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/serialization/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/serialization/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "41-55"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/examples/serialization/tests.lgt#L41"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "8f1a303e51fa6c4f.json",
+  "parameterValues" : [ "examples/serialization/tests.lgt", "41-55", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/examples/serialization/tests.lgt#L41" ]
+}

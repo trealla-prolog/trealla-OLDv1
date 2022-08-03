@@ -1,0 +1,61 @@
+{
+  "uid" : "9dc68ff43ade91eb",
+  "name" : "leq_01",
+  "fullName" : "leq_01::tests",
+  "historyId" : "leq_01::tests",
+  "time" : {
+    "duration" : 2
+  },
+  "status" : "failed",
+  "statusMessage" : "Error instead of success",
+  "statusTrace" : "assertion_failure(variant((leq(A,B),leq(C,A)),(leq(C,B),leq(A,B),leq(C,A))))",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "ports/toychr/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "ports/toychr/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "42-43"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/ports/toychr/tests.lgt#L42"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ ]
+  },
+  "source" : "9dc68ff43ade91eb.json",
+  "parameterValues" : [ "ports/toychr/tests.lgt", "42-43", "https://github.com/LogtalkDotOrg/logtalk3/tree/5d3ec7f00cce656ea4159366e746168a798e6be6/ports/toychr/tests.lgt#L42" ]
+}
