@@ -208,21 +208,17 @@ predicate *create_predicate(module *m, cell *c)
 
 static void destroy_predicate(module *m, predicate *pr)
 {
+#if 0
+	if (pr->cnt != 0) {
+		printf("*** Warning: unreleased (%u) predicate '%s'/%u\n",
+		(unsigned)pr->cnt, C_STR(m, &pr->key), pr->key.arity);
+	}
+#endif
+
 	map_del(m->index, &pr->key);
 
 	for (db_entry *dbe = pr->head; dbe;) {
 		db_entry *save = dbe->next;
-
-		if (!dbe->cl.ugen_erased) {
-			clear_rule(&dbe->cl);
-			free(dbe);
-		}
-
-		dbe = save;
-	}
-
-	for (db_entry *dbe = pr->dirty_list; dbe;) {
-		db_entry *save = dbe->dirty;
 		clear_rule(&dbe->cl);
 		free(dbe);
 		dbe = save;

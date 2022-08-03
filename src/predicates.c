@@ -7018,9 +7018,9 @@ static void load_ops(query *q)
 		char tmpbuf[1024];
 
 		if (quote)
-			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n", ptr->priority, specifier, name);
+			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'( '%s', %s, %u).\n", name, specifier, ptr->priority);
 		else
-			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, (%s)).\n", ptr->priority, specifier, name);
+			snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'( (%s), %s, %u).\n", name, specifier, ptr->priority);
 
 		ASTRING_strcat(pr, tmpbuf);
 	}
@@ -7052,8 +7052,8 @@ static void load_ops(query *q)
 		formatted(name, sizeof(name), ptr->name, strlen(ptr->name), false);
 		char tmpbuf[1024];
 
-		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'(%u, %s, '%s').\n",
-			ptr->priority, specifier, name);
+		snprintf(tmpbuf, sizeof(tmpbuf), "'$current_op'('%s', %s, %u).\n",
+			name, specifier, ptr->priority);
 		ASTRING_strcat(pr, tmpbuf);
 	}
 
