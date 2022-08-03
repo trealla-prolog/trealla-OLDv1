@@ -2226,6 +2226,7 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
 	pr->idx2 = pr->idx = NULL;
+	pr->is_processed = false;
 	q->st.iter = NULL;
 
 	if (hard) {
