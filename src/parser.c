@@ -2599,6 +2599,8 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				continue;
 			}
 
+			p->toklen = dst - p->token;
+
 			if (!p->string
 				&& strcmp(p->token, "[")
 				&& strcmp(p->token, "(")
@@ -2607,7 +2609,9 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				&& strcmp(p->token, ")")
 				&& strcmp(p->token, "}"))
 			{
-				if (search_op(p->m, p->token, NULL, false)) {
+				if (p->toklen && !p->token[0]) {
+					p->quote_char = -1;
+				} else if (search_op(p->m, p->token, NULL, false)) {
 					p->is_op = true;
 
 					if (!strcmp(p->token, ","))
@@ -2618,7 +2622,6 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				p->quote_char = -1;
 
 			p->srcptr = (char*)src;
-			p->toklen = dst - p->token;
 			return true;
 		}
 	}
