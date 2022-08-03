@@ -709,6 +709,7 @@ void drop_choice(query *q)
 		ch->st.iter = NULL;
 	}
 
+	q->st.pr = NULL;
 	--q->cp;
 }
 
