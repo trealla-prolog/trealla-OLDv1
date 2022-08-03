@@ -2309,6 +2309,16 @@ static bool check_space_before_function(parser *p, int ch, const char *src)
 	return true;
 }
 
+static bool contains_null(const char *src, size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		if (!*src++)
+			return true;
+	}
+
+	return false;
+}
+
 bool get_token(parser *p, bool last_op, bool was_postfix)
 {
 	if (p->error || !p->srcptr || !*p->srcptr)
@@ -2609,7 +2619,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				&& strcmp(p->token, ")")
 				&& strcmp(p->token, "}"))
 			{
-				if (p->toklen && !p->token[0]) {
+				if (p->toklen && contains_null(p->token, p->toklen)) {
 					p->quote_char = -1;
 				} else if (search_op(p->m, p->token, NULL, false)) {
 					p->is_op = true;
