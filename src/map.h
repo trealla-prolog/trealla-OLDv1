@@ -14,6 +14,7 @@
 #define map_del sl_del
 #define map_count sl_count
 #define map_find sl_find
+#define map_remove sl_remove
 
 #define map_first sl_first
 #define map_is_next sl_is_next

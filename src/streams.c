@@ -505,7 +505,7 @@ static void clear_streams_properties(query *q)
 		for (db_entry *dbe = pr->head; dbe;) {
 			db_entry *save = dbe;
 			dbe = dbe->next;
-			add_to_dirty_list(q->st.m, save);
+			add_to_dirty_list(save);
 		}
 
 		pr->head = pr->tail = NULL;

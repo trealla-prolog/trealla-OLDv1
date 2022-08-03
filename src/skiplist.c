@@ -528,6 +528,36 @@ bool sl_next(sliter *iter, void **val)
 	return false;
 }
 
+void sl_remove(skiplist *l, const void *v)
+{
+	if (!l)
+		return;
+
+	slnode_t *p;
+	p = l->header;
+	p = p->forward[0];
+
+	while (p) {
+		slnode_t *q = p->forward[0];
+
+		for (int j = 0; j < p->nbr; j++) {
+			if (p->bkt[j].val != v)
+				continue;
+
+			while (j < (p->nbr - 1)) {
+				p->bkt[j] = p->bkt[j + 1];
+				j++;
+			}
+
+			p->nbr--;
+			l->count--;
+			return;
+		}
+
+		p = q;
+	}
+}
+
 sliter *sl_find_key(skiplist *l, const void *key)
 {
 	slnode_t *p, *q = 0;

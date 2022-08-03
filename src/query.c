@@ -839,8 +839,15 @@ void unshare_predicate(query *q, predicate *pr)
 	if (--pr->ref_cnt != 0)
 		return;
 
+	// Predicate is no longer being used
+
 	if (!pr->dirty_list)
 		return;
+
+	// Just because this predicate is no longer in use doesn't
+	// mean there are no shared references to terms contained
+	// within. So move items on the dirty-list to the query
+	// dirty-list. They will be freed up at end of the query.
 
 	db_entry *dbe = pr->dirty_list;
 	unsigned cnt = 0;
@@ -858,6 +865,10 @@ void unshare_predicate(query *q, predicate *pr)
 		if (pr->tail == dbe)
 			pr->tail = dbe->prev;
 
+		predicate *pr = dbe->owner;
+		map_remove(pr->idx2, dbe);
+		map_remove(pr->idx, dbe);
+
 		dbe->cl.is_deleted = true;
 		db_entry *save = dbe->dirty;
 		dbe->dirty = q->dirty_list;
@@ -868,14 +879,25 @@ void unshare_predicate(query *q, predicate *pr)
 
 	pr->dirty_list = NULL;
 
-	if (!pr->cnt) {
-		map_destroy(pr->idx2);
-		map_destroy(pr->idx);
-		pr->idx2 = pr->idx = NULL;
+	if (pr->idx && !pr->cnt) {
+		map_destroy(pr->idx2_save);
+		map_destroy(pr->idx_save);
+		pr->idx2_save = pr->idx2;
+		pr->idx_save = pr->idx;
+		pr->idx2 = NULL;
+
+		pr->idx = map_create(index_cmpkey, NULL, pr->m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, pr->m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
+
 		q->st.iter = NULL;
 	}
-
-	//purge_dirty_list(q);
 }
 
 static void commit_me(query *q)

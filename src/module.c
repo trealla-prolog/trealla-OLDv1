@@ -228,6 +228,7 @@ static void destroy_predicate(module *m, predicate *pr)
 		dbe = save;
 	}
 
+	map_destroy(pr->idx2_save);
 	map_destroy(pr->idx_save);
 	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
@@ -849,13 +850,14 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 		&& (C_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				add_to_dirty_list(m, dbe);
+				add_to_dirty_list(dbe);
 				pr->is_processed = false;
 			}
 
 			if (dbe->owner->cnt)
 				fprintf(stderr, "Warning: overwriting %s/%u\n", C_STR(m, &pr->key), pr->key.arity);
 
+			map_destroy(pr->idx2_save);
 			map_destroy(pr->idx_save);
 			map_destroy(pr->idx2);
 			map_destroy(pr->idx);
@@ -1040,7 +1042,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 		return;
 
 	if (!pr->idx) {
-		if (pr->cnt < m->indexing_threshold)
+		if (pr->cnt < (!pr->is_dynamic ? m->indexing_threshold : 250))
 			return;
 
 		pr->idx = map_create(index_cmpkey, NULL, m);
@@ -1149,19 +1151,22 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 	return dbe;
 }
 
-static bool retract_from_db(module *m, db_entry *dbe)
+static bool retract_from_db(db_entry *dbe)
 {
 	if (dbe->cl.ugen_erased)
 		return false;
 
+	predicate *pr = dbe->owner;
+	module *m = pr->m;
 	dbe->cl.ugen_erased = ++m->pl->ugen;
 	dbe->filename = NULL;
-	predicate *pr = dbe->owner;
 	pr->cnt--;
 
 	if (pr->idx && !pr->cnt) {
-		map_destroy(pr->idx2);
-		map_destroy(pr->idx);
+		map_destroy(pr->idx2_save);
+		map_destroy(pr->idx_save);
+		pr->idx2_save = pr->idx2;
+		pr->idx_save = pr->idx;
 		pr->idx2 = NULL;
 
 		pr->idx = map_create(index_cmpkey, NULL, m);
@@ -1178,9 +1183,9 @@ static bool retract_from_db(module *m, db_entry *dbe)
 	return true;
 }
 
-void add_to_dirty_list(module *m, db_entry *dbe)
+void add_to_dirty_list(db_entry *dbe)
 {
-	if (!retract_from_db(m, dbe))
+	if (!retract_from_db(dbe))
 		return;
 
 	predicate *pr = dbe->owner;
@@ -1319,7 +1324,7 @@ static bool unload_realfile(module *m, const char *filename)
 				continue;
 
 			if (dbe->filename && !strcmp(dbe->filename, filename)) {
-				if (!retract_from_db(m, dbe))
+				if (!retract_from_db(dbe))
 					continue;
 
 				dbe->dirty = pr->dirty_list;
@@ -1681,7 +1686,7 @@ module *create_module(prolog *pl, const char *name)
 	m->id = ++pl->next_mod_id;
 	m->defops = map_create((void*)fake_strcmp, NULL, NULL);
 	map_allow_dups(m->defops, false);
-	m->indexing_threshold = 1500;
+	m->indexing_threshold = 4000;
 	pl->modmap[m->id] = m;
 
 	if (strcmp(name, "system")) {

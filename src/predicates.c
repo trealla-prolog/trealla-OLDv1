@@ -2139,7 +2139,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_dbe;
-	add_to_dirty_list(q->st.m, dbe);
+	add_to_dirty_list(dbe);
 	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q);
 	stash_me(q, &dbe->cl, last_match);
 
@@ -2181,10 +2181,23 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
-	if (!pr->cnt) {
-		map_destroy(pr->idx2);
-		map_destroy(pr->idx);
-		pr->idx2 = pr->idx = NULL;
+	if (pr->idx && !pr->cnt) {
+		map_destroy(pr->idx2_save);
+		map_destroy(pr->idx_save);
+		pr->idx2_save = pr->idx2;
+		pr->idx_save = pr->idx;
+		pr->idx2 = NULL;
+
+		pr->idx = map_create(index_cmpkey, NULL, pr->m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, pr->m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
+
 		q->st.iter = NULL;
 	}
 
@@ -2209,20 +2222,28 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
 			db_log(q, dbe, LOG_ERASE);
 
-		add_to_dirty_list(q->st.m, dbe);
+		add_to_dirty_list(dbe);
 	}
 
-	map_destroy(pr->idx2);
-	map_destroy(pr->idx);
+	map_destroy(pr->idx2_save);
+	map_destroy(pr->idx_save);
+	pr->idx2_save = pr->idx2;
+	pr->idx_save = pr->idx;
 	pr->idx2 = pr->idx = NULL;
 	q->st.iter = NULL;
 
 	if (hard) {
 		pr->is_abolished = true;
 	} else {
-		//pr->idx = map_create(index_cmpkey, NULL, q->st.m);
-		//ensure(pr->idx);
-		//map_allow_dups(pr->idx, true);
+		pr->idx = map_create(index_cmpkey, NULL, pr->m);
+		ensure(pr->idx);
+		map_allow_dups(pr->idx, true);
+
+		if (pr->key.arity > 1) {
+			pr->idx2 = map_create(index_cmpkey, NULL, pr->m);
+			ensure(pr->idx2);
+			map_allow_dups(pr->idx2, true);
+		}
 	}
 
 	pr->head = pr->tail = NULL;

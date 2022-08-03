@@ -447,7 +447,7 @@ struct predicate_ {
 	predicate *prev, *next;
 	db_entry *head, *tail;
 	module *m;
-	map *idx, *idx2, *idx_save;
+	map *idx, *idx2, *idx_save, *idx2_save;
 	db_entry *dirty_list;
 	cell key;
 	uint64_t cnt, ref_cnt, db_id;
