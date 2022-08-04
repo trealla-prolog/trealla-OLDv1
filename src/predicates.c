@@ -2181,6 +2181,8 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 
 	//printf("*** retracted %s/%u %u of %u clauses\n", C_STR(q, &pr->key), pr->key.arity, cnt, (unsigned)pr->cnt);
 
+	purge_predicate_dirty_list(q, pr);
+
 	if (pr->idx && !pr->cnt) {
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
@@ -2216,6 +2218,8 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 	if (!pr->is_dynamic)
 		return throw_error(q, c_orig, q->st.curr_frame, "permission_error", "modify,static_procedure");
 
+	share_predicate(q, pr);
+
 	for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
 		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
 			db_log(q, dbe, LOG_ERASE);
@@ -2223,6 +2227,8 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		add_to_dirty_list(dbe);
 	}
 
+	unshare_predicate(q, pr);
+	purge_predicate_dirty_list(q, pr);
 	map_destroy(pr->idx2);
 	map_destroy(pr->idx);
 	pr->idx2 = pr->idx = NULL;

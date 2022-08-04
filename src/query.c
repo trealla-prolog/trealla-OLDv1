@@ -832,12 +832,32 @@ static bool check_slots(const query *q, const frame *f, const clause *cl)
 	return true;
 }
 
-void unshare_predicate(query *q, predicate *pr)
+void share_predicate(query *q, predicate *pr)
 {
-	if (!pr || !pr->ref_cnt)
+	if (!pr->is_dynamic)
 		return;
 
-	if (--pr->ref_cnt != 0)
+	q->st.pr = pr;
+	pr->ref_cnt++;
+	//fprintf(stderr, "*** share [%u] '%s'/%u\n", (unsigned)pr->ref_cnt, C_STR(q, &pr->key), pr->key.arity);
+}
+
+void unshare_predicate(query *q, predicate *pr)
+{
+	if (!pr)
+		return;
+
+	if (!pr->is_dynamic)
+		return;
+
+	if (!pr->ref_cnt)
+		return;
+
+	--pr->ref_cnt;
+
+	//fprintf(stderr, "*** unshare [%u] '%s'/%u\n", (unsigned)pr->ref_cnt, C_STR(q, &pr->key), pr->key.arity);
+
+	if (pr->ref_cnt != 0)
 		return;
 
 	// Predicate is no longer being used
@@ -877,6 +897,8 @@ void unshare_predicate(query *q, predicate *pr)
 		dbe = save;
 		cnt++;
 	}
+
+	//fprintf(stderr, "*** add %u to query dirty_list\n", cnt);
 
 	pr->dirty_list = NULL;
 
@@ -1357,7 +1379,7 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
 		find_key(q, pr, c);
-		share_predicate(q->st.pr = pr);
+		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
@@ -1462,7 +1484,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 		}
 
 		find_key(q, pr, c);
-		share_predicate(q->st.pr=pr);
+		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else {
@@ -1537,7 +1559,7 @@ static bool match_head(query *q)
 		}
 
 		find_key(q, pr, c);
-		share_predicate(q->st.pr=pr);
+		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
 	} else
@@ -1909,6 +1931,26 @@ bool execute(query *q, cell *cells, unsigned nbr_vars)
 	f->nbr_slots = nbr_vars;
 	f->ugen = ++q->pl->ugen;
 	return start(q);
+}
+
+void purge_predicate_dirty_list(query *q, predicate *pr)
+{
+	db_entry *save = NULL;
+
+	while (q->dirty_list) {
+		db_entry *dbe = q->dirty_list;
+		q->dirty_list = dbe->dirty;
+
+		if (dbe->owner == pr) {
+			clear_rule(&dbe->cl);
+			free(dbe);
+		} else {
+			dbe->dirty = save;
+			save = dbe;
+		}
+	}
+
+	q->dirty_list = save;
 }
 
 void purge_dirty_list(query *q)
