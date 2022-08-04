@@ -94,7 +94,7 @@ bool fn_iso_findall_3(query *q)
 				tmp = deep_clone_to_tmp(q, p1, p1_ctx);
 
 			check_heap_error(tmp);
-			check_heap_error(alloc_on_queuen(q, q->st.qnbr, tmp));
+			check_heap_error(alloc_on_queuen_unsafe(q, q->st.qnbr, tmp));
 		}
 
 		undo_me(q);

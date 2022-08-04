@@ -145,7 +145,7 @@ void clear_rule(clause *cl)
 		cell *c = cl->cells + i;
 		unshare_cell(c);
 		*c = (cell){0};
-		c->tag = TAG_EMPTY;
+		//c->tag = TAG_EMPTY;
 	}
 
 	cl->cidx = 0;

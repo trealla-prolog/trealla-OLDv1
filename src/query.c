@@ -315,7 +315,7 @@ static bool is_ground(const cell *c)
 	return true;
 }
 
-void setup_key(query *q)
+static void setup_key(query *q)
 {
 	cell *arg1 = q->key + 1, *arg2 = NULL, *arg3 = NULL;
 
@@ -419,7 +419,7 @@ const char *dump_id(const void *k, const void *v, const void *p)
 	return tmpbuf;
 }
 
-static bool find_key(query *q, predicate *pr, cell *key)
+static bool find_key(query *q, predicate *pr, cell *key, pl_idx_t key_ctx)
 {
 	q->st.iter = NULL;
 	q->st.arg1_is_ground = false;
@@ -443,7 +443,7 @@ static bool find_key(query *q, predicate *pr, cell *key)
 	//sl_dump(pr->idx, dump_key, q);
 
 	check_heap_error(init_tmp_heap(q));
-	q->key = key = deep_clone_to_tmp(q, key, q->st.curr_frame);
+	q->key = key = deep_clone_to_tmp(q, key, key_ctx);
 
 	cell *arg1 = key->arity ? key + 1 : NULL;
 	map *idx = pr->idx;
@@ -1378,7 +1378,7 @@ bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
 		if (!pr->is_dynamic)
 			return throw_error(q, head, q->latest_ctx, "permission_error", "modify,static_procedure");
 
-		find_key(q, pr, c);
+		find_key(q, pr, c, p1_ctx);
 		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
@@ -1483,7 +1483,7 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retra
 				return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 		}
 
-		find_key(q, pr, c);
+		find_key(q, pr, c, p1_ctx);
 		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
@@ -1558,7 +1558,7 @@ static bool match_head(query *q)
 			c->match = pr;
 		}
 
-		find_key(q, pr, c);
+		find_key(q, pr, c, q->st.curr_frame);
 		share_predicate(q, pr);
 		frame *f = GET_FRAME(q->st.curr_frame);
 		f->ugen = q->pl->ugen;
