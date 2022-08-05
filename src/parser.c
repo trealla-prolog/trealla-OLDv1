@@ -3113,7 +3113,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			if (p->was_consing) {
+			if (p->was_consing || last_op) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
