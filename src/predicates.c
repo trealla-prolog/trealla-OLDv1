@@ -6008,10 +6008,15 @@ static bool fn_sys_ne_2(query *q)
 
 static bool fn_sys_incr_2(query *q)
 {
-	GET_FIRST_ARG(p1, variable);
+	GET_FIRST_ARG(p1, integer_or_var);
 	GET_NEXT_ARG(p2, integer);
 	int64_t n = get_smallint(p2);
-	set_smallint(p2, n+1);
+	n++;
+	set_smallint(p2, n);
+
+	if (is_integer(p1))
+		return get_smallint(p1) == n;
+
 	return unify(q, p1, p1_ctx, p2, q->st.curr_frame);
 }
 
