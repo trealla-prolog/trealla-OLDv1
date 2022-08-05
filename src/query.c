@@ -874,17 +874,7 @@ void unshare_predicate(query *q, predicate *pr)
 	unsigned cnt = 0;
 
 	while (dbe) {
-		if (dbe->prev)
-			dbe->prev->next = dbe->next;
-
-		if (dbe->next)
-			dbe->next->prev = dbe->prev;
-
-		if (pr->head == dbe)
-			pr->head = dbe->next;
-
-		if (pr->tail == dbe)
-			pr->tail = dbe->prev;
+		delink(pr, dbe);
 
 		predicate *pr = dbe->owner;
 		map_remove(pr->idx2, dbe);

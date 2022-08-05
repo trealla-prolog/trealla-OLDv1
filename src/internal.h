@@ -952,3 +952,10 @@ typedef struct {
 
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define ASTRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
+
+#define delink(l, e) {													\
+	if (e->prev) e->prev->next = e->next;								\
+	if (e->next) e->next->prev = e->prev;								\
+	if (l->head == e) l->head = e->next;								\
+	if (l->tail == e) l->tail = e->prev;								\
+}

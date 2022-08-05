@@ -2184,6 +2184,7 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 	//purge_predicate_dirty_list(q, pr);
 
 	if (pr->idx && !pr->cnt) {
+		purge_predicate_dirty_list(q, pr);
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
 		pr->idx2 = NULL;
