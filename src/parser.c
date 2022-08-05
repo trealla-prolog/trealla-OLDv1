@@ -3225,6 +3225,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				p->error = true;
 				break;
 			}
+
 			p->last_close = true;
 			p->nesting_parens--;
 			analyze(p, arg_idx, last_op=false);
@@ -3345,7 +3346,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-		if (priority && (specifier == OP_YFX) && last_op && !last_postfix && !last_quoted) {
+		if (priority && IS_INFIX(specifier) && last_op && !last_postfix && !last_quoted) {
 			specifier = 0;
 			priority = 0;
 		}
