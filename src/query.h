@@ -15,9 +15,9 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 bool do_read_term(query *q, stream *str, cell *p1, pl_idx_t p1_ctx, cell *p2, pl_idx_t p2_ctx, char *src);
 bool do_yield_0(query *q, int msecs);
 
-void setup_key(query *q);
 bool is_next_key(query *q);
 void next_key(query *q);
+void purge_predicate_dirty_list(query *q, predicate *pr);
 void purge_dirty_list(query *q);
 bool check_slot(query *q, unsigned cnt);
 void cut_me(query *q, bool inner_cut, bool soft_cut);
@@ -51,6 +51,7 @@ size_t scan_is_chars_list(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes);
 char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t len);
 
 unsigned create_vars(query *q, unsigned nbr);
+void share_predicate(query *q, predicate *pr);
 void unshare_predicate(query *q, predicate *pr);
 cell *skip_max_list(query *q, cell *head, pl_idx_t *head_ctx, pl_int_t max, pl_int_t *skip, cell *tmp);
 bool is_cyclic_term(query *q, cell *p1, pl_idx_t p1_ctx);
@@ -129,8 +130,6 @@ cell *convert_to_list(query *q, cell *c, pl_idx_t nbr_cells);
 inline static pl_idx_t queuen_used(const query *q) { return q->qp[q->st.qnbr]; }
 inline static cell *get_queuen(query *q) { return q->queue[q->st.qnbr]; }
 inline static cell *take_queuen(query *q) { cell *save = q->queue[q->st.qnbr]; q->queue[q->st.qnbr] = NULL; return save; }
-
-inline static void share_predicate(predicate *pr) {	pr->ref_cnt++; }
 
 inline static bool can_view(uint64_t ugen, const db_entry *dbe)
 {

@@ -145,7 +145,7 @@ void clear_rule(clause *cl)
 		cell *c = cl->cells + i;
 		unshare_cell(c);
 		*c = (cell){0};
-		c->tag = TAG_EMPTY;
+		//c->tag = TAG_EMPTY;
 	}
 
 	cl->cidx = 0;
@@ -2309,6 +2309,16 @@ static bool check_space_before_function(parser *p, int ch, const char *src)
 	return true;
 }
 
+static bool contains_null(const char *src, size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		if (!*src++)
+			return true;
+	}
+
+	return false;
+}
+
 bool get_token(parser *p, bool last_op, bool was_postfix)
 {
 	if (p->error || !p->srcptr || !*p->srcptr)
@@ -2609,7 +2619,7 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 				&& strcmp(p->token, ")")
 				&& strcmp(p->token, "}"))
 			{
-				if (p->toklen && !p->token[0]) {
+				if (p->toklen && contains_null(p->token, p->toklen)) {
 					p->quote_char = -1;
 				} else if (search_op(p->m, p->token, NULL, false)) {
 					p->is_op = true;
@@ -2719,6 +2729,19 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 	// Symbols...
 
+	if (is_matching_pair(ch, next_ch, ')','(') ||
+		is_matching_pair(ch, next_ch, ']','(') ||
+		is_matching_pair(ch, next_ch, '}','(') ||
+		is_matching_pair(ch, next_ch, '}','(')) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, line %d: '%s'\n", p->line_nbr, p->srcptr);
+
+		p->error_desc = "operator_expected";
+		p->error = true;
+		p->srcptr = (char*)src;
+		return false;
+	}
+
 	p->symbol = true;
 
 	do {
@@ -2825,7 +2848,9 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 #if 0
 		int ch = peek_char_utf8(p->token);
-		fprintf(stderr, "Debug: token '%s' (%d) line_nbr=%d, symbol=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n", p->token, ch, p->line_nbr, p->symbol, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
+		fprintf(stderr,
+			"Debug: token '%s' (%d) line_nbr=%d, symbol=%d, quoted=%d, tag=%u, op=%d, lastop=%d, string=%d\n",
+			p->token, ch, p->line_nbr, p->symbol, p->quote_char, p->v.tag, p->is_op, last_op, p->string);
 #endif
 
 		if (!p->quote_char && !strcmp(p->token, ".")
@@ -3088,7 +3113,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				break;
 			}
 
-			if (p->was_consing) {
+			if (p->was_consing || last_op) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: syntax error, parsing list '%s'\n", p->save_line?p->save_line:"");
 
@@ -3334,9 +3359,14 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->quote_char = 0;
 		}
 
-		int func = last_op && is_interned(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
+		is_func = last_op && is_interned(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
 
-		if ((p->was_string || p->string) && func) {
+#if 0
+		printf("*** token=%s, last_op=%d, p->is_op=%d, is_func=%d, prefix=%d\n",
+			p->token, last_op, p->is_op, is_func, IS_PREFIX(specifier));
+#endif
+
+		if ((p->was_string || p->string) && is_func) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, near \"%s\", expected atom\n", p->token);
 
@@ -3345,8 +3375,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			break;
 		}
 
-		if (func) {
-			is_func = true;
+		if (is_func) {
 			p->is_op = false;
 			specifier = 0;
 			save_idx = p->cl->cidx;
@@ -3360,8 +3389,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->error = true;
 			break;
 		}
-
-		//printf("*** op=%s, prefix=%d\n", p->token, IS_PREFIX(specifier));
 
 		if ((!p->is_op || IS_PREFIX(specifier)) && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
@@ -3393,12 +3420,12 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			set_smallint(c, get_int(&p->v));
 		} else if (p->v.tag == TAG_FLOAT) {
 			set_float(c, get_float(&p->v));
-		} else if ((!p->is_quoted || func || p->is_op || p->is_variable
+		} else if ((!p->is_quoted || is_func || p->is_op || p->is_variable
 			|| (get_builtin(p->m->pl, p->token, 0, &found, NULL), found)
 			//|| !strcmp(p->token, "[]")
 			) && !p->string) {
 
-			if (func && !strcmp(p->token, "."))
+			if (is_func && !strcmp(p->token, "."))
 				c->priority = 0;
 
 			if (p->is_variable)

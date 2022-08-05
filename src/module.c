@@ -1036,7 +1036,7 @@ static void assert_commit(module *m, db_entry *dbe, predicate *pr, bool append)
 	if (!pr->idx) {
 		bool sys = C_STR(m, &pr->key)[0] == '$';
 
-		if (pr->cnt < (!pr->is_dynamic || sys ? m->indexing_threshold : 250))
+		if (pr->cnt < (!pr->is_dynamic || sys ? m->indexing_threshold : 50))
 			return;
 
 		pr->idx = map_create(index_cmpkey, NULL, m);

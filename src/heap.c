@@ -654,45 +654,6 @@ cell *clone_to_heap(query *q, bool prefix, cell *p1, pl_idx_t suffix)
 	return tmp;
 }
 
-// TODO: rewrite one universal replacement copying...
-
-#if 0
-static cell *copy_term_internal(query *q, cell *c, cell *c_ctx, bool copy, bool copy_attrs)
-{
-	return c;
-}
-
-cell *copy_term_to_tmp(query *q, cell *c, cell *c_ctx, bool copy_attrs)
-{
-	return copy_term_internal(q, c, c_ctx, true, copy_attrs);
-}
-
-cell *clone_term_to_tmp(query *q, cell *c, cell *c_ctx, bool copy_attrs)
-{
-	cell *tmp = copy_term_internal(q, c, c_ctx, false, false);
-	if (!tmp) return NULL;
-	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
-	if (!tmp2) return NULL;
-	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
-	return tmp;
-}
-
-cell *copy_term(query *q, cell *c, cell *c_ctx, bool copy_attrs)
-{
-	cell *tmp = copy_term_internal(q, c, c_ctx, true, copy_attrs);
-	if (!tmp) return NULL;
-	cell *tmp2 = alloc_on_heap(q, tmp->nbr_cells);
-	if (!tmp2) return NULL;
-	safe_copy_cells(tmp2, tmp, tmp->nbr_cells);
-	return tmp;
-}
-
-cell *clone_term(query *q, cell *c, cell *c_ctx, bool copy_attrs)
-{
-	cell *tmp = copy_term_internal(q, c, c_ctx, false, false);
-}
-#endif
-
 cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 {
 	if (!q->queue[qnbr]) {
@@ -708,6 +669,24 @@ cell *alloc_on_queuen(query *q, int qnbr, const cell *c)
 
 	cell *dst = q->queue[qnbr] + q->qp[qnbr];
 	q->qp[qnbr] += safe_copy_cells(dst, c, c->nbr_cells);
+	return dst;
+}
+
+cell *alloc_on_queuen_unsafe(query *q, int qnbr, const cell *c)
+{
+	if (!q->queue[qnbr]) {
+		q->queue[qnbr] = calloc(q->q_size[qnbr], sizeof(cell));
+		check_error(q->queue[qnbr]);
+	}
+
+	while ((q->qp[qnbr]+c->nbr_cells) >= q->q_size[qnbr]) {
+		q->q_size[qnbr] += q->q_size[qnbr] / 2;
+		q->queue[qnbr] = realloc(q->queue[qnbr], sizeof(cell)*q->q_size[qnbr]);
+		check_error(q->queue[qnbr]);
+	}
+
+	cell *dst = q->queue[qnbr] + q->qp[qnbr];
+	q->qp[qnbr] += copy_cells(dst, c, c->nbr_cells);
 	return dst;
 }
 
@@ -783,21 +762,3 @@ cell *end_list_unsafe(query *q)
 	fix_list(tmp);
 	return tmp;
 }
-
-bool search_tmp_list(query *q, cell *v)
-{
-	cell *tmp = get_tmp_heap(q, 0);
-	pl_idx_t nbr_cells = tmp_heap_used(q);
-
-
-	if (!tmp || !tmp_heap_used(q))
-		return false;
-
-	for (pl_idx_t i = 0; i < nbr_cells; i++, tmp++) {
-		if (tmp->var_nbr == v->var_nbr)
-			return true;
-	}
-
-	return false;
-}
-
