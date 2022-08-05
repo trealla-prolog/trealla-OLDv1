@@ -5417,7 +5417,7 @@ static bool fn_hex_chars_2(query *q)
 
 		cell tmp;
 		check_heap_error(make_string(&tmp, dst));
-		if (is_bigint(p1) && (dst != tmpbuf)) free(dst);
+		if (dst != tmpbuf) free(dst);
 		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -5470,7 +5470,7 @@ static bool fn_octal_chars_2(query *q)
 
 		cell tmp;
 		check_heap_error(make_string(&tmp, dst));
-		if (is_bigint(p1) && (dst != tmpbuf)) free(dst);
+		if (dst != tmpbuf) free(dst);
 		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
