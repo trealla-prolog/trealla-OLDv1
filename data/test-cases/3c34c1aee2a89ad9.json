@@ -1,0 +1,55 @@
+{
+  "uid" : "3c34c1aee2a89ad9",
+  "name" : "puzzles_6",
+  "fullName" : "puzzles_6::tests",
+  "historyId" : "puzzles_6::tests",
+  "time" : {
+    "duration" : 0
+  },
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "newBroken" : false,
+  "newPassed" : false,
+  "retriesCount" : 0,
+  "retriesStatusChange" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "resultFormat",
+    "value" : "xunit"
+  }, {
+    "name" : "suite",
+    "value" : "examples/puzzles/tests.lgt::tests"
+  }, {
+    "name" : "testClass",
+    "value" : "examples/puzzles/tests.lgt::tests"
+  }, {
+    "name" : "package",
+    "value" : "examples/puzzles/tests.lgt::tests"
+  }, {
+    "name" : "framework",
+    "value" : "lgtunit"
+  } ],
+  "parameters" : [ {
+    "name" : "file",
+    "value" : "examples/puzzles/tests.lgt"
+  }, {
+    "name" : "position",
+    "value" : "59-61"
+  }, {
+    "name" : "url",
+    "value" : "https://github.com/LogtalkDotOrg/logtalk3/tree/2afae0676783b626146100b93477620ee91ed26e/examples/puzzles/tests.lgt#L59"
+  } ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ ],
+    "categories" : [ ],
+    "tags" : [ ]
+  },
+  "source" : "3c34c1aee2a89ad9.json",
+  "parameterValues" : [ "examples/puzzles/tests.lgt", "59-61", "https://github.com/LogtalkDotOrg/logtalk3/tree/2afae0676783b626146100b93477620ee91ed26e/examples/puzzles/tests.lgt#L59" ]
+}
