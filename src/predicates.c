@@ -6020,7 +6020,7 @@ static bool fn_call_nth_2(query *q)
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,integer_or_var);
 
-	if (is_zero(p2))
+	if (is_integer(p2) && is_zero(p2))
 		return false;
 
 	if (is_integer(p2) && is_negative(p2))
