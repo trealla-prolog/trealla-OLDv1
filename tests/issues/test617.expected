@@ -1,1 +1,1 @@
-   error(syntax_error(operator_clash),read_term_from_chars/3).
+   error(syntax_error(operator_expected),read_term_from_chars/3).

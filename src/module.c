@@ -1194,7 +1194,8 @@ static void xref_cell(module *m, clause *cl, cell *c, predicate *parent)
 		&& !GET_OP(c)
 		&& (c->val_off != g_braces_s)
 		&& search_op(m, functor, &specifier, false)) {
-		SET_OP(c, specifier);
+		if (IS_INFIX(specifier))
+			SET_OP(c, specifier);
 	}
 
 	bool found = false, function = false;
