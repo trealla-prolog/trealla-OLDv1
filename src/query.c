@@ -1935,6 +1935,9 @@ bool execute(query *q, cell *cells, unsigned nbr_vars)
 
 void purge_predicate_dirty_list(query *q, predicate *pr)
 {
+	if (pr->ref_cnt)
+		return;
+
 	db_entry *save = NULL;
 
 	while (q->dirty_list) {
