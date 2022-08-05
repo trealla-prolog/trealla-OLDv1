@@ -348,7 +348,11 @@ static bool fn_iso_halt_0(query *q)
 static bool fn_iso_halt_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	q->halt_code = get_int(p1);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	q->halt_code = get_smallint(p1);
 	q->halt = q->error = true;
 	return false;
 }
@@ -425,12 +429,12 @@ static bool fn_iso_char_code_2(query *q)
 	if (is_integer(p2) && is_negative(p2))
 		return throw_error(q, p2, p2_ctx, "representation_error", "character_code");
 
-	if (is_integer(p2) && (get_int(p2) > MAX_CODEPOINT))
+	if (is_integer(p2) && (get_smallint(p2) > MAX_CODEPOINT))
 		return throw_error(q, p2, p2_ctx, "representation_error", "character_code");
 
 	if (is_variable(p1)) {
 		char tmpbuf[256];
-		int n = put_char_utf8(tmpbuf, get_int(p2));
+		int n = put_char_utf8(tmpbuf, get_smallint(p2));
 		cell tmp;
 		make_smalln(&tmp, tmpbuf, n);
 		return unify(q, p1, p1_ctx, &tmp, q->st.curr_frame);
@@ -443,7 +447,7 @@ static bool fn_iso_char_code_2(query *q)
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
 
 	int ch = peek_char_utf8(src);
-	return ch == get_int(p2);
+	return ch == get_smallint(p2);
 }
 
 static bool fn_iso_atom_chars_2(query *q)
@@ -815,7 +819,7 @@ static bool fn_iso_atom_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			pl_int_t val = get_int(head);
+			pl_int_t val = get_smallint(head);
 
 			if (val < 0)
 				return throw_error(q, head, q->latest_ctx, "representation_error", "character_code");
@@ -935,7 +939,7 @@ static bool fn_string_codes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			pl_int_t val = get_int(head);
+			pl_int_t val = get_smallint(head);
 
 			if (val < 0)
 				return throw_error(q, head, q->latest_ctx, "representation_error", "character_code");
@@ -1046,7 +1050,7 @@ static bool fn_hex_bytes_2(query *q)
 			cell *head = LIST_HEAD(p2);
 			head = deref(q, head, p2_ctx);
 
-			pl_int_t val = get_int(head);
+			pl_int_t val = get_smallint(head);
 
 			if ((val < 0) || (val > 255))
 				return throw_error(q, head, q->latest_ctx, "representation_error", "byte");
@@ -1232,7 +1236,7 @@ static bool fn_iso_number_codes_2(query *q)
 				return throw_error(q, head, q->latest_ctx, "type_error", "integer");
 			}
 
-			int val = get_int(head);
+			int val = get_smallint(head);
 
 			if (val < 0) {
 				free(tmpbuf);
@@ -1336,13 +1340,13 @@ static bool fn_iso_sub_atom_5(query *q)
 		check_heap_error(push_choice(q));
 
 		if (!is_variable(p2))
-			before = get_int(p2);
+			before = get_smallint(p2);
 
 		if (!is_variable(p3))
-			len = get_int(p3);
+			len = get_smallint(p3);
 
 		if (!is_variable(p4))
-			after = get_int(p4);
+			after = get_smallint(p4);
 
 		if (is_variable(p2) && is_integer(p3) && is_integer(p4))
 			before = len_p1 - after - len;
@@ -2280,17 +2284,17 @@ static bool fn_iso_abolish_1(query *q)
 	if (is_negative(p1_arity))
 		return throw_error(q, p1_arity, p1_ctx, "domain_error", "not_less_than_zero");
 
-	if (get_int(p1_arity) > MAX_ARITY)
+	if (get_smallint(p1_arity) > MAX_ARITY)
 		return throw_error(q, p1_arity, p1_ctx, "representation_error", "max_arity");
 
 	bool found = false;
 
-	if (get_builtin(q->pl, C_STR(q, p1_name), get_int(p1_arity), &found, NULL), found)
+	if (get_builtin(q->pl, C_STR(q, p1_name), get_smallint(p1_arity), &found, NULL), found)
 		return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 
 	cell tmp;
 	tmp = *p1_name;
-	tmp.arity = get_int(p1_arity);
+	tmp.arity = get_smallint(p1_arity);
 	CLR_OP(&tmp);
 	return do_abolish(q, p1, &tmp, true);
 }
@@ -2323,17 +2327,17 @@ static bool fn_soft_abolish_1(query *q)
 	if (is_negative(p1_arity))
 		return throw_error(q, p1_arity, p1_ctx, "domain_error", "not_less_than_zero");
 
-	if (get_int(p1_arity) > MAX_ARITY)
+	if (get_smallint(p1_arity) > MAX_ARITY)
 		return throw_error(q, p1_arity, p1_ctx, "representation_error", "max_arity");
 
 	bool found = false;
 
-	if (get_builtin(q->pl, C_STR(q, p1_name), get_int(p1_arity), &found, NULL), found)
+	if (get_builtin(q->pl, C_STR(q, p1_name), get_smallint(p1_arity), &found, NULL), found)
 		return throw_error(q, p1, p1_ctx, "permission_error", "modify,static_procedure");
 
 	cell tmp;
 	tmp = *p1_name;
-	tmp.arity = get_int(p1_arity);
+	tmp.arity = get_smallint(p1_arity);
 	CLR_OP(&tmp);
 	return do_abolish(q, p1, &tmp, false);
 }
@@ -2540,7 +2544,7 @@ static bool fn_iso_functor_3(query *q)
 		if (!is_atom(p2) && is_positive(p3))
 			return throw_error(q, p2, p2_ctx, "type_error", "atom");
 
-		unsigned arity = get_int(p3);
+		unsigned arity = get_smallint(p3);
 		unsigned var_nbr = 0;
 
 		if (arity) {
@@ -2621,7 +2625,7 @@ static bool fn_iso_current_rule_1(query *q)
 		return throw_error(q, p1, p1_ctx, "type_error", "integer");
 
 	const char *functor = C_STR(q, pf);
-	unsigned arity = get_int(pa) + add_two;
+	unsigned arity = get_smallint(pa) + add_two;
 
 	if (strchr(functor, ':')) {
 		char tmpbuf1[256], tmpbuf2[256];
@@ -2724,7 +2728,7 @@ static bool fn_iso_current_predicate_1(query *q)
 	cell tmp = (cell){0};
 	tmp.tag = TAG_INTERNED;
 	tmp.val_off = is_interned(p1) ? p1->val_off : index_from_pool(q->pl, C_STR(q, p1));
-	tmp.arity = get_int(p2);
+	tmp.arity = get_smallint(p2);
 
 	return search_predicate(q->st.m, &tmp) != NULL;
 }
@@ -2910,7 +2914,7 @@ static bool fn_iso_set_prolog_flag_2(query *q)
 		return throw_error(q, p1, p1_ctx, "type_error", "atom");
 
 	if (!CMP_STR_CSTR(q, p1, "cpu_count") && is_integer(p2)) {
-		g_cpu_count = get_int(p2);
+		g_cpu_count = get_smallint(p2);
 		return true;
 	}
 
@@ -3448,7 +3452,7 @@ bool fn_sys_queuen_2(query *q)
 	check_heap_error(init_tmp_heap(q));
 	cell *tmp = deep_raw_copy_to_tmp(q, p2, p2_ctx);
 	check_heap_error(tmp);
-	check_heap_error(alloc_on_queuen(q, get_int(p1), tmp));
+	check_heap_error(alloc_on_queuen(q, get_smallint(p1), tmp));
 	return true;
 }
 
@@ -3461,7 +3465,7 @@ static bool do_op(query *q, cell *p3, pl_idx_t p3_ctx)
 		return throw_error(q, p3, p3_ctx, "type_error", "atom");
 
 	unsigned specifier;
-	unsigned pri = get_int(p1);
+	unsigned pri = get_smallint(p1);
 
 	if (!CMP_STR_CSTR(q, p2, "fx"))
 		specifier = OP_FX;
@@ -3948,7 +3952,7 @@ static bool fn_listing_1(query *q)
 			return throw_error(q, p3, p1_ctx, "type_error", "integer");
 
 		name = index_from_pool(q->pl, C_STR(q, p2));
-		arity = get_int(p3);
+		arity = get_smallint(p3);
 
 		if (!CMP_STR_CSTR(q, p1, "//"))
 			arity += 2;
@@ -3988,7 +3992,7 @@ static bool fn_sys_dump_keys_1(query *q)
 			return throw_error(q, p3, p1_ctx, "type_error", "integer");
 
 		name = C_STR(q, p2);
-		arity = get_int(p3);
+		arity = get_smallint(p3);
 
 		if (!CMP_STR_CSTR(q, p1, "//"))
 			arity += 2;
@@ -4095,10 +4099,13 @@ static bool fn_sleep_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task)
-		return do_yield_0(q, get_int(p1)*1000);
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 
-	sleep((unsigned)get_int(p1));
+	if (q->is_task)
+		return do_yield_0(q, get_smallint(p1)*1000);
+
+	sleep((unsigned)get_smallint(p1));
 	return true;
 }
 
@@ -4109,17 +4116,24 @@ static bool fn_delay_1(query *q)
 
 	GET_FIRST_ARG(p1,integer);
 
-	if (q->is_task)
-		return do_yield_0(q, get_int(p1));
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 
-	msleep((unsigned)get_int(p1));
+	if (q->is_task)
+		return do_yield_0(q, get_smallint(p1));
+
+	msleep((unsigned)get_smallint(p1));
 	return true;
 }
 
 static bool fn_busy_1(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
-	pl_int_t elapse = get_int(p1);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	pl_int_t elapse = get_smallint(p1);
 
 	if (elapse < 0)
 		return true;
@@ -4180,28 +4194,31 @@ static bool fn_between_3(query *q)
 	GET_NEXT_ARG(p2,integer);
 	GET_NEXT_ARG(p3,integer_or_var);
 
-	if (!is_integer(p1))
-		return throw_error(q, p1, p1_ctx, "type_error", "integer");
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 
-	if (!is_integer(p2))
-		return throw_error(q, p2, p2_ctx, "type_error", "integer");
+	if (is_bigint(p2))
+		return throw_error(q, p2, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_bigint(p3))
+		return throw_error(q, p3, p3_ctx, "domain_error", "small_integer_range");
 
 	if (!q->retry) {
-		if (get_int(p1) > get_int(p2))
+		if (get_smallint(p1) > get_smallint(p2))
 			return false;
 
 		if (!is_variable(p3)) {
-			if (get_int(p3) > get_int(p2))
+			if (get_smallint(p3) > get_smallint(p2))
 				return false;
 
-			if (get_int(p3) < get_int(p1))
+			if (get_smallint(p3) < get_smallint(p1))
 				return false;
 
 			return true;
 		}
 
-		if (get_int(p1) != get_int(p2)) {
-			q->st.cnt = get_int(p1);
+		if (get_smallint(p1) != get_smallint(p2)) {
+			q->st.cnt = get_smallint(p1);
 			check_heap_error(push_choice(q));
 		}
 
@@ -4212,7 +4229,7 @@ static bool fn_between_3(query *q)
 	cell tmp;
 	make_int(&tmp, ++cnt);
 
-	if (cnt != get_int(p2)) {
+	if (cnt != get_smallint(p2)) {
 		q->st.cnt = cnt;
 		check_heap_error(push_choice(q));
 	}
@@ -5353,6 +5370,9 @@ static bool fn_term_hash_2(query *q)
 	GET_FIRST_ARG(p1,any);
 	GET_NEXT_ARG(p2,integer_or_var);
 
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
 	if (is_variable(p1))
 		return true;
 
@@ -5378,6 +5398,8 @@ static bool fn_hex_chars_2(query *q)
 	GET_FIRST_ARG(p1,integer_or_var);
 	GET_NEXT_ARG(p2,atom_or_var);
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 	if (is_variable(p1) && is_variable(p2))
 		return throw_error(q, p1, p1_ctx, "instantiation_error", "atom");
 
@@ -5390,12 +5412,12 @@ static bool fn_hex_chars_2(query *q)
 			dst = malloc(len+10);
 			mp_int_to_string(&p1->val_bigint->ival, 16, dst, len+1);
 		} else {
-			snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_int(p1));
+			snprintf(tmpbuf, sizeof(tmpbuf), "%llx", (long long)get_smallint(p1));
 		}
 
 		cell tmp;
 		check_heap_error(make_string(&tmp, dst));
-		if (is_bigint(p1)) free(dst);
+		if (is_bigint(p1) && (dst != tmpbuf)) free(dst);
 		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -5443,12 +5465,12 @@ static bool fn_octal_chars_2(query *q)
 			dst = malloc(len+10);
 			mp_int_to_string(&p1->val_bigint->ival, 8, dst, len+1);
 		} else {
-			snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_int(p1));
+			snprintf(tmpbuf, sizeof(tmpbuf), "%llo", (long long)get_smallint(p1));
 		}
 
 		cell tmp;
 		check_heap_error(make_string(&tmp, dst));
-		if (is_bigint(p1)) free(dst);
+		if (is_bigint(p1) && (dst != tmpbuf)) free(dst);
 		bool ok = unify(q, p2, p2_ctx, &tmp, q->st.curr_frame);
 		unshare_cell(&tmp);
 		return ok;
@@ -5511,11 +5533,14 @@ static bool fn_setenv_2(query *q)
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,atom_or_int);
 
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
 	if (is_atom(p2)) {
 		setenv(C_STR(q, p1), C_STR(q, p2), 1);
 	} else if (is_integer(p2)) {
 		char tmpbuf[256];
-		sprint_int(tmpbuf, sizeof(tmpbuf), get_int(p2), 10);
+		sprint_int(tmpbuf, sizeof(tmpbuf), get_smallint(p2), 10);
 		setenv(C_STR(q, p1), tmpbuf, 1);
 	} else
 		return false;
@@ -5794,13 +5819,16 @@ static bool fn_char_type_2(query *q)
 	GET_NEXT_ARG(p2,atom);
 	int ch;
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (is_atom(p1)) {
 		if (strlen_utf8(C_STR(q, p1)) != 1)
 			return false;
 
 		ch = peek_char_utf8(C_STR(q, p1));
 	} else
-		ch = get_int(p1);
+		ch = get_smallint(p1);
 
 	if (!CMP_STR_CSTR(q, p2, "alpha"))
 		return iswalpha(ch);
@@ -5926,8 +5954,12 @@ static bool fn_abolish_2(query *q)
 {
 	GET_FIRST_ARG(p1,atom);
 	GET_NEXT_ARG(p2,integer);
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
 	cell tmp = *p1;
-	tmp.arity = get_int(p2);
+	tmp.arity = get_smallint(p2);
 	CLR_OP(&tmp);
 	return do_abolish(q, &tmp, &tmp, true);
 }
@@ -5936,9 +5968,16 @@ static bool fn_sys_lt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	pl_int_t num = get_int(p1);
 
-	if (num < get_int(p2)) {
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
+	pl_int_t num = get_smallint(p1);
+
+	if (num < get_smallint(p2)) {
 		set_smallint(p1, num+1);
 		return true;
 	}
@@ -5952,11 +5991,15 @@ static bool fn_limit_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	cell *tmp = clone_to_heap(q, true, p2, 4);
 	pl_idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_fail_s, fn_sys_lt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_int(p1));
+	make_int(tmp+nbr_cells++, get_smallint(p1));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return true;
@@ -5966,9 +6009,16 @@ static bool fn_sys_gt_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	pl_int_t num = get_int(p1);
 
-	if (num <= get_int(p2)) {
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
+	pl_int_t num = get_smallint(p1);
+
+	if (num <= get_smallint(p2)) {
 		set_smallint(p1, num+1);
 		return false;
 	}
@@ -5980,11 +6030,15 @@ static bool fn_offset_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,callable);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	cell *tmp = clone_to_heap(q, true, p2, 4);
 	pl_idx_t nbr_cells = 1 + p2->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_fail_s, fn_sys_gt_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_int(p1));
+	make_int(tmp+nbr_cells++, get_smallint(p1));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return true;
@@ -5994,9 +6048,16 @@ static bool fn_sys_ne_2(query *q)
 {
 	GET_FIRST_ARG(p1,integer);
 	GET_NEXT_ARG(p2,integer);
-	pl_int_t num = get_int(p1);
 
-	if (num != get_int(p2)) {
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
+	pl_int_t num = get_smallint(p1);
+
+	if (num != get_smallint(p2)) {
 		set_smallint(p1, num+1);
 		return false;
 	}
@@ -6010,7 +6071,11 @@ static bool fn_sys_incr_2(query *q)
 {
 	GET_FIRST_ARG(p1, integer_or_var);
 	GET_NEXT_ARG(p2, integer);
-	int64_t n = get_smallint(p2);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	pl_int_t n = get_smallint(p2);
 	n++;
 	set_smallint(p2, n);
 
@@ -6024,6 +6089,9 @@ static bool fn_call_nth_2(query *q)
 {
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,integer_or_var);
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
 
 	if (is_integer(p2) && is_zero(p2))
 		return false;
@@ -6048,7 +6116,7 @@ static bool fn_call_nth_2(query *q)
 	pl_idx_t nbr_cells = 1 + p1->nbr_cells;
 	make_struct(tmp+nbr_cells++, g_sys_ne_s, fn_sys_ne_2, 2, 2);
 	make_int(tmp+nbr_cells++, 1);
-	make_int(tmp+nbr_cells++, get_int(p2));
+	make_int(tmp+nbr_cells++, get_smallint(p2));
 	make_return(q, tmp+nbr_cells);
 	q->st.curr_cell = tmp;
 	return true;
@@ -6211,7 +6279,10 @@ static bool fn_get_unbuffered_code_1(query *q)
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -6268,7 +6339,10 @@ static bool fn_get_unbuffered_char_1(query *q)
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -6408,6 +6482,12 @@ static bool fn_kv_get_3(query *q)
 	bool do_delete = false;
 	LIST_HANDLER(p3);
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_bigint(p2))
+		return throw_error(q, p2, p2_ctx, "domain_error", "small_integer_range");
+
 	while (is_list(p3)) {
 		CHECK_INTERRUPT();
 		cell *h = LIST_HEAD(p3);
@@ -6439,7 +6519,7 @@ static bool fn_kv_get_3(query *q)
 	char tmpbuf[128];
 
 	if (is_integer(p1)) {
-		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_int(p1));
+		snprintf(tmpbuf, sizeof(tmpbuf), "%lld", (long long unsigned)get_smallint(p1));
 		key = tmpbuf;
 	} else if (is_atom(p1))
 		key = DUP_STR(q, p1);

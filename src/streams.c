@@ -1826,8 +1826,8 @@ bool parse_write_params(query *q, cell *c, pl_idx_t c_ctx, cell **vnames, pl_idx
 			return false;
 		}
 
-		if (is_integer(c1) && (get_int(&c[1]) >= 1))
-			q->max_depth = get_int(&c[1]);
+		if (is_integer(c1) && (get_smallint(&c[1]) >= 1))
+			q->max_depth = get_smallint(&c[1]);
 	} else if (!CMP_STR_CSTR(q, c, "fullstop")) {
 		if (is_variable(c1)) {
 			throw_error(q, c1, c_ctx, "instantiation_error", "write_option");
@@ -2176,6 +2176,9 @@ static bool fn_iso_put_code_1(query *q)
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (str->binary) {
 		cell tmp;
 		make_int(&tmp, n);
@@ -2189,7 +2192,7 @@ static bool fn_iso_put_code_1(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "character_code");
 
-	int ch = (int)get_int(p1);
+	int ch = (int)get_smallint(p1);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
@@ -2202,6 +2205,9 @@ static bool fn_iso_put_code_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer);
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
@@ -2219,7 +2225,7 @@ static bool fn_iso_put_code_2(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "character_code");
 
-	int ch = (int)get_int(p1);
+	int ch = (int)get_smallint(p1);
 	char tmpbuf[80];
 	put_char_utf8(tmpbuf, ch);
 	net_write(tmpbuf, strlen(tmpbuf), str);
@@ -2231,6 +2237,9 @@ static bool fn_iso_put_byte_1(query *q)
 	GET_FIRST_ARG(p1,byte);
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
+
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
 
 	if (!str->binary) {
 		cell tmp;
@@ -2245,7 +2254,7 @@ static bool fn_iso_put_byte_1(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "character_code");
 
-	int ch = (int)get_int(p1);
+	int ch = (int)get_smallint(p1);
 	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
@@ -2259,6 +2268,9 @@ static bool fn_iso_put_byte_2(query *q)
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,byte);
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (!strcmp(str->mode, "read"))
 		return throw_error(q, pstr, q->st.curr_frame, "permission_error", "output,stream");
 
@@ -2271,7 +2283,7 @@ static bool fn_iso_put_byte_2(query *q)
 	if (is_integer(p1) && is_le(p1,-1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "character_code");
 
-	int ch = (int)get_int(p1);
+	int ch = (int)get_smallint(p1);
 	char tmpbuf[80];
 	snprintf(tmpbuf, sizeof(tmpbuf), "%c", ch);
 	net_write(tmpbuf, 1, str);
@@ -2426,7 +2438,10 @@ static bool fn_iso_get_code_1(query *q)
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -2498,7 +2513,10 @@ static bool fn_iso_get_code_2(query *q)
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
@@ -2799,7 +2817,10 @@ static bool fn_iso_peek_code_1(query *q)
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (str->binary) {
@@ -2851,7 +2872,10 @@ static bool fn_iso_peek_code_2(query *q)
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer_or_var);
 
-	if (is_integer(p1) && (get_int(p1) < -1))
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
+	if (is_integer(p1) && (get_smallint(p1) < -1))
 		return throw_error(q, p1, p1_ctx, "representation_error", "in_character_code");
 
 	if (strcmp(str->mode, "read"))
@@ -3026,7 +3050,7 @@ int get_stream(query *q, cell *p1)
 	if (!(p1->flags&FLAG_INT_STREAM))
 		return -1;
 
-	if (!q->pl->streams[get_int(p1)].fp)
+	if (!q->pl->streams[get_smallint(p1)].fp)
 		return -1;
 
 	return get_smallint(p1);
@@ -3366,6 +3390,9 @@ static bool fn_edin_redo_1(query *q)
 	int n = q->pl->current_input;
 	stream *str = &q->pl->streams[n];
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
@@ -3382,7 +3409,7 @@ static bool fn_edin_redo_1(query *q)
 		} else if (ch == '\n')
 			str->did_getc = false;
 
-		if (ch == get_int(p1))
+		if (ch == get_smallint(p1))
 			break;
 	}
 
@@ -3396,6 +3423,9 @@ static bool fn_edin_redo_2(query *q)
 	stream *str = &q->pl->streams[n];
 	GET_NEXT_ARG(p1,integer);
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (isatty(fileno(str->fp)) && !str->did_getc && !str->ungetch) {
 		fprintf(str->fp, "%s", PROMPT);
 		fflush(str->fp);
@@ -3412,7 +3442,7 @@ static bool fn_edin_redo_2(query *q)
 		} else if (ch == '\n')
 			str->did_getc = false;
 
-		if (ch == get_int(p1))
+		if (ch == get_smallint(p1))
 			break;
 	}
 
@@ -3430,7 +3460,7 @@ static bool fn_edin_tab_1(query *q)
 	int n = q->pl->current_output;
 	stream *str = &q->pl->streams[n];
 
-	for (int i = 0; i < get_int(&p1); i++)
+	for (int i = 0; i < get_smallint(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -3448,7 +3478,7 @@ static bool fn_edin_tab_2(query *q)
 	int n = get_stream(q, pstr);
 	stream *str = &q->pl->streams[n];
 
-	for (int i = 0; i < get_int(&p1); i++)
+	for (int i = 0; i < get_smallint(&p1); i++)
 		fputc(' ', str->fp);
 
 	return !ferror(str->fp);
@@ -4904,12 +4934,12 @@ static bool fn_server_3(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = get_int(c);
+					port = get_smallint(c);
 			} else if (!CMP_STR_CSTR(q, c, "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)get_int(c);
+					level = (int)get_smallint(c);
 			}
 		}
 
@@ -5069,12 +5099,12 @@ static bool fn_client_5(query *q)
 				c = c + 1;
 
 				if (is_integer(c))
-					port = (int)get_int(c);
+					port = (int)get_smallint(c);
 			} else if (!CMP_STR_CSTR(q, c, "level")) {
 				c = c + 1;
 
 				if (is_integer(c))
-					level = (int)get_int(c);
+					level = (int)get_smallint(c);
 			}
 		}
 
@@ -5172,15 +5202,18 @@ static bool fn_bread_3(query *q)
 	stream *str = &q->pl->streams[n];
 	size_t len;
 
+	if (is_bigint(p1))
+		return throw_error(q, p1, p1_ctx, "domain_error", "small_integer_range");
+
 	if (is_integer(p1) && is_positive(p1)) {
 		if (!str->data) {
-			str->data = malloc(get_int(p1)+1);
+			str->data = malloc(get_smallint(p1)+1);
 			check_heap_error(str->data);
 			str->data_len = 0;
 		}
 
 		for (;;) {
-			len = get_int(p1) - str->data_len;
+			len = get_smallint(p1) - str->data_len;
 			size_t nbytes = net_read(str->data+str->data_len, len, str);
 			str->data_len += nbytes;
 			str->data[str->data_len] = '\0';
