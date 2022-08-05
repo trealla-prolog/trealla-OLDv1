@@ -2729,6 +2729,19 @@ bool get_token(parser *p, bool last_op, bool was_postfix)
 
 	// Symbols...
 
+	if (is_matching_pair(ch, next_ch, ')','(') ||
+		is_matching_pair(ch, next_ch, ']','(') ||
+		is_matching_pair(ch, next_ch, '}','(') ||
+		is_matching_pair(ch, next_ch, '}','(')) {
+		if (DUMP_ERRS || !p->do_read_term)
+			fprintf(stdout, "Error: syntax error, line %d: '%s'\n", p->line_nbr, p->srcptr);
+
+		p->error_desc = "operator_expected";
+		p->error = true;
+		p->srcptr = (char*)src;
+		return false;
+	}
+
 	p->symbol = true;
 
 	do {
@@ -3348,6 +3361,11 @@ unsigned tokenize(parser *p, bool args, bool consing)
 
 		is_func = last_op && is_interned(&p->v) && !specifier && !last_num && (*p->srcptr == '(');
 
+#if 0
+		printf("*** token=%s, last_op=%d, p->is_op=%d, is_func=%d, prefix=%d\n",
+			p->token, last_op, p->is_op, is_func, IS_PREFIX(specifier));
+#endif
+
 		if ((p->was_string || p->string) && is_func) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: syntax error, near \"%s\", expected atom\n", p->token);
@@ -3371,8 +3389,6 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			p->error = true;
 			break;
 		}
-
-		//printf("*** token=%s, p->is_op=%d, is_func=%d, prefix=%d\n", p->token, p->is_op, is_func, IS_PREFIX(specifier));
 
 		if ((!p->is_op || IS_PREFIX(specifier)) && !is_func && !last_op) {
 			if (DUMP_ERRS || !p->do_read_term)
