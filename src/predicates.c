@@ -6111,6 +6111,7 @@ static bool fn_call_nth_2(query *q)
 		tmp[nbr_cells++].nbr_cells = 1;
 		make_int(tmp+nbr_cells++, 0);
 		make_return(q, tmp+nbr_cells);
+		check_heap_error(push_call_barrier(q));
 		q->st.curr_cell = tmp;
 		return true;
 	}
