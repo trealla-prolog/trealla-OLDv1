@@ -905,7 +905,7 @@ static bool unify_integers(query *q, cell *p1, cell *p2)
 		return !mp_int_compare_value(&p2->val_bigint->ival, p1->val_int);
 
 	if (is_integer(p2))
-		return (get_int(p1) == get_int(p2));
+		return (get_smallint(p1) == get_smallint(p2));
 
 	return false;
 }

@@ -286,7 +286,7 @@ char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t
 		h = deref(q, h, p_chars_ctx);
 
 		if (is_integer(h)) {
-			int ch = get_int(h);
+			int ch = get_smallint(h);
 			dst += put_char_utf8(dst, ch);
 		} else {
 			const char *p = C_STR(q, h);
@@ -569,7 +569,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		}
 
 		if (is_integer(c)) {
-			int ch = get_int(c);
+			int ch = get_smallint(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
