@@ -350,7 +350,7 @@ Non-standard predicates
 	time/1
 	inf/0
 	nan/0
-	\uXXXX and \UXXXXXXXX quoted character escapes
+	\uXXXX and \UXXXXXXXX 		# quoted character escapes
 	gcd/2
 	char_type/2
 	code_type/2
@@ -375,8 +375,8 @@ Non-standard predicates
 	b_getval(K,V)
 	b_delete(K)
 
-	'$kv_set'(+atomic,+atomic,[create(Bool)])	# non-backtracking
-	'$kv_get'(+atomic,?atomic,[delete(Bool)])	# non-backtracking
+	'$kv_set'(+key,+value,[create(Bool)])	# use atomics only
+	'$kv_get'(+key,?value,[delete(Bool)])	# use atomics only
 
 	call_nth/2
 	offset/2
