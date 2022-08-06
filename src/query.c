@@ -788,7 +788,7 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 	q->tot_tcos++;
 }
 
-void trim_trail(query *q)
+static void trim_trail(query *q)
 {
 	if (q->undo_hi_tp)
 		return;

@@ -35,7 +35,6 @@ bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type retract)
 bool try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);
 void stash_me(query *q, const clause *cl, bool last_match);
-void trim_trail(query *q);
 bool do_post_unification_hook(query *q, bool is_builtin);
 bool check_redo(query *q);
 void dump_vars(query *q, bool partial);
