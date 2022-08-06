@@ -5983,7 +5983,6 @@ static bool fn_sys_lt_2(query *q)
 	}
 
 	drop_choice(q);
-	trim_trail(q);
 	return true;
 }
 
