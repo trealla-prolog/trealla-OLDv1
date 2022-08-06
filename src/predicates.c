@@ -6063,7 +6063,6 @@ static bool fn_sys_ne_2(query *q)
 	}
 
 	drop_choice(q);
-	trim_trail(q);
 	return true;
 }
 
