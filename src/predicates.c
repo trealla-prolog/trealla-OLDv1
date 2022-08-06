@@ -6087,6 +6087,9 @@ static bool fn_sys_incr_2(query *q)
 
 static bool fn_call_nth_2(query *q)
 {
+	if (q->retry)
+		return false;
+
 	GET_FIRST_ARG(p1,callable);
 	GET_NEXT_ARG(p2,integer_or_var);
 
@@ -6118,6 +6121,7 @@ static bool fn_call_nth_2(query *q)
 	make_int(tmp+nbr_cells++, 1);
 	make_int(tmp+nbr_cells++, get_smallint(p2));
 	make_return(q, tmp+nbr_cells);
+	check_heap_error(push_call_barrier(q));
 	q->st.curr_cell = tmp;
 	return true;
 }
