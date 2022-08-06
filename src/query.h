@@ -30,7 +30,7 @@ void drop_choice(query *q);
 bool retry_choice(query *q);
 void term_assign_vars(parser *p, unsigned start, bool rebase);
 bool start(query *q);
-bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx);
+bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract);
 bool match_clause(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type retract);
 bool try_me(query *q, unsigned vars);
 void call_attrs(query *q, cell *attrs);

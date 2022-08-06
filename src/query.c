@@ -1338,7 +1338,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 // Match HEAD :- BODY.
 
-bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
+bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);

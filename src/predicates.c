@@ -2133,7 +2133,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 	bool match;
 
 	if (is_a_rule(p1) && get_logical_body(p1)) {
-		match = match_rule(q, p1, p1_ctx);
+		match = match_rule(q, p1, p1_ctx, is_retract);
 	} else {
 		p1 = get_head(p1);
 		match = match_clause(q, p1, p1_ctx, is_retract);
