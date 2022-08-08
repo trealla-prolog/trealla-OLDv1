@@ -106,11 +106,9 @@ extern unsigned g_string_cnt, g_interned_cnt;
 #define get_float(c) (c)->val_float
 #define set_float(c,v) (c)->val_float = (v)
 #define get_smallint(c) (c)->val_int
-#define get_smalluint(c) (c)->val_uint
 #define set_smallint(c,v) { (c)->val_int = (v); }
+#define get_smalluint(c) (c)->val_uint
 #define set_smalluint(c,v) { (c)->val_uint = (v); }
-#define get_int(c) (c)->val_int
-#define get_ptr(c) (c)->val_ptr
 
 #define neg_bigint(c) (c)->val_bigint->ival.sign = MP_NEG;
 #define neg_smallint(c) (c)->val_int = -llabs((c)->val_int)
@@ -118,17 +116,17 @@ extern unsigned g_string_cnt, g_interned_cnt;
 
 #define is_zero(c) (is_bigint(c) ?							\
 	mp_int_compare_zero(&(c)->val_bigint->ival) == 0 :		\
-	is_integer(c) ? get_smallint(c) == 0 :					\
+	is_smallint(c) ? get_smallint(c) == 0 :					\
 	is_float(c) ? get_float(c) == 0.0 : false)
 
 #define is_negative(c) (is_bigint(c) ?						\
 	(c)->val_bigint->ival.sign == MP_NEG :					\
-	is_integer(c) ? get_smallint(c) < 0 :					\
+	is_smallint(c) ? get_smallint(c) < 0 :					\
 	is_float(c) ? get_float(c) < 0.0 : false)
 
 #define is_positive(c) (is_bigint(c) ?						\
 	mp_int_compare_zero(&(c)->val_bigint->ival) > 0 :		\
-	is_integer(c) ? get_smallint(c) > 0 :					\
+	is_smallint(c) ? get_smallint(c) > 0 :					\
 	is_float(c) ? get_float(c) > 0.0 : false)
 
 #define is_gt(c,n) (get_smallint(c) > (n))
@@ -952,3 +950,10 @@ typedef struct {
 
 #define ASTRING_cstr(pr) pr##_buf.buf ? pr##_buf.buf : ""
 #define ASTRING_free(pr) { free(pr##_buf.buf); pr##_buf.buf = NULL; }
+
+#define delink(l, e) {													\
+	if (e->prev) e->prev->next = e->next;								\
+	if (e->next) e->next->prev = e->prev;								\
+	if (l->head == e) l->head = e->next;								\
+	if (l->tail == e) l->tail = e->prev;								\
+}

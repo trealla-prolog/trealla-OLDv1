@@ -844,7 +844,7 @@ static bool check_multifile(module *m, predicate *pr, db_entry *dbe)
 		&& (C_STR(m, &pr->key)[0] != '$')) {
 		if (dbe->filename != pr->head->filename) {
 			for (db_entry *dbe = pr->head; dbe; dbe = dbe->next) {
-				add_to_dirty_list(dbe);
+				retract_from_db(dbe);
 				pr->is_processed = false;
 			}
 
@@ -1145,7 +1145,7 @@ db_entry *assertz_to_db(module *m, unsigned nbr_vars, unsigned nbr_temporaries, 
 	return dbe;
 }
 
-static bool retract_from_db(db_entry *dbe)
+static bool retract_from_predicate(db_entry *dbe)
 {
 	if (dbe->cl.ugen_erased)
 		return false;
@@ -1156,7 +1156,7 @@ static bool retract_from_db(db_entry *dbe)
 	dbe->filename = NULL;
 	pr->cnt--;
 
-	if (pr->idx && !pr->cnt) {
+	if (pr->idx && !pr->cnt && 0) {
 		map_destroy(pr->idx2);
 		map_destroy(pr->idx);
 		pr->idx2 = NULL;
@@ -1175,9 +1175,9 @@ static bool retract_from_db(db_entry *dbe)
 	return true;
 }
 
-void add_to_dirty_list(db_entry *dbe)
+void retract_from_db(db_entry *dbe)
 {
-	if (!retract_from_db(dbe))
+	if (!retract_from_predicate(dbe))
 		return;
 
 	predicate *pr = dbe->owner;
@@ -1194,7 +1194,8 @@ static void xref_cell(module *m, clause *cl, cell *c, predicate *parent)
 		&& !GET_OP(c)
 		&& (c->val_off != g_braces_s)
 		&& search_op(m, functor, &specifier, false)) {
-		SET_OP(c, specifier);
+		if (IS_INFIX(specifier))
+			SET_OP(c, specifier);
 	}
 
 	bool found = false, function = false;
@@ -1316,7 +1317,7 @@ static bool unload_realfile(module *m, const char *filename)
 				continue;
 
 			if (dbe->filename && !strcmp(dbe->filename, filename)) {
-				if (!retract_from_db(dbe))
+				if (!retract_from_predicate(dbe))
 					continue;
 
 				dbe->dirty = pr->dirty_list;

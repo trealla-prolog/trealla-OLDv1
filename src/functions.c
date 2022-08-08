@@ -233,7 +233,6 @@ static bool fn_return_1(query *q)
 	q->accum = p1;
 	cut_me(q, true, false);
 	drop_choice(q);
-	trim_trail(q);
 	q->error = true;
 	return true;
 }

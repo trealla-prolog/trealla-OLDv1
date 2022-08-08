@@ -292,7 +292,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 		if (is_atom(h)) {
 			char *name = DUP_STR(p, h);
 
-			if (!set_op(p->m, name, specifier, get_int(p1))) {
+			if (!set_op(p->m, name, specifier, get_smallint(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -301,7 +301,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 			}
 
 			if (make_public) {
-				if (!set_op(p->pl->user_m, name, specifier, get_int(p1))) {
+				if (!set_op(p->pl->user_m, name, specifier, get_smallint(p1))) {
 					if (DUMP_ERRS || !p->do_read_term)
 						fprintf(stdout, "Error: could not set op\n");
 
@@ -319,7 +319,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 	if (is_atom(p3) && !is_nil(p3)) {
 		char *name = DUP_STR(p, p3);
 
-		if (!set_op(p->m, name, specifier, get_int(p1))) {
+		if (!set_op(p->m, name, specifier, get_smallint(p1))) {
 			if (DUMP_ERRS || !p->do_read_term)
 				fprintf(stdout, "Error: could not set op\n");
 
@@ -328,7 +328,7 @@ static void do_op(parser *p, cell *c, bool make_public)
 		}
 
 		if (make_public) {
-			if (!set_op(p->pl->user_m, name, specifier, get_int(p1))) {
+			if (!set_op(p->pl->user_m, name, specifier, get_smallint(p1))) {
 				if (DUMP_ERRS || !p->do_read_term)
 					fprintf(stdout, "Error: could not set op\n");
 
@@ -545,7 +545,7 @@ static void directives(parser *p, cell *d)
 					if (!is_interned(f)) return;
 					if (!is_integer(a)) return;
 					cell tmp = *f;
-					tmp.arity = get_int(a);
+					tmp.arity = get_smallint(a);
 
 					if (!strcmp(C_STR(p, head), "//"))
 						tmp.arity += 2;
@@ -738,7 +738,7 @@ static void directives(parser *p, cell *d)
 			if (!is_atom(c_name)) continue;
 			cell *c_arity = h + 2;
 			if (!is_integer(c_arity)) continue;
-			unsigned arity = get_int(c_arity);
+			unsigned arity = get_smallint(c_arity);
 
 			if (!strcmp(C_STR(p, h), "//"))
 				arity += 2;
@@ -826,7 +826,7 @@ static void directives(parser *p, cell *d)
 			if (!is_atom(c_name)) return;
 			cell *c_arity = c_id + 2;
 			if (!is_integer(c_arity)) return;
-			unsigned arity = get_int(c_arity);
+			unsigned arity = get_smallint(c_arity);
 			cell tmp = *c_name;
 			tmp.arity = arity;
 
@@ -2019,7 +2019,7 @@ static bool parse_number(parser *p, const char **srcptr, bool neg)
 
 		p->v.tag = TAG_INTEGER;
 		set_smallint(&p->v, v);
-		if (neg) set_smallint(&p->v, -get_int(&p->v));
+		if (neg) set_smallint(&p->v, -get_smallint(&p->v));
 		*srcptr = s;
 		return true;
 	}
@@ -3225,6 +3225,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 				p->error = true;
 				break;
 			}
+
 			p->last_close = true;
 			p->nesting_parens--;
 			analyze(p, arg_idx, last_op=false);
@@ -3345,7 +3346,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 			priority = 0;
 		}
 
-		if (priority && (specifier == OP_YFX) && last_op && !last_postfix && !last_quoted) {
+		if (priority && IS_INFIX(specifier) && last_op && !last_postfix && !last_quoted) {
 			specifier = 0;
 			priority = 0;
 		}
@@ -3417,7 +3418,7 @@ unsigned tokenize(parser *p, bool args, bool consing)
 		if (is_bigint(&p->v)) {
 			c->val_bigint = p->v.val_bigint;
 		} else if (is_smallint(&p->v)) {
-			set_smallint(c, get_int(&p->v));
+			set_smallint(c, get_smallint(&p->v));
 		} else if (p->v.tag == TAG_FLOAT) {
 			set_float(c, get_float(&p->v));
 		} else if ((!p->is_quoted || is_func || p->is_op || p->is_variable

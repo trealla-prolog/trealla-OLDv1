@@ -286,7 +286,7 @@ char *chars_list_to_string(query *q, cell *p_chars, pl_idx_t p_chars_ctx, size_t
 		h = deref(q, h, p_chars_ctx);
 
 		if (is_integer(h)) {
-			int ch = get_int(h);
+			int ch = get_smallint(h);
 			dst += put_char_utf8(dst, ch);
 		} else {
 			const char *p = C_STR(q, h);
@@ -569,7 +569,7 @@ size_t scan_is_chars_list2(query *q, cell *l, pl_idx_t l_ctx, bool allow_codes, 
 		}
 
 		if (is_integer(c)) {
-			int ch = get_int(c);
+			int ch = get_smallint(c);
 			char tmp[20];
 			put_char_utf8(tmp, ch);
 			size_t len = len_char_utf8(tmp);
@@ -788,7 +788,7 @@ static void reuse_frame(query *q, frame* f, clause *cl)
 	q->tot_tcos++;
 }
 
-void trim_trail(query *q)
+static void trim_trail(query *q)
 {
 	if (q->undo_hi_tp)
 		return;
@@ -874,17 +874,7 @@ void unshare_predicate(query *q, predicate *pr)
 	unsigned cnt = 0;
 
 	while (dbe) {
-		if (dbe->prev)
-			dbe->prev->next = dbe->next;
-
-		if (dbe->next)
-			dbe->next->prev = dbe->prev;
-
-		if (pr->head == dbe)
-			pr->head = dbe->next;
-
-		if (pr->tail == dbe)
-			pr->tail = dbe->prev;
+		delink(pr, dbe);
 
 		predicate *pr = dbe->owner;
 		map_remove(pr->idx2, dbe);
@@ -1348,7 +1338,7 @@ void reset_var(query *q, const cell *c, pl_idx_t c_ctx, cell *v, pl_idx_t v_ctx,
 
 // Match HEAD :- BODY.
 
-bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx)
+bool match_rule(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract)
 {
 	if (!q->retry) {
 		cell *head = deref(q, get_head(p1), p1_ctx);
@@ -1935,6 +1925,9 @@ bool execute(query *q, cell *cells, unsigned nbr_vars)
 
 void purge_predicate_dirty_list(query *q, predicate *pr)
 {
+	if (pr->ref_cnt)
+		return;
+
 	db_entry *save = NULL;
 
 	while (q->dirty_list) {

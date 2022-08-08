@@ -103,7 +103,6 @@ bool fn_iso_findall_3(query *q)
 	// Return matching solutions
 
 	drop_choice(q);
-	trim_trail(q);
 	free(solns);
 	cell *l = convert_to_list(q, get_queuen(q), queuen_used(q));
 	drop_queuen(q);

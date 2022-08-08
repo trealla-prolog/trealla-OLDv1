@@ -372,7 +372,7 @@ ssize_t print_canonical_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_i
 
 #if 1
 	if (q->is_dump_vars && is_stream(c)) {
-		dst += snprintf(dst, dstlen, "'$stream'(%d)", (int)get_smallint(c));
+		dst += snprintf(dst, dstlen, "<$stream>(%d)", (int)get_smallint(c));
 		return dst - save_dst;
 	}
 #endif
@@ -844,7 +844,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 #if 1
 	if (q->is_dump_vars && is_stream(c)) {
-		dst += snprintf(dst, dstlen, "'$stream'(%d)", (int)get_smallint(c));
+		dst += snprintf(dst, dstlen, "<$stream>(%d)", (int)get_smallint(c));
 		q->last_thing_was_symbol = false;
 		return dst - save_dst;
 	}
@@ -1155,7 +1155,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 		if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 		int quote = q->quoted && has_spaces(src, src_len);
-		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?" '":"");
 
 		dst += plain(dst, dstlen, src, srclen);
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
@@ -1195,7 +1195,7 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 
 		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
 		dst += plain(dst, dstlen, src, srclen);
-		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
+		if (quote) dst += snprintf(dst, dstlen, "%s", quote?"' ":"");
 		if (space) dst += snprintf(dst, dstlen, "%s", " ");
 		if (parens) dst += snprintf(dst, dstlen, "%s", "(");
 		q->last_thing_was_symbol = false;
@@ -1268,9 +1268,9 @@ ssize_t print_term_to_buf(query *q, char *dst, size_t dstlen, cell *c, pl_idx_t 
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 	int quote = q->quoted && has_spaces(src, src_len);
 	if (op_needs_quoting(q->st.m, src, src_len)) quote = 1;
-	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
+	if (quote) dst += snprintf(dst, dstlen, "%s", quote?" '":"");
 	dst += plain(dst, dstlen, src, srclen);
-	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"'":"");
+	if (quote) dst += snprintf(dst, dstlen, "%s", quote?"' ":"");
 	if (space) dst += snprintf(dst, dstlen, "%s", " ");
 
 	// Print RHS...
