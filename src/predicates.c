@@ -2143,7 +2143,7 @@ bool do_retract(query *q, cell *p1, pl_idx_t p1_ctx, enum clause_type is_retract
 		return match;
 
 	db_entry *dbe = q->st.curr_dbe;
-	add_to_dirty_list(dbe);
+	retract_from_db(dbe);
 	bool last_match = (is_retract == DO_RETRACT) && !is_next_key(q);
 	stash_me(q, &dbe->cl, last_match);
 
@@ -2159,8 +2159,9 @@ static bool fn_iso_retract_1(query *q)
 	return do_retract(q, p1, p1_ctx, DO_RETRACT);
 }
 
-static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
+static bool fn_iso_retractall_1(query *q)
 {
+	GET_FIRST_ARG(p1,callable);
 	cell *head = deref(q, get_head(p1), p1_ctx);
 	predicate *pr = search_predicate(q->st.m, head);
 
@@ -2209,12 +2210,6 @@ static bool do_retractall(query *q, cell *p1, pl_idx_t p1_ctx)
 	return true;
 }
 
-static bool fn_iso_retractall_1(query *q)
-{
-	GET_FIRST_ARG(p1,callable);
-	return do_retractall(q, p1, p1_ctx);
-}
-
 static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 {
 	predicate *pr = search_predicate(q->st.m, c);
@@ -2227,7 +2222,7 @@ static bool do_abolish(query *q, cell *c_orig, cell *c, bool hard)
 		if (!q->st.m->loading && dbe->owner->is_persist && !dbe->cl.ugen_erased)
 			db_log(q, dbe, LOG_ERASE);
 
-		add_to_dirty_list(dbe);
+		retract_from_db(dbe);
 	}
 
 	purge_predicate_dirty_list(q, pr);
